@@ -104,6 +104,20 @@ def run_with_save_on_exception(code: str, output_path: str = "OUTPUT_PATH") -> s
     return "".join(f"{ln}\n" for ln in future) + _C2_HEAD + textwrap.indent(body_text, "    ") + "\n" + tail
 
 
+_PROFILE_ROOT = os.path.join(tempfile.gettempdir(), "emin_lo_profiles")
+
+
+def _thread_profile() -> str:
+    """One LibreOffice user profile per (process, thread): never shared concurrently (the headless
+    concurrency trap), but reused across calls so the multi-second first-start profile
+    initialisation is paid once per worker instead of once per conversion."""
+    import threading
+
+    d = os.path.join(_PROFILE_ROOT, f"{os.getpid()}_{threading.get_ident()}")
+    os.makedirs(d, exist_ok=True)
+    return d
+
+
 def recalc(path: str, soffice: str, timeout: int = 120) -> tuple[bool, str]:
     """c3: recalculate `path` in place with headless LibreOffice. Returns (ok, detail)."""
     path = os.path.abspath(path)
@@ -112,9 +126,8 @@ def recalc(path: str, soffice: str, timeout: int = 120) -> tuple[bool, str]:
     if not (soffice and os.path.isfile(soffice)):
         return False, "soffice_not_found"
     name = os.path.splitext(os.path.basename(path))[0]
-    with tempfile.TemporaryDirectory(prefix="emin_lo_out_") as out, tempfile.TemporaryDirectory(
-        prefix="emin_lo_profile_"
-    ) as profile:
+    profile = _thread_profile()
+    with tempfile.TemporaryDirectory(prefix="emin_lo_out_") as out:
         env = dict(os.environ)
         env.setdefault("HOME", profile)
         cmd = [

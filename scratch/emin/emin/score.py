@@ -114,11 +114,18 @@ def golden_recalced(golden: Path, cache_dir: Path, soffice: str | None = None, t
         if marker.exists():
             status = marker.read_text(encoding="utf-8").strip()
             return (target if status == "ok" and target.exists() else None), status
-        tmp = cache_dir / f"{digest}.tmp.xlsx"
+        # several arm processes share this cache: process/thread-unique temp name, tolerate a concurrent winner
+        tmp = cache_dir / f"{digest}.{os.getpid()}.{threading.get_ident()}.tmp.xlsx"
         shutil.copyfile(golden, tmp)
         ok, detail = recalc(str(tmp), soffice, timeout)
         if ok:
-            os.replace(tmp, target)
+            if target.exists():
+                tmp.unlink(missing_ok=True)
+            else:
+                try:
+                    os.replace(tmp, target)
+                except FileNotFoundError:
+                    pass
             marker.write_text("ok", encoding="utf-8")
             return target, "ok"
         tmp.unlink(missing_ok=True)
