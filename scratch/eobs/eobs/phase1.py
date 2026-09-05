@@ -22,9 +22,19 @@ from pathlib import Path
 from eobs.settings import ENVHARNESS_ROOT, EOBS_ROOT, RESULTS, WORK, secrets
 
 
-def _witness(seed: int) -> dict:
+def _witness(seed: int, attempts: int = 3) -> dict:
+    """W_base = the FIRST attempt (pre-registered single execution). The ALFWorld handcoded expert is stochastic
+    (unseeded RNG in its receptacle search), so two supplementary fields are added: `W_base_any3` (pass in any of 3
+    attempts) and `expert_stochastic` (action sequences differ across attempts). Owner review 2026-09-05."""
     from eobs.replay import witness_base
-    return witness_base(seed)
+    runs = [witness_base(seed) for _ in range(attempts)]
+    first = dict(runs[0])
+    first["attempts"] = [{"W_base": r["W_base"], "reason": r["reason"], "expert_plan_len": r["expert_plan_len"]} for r in runs]
+    first["W_base_any3"] = any(r["W_base"] for r in runs)
+    first["expert_stochastic"] = len({tuple(r["expert_actions"]) for r in runs}) > 1
+    passing = [r for r in runs if r["W_base"]]
+    first["expert_actions_any"] = min(passing, key=lambda r: r["expert_plan_len"])["expert_actions"] if passing else []
+    return first
 
 
 def run_witnesses(n: int, out: Path, workers: int = 6) -> list[dict]:

@@ -129,13 +129,18 @@ def ledger_totals(path: Path) -> dict:
     usd = usd_peak = 0.0
     calls = 0
     by_phase: dict[str, float] = {}
+    bad = 0
     if Path(path).exists():
         for line in Path(path).read_text(encoding="utf-8").splitlines():
             if not line.strip():
                 continue
-            r = json.loads(line)
+            try:
+                r = json.loads(line)
+            except json.JSONDecodeError:   # a process killed mid-write leaves one truncated line; count, never drop the file
+                bad += 1
+                continue
             calls += 1
             usd += float(r.get("usd", 0.0) or 0.0)
             usd_peak += float(r.get("usd_peak_bound", 0.0) or 0.0)
             by_phase[r.get("phase", "")] = by_phase.get(r.get("phase", ""), 0.0) + float(r.get("usd", 0.0) or 0.0)
-    return {"calls": calls, "usd": usd, "usd_peak_bound": usd_peak, "by_phase": by_phase}
+    return {"calls": calls, "usd": usd, "usd_peak_bound": usd_peak, "by_phase": by_phase, "bad_lines": bad}

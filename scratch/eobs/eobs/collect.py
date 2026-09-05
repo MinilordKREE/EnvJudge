@@ -23,13 +23,36 @@ def _jsonl(p: Path) -> list[dict]:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--released", default="eobs_alfworld_001")
-    ap.add_argument("--hard", default="eobs_alfworld_H_001")
+    ap.add_argument("--hard", default="eobs_alfworld_H_001,eobs_alfworld_H_001b_s10,eobs_alfworld_H_001b_s15,eobs_alfworld_H_001b_s20,eobs_alfworld_H_001b_s25")
     ap.add_argument("--phase1", default="eobs_phase1_extra")
     ap.add_argument("--n-tasks", type=int, default=30)
     a = ap.parse_args()
     runs = WORK / "runs"
     rel = hooks.extract(runs / a.released) if (runs / a.released / "traces.jsonl").exists() else None
-    hard = hooks.extract(runs / a.hard) if (runs / a.hard / "traces.jsonl").exists() else None
+    # The hardening arm may be split across run dirs (resume after the 2026-09-05 interruption): comma-separated,
+    # later dirs override earlier ones for the task_ids they COMPLETED (task_end event); incomplete tasks are dropped.
+    hard = None
+    for d in [x for x in a.hard.split(",") if x]:
+        if not (runs / d / "traces.jsonl").exists():
+            continue
+        ex = hooks.extract(runs / d)
+        events = [json.loads(l) for l in (runs / d / "orchestrator.jsonl").read_text(encoding="utf-8").splitlines() if l.strip()]
+        ended = {e.get("task_idx") for e in events if e.get("kind") == "task_end"}
+        # task_idx in a shard is relative; task_id (= seed) is absolute -> key by task_id
+        idx_to_id = {t["task_idx"]: t["task_id"] for t in ex["tasks"].values()}
+        complete_ids = {idx_to_id[i] for i in ended if i in idx_to_id}
+        ex["candidates"] = [c for c in ex["candidates"] if c["task_id"] in complete_ids]
+        ex["validation_rollouts"] = [v for v in ex["validation_rollouts"] if v["task_id"] in complete_ids]
+        ex["tasks"] = {t["task_id"]: t for t in ex["tasks"].values() if t["task_id"] in complete_ids}
+        if hard is None:
+            hard = ex
+        else:
+            for tid in ex["tasks"]:
+                hard["candidates"] = [c for c in hard["candidates"] if c["task_id"] != tid]
+                hard["validation_rollouts"] = [v for v in hard["validation_rollouts"] if v["task_id"] != tid]
+            hard["candidates"] += ex["candidates"]; hard["validation_rollouts"] += ex["validation_rollouts"]; hard["tasks"].update(ex["tasks"])
+            for k, v in ex.get("align_stats", {}).items():
+                hard.setdefault("align_stats", {})[k] = hard.get("align_stats", {}).get(k, 0) + v
     extra = _jsonl(runs / a.phase1 / "traces.jsonl")
     witness = {int(w["task_id"]): w for w in _jsonl(RESULTS / "witness_base.jsonl")}
 
@@ -65,7 +88,7 @@ def main() -> None:
         allb = rig + ext
         p16 = sum(b["success"] for b in allb) / len(allb) if allb else None
         tr = (rel or {}).get("tasks", {}).get(tid, {}) if rel else {}
-        th = (hard or {}).get("tasks", {}).get(tid, {}) if hard else {}
+        th = (hard or {}).get("tasks", {}).get(tid, {}) if hard else {}   # keyed by task_id after the merge above
         rows.append({"task_id": tid, "type": w.get("type", ""), "expert_plan_len": w.get("expert_plan_len", ""), "W_base": w.get("W_base", ""),
                      "W_reason": w.get("reason", ""), "within_policy_cap": w.get("within_policy_cap", ""),
                      "p5": "" if p5 is None else round(p5, 4), "p11": "" if p11 is None else round(p11, 4), "p16": "" if p16 is None else round(p16, 4),
