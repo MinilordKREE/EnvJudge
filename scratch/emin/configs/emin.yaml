@@ -1,0 +1,74 @@
+# E-min frozen run configuration (2026-09-05). Paths are absolute where they point outside this repo.
+experiment: emin
+prereg_git_sha: 0a07fa23ebce6cdb10dc181fa8f783dcfc743757
+
+switchharness_root: /home/kree/work/switchHarness
+python: /home/kree/work/switchHarness/.venv/bin/python
+asset_root: /home/kree/work/switchHarness/datasets/spreadsheetbench_assets
+dataset_json: /home/kree/work/switchHarness/datasets/spreadsheetbench_assets/dataset.json
+split_manifest: /home/kree/work/switchHarness/datasets/spreadsheetbench/SPLIT_MANIFEST.json
+pool_ids: /home/kree/work/switchHarness/results/frozen/spreadsheetbench_ids_train_pool.txt
+val_ids: /home/kree/work/switchHarness/results/frozen/spreadsheetbench_ids_val.txt
+test_ids: /home/kree/work/switchHarness/results/frozen/spreadsheetbench_ids_test.txt
+parent_skill: /home/kree/work/switchHarness/results/frozen/spreadsheetbench_parent.md
+parent_minus_skill: configs/spreadsheetbench_parent_minus.md
+reference_cache: /home/kree/work/switchHarness/rethinkskill/runs/pilot/nothink/spreadsheetbench/references/references.json
+soffice: /home/kree/.local/opt/lo/squashfs-root/opt/libreoffice25.8/program/soffice
+
+results_dir: results/emin          # append-only deliverables
+work_dir: work                     # gitignored per-rollout artifacts (responses, output workbooks)
+
+api:
+  base_url: https://api.deepseek.com/v1
+  timeout_seconds: 600
+  retries: 3                       # transient faults only (network, timeout, HTTP 429/5xx)
+  backoff_seconds: [10, 30, 90]
+models:
+  pro: deepseek-v4-pro
+  flash: deepseek-v4-flash
+sampling:
+  temperature: 0.7
+  thinking: disabled
+  k: 8
+  seed_is_rollout_index: true      # seed field sent to the API = rollout index; honoured-or-not is tested at smoke
+execution:
+  timeout_seconds: 120             # same as the substrate harness (min(timeout, 120))
+  recalc_timeout_seconds: 120
+
+# USD per 1M tokens (DeepSeek pricing page as read by the pilot on 2026-09-03).
+# Peak = 01:00-04:00 and 06:00-10:00 UTC, Monday-Friday. Budget gates use the tariff in force at call time.
+prices:
+  deepseek-v4-pro:   {peak: {miss: 1.32, hit: 0.044, out: 3.96}, offpeak: {miss: 0.66, hit: 0.022, out: 1.98}}
+  deepseek-v4-flash: {peak: {miss: 0.44, hit: 0.014, out: 1.32}, offpeak: {miss: 0.22, hit: 0.007, out: 0.66}}
+budget:
+  hard_usd: 20.0
+  soft_usd: 12.0
+smoke:
+  tasks: 3
+  rollouts: 2
+concurrency:
+  api: 6
+  recalc: 6
+
+envs:                                # c1 fence unwrap, c2 save-on-exception, c3 official recalc path
+  E_sub: {c1: false, c2: false, c3: false}
+  E_c12: {c1: true,  c2: true,  c3: false}
+  E_off: {c1: false, c2: false, c3: true}
+  E_all: {c1: true,  c2: true,  c3: true}
+
+arms:
+  A1:  {agent: parent_minus, env: E_sub, consumer: pro,   seeds: [0, 1, 2, 3, 4, 5, 6, 7]}
+  A1p: {agent: parent_minus, env: E_sub, consumer: pro,   seeds: [8, 9, 10, 11, 12, 13, 14, 15]}
+  A2:  {agent: parent_minus, env: E_c12, consumer: pro,   seeds: [0, 1, 2, 3, 4, 5, 6, 7]}
+  A3:  {agent: parent_minus, env: E_off, consumer: pro,   seeds: [0, 1, 2, 3, 4, 5, 6, 7]}
+  A4:  {agent: parent_minus, env: E_all, consumer: pro,   seeds: [0, 1, 2, 3, 4, 5, 6, 7]}
+  A5:  {agent: parent,       env: E_sub, consumer: pro,   seeds: [0, 1, 2, 3, 4, 5, 6, 7]}
+  A6:  {agent: parent,       env: E_all, consumer: pro,   seeds: [0, 1, 2, 3, 4, 5, 6, 7]}
+  A7:  {agent: parent_minus, env: E_sub, consumer: flash, seeds: [0, 1, 2, 3, 4, 5, 6, 7]}
+  A8:  {agent: parent_minus, env: E_all, consumer: flash, seeds: [0, 1, 2, 3, 4, 5, 6, 7]}
+r1:
+  agent: parent_minus
+  env: E_all
+  consumer: pro
+  attempts: 5
+  judge: true                        # pilot authenticity judge (pilot.judges) on verifier-passing attempts
