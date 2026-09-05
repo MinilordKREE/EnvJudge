@@ -1,1 +1,10 @@
-arm
+arm,env,consumer,agent,rollouts,tasks,mean_p,zero_share,full_share,band_2_6_share
+A1,E_sub,pro,parent_minus,608,76,0.248,0.500,0.000,0.329
+A1p,E_sub,pro,parent_minus,608,76,0.248,0.447,0.000,0.382
+A2,E_c12,pro,parent_minus,608,76,0.257,0.447,0.013,0.303
+A3,E_off,pro,parent_minus,608,76,0.248,0.487,0.013,0.342
+A4,E_all,pro,parent_minus,608,76,0.245,0.461,0.039,0.329
+A5,E_sub,pro,parent,608,76,0.303,0.421,0.039,0.382
+A6,E_all,pro,parent,608,76,0.324,0.408,0.026,0.316
+A7,E_sub,flash,parent_minus,608,76,0.212,0.487,0.000,0.342
+A8,E_all,flash,parent_minus,608,76,0.247,0.368,0.013,0.487

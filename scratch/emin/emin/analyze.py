@@ -469,6 +469,37 @@ def main() -> None:
     lines += ["", "## Extraction / c2 activity per arm (raw_extraction_ok, c1_ok, c2_fired) counts", ""]
     for a, c in extraction.items():
         lines.append(f"- {a}: {dict(c)}")
+    # ---- measurement notes (facts about the same rollouts; no interpretation beyond section 1)
+    notes = []
+    if "A1" in arms_present and "A1p" in arms_present and solved:
+        r_aa = ci_rate([P["A1p"][t] >= 0.75 for t in solved if P["A1p"][t] is not None])
+        notes.append(f"P4 A/A reference: the same P4 statistic between A1 and A1' (identical env) = {rate_str(r_aa)}; "
+                     f"mean p over the {len(solved)} tasks: A1 {fmt(float(np.mean([P['A1'][t] for t in solved])))} -> A1' {fmt(float(np.mean([P['A1p'][t] for t in solved])))}.")
+    if "A4" in arms_present and solved:
+        same = all(phat(roll.get(("A4", t), []), "sub_raw") == phat(roll.get(("A4", t), []), "off_c12") for t in solved)
+        paired = ci_rate([phat(roll.get(("A1", t), []), "off_c12") >= 0.75 for t in solved])
+        notes.append(f"P4 paired: on the A4 responses of those {len(solved)} tasks the E_sub and E_all verdicts agree rollout-for-rollout: {same}; "
+                     f"on the A1 responses re-scored under E_all the P4 statistic = {rate_str(paired)}.")
+    allrows = [r for a in arms_present for t in ids for r in roll.get((a, t), []) if r.get("scores")]
+    c2 = [r for r in allrows if r.get("c2_fired")]
+    notes.append(f"c2 fired on {len(c2)}/{len(allrows)} rollouts across all arms; passing sub_c12 verdicts among them: {sum(r['scores']['sub_c12']['verdict'] == 'PASS' for r in c2)}; "
+                 f"passing off_c12: {sum(r['scores']['off_c12']['verdict'] == 'PASS' for r in c2)}.")
+    rx = [r for r in allrows if r.get("raw_extraction") != "ok"]
+    notes.append(f"substrate extraction failed on {len(rx)} rollouts (by arm: {dict(Counter(r['arm'] for r in rx))}); c1 recovered code on {sum(r.get('c1_extraction') == 'ok' for r in rx)} of them, "
+                 f"of which sub_c12 PASS: {sum(r['scores']['sub_c12']['verdict'] == 'PASS' for r in rx)}, off_c12 PASS: {sum(r['scores']['off_c12']['verdict'] == 'PASS' for r in rx)}.")
+    c1c = [r for r in allrows if r.get("c1_changed_code") and r.get("raw_extraction") == "ok"]
+    notes.append(f"c1 selected a different program than the substrate extractor on {len(c1c)} rollouts where both extracted code; verdict changes (sub_raw -> sub_c12): "
+                 f"{dict(Counter((r['scores']['sub_raw']['verdict'], r['scores']['sub_c12']['verdict']) for r in c1c))}.")
+    flips = Counter((r["scores"]["sub_raw"]["verdict"], r["scores"]["off_raw"]["verdict"]) for r in allrows)
+    fp = Counter(r["unit_id"] for r in allrows if r["scores"]["sub_raw"]["verdict"] == "PASS" and r["scores"]["off_raw"]["verdict"] == "FAIL")
+    fn = Counter(r["unit_id"] for r in allrows if r["scores"]["sub_raw"]["verdict"] == "FAIL" and r["scores"]["off_raw"]["verdict"] == "PASS")
+    notes.append(f"Official vs substrate verdict on the same outputs, all {len(allrows)} rollouts: (sub, off) counts {dict(flips)}; substrate-PASS/official-FAIL tasks {dict(fp)}; "
+                 f"substrate-FAIL/official-PASS tasks {dict(fn)}. Task 48257: LibreOffice evaluates the golden's array formulas to '#VALUE!' while the cached golden values equal the agent's output.")
+    if r1:
+        hoff = {t: v for t, v in r1.items()}
+        notes.append(f"R1/H_off on the {len(r1)} L1 tasks: {sum(bool(v.get('H_off_pass')) for v in r1.values())} pass under E_all with the answer supplied "
+                     f"({sum(bool(v.get('H_off_authentic')) for v in r1.values())} judged authentic); {sum(not v.get('H_off_pass') for v in r1.values())} remain unsolved after 5 answer-conditioned attempts.")
+    lines += ["", "## Measurement notes (same rollouts, additional facts)", ""] + [f"- {n}" for n in notes]
     if r1:
         lines += ["", "## R1 (answer-conditioned regeneration under E_all on L1 tasks)", "",
                   f"tasks {len(r1)}; H_off pass {sum(bool(v.get('H_off_pass')) for v in r1.values())}; authentic {sum(bool(v.get('H_off_authentic')) for v in r1.values())}; "
@@ -478,7 +509,9 @@ def main() -> None:
               "- L1/L2 depend on the substrate-path answer-condition cache (H_sub); R1 supplies part of the official-path labelling (H_off); the full witness regeneration protocol is left to M4.",
               "- c2 ('save on exception') wraps the agent program; it is not a repair of environment state. Its contribution is reported separately (dose table, c2_fired counts).",
               "- ALFWorld witness false-positive tests are outside E-min (M1/M4).",
-              "- Deviations and nulls: see LOG.md (LibreOffice via extracted AppImage instead of apt; vendored evaluator fetched from GitHub; venv additions)."]
+              "- Witness W(a) compares two recalculated golden copies, so a golden whose formulas LibreOffice cannot evaluate (48257, '#VALUE!') passes W while the official protocol rejects correct outputs; the witness column sub_recalc_vs_raw (5/76 pool tasks) is the closer detector for this defect class.",
+              "- The A/A arm shows the independent-arm design's noise floor: f_AA = 0.184 spurious unlocks and 10/76 zero-status flips between two identical runs. Every pre-registered unlock rate is at or below this floor; the paired re-scoring (supplementary) gives the noise-free version of the same quantities.",
+              "- Deviations and nulls: see LOG.md (LibreOffice via extracted AppImage instead of apt; vendored evaluator fetched from GitHub; venv additions; lane relaunch after a cache race; API seed not honoured)."]
     (rd / "verdict.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     print("\n".join(lines[:12]))
     print(f"... wrote {rd / 'verdict.md'} and CSVs")

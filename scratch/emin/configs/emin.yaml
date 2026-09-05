@@ -47,7 +47,7 @@ smoke:
   tasks: 3
   rollouts: 2
 concurrency:
-  api: 6
+  api: 10
   recalc: 6
 
 envs:                                # c1 fence unwrap, c2 save-on-exception, c3 official recalc path

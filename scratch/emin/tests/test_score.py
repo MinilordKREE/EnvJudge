@@ -114,6 +114,8 @@ def test_c1_variants():
     assert contracts.unwrap_fence("```bash\nls\n```\n```python\nx = 2\n```") == "x = 2"
     assert contracts.unwrap_fence("```python\nx = 1\n```\n```python\nx = 2\n```") == "x = 1"   # first block
     assert contracts.unwrap_fence("x = 3") == "x = 3"
+    assert contracts.unwrap_fence("Let's produce the code.```python\nx = 4\n```") == "x = 4"   # inline opening fence
+    assert contracts.unwrap_fence("```python\nx = 5\n```trailing") == "x = 5"
     with pytest.raises(ValueError):
         contracts.unwrap_fence("")
 

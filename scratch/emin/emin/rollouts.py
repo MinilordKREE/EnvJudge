@@ -316,13 +316,88 @@ def main() -> None:
     p = sub.add_parser("r1")
     p.add_argument("--ids-file", required=True, type=Path)
     p.add_argument("--approve-beyond-soft", action="store_true")
+    p = sub.add_parser("reprocess-c1")
+    p.add_argument("--ids-json", required=True, type=Path)
+    p.add_argument("--archive", required=True)
     a = ap.parse_args()
+    if a.cmd == "reprocess-c1":
+        reprocess_c1(a.ids_json, a.archive)
+        return
     if a.cmd in ("smoke", "run"):
         run_arm(a.arm, smoke=(a.cmd == "smoke"), limit=a.limit, soft_ok=a.approve_beyond_soft)
     elif a.cmd == "seedtest":
         seedtest(a.approve_beyond_soft)
     else:
         r1(a.ids_file, a.approve_beyond_soft)
+
+
+
+
+# ----------------------------------------------------------------------------------------------
+# Re-processing after a Contract implementation fix (compute only; no LLM call). The original rows
+# file is preserved under a versioned name; the corrected file replaces results/emin/rollouts.jsonl.
+def _recompute_c12(row: dict, task: Task, root: Path) -> dict:
+    cfg = config()
+    timeout = int(cfg["execution"]["timeout_seconds"])
+    response = (root / "response.md").read_text(encoding="utf-8")
+    try:
+        code_raw = extract_python_code(response)
+    except ValueError:
+        code_raw = ""
+    c12_ws = root / "c12"
+    if c12_ws.exists():
+        shutil.rmtree(c12_ws)
+    c12_ws.mkdir(parents=True, exist_ok=True)
+    try:
+        code_c1 = contracts.unwrap_fence(response)
+        row["c1_extraction"] = "ok"
+    except ValueError as exc:
+        code_c1 = ""
+        row["c1_extraction"] = str(exc)[:80]
+    row["c1_changed_code"] = bool(code_c1) and not _same_program(code_c1, code_raw)
+    if code_c1:
+        row["c12_exec"] = _run_program(contracts.run_with_save_on_exception(code_c1), task, c12_ws, timeout)
+    else:
+        row["c12_exec"] = {"failure": "no_code", "output_exists": False}
+    out = c12_ws / "output.xlsx"
+    row["scores"]["sub_c12"] = score_substrate(out, task.golden_path, task.answer_position).to_dict()
+    row["scores"]["off_c12"] = score_official(out, task.golden_path, task.answer_position, task.instruction_type,
+                                              Path(cfg["work_dir"]) / "_scoring").to_dict()
+    row["c2_fired"] = bool(row["c12_exec"].get("output_exists")) and not bool(row["raw_exec"].get("output_exists")) \
+        and row["c1_extraction"] == "ok" and not row["c1_changed_code"]
+    key = row["primary_key"]
+    row["primary_pass"] = row["scores"][key]["verdict"] == "PASS"
+    row["primary_reason"] = row["scores"][key]["reason"]
+    row["reprocessed"] = "c1_fix_" + time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
+    return row
+
+
+def reprocess_c1(ids_json: Path, archive_name: str) -> None:
+    """Recompute the c12 variant for the (arm, unit_id, seed) triples listed in ids_json."""
+    cfg = config()
+    results_dir = Path(cfg["results_dir"])
+    rows_path = results_dir / "rollouts.jsonl"
+    archive = results_dir / archive_name
+    if archive.exists():
+        raise SystemExit(f"archive exists, refusing to overwrite: {archive}")
+    shutil.copyfile(rows_path, archive)
+    targets = {tuple(x) for x in json.loads(Path(ids_json).read_text(encoding="utf-8"))}
+    rows = [json.loads(l) for l in rows_path.read_text(encoding="utf-8").splitlines() if l.strip()]
+    tasks = {t.task_id: t for t in pool_tasks()}
+    todo = [r for r in rows if (r["arm"], r["unit_id"], int(r["seed"])) in targets and r.get("llm_ok")]
+    print(f"re-processing {len(todo)} rows; original preserved at {archive}", flush=True)
+
+    def work(r: dict) -> dict:
+        root = Path(cfg["work_dir"]) / ("smoke" if "smoke" in r["run_id"] else "arms") / r["arm"] / r["unit_id"] / f"seed{r['seed']}"
+        return _recompute_c12(r, tasks[r["unit_id"]], root)
+
+    with ThreadPoolExecutor(max_workers=int(cfg["concurrency"]["api"])) as pool:
+        done = list(pool.map(work, todo))
+    by_key = {(r["arm"], r["unit_id"], int(r["seed"])): r for r in done}
+    out = [by_key.get((r["arm"], r["unit_id"], int(r["seed"])), r) for r in rows]
+    rows_path.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in out), encoding="utf-8")
+    changed = sum(1 for a, b in zip(rows, out) if a.get("primary_pass") != b.get("primary_pass"))
+    print(f"done; primary verdict changed on {changed} rows", flush=True)
 
 
 if __name__ == "__main__":

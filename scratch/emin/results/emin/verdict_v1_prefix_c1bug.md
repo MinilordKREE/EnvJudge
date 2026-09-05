@@ -1,4 +1,4 @@
-# E-min verdict — generated 2026-09-05 09:30 UTC
+# E-min verdict — generated 2026-09-05 09:09 UTC
 
 Pre-registration: `PREREG.md` @ git sha `0a07fa23ebce6cdb10dc181fa8f783dcfc743757`. Rollouts per arm: A1=608, A1p=608, A2=608, A3=608, A4=608, A5=608, A6=608, A7=608, A8=608.
 Spend so far: 5671 API calls, USD 7.36 at the applicable tariff (USD 14.72 at the peak bound). Budget: hard 20 / soft 12.
@@ -31,7 +31,7 @@ Flash labels from A7 (p0=0 tasks: 37; L1 n=24, L2 n=8). E_all (A8): unlock(L1) =
 
 ### P6 phi = G'/G >= 0.6: contradicted (CI not decisive)
 
-G = mean p(A5 parent,E_sub) - mean p(A1 parent-,E_sub) = 0.054 [0.010, 0.099]; G' = mean p(A4 parent-,E_all) - mean p(A1) = -0.003 [-0.051, 0.043]; phi = G'/G (CI over resamples with G>0) = -0.061 [-2.333, 0.728]; A6 - A4 (skill increment on top of Contract) = 0.079 [0.039, 0.120]; A6 - A5 (Contract increment on top of skill) = 0.021 [-0.018, 0.061].
+G = mean p(A5 parent,E_sub) - mean p(A1 parent-,E_sub) = 0.054 [0.010, 0.099]; G' = mean p(A4 parent-,E_all) - mean p(A1) = -0.003 [-0.051, 0.043]; phi = G'/G (CI over resamples with G>0) = -0.061 [-2.333, 0.728]; A6 - A4 (skill increment on top of Contract) = 0.077 [0.038, 0.118]; A6 - A5 (Contract increment on top of skill) = 0.020 [-0.020, 0.059].
 
 ### P7 baseline misrouting: designer rule sr==0 -> SKIP skips every p0=0 task; L1 share among them: supported (CI-decisive)
 
@@ -61,9 +61,9 @@ f_AA = P(p(A1') > 0 | p(A1) = 0) = 0.184 [0.079, 0.316] (n=38); reverse = 0.088 
 | A3 | parent_minus | E_off | pro | 608 | 0.248 | 0.487 | 0.013 | 0.342 |
 | A4 | parent_minus | E_all | pro | 608 | 0.245 | 0.461 | 0.039 | 0.329 |
 | A5 | parent | E_sub | pro | 608 | 0.303 | 0.421 | 0.039 | 0.382 |
-| A6 | parent | E_all | pro | 608 | 0.324 | 0.408 | 0.026 | 0.316 |
+| A6 | parent | E_all | pro | 608 | 0.322 | 0.421 | 0.026 | 0.316 |
 | A7 | parent_minus | E_sub | flash | 608 | 0.212 | 0.487 | 0.000 | 0.342 |
-| A8 | parent_minus | E_all | flash | 608 | 0.247 | 0.368 | 0.013 | 0.487 |
+| A8 | parent_minus | E_all | flash | 608 | 0.212 | 0.368 | 0.013 | 0.408 |
 
 ## Unlock rates (unlock_rates.csv)
 
@@ -103,17 +103,17 @@ f_AA = P(p(A1') > 0 | p(A1) = 0) = 0.184 [0.079, 0.316] (n=38); reverse = 0.088 
 - G = mean p(A5 parent,E_sub) - mean p(A1 parent-,E_sub) = 0.054 [0.010, 0.099] (n=76)
 - G' = mean p(A4 parent-,E_all) - mean p(A1) = -0.003 [-0.051, 0.043] (n=76)
 - phi = G'/G (CI over resamples with G>0) = -0.061 [-2.333, 0.728] (n=9943)
-- A6 - A4 (skill increment on top of Contract) = 0.079 [0.039, 0.120] (n=76)
-- A6 - A5 (Contract increment on top of skill) = 0.021 [-0.018, 0.061] (n=76)
+- A6 - A4 (skill increment on top of Contract) = 0.077 [0.038, 0.118] (n=76)
+- A6 - A5 (Contract increment on top of skill) = 0.020 [-0.020, 0.059] (n=76)
 - mean p(A1 parent_minus,E_sub,pro) = 0.248 [0.181, 0.319] (n=76)
 - mean p(A1p parent_minus,E_sub,pro) = 0.248 [0.186, 0.319] (n=76)
 - mean p(A2 parent_minus,E_c12,pro) = 0.257 [0.188, 0.329] (n=76)
 - mean p(A3 parent_minus,E_off,pro) = 0.248 [0.181, 0.319] (n=76)
 - mean p(A4 parent_minus,E_all,pro) = 0.245 [0.178, 0.317] (n=76)
 - mean p(A5 parent,E_sub,pro) = 0.303 [0.229, 0.378] (n=76)
-- mean p(A6 parent,E_all,pro) = 0.324 [0.247, 0.405] (n=76)
+- mean p(A6 parent,E_all,pro) = 0.322 [0.243, 0.403] (n=76)
 - mean p(A7 parent_minus,E_sub,flash) = 0.212 [0.153, 0.276] (n=76)
-- mean p(A8 parent_minus,E_all,flash) = 0.247 [0.191, 0.304] (n=76)
+- mean p(A8 parent_minus,E_all,flash) = 0.212 [0.161, 0.266] (n=76)
 
 ## Supplementary (not pre-registered): paired re-scoring of the A1 responses under the four env verdicts
 
@@ -132,9 +132,9 @@ The prompt does not depend on the env, so every A1 response can be re-scored und
 - A3: {'workbook_missing': 293, 'value_mismatch': 159, 'pass': 151, 'sheet_missing': 5}
 - A4: {'value_mismatch': 244, 'workbook_missing': 211, 'pass': 149, 'sheet_missing': 4}
 - A5: {'value_mismatch': 214, 'workbook_missing': 210, 'pass': 184}
-- A6: {'value_mismatch': 264, 'pass': 197, 'workbook_missing': 141, 'sheet_missing': 6}
+- A6: {'value_mismatch': 264, 'pass': 196, 'workbook_missing': 142, 'sheet_missing': 6}
 - A7: {'workbook_missing': 332, 'value_mismatch': 147, 'pass': 129}
-- A8: {'workbook_missing': 292, 'value_mismatch': 165, 'pass': 150, 'sheet_missing': 1}
+- A8: {'workbook_missing': 337, 'value_mismatch': 141, 'pass': 129, 'sheet_missing': 1}
 
 ## Extraction / c2 activity per arm (raw_extraction_ok, c1_ok, c2_fired) counts
 
@@ -145,17 +145,17 @@ The prompt does not depend on the env, so every A1 response can be re-scored und
 - A4: {(True, True, False): 560, (True, True, True): 45, (False, True, False): 3}
 - A5: {(True, True, False): 540, (True, True, True): 66, (False, True, False): 2}
 - A6: {(True, True, False): 539, (True, True, True): 65, (False, True, False): 4}
-- A7: {(True, True, False): 533, (False, True, False): 27, (True, True, True): 48}
-- A8: {(True, True, False): 525, (True, True, True): 54, (False, True, False): 29}
+- A7: {(True, True, False): 540, (False, True, False): 27, (True, True, True): 41}
+- A8: {(True, True, False): 530, (True, True, True): 49, (False, True, False): 29}
 
 ## Measurement notes (same rollouts, additional facts)
 
 - P4 A/A reference: the same P4 statistic between A1 and A1' (identical env) = 0.667 [0.333, 1.000] (n=6); mean p over the 6 tasks: A1 0.875 -> A1' 0.708.
 - P4 paired: on the A4 responses of those 6 tasks the E_sub and E_all verdicts agree rollout-for-rollout: True; on the A1 responses re-scored under E_all the P4 statistic = 1.000 [1.000, 1.000] (n=6).
-- c2 fired on 478/5472 rollouts across all arms; passing sub_c12 verdicts among them: 3; passing off_c12: 5.
-- substrate extraction failed on 74 rollouts (by arm: {'A1p': 3, 'A5': 2, 'A3': 1, 'A1': 3, 'A6': 4, 'A7': 27, 'A8': 29, 'A4': 3, 'A2': 2}); c1 recovered code on 74 of them, of which sub_c12 PASS: 0, off_c12 PASS: 0.
-- c1 selected a different program than the substrate extractor on 18 rollouts where both extracted code; verdict changes (sub_raw -> sub_c12): {('FAIL', 'FAIL'): 11, ('PASS', 'PASS'): 7}.
-- Official vs substrate verdict on the same outputs, all 5472 rollouts: (sub, off) counts {('FAIL', 'FAIL'): 3940, ('PASS', 'PASS'): 1295, ('FAIL', 'PASS'): 162, ('PASS', 'FAIL'): 75}; substrate-PASS/official-FAIL tasks {'48257': 44, '59734': 12, '54144': 15, '22-47': 4}; substrate-FAIL/official-PASS tasks {'52216': 7, '52807': 23, '408-5': 8, '55060': 34, '54242': 13, '40478': 3, '43657': 7, '10747': 6, '52541': 13, '183-8': 7, '48608': 4, '31915': 11, '49196': 10, '32337': 2, '41601': 6, '36097': 5, '59196': 1, '46167': 1, '52917': 1}. Task 48257: LibreOffice evaluates the golden's array formulas to '#VALUE!' while the cached golden values equal the agent's output.
+- c2 fired on 466/5472 rollouts across all arms; passing sub_c12 verdicts among them: 3; passing off_c12: 5.
+- substrate extraction failed on 74 rollouts (by arm: {'A4': 3, 'A2': 2, 'A7': 27, 'A1': 3, 'A1p': 3, 'A5': 2, 'A3': 1, 'A6': 4, 'A8': 29}); c1 recovered code on 74 of them, of which sub_c12 PASS: 0, off_c12 PASS: 0.
+- c1 selected a different program than the substrate extractor on 277 rollouts where both extracted code; verdict changes (sub_raw -> sub_c12): {('FAIL', 'FAIL'): 230, ('PASS', 'PASS'): 7, ('PASS', 'FAIL'): 40}.
+- Official vs substrate verdict on the same outputs, all 5472 rollouts: (sub, off) counts {('PASS', 'PASS'): 1295, ('FAIL', 'FAIL'): 3940, ('FAIL', 'PASS'): 162, ('PASS', 'FAIL'): 75}; substrate-PASS/official-FAIL tasks {'48257': 44, '59734': 12, '54144': 15, '22-47': 4}; substrate-FAIL/official-PASS tasks {'43657': 7, '52541': 13, '52807': 23, '55060': 34, '52216': 7, '49196': 10, '408-5': 8, '41601': 6, '10747': 6, '32337': 2, '183-8': 7, '36097': 5, '54242': 13, '40478': 3, '59196': 1, '31915': 11, '48608': 4, '46167': 1, '52917': 1}. Task 48257: LibreOffice evaluates the golden's array formulas to '#VALUE!' while the cached golden values equal the agent's output.
 - R1/H_off on the 26 L1 tasks: 4 pass under E_all with the answer supplied (2 judged authentic); 22 remain unsolved after 5 answer-conditioned attempts.
 
 ## R1 (answer-conditioned regeneration under E_all on L1 tasks)

@@ -6,7 +6,9 @@ c1  unwrap_fence(text) -> code
     first fenced block with an empty info string, else the whole response. Fences are ``` runs
     (3+ backticks) or ~~~ runs. The substrate's own extractor only accepts an info string that
     is exactly `python`/`py` and otherwise treats the whole response as code, which fails on
-    `python3`, untagged fences, or prose around the fence.
+    `python3`, untagged fences, or prose around the fence. Bug fixed 2026-09-05 09:20 UTC after the arms
+    ran: the first version anchored the opening fence to line start and therefore fell back to the whole
+    response for fences written inline after prose (see LOG.md; affected rollouts were re-processed).
 
 c2  run_with_save_on_exception(code, output_path) -> code
     Source-level wrapper around the generated program. The wrapped program behaves identically
@@ -35,9 +37,11 @@ import subprocess
 import tempfile
 import textwrap
 
+# Opening fence may sit anywhere (also inline after prose, as the substrate regex allows); the info
+# string is the rest of that line; the closing fence is the next run of the same fence characters.
 _FENCE = re.compile(
-    r"^[ \t]*(?P<fence>`{3,}|~{3,})[ \t]*(?P<info>[^\n]*)\n(?P<code>.*?)^[ \t]*(?P=fence)[ \t]*$",
-    re.DOTALL | re.MULTILINE,
+    r"(?P<fence>`{3,}|~{3,})[ \t]*(?P<info>[^\n]*)\n(?P<code>.*?)(?P=fence)",
+    re.DOTALL,
 )
 
 

@@ -1,1 +1,15 @@
 quantity,value,ci_lo,ci_hi,n_tasks
+"G = mean p(A5 parent,E_sub) - mean p(A1 parent-,E_sub)",0.054,0.010,0.099,76
+"G' = mean p(A4 parent-,E_all) - mean p(A1)",-0.003,-0.051,0.043,76
+phi = G'/G (CI over resamples with G>0),-0.061,-2.333,0.728,9943
+A6 - A4 (skill increment on top of Contract),0.079,0.039,0.120,76
+A6 - A5 (Contract increment on top of skill),0.021,-0.018,0.061,76
+"mean p(A1 parent_minus,E_sub,pro)",0.248,0.181,0.319,76
+"mean p(A1p parent_minus,E_sub,pro)",0.248,0.186,0.319,76
+"mean p(A2 parent_minus,E_c12,pro)",0.257,0.188,0.329,76
+"mean p(A3 parent_minus,E_off,pro)",0.248,0.181,0.319,76
+"mean p(A4 parent_minus,E_all,pro)",0.245,0.178,0.317,76
+"mean p(A5 parent,E_sub,pro)",0.303,0.229,0.378,76
+"mean p(A6 parent,E_all,pro)",0.324,0.247,0.405,76
+"mean p(A7 parent_minus,E_sub,flash)",0.212,0.153,0.276,76
+"mean p(A8 parent_minus,E_all,flash)",0.247,0.191,0.304,76
