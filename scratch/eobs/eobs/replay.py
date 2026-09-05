@@ -116,26 +116,44 @@ class Session:
                 "won": bool(self.bridge.state.won), "effective": bool(resp.info.get("effective", True))}
 
     def close(self):
-        try:
-            self.stack.close()
-        except Exception:
-            pass
+        """Detach harness layers from the reused bridge without closing the bridge itself."""
+        cur = self.stack
+        while cur is not self.bridge and hasattr(cur, "_inner"):
+            nxt = cur._inner
+            cur._inner = None
+            cur = nxt
+
+
+_CACHED: dict[str, Any] = {}   # per-process reusable base bridge (+proxy); the 8,810-file game scan is paid once
+
+
+def _base_bridge(reset_options: dict, seed: int):
+    """Return (bridge, proxy). Reuses one AlfworldEnv per process: `reset(seed, options)` on a live bridge
+    re-selects the game deterministically (same `_safe_seed` path as a fresh instance) without re-scanning
+    the game files; equivalence with fresh instances is checked in tests/test_integration.py."""
+    from envharness.bridges.alfworld import AlfworldEnv
+    if "bridge" not in _CACHED:
+        b = AlfworldEnv()
+        b.reset(seed=seed, options={**reset_options, "task_id": TASK_LABEL})
+        proxy = RecordingProxy(b._env)
+        b._env = proxy
+        _CACHED["bridge"], _CACHED["proxy"] = b, proxy
+    return _CACHED["bridge"], _CACHED["proxy"]
 
 
 def open_session(candidate: Candidate | None, seed: int, reset_options: dict | None = None) -> Session:
+    """Build the stack exactly as runner.build_env_stack does (base -> Setup -> Rules), over a reused base bridge."""
+    from envharness.core.code_loader import load_rules_instance
+    from envharness.harnesses.setup import Setup
     cand = candidate or Candidate(rules_code="", in_env_actions=[])
-    spec = EpisodeSpec(env=EnvSpec(import_path="envharness.bridges.alfworld:AlfworldEnv",
-                                   reset_options=dict(reset_options or RESET_OPTIONS), reset_seed=seed),
-                       candidate=cand, policy=PolicySpec(client_factory="x"), iteration_id="eobs", task_id=TASK_LABEL,
-                       max_steps=POLICY_MAX_STEPS)
-    stack = build_env_stack(spec)
-    bridge = _base_env(stack)
-    # Boot the underlying env first (lazy init happens inside reset), then wrap it. A Setup layer replays
-    # its actions inside reset(), so we do a bare bridge reset to init, wrap, then the real stack reset.
-    bridge.reset(seed=seed, options={**spec.env.reset_options, "task_id": TASK_LABEL})
-    proxy = RecordingProxy(bridge._env)
-    bridge._env = proxy
-    stack.reset(seed=seed, options={**spec.env.reset_options, "task_id": TASK_LABEL})
+    opts = dict(reset_options or RESET_OPTIONS)
+    bridge, proxy = _base_bridge(opts, seed)
+    stack: Any = bridge
+    if cand.in_env_actions:
+        stack = Setup(inner=stack, actions=list(cand.in_env_actions))
+    if (cand.rules_code or "").strip():
+        stack = load_rules_instance(cand.rules_code, inner=stack)
+    stack.reset(seed=seed, options={**opts, "task_id": TASK_LABEL})
     gf = _unwrap(proxy.last_infos).get("extra.gamefile") or ""
     return Session(stack=stack, bridge=bridge, proxy=proxy, seed=seed, gamefile=str(gf))
 

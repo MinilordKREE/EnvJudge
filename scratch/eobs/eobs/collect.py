@@ -23,7 +23,7 @@ def _jsonl(p: Path) -> list[dict]:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--released", default="eobs_alfworld_001")
-    ap.add_argument("--hard", default="eobs_alfworld_H_001,eobs_alfworld_H_001b_s10,eobs_alfworld_H_001b_s15,eobs_alfworld_H_001b_s20,eobs_alfworld_H_001b_s25")
+    ap.add_argument("--hard", default="eobs_alfworld_H_001,eobs_alfworld_H_001b_s10,eobs_alfworld_H_001b_s15,eobs_alfworld_H_001b_s20,eobs_alfworld_H_001b_s25,eobs_alfworld_H_001c_s11,eobs_alfworld_H_001c_s19,eobs_alfworld_H_001c_s22,eobs_alfworld_H_001c_s27")
     ap.add_argument("--phase1", default="eobs_phase1_extra")
     ap.add_argument("--n-tasks", type=int, default=30)
     a = ap.parse_args()
