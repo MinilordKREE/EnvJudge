@@ -1,0 +1,3 @@
+[submodule "third_party/envharness"]
+	path = third_party/envharness
+	url = https://github.com/google-research/envharness

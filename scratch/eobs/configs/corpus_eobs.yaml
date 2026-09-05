@@ -1,0 +1,112 @@
+# E-obs copy of third_party/envharness/experiments/alfworld/corpus.yaml @ fab7d574.
+# Edits (permitted set only): agent/policy client -> eobs.llm:LedgerLLMClient wrapping LiteLLMClient with
+# model openai/deepseek-v4-pro, api_base https://api.deepseek.com, extra_body thinking disabled; storage/log paths.
+# Everything else (extra_instructions, task_description, temperature 0.5, K=5, max_k=5, max_episode_steps 50,
+# rollout_concurrency 5, target_band, baseline_cache_dir null, skip_passthrough_candidates true) is unchanged.
+env:
+  import_path: envharness.bridges.alfworld:AlfworldEnv
+  reset_options:
+    split: train
+    repetition_threshold: 0
+agent:
+  type: llm
+  client_factory: eobs.llm:LedgerLLMClient
+  client_kwargs:
+    inner_factory: envharness.infra.llm:LiteLLMClient
+    inner_kwargs:
+      model: openai/deepseek-v4-pro
+      api_base: https://api.deepseek.com
+      extra_body: &id001
+        thinking:
+          type: disabled
+      drop_params: true
+    ledger_path: /home/kree/work/EnvJudge/scratch/eobs/results/eobs/ledger.jsonl
+    role: harness_agent
+  extra_instructions: "PHASE 1 -- TASK SELECTION (you may skip easy tasks):\n  Read HarnessAgentContext.baseline.sr\
+    \ (the K unmutated rollouts on\n  this task before your propose).\n    - If baseline_sr >= 0.8: SKIP.\
+    \ The Policy already solves this\n      task; no new skill to extract. Emit\n      `Candidate(rules_code=\"\
+    \", in_env_actions=[],\n                 rationale=\"skip-easy-task\")` and the orchestrator\n   \
+    \   will move on.\n    - If 0.0 < baseline_sr < 0.6: TARGET. The Policy struggles here.\n      Proceed\
+    \ to Phase 2.\n    - If baseline_sr == 0.0: TARGET if you can diagnose a recoverable\n      failure\
+    \ mode from the baseline trajectories. Otherwise SKIP.\n\nPHASE 2 -- FAILURE DIAGNOSIS:\n  Read the\
+    \ baseline trajectories in HarnessAgentContext.baseline_traces.\n  Identify the specific failure mode\
+    \ (e.g. \"Policy doesn't reason\n  about which container is most likely to hold the target\", \"Policy\n\
+    \  gets stuck in navigation loops\", \"Policy forgets to OPEN closed\n  containers before searching\"\
+    ). State it explicitly in your\n  `rationale` field.\n\nPHASE 3 -- IN-DISTRIBUTION HARNESS:\n  Build\
+    \ a harness that EXERCISES the failure-recovery skill without\n  changing the env's surface presentation.\
+    \ The Policy must NEVER see\n  anything in the mutated env that couldn't appear in standard\n  ALFWorld:\n\
+    \n  FORBIDDEN (introduces env-distribution shift):\n    - Hide admissible commands (no aggressive\
+    \ O-axis stripping)\n    - Block standard verbs with custom error messages\n    - Add new error /\
+    \ affordance text the standard env wouldn't print\n    - Remove \"Admissible commands: ...\" footer\n\
+    \    - Invent action vocabulary\n    - Change observation FORMAT (whitespace, prefixes, casing)\n\n\
+    \  PERMITTED (stays in-distribution):\n    - T-axis Rules: occasional standard-feedback failures\n\
+    \      (\"Nothing happens\" returned as the obs text); only this exact\n      string, only at sub-10%\
+    \ frequency, no other surface change\n    - in_env_actions (Setup harness): execute a sequence of\
+    \ standard\n      `do(text=...)` actions before Policy starts (open containers,\n      move objects\
+    \ -- anything reachable via the normal tool set)\n\nPHASE 4 -- ACCEPTANCE:\n  Run K=5 rollouts. The\
+    \ harness succeeds if mutated SR > baseline_sr\n  by at least 0.2 (the recovery skill helps). If only\
+    \ some rollouts\n  use the diagnosed recovery skill, ACCEPT but flag in rationale.\n  If neither,\
+    \ REFINE with a different failure mode or smaller\n  perturbation.\n"
+policy:
+  client_factory: eobs.llm:LedgerLLMClient
+  client_kwargs:
+    inner_factory: envharness.infra.llm:LiteLLMClient
+    inner_kwargs:
+      model: openai/deepseek-v4-pro
+      api_base: https://api.deepseek.com
+      extra_body: *id001
+      drop_params: true
+    ledger_path: /home/kree/work/EnvJudge/scratch/eobs/results/eobs/ledger.jsonl
+    role: policy
+  action_format: think_action
+  max_history: 200
+  temperature: 0.5
+  task_description: 'You are an agent in a text-based household environment (ALFWorld).
+
+    Each turn you receive an observation and a list of admissible
+
+    commands. First reason step-by-step about the current situation
+
+    inside <think>...</think> tags. Then pick ONE admissible command
+
+    and output it inside <action>...</action> tags.
+
+    '
+objective:
+  type: difficulty_zone
+  target_band:
+  - 0.0
+  - 1.0
+  window: 20
+budget:
+  type: capped_adaptive
+  max_k: 5
+orchestrator:
+  task_id: alfworld-corpus-ours-release
+  task_description: 'Mutate train tasks where the Policy is currently weak; only emit
+
+    harnesses that exercise failure-recovery skills WITHOUT shifting
+
+    the env''s surface presentation.
+
+    '
+  n_iterations: 100
+  max_episode_steps: 50
+  k_per_candidate: 5
+  rollout_concurrency: 5
+  base_seed: 0
+  baseline_cache_dir: null
+  task_id_stride: 1
+  task_id_base_offset: 0
+  discard_rollout_steps_after_decide: false
+  mutator_baseline_mode: full
+  skip_passthrough_candidates: true
+runner:
+  type: subprocess
+  timeout_seconds: 500
+storage:
+  trace_path: /home/kree/work/EnvJudge/scratch/eobs/work/runs/{run_name}/traces.jsonl
+logging:
+  log_dir: /home/kree/work/EnvJudge/scratch/eobs/work/runs/{run_name}
+  log_policy_calls: true
+  log_agent_calls: true
