@@ -1,0 +1,83 @@
+# E-obs Phase-2b hardening arm (PREREG_H.md): corpus_eobs.yaml minus agent.extra_instructions, objective.target_band [0.4, 0.6].
+env:
+  import_path: envharness.bridges.alfworld:AlfworldEnv
+  reset_options:
+    split: train
+    repetition_threshold: 0
+agent:
+  type: llm
+  client_factory: eobs.llm:LedgerLLMClient
+  client_kwargs:
+    inner_factory: envharness.infra.llm:LiteLLMClient
+    inner_kwargs:
+      model: openai/deepseek-v4-pro
+      api_base: https://api.deepseek.com
+      extra_body: &id001
+        thinking:
+          type: disabled
+      drop_params: true
+    ledger_path: /home/kree/work/EnvJudge/scratch/eobs/results/eobs/ledger.jsonl
+    role: harness_agent
+policy:
+  client_factory: eobs.llm:LedgerLLMClient
+  client_kwargs:
+    inner_factory: envharness.infra.llm:LiteLLMClient
+    inner_kwargs:
+      model: openai/deepseek-v4-pro
+      api_base: https://api.deepseek.com
+      extra_body: *id001
+      drop_params: true
+    ledger_path: /home/kree/work/EnvJudge/scratch/eobs/results/eobs/ledger.jsonl
+    role: policy
+  action_format: think_action
+  max_history: 200
+  temperature: 0.5
+  task_description: 'You are an agent in a text-based household environment (ALFWorld).
+
+    Each turn you receive an observation and a list of admissible
+
+    commands. First reason step-by-step about the current situation
+
+    inside <think>...</think> tags. Then pick ONE admissible command
+
+    and output it inside <action>...</action> tags.
+
+    '
+objective:
+  type: difficulty_zone
+  target_band:
+  - 0.4
+  - 0.6
+  window: 20
+budget:
+  type: capped_adaptive
+  max_k: 5
+orchestrator:
+  task_id: alfworld-corpus-ours-release
+  task_description: 'Mutate train tasks where the Policy is currently weak; only emit
+
+    harnesses that exercise failure-recovery skills WITHOUT shifting
+
+    the env''s surface presentation.
+
+    '
+  n_iterations: 100
+  max_episode_steps: 50
+  k_per_candidate: 5
+  rollout_concurrency: 5
+  base_seed: 0
+  baseline_cache_dir: null
+  task_id_stride: 1
+  task_id_base_offset: 0
+  discard_rollout_steps_after_decide: false
+  mutator_baseline_mode: full
+  skip_passthrough_candidates: true
+runner:
+  type: subprocess
+  timeout_seconds: 500
+storage:
+  trace_path: /home/kree/work/EnvJudge/scratch/eobs/work/runs/{run_name}/traces.jsonl
+logging:
+  log_dir: /home/kree/work/EnvJudge/scratch/eobs/work/runs/{run_name}
+  log_policy_calls: true
+  log_agent_calls: true

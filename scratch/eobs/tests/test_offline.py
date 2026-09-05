@@ -72,7 +72,7 @@ def test_ledger_client_is_observe_only(tmp_path, monkeypatch):
     import eobs.llm as L
     monkeypatch.setattr(L, "import_symbol", lambda name: _FakeInner)
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
-    c = L.LedgerLLMClient("x:Fake", {"model": "openai/deepseek-v4-pro"}, ledger_path=str(tmp_path / "ledger.jsonl"), role="policy")
+    c = L.LedgerLLMClient("x:Fake", {"model": "openai/deepseek-v4-pro", "api_base": "https://api.deepseek.com"}, ledger_path=str(tmp_path / "ledger.jsonl"), role="policy")
     msgs = [object()]
     tools = [{"type": "function"}]
     r1 = c.chat(msgs, tools=tools, tool_choice="auto", temperature=0.5, max_tokens=None, foo=1)
@@ -115,3 +115,21 @@ def test_hooks_extract(tmp_path):
     assert c["candidate_id"] == "cand1" and c["axis"] == "A" and c["SR_c"] == 0.0 and c["decision"] == "reject"
     assert c["reverse_or_loosen"] and "UNSOLVABLE" in c["matched_snippet"] and c["decision_text"].startswith("All rollouts")
     assert c["failure_dist"] == {"blocked": 2} and out["tasks"][0]["p5"] == 0.5
+
+
+def test_reverse_regex_word_boundaries():
+    from eobs.hooks import REVERSE_RE
+    hits = lambda s: [m.group(0).lower() for m in REVERSE_RE.finditer(s)]
+    assert hits("we must reverse the ban; loosen it") == ["reverse", "loosen"]
+    assert hits("the task is unsolvable / impossible; impossibility of success") == ["unsolvable", "impossible", "impossibility"]
+    assert hits("this is irreversible; reversal noted; reversed policy") == ["reversal", "reversed"]
+    assert hits("nonreversible reverses") == ["reverses"] or hits("nonreversible reverses") == []
+
+
+def test_ledger_client_routing_guard(tmp_path, monkeypatch):
+    import eobs.llm as L
+    monkeypatch.setattr(L, "import_symbol", lambda name: _FakeInner)
+    with pytest.raises(ValueError):
+        L.LedgerLLMClient("x:Fake", {"model": "openai/deepseek-v4-pro"}, ledger_path=str(tmp_path / "l.jsonl"))
+    with pytest.raises(ValueError):
+        L.LedgerLLMClient("x:Fake", {"model": "openai/gpt-4.1-mini", "api_base": "https://api.deepseek.com"}, ledger_path=str(tmp_path / "l.jsonl"))

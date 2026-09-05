@@ -70,6 +70,11 @@ class LedgerLLMClient(LLMClient):
                  run_id: str = "", phase: str = "", arm: str = ""):
         cls = import_symbol(inner_factory)
         kw = dict(inner_kwargs)
+        # Routing guard: the DeepSeek key travels as OPENAI_API_KEY, so any path that forgets api_base would send it to
+        # api.openai.com. Refuse to construct unless the kwargs pin the DeepSeek endpoint and a deepseek model.
+        if kw.get("api_base") != "https://api.deepseek.com" or not str(kw.get("model", "")).startswith("openai/deepseek"):
+            raise ValueError(f"LedgerLLMClient: refusing model/api_base {kw.get('model')!r} / {kw.get('api_base')!r}; "
+                             "expected openai/deepseek-* at https://api.deepseek.com")
         # api key from the environment (exported by the launcher from pydantic-settings); never from YAML
         if "api_key" not in kw and os.environ.get("OPENAI_API_KEY"):
             kw["api_key"] = os.environ["OPENAI_API_KEY"]

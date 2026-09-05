@@ -36,14 +36,24 @@ def recoverability(trajectory_id: str, task_id: int, actions: list[str], cap: in
         c, reason = c_at(task_id, actions[:t])
         c_seq.append(c)
         reasons.append(reason)
-    ones = [t for t, c in enumerate(c_seq) if c == 1]
-    zeros = [t for t, c in enumerate(c_seq) if c == 0]
+    return {"trajectory_id": trajectory_id, "task_id": task_id, "T": T, "T_eval": n, "C_seq": c_seq,
+            **_stats(c_seq, reasons, exclude_expert_failures=False),
+            "excluded": _stats(c_seq, reasons, exclude_expert_failures=True),
+            "expert_errors": sum(r in EXPERT_FAIL for r in reasons), "reasons": reasons, "recover_mode": RECOVER_MODE}
+
+
+EXPERT_FAIL = ("expert_error", "expert_stuck", "expert_timeout")
+
+
+def _stats(c_seq: list[int], reasons: list[str], exclude_expert_failures: bool) -> dict:
+    """Conservative version: an expert failure counts as C=0. Excluded version: those prefixes are dropped."""
+    pairs = [(t, c) for t, (c, r) in enumerate(zip(c_seq, reasons)) if not (exclude_expert_failures and r in EXPERT_FAIL)]
+    ones = [t for t, c in pairs if c == 1]
+    zeros = [t for t, c in pairs if c == 0]
     L = max(ones) if ones else -1
     first_zero = min(zeros) if zeros else None
     monotone = 1 if (first_zero is None or not any(t > first_zero for t in ones)) else 0
-    return {"trajectory_id": trajectory_id, "task_id": task_id, "T": T, "T_eval": n, "C_seq": c_seq, "L": L,
-            "first_zero": first_zero, "monotone": monotone, "expert_errors": sum(r == "expert_error" for r in reasons),
-            "reasons": reasons, "recover_mode": RECOVER_MODE}
+    return {"L": L, "first_zero": first_zero, "monotone": monotone, "n_prefixes": len(pairs)}
 
 
 def summarize(rec: dict) -> dict:

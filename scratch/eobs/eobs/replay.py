@@ -157,10 +157,23 @@ def replay_actions(sess: Session, actions: list[str]) -> ReplayResult:
                         step=None if ok else len(sess.actions), n_steps=len(sess.actions), actions=list(sess.actions))
 
 
+EXPERT_STUCK_N = 4   # same expert action N times in a row with no observation change -> expert_stuck
+
+
 def run_expert(sess: Session, max_steps: int = EXPERT_MAX_STEPS, retry_blocked: int = 3) -> ReplayResult:
-    """Closed-loop handcoded expert from the session's CURRENT state until won / done / cap."""
+    """Closed-loop handcoded expert from the session's CURRENT state until won / done / cap.
+
+    Expert-failure classes (owner review 2026-09-05), reported separately from verifier_fail:
+      expert_stuck    the expert repeats one action EXPERT_STUCK_N times with an unchanged observation (ALFWorld's
+                      AlfredExpert falls back to ["look"] when its action is inadmissible, which would otherwise burn
+                      the step cap and look like an unrecoverable state);
+      expert_timeout  the handcoded expert raised (HandCodedAgentTimeout/Failed surface as Exception("Timeout") etc.);
+      expert_error    no plan published.
+    """
     start = len(sess.actions)
     consecutive_blocked = 0
+    last_pair: tuple[str, str] | None = None
+    same_count = 0
     for i in range(max_steps):
         if sess.won:
             break
@@ -173,8 +186,16 @@ def run_expert(sess: Session, max_steps: int = EXPERT_MAX_STEPS, retry_blocked: 
         try:
             r = sess.step_text(nxt)
         except Exception as e:  # noqa: BLE001
-            sess.errors.append(f"{type(e).__name__}: {e}"[:200])
-            return ReplayResult(ok=False, reason="env_error", step=start + i, n_steps=len(sess.actions) - start,
+            msg = f"{type(e).__name__}: {e}"[:200]
+            sess.errors.append(msg)
+            reason = "expert_timeout" if ("Timeout" in msg or "HandCoded" in msg) else "env_error"
+            return ReplayResult(ok=False, reason=reason, step=start + i, n_steps=len(sess.actions) - start,
+                                actions=list(sess.actions[start:]))
+        pair = (nxt, r["obs"])
+        same_count = same_count + 1 if pair == last_pair else 1
+        last_pair = pair
+        if same_count >= EXPERT_STUCK_N and not r["won"]:
+            return ReplayResult(ok=False, reason="expert_stuck", step=start + i, n_steps=len(sess.actions) - start,
                                 actions=list(sess.actions[start:]))
         if r["blocked"]:
             consecutive_blocked += 1
