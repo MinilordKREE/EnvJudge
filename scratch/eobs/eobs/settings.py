@@ -26,8 +26,19 @@ PRICES = {
     # E1-pilot: Qwen3-8B on DashScope (no peak tariff). Filled by the price lookup in scratch/e1pilot/LOG.md; placeholder is the
     # conservative USD 0.50 / 2.00 per M in/out until verified (PRICING_VERSION_QWEN says which).
     "qwen3-8b": {"peak": {"miss": 0.18, "hit": 0.18, "out": 0.70}, "offpeak": {"miss": 0.18, "hit": 0.18, "out": 0.70}},
+    # E1-pilot (2026-09-07): Qwen3-8B via OpenRouter (model id openai/qwen/qwen3-8b -> key "qwen/qwen3-8b"). Owner stated USD 0.05/0.40;
+    # the sole endpoint (Alibaba) lists 0.117/0.455 and the probe's usage.cost matched 0.117/0.455 exactly -> verified price used.
+    "qwen/qwen3-8b": {"peak": {"miss": 0.117, "hit": 0.117, "out": 0.455}, "offpeak": {"miss": 0.117, "hit": 0.117, "out": 0.455}},
 }
 PRICING_VERSION_QWEN = "dashscope-qwen3-8b-2026-09-06"   # Model Studio intl (Singapore) price page: USD 0.18 in / 0.70 out per M, same for both modes
+PRICING_VERSIONS = {"qwen3-8b": PRICING_VERSION_QWEN, "qwen/qwen3-8b": "openrouter-qwen3-8b-2026-09-07"}
+
+
+def pricing_version_for(model: str) -> str:
+    key = model.split("/", 1)[-1]
+    return PRICING_VERSIONS.get(key, PRICING_VERSION)
+
+
 BUDGET_HARD_USD = 120.0
 BUDGET_SOFT_USD = 80.0
 
@@ -36,6 +47,7 @@ class Secrets(BaseSettings):
     model_config = SettingsConfigDict(env_file=(str(REPO_ROOT / ".env"),), env_file_encoding="utf-8", extra="ignore")
     deepseek_api_key: SecretStr
     dashscope_api_key: SecretStr | None = None   # E1-pilot (2026-09-06): second provider, optional
+    openrouter_api_key: SecretStr | None = None  # E1-pilot (2026-09-07): third provider, optional
 
 
 @functools.lru_cache(maxsize=1)

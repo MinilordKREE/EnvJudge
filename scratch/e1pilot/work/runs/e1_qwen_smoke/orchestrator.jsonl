@@ -1,0 +1,8 @@
+{"ts": 1788668829.6857102, "iso": "2026-09-06T04:27:09Z", "kind": "p1_start", "n_tasks": 2, "k": 2, "conc": 2, "phase": "p1_map"}
+{"ts": 1788669029.722311, "iso": "2026-09-06T04:30:29Z", "kind": "rollout_done", "iteration_id": "baseline-0000", "attempt": 0, "candidate_id": "baseline", "rollout": 1, "seed": 0, "duration_ms": 200035, "success": false, "reward": 0.0, "steps": 50, "error": null}
+{"ts": 1788669061.820246, "iso": "2026-09-06T04:31:01Z", "kind": "rollout_done", "iteration_id": "baseline-0000", "attempt": 0, "candidate_id": "baseline", "rollout": 0, "seed": 0, "duration_ms": 232133, "success": false, "reward": 0.0, "steps": 50, "error": null}
+{"ts": 1788669061.8237631, "iso": "2026-09-06T04:31:01Z", "kind": "p1_task_done", "task_idx": 0, "task_id": 0, "k": 2, "sr": 0.0, "n_errors": 0, "wall_s": 232.1}
+{"ts": 1788669091.9880476, "iso": "2026-09-06T04:31:31Z", "kind": "rollout_done", "iteration_id": "baseline-0001", "attempt": 0, "candidate_id": "baseline", "rollout": 1, "seed": 1, "duration_ms": 30163, "success": true, "reward": 1.0, "steps": 9, "error": null}
+{"ts": 1788669092.0109026, "iso": "2026-09-06T04:31:32Z", "kind": "rollout_done", "iteration_id": "baseline-0001", "attempt": 0, "candidate_id": "baseline", "rollout": 0, "seed": 1, "duration_ms": 30186, "success": true, "reward": 1.0, "steps": 9, "error": null}
+{"ts": 1788669092.0118587, "iso": "2026-09-06T04:31:32Z", "kind": "p1_task_done", "task_idx": 1, "task_id": 1, "k": 2, "sr": 1.0, "n_errors": 0, "wall_s": 30.2}
+{"ts": 1788669092.0119872, "iso": "2026-09-06T04:31:32Z", "kind": "p1_end", "n_traces": 4}

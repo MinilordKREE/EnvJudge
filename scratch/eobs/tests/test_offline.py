@@ -154,3 +154,16 @@ def test_provider_allowlist_guard(tmp_path, monkeypatch):
     msgs = [object()]
     r = ok.chat(msgs, tools=None, temperature=0.5)
     assert ok.inner.calls[0]["messages"] is msgs and r.content == "<action>look</action>"
+
+
+def test_openrouter_pairing(tmp_path, monkeypatch):
+    import eobs.llm as L
+    monkeypatch.setattr(L, "import_symbol", lambda name: _FakeInner)
+    monkeypatch.setattr(L, "_secret_for", lambda env: "sk-fake")
+    OR = "https://openrouter.ai/api/v1"
+    L.LedgerLLMClient("x:Fake", {"model": "openai/qwen/qwen3-8b", "api_base": OR}, ledger_path=str(tmp_path / "l.jsonl"), api_key_env="OPENROUTER_API_KEY")
+    for kwargs, env in (({"model": "openai/qwen/qwen3-8b", "api_base": "https://api.deepseek.com"}, "OPENROUTER_API_KEY"),
+                        ({"model": "openai/qwen/qwen3-14b", "api_base": OR}, "OPENROUTER_API_KEY"),
+                        ({"model": "openai/deepseek-v4-pro", "api_base": OR}, "DEEPSEEK_API_KEY")):
+        with pytest.raises(ValueError):
+            L.LedgerLLMClient("x:Fake", kwargs, ledger_path=str(tmp_path / "l.jsonl"), api_key_env=env)

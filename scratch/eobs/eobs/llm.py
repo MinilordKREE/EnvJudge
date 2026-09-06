@@ -70,6 +70,7 @@ PROVIDER_ALLOWLIST = {
     # provider must never be sent to another endpoint (E1-pilot extension, 2026-09-06; backward-compatible).
     "DEEPSEEK_API_KEY": ({"https://api.deepseek.com"}, "openai/deepseek"),
     "DASHSCOPE_API_KEY": ({"https://dashscope.aliyuncs.com/compatible-mode/v1", "https://dashscope-intl.aliyuncs.com/compatible-mode/v1"}, "openai/qwen"),
+    "OPENROUTER_API_KEY": ({"https://openrouter.ai/api/v1"}, "openai/qwen/qwen3-8b"),   # E1-pilot 2026-09-07: exact model pin
 }
 
 
@@ -121,8 +122,12 @@ class LedgerLLMClient(LLMClient):
         usage = _usage_from_raw(getattr(resp, "raw", None))
         ts = time.time()
         tariff = tariff_at(ts)
+        raw = getattr(resp, "raw", None)
+        prov = getattr(raw, "provider", None) or (raw.get("provider") if isinstance(raw, dict) else None) or (getattr(raw, "_hidden_params", {}) or {}).get("provider")
+        u = getattr(raw, "usage", None)
+        upstream_cost = getattr(u, "cost", None) if u is not None and not isinstance(u, dict) else (u.get("cost") if isinstance(u, dict) else None)
         self._append({
-            "ok": True, "latency_ms": int((ts - t0) * 1000), **usage,
+            "ok": True, "latency_ms": int((ts - t0) * 1000), **usage, "provider": prov, "upstream_cost": upstream_cost,
             "reasoning_content_present": _reasoning_content_present(getattr(resp, "raw", None)),
             "tariff": tariff,
             "usd": usd_for(self.model_id, usage.get("prompt_tokens", 0), usage.get("cached_tokens", 0), usage.get("completion_tokens", 0), tariff),
@@ -141,7 +146,7 @@ class LedgerLLMClient(LLMClient):
             "candidate_id": os.environ.get("EOBS_CANDIDATE_ID", ""),
             "seed": os.environ.get("EOBS_SEED", ""),
             "role": self.role, "model": self.model_id, "pid": os.getpid(),
-            "pricing_version": (__import__("eobs.settings", fromlist=["PRICING_VERSION_QWEN"]).PRICING_VERSION_QWEN if "qwen" in str(self.model_id) else PRICING_VERSION), **fields,
+            "pricing_version": __import__("eobs.settings", fromlist=["pricing_version_for"]).pricing_version_for(str(self.model_id)), **fields,
         }
         line = json.dumps(row, ensure_ascii=False, default=str) + "\n"
         with _LOCK:

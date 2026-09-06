@@ -1,0 +1,26 @@
+2026-09-05 23:27:09,685 INFO p1_start  n_tasks=2 k=2 conc=2 phase=p1_map
+2026-09-05 23:30:29,722 INFO rollout_done  iteration_id=baseline-0000 attempt=0 candidate_id=baseline rollout=1 seed=0 duration_ms=200035 success=False reward=0.0 steps=50 error=None
+2026-09-05 23:31:01,820 INFO rollout_done  iteration_id=baseline-0000 attempt=0 candidate_id=baseline rollout=0 seed=0 duration_ms=232133 success=False reward=0.0 steps=50 error=None
+2026-09-05 23:31:01,823 INFO p1_task_done  task_idx=0 task_id=0 k=2 sr=0.0 n_errors=0 wall_s=232.1
+[P1] task 0: sr=0.000 errors=0 232s
+2026-09-05 23:31:31,988 INFO rollout_done  iteration_id=baseline-0001 attempt=0 candidate_id=baseline rollout=1 seed=1 duration_ms=30163 success=True reward=1.0 steps=9 error=None
+2026-09-05 23:31:32,011 INFO rollout_done  iteration_id=baseline-0001 attempt=0 candidate_id=baseline rollout=0 seed=1 duration_ms=30186 success=True reward=1.0 steps=9 error=None
+2026-09-05 23:31:32,011 INFO p1_task_done  task_idx=1 task_id=1 k=2 sr=1.0 n_errors=0 wall_s=30.2
+[P1] task 1: sr=1.000 errors=0 30s
+2026-09-05 23:31:32,012 INFO p1_end  n_traces=4
+{
+ "episodes": 4,
+ "steps": 118,
+ "no_action_tag": 0,
+ "inadmissible": 24,
+ "parse_fail_rate": 0.2033898305084746,
+ "mean_per_episode": 0.12,
+ "errors": 0,
+ "mean_steps": 29.5,
+ "calls": 118,
+ "calls_per_episode": 29.5,
+ "usd_per_episode": 0.056,
+ "projected_P1_K16": 26.87,
+ "projected_P1_K12": 20.15
+}
+prompt identity vs E-obs Phase 1 (task 0): {'system_identical': True, 'first_user_identical': True, 'system_len': (306, 306), 'user_len': (2522, 2522)}

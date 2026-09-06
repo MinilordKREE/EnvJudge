@@ -1,0 +1,8 @@
+2026-09-06T04:27:09Z p1_start  n_tasks=2 k=2 conc=2 phase=p1_map
+2026-09-06T04:30:29Z rollout_done  iteration_id=baseline-0000 attempt=0 candidate_id=baseline rollout=1 seed=0 duration_ms=200035 success=False reward=0.0 steps=50 error=None
+2026-09-06T04:31:01Z rollout_done  iteration_id=baseline-0000 attempt=0 candidate_id=baseline rollout=0 seed=0 duration_ms=232133 success=False reward=0.0 steps=50 error=None
+2026-09-06T04:31:01Z p1_task_done  task_idx=0 task_id=0 k=2 sr=0.0 n_errors=0 wall_s=232.1
+2026-09-06T04:31:31Z rollout_done  iteration_id=baseline-0001 attempt=0 candidate_id=baseline rollout=1 seed=1 duration_ms=30163 success=True reward=1.0 steps=9 error=None
+2026-09-06T04:31:32Z rollout_done  iteration_id=baseline-0001 attempt=0 candidate_id=baseline rollout=0 seed=1 duration_ms=30186 success=True reward=1.0 steps=9 error=None
+2026-09-06T04:31:32Z p1_task_done  task_idx=1 task_id=1 k=2 sr=1.0 n_errors=0 wall_s=30.2
+2026-09-06T04:31:32Z p1_end  n_traces=4
