@@ -34,3 +34,12 @@ def test_footer_rules_compile_and_mask():
     assert out.text == "Task: x\n\nYou see a table." and "admissible_commands" not in out.data and out.data["goal_text"] == "x"
     cls0 = load_rules_subclass(rules_code(3, 0.0))
     assert cls0(inner=None).filter_observation(obs, S()).text == obs.text
+
+
+def test_goal_class_parsing():
+    from e1.operators.s0_displace import _goal_class_from_text, _cls
+    assert _goal_class_from_text("Your task is to: put two lettuce in fridge.") == "fridge"
+    assert _goal_class_from_text("Your task is to: clean some egg and put it in microwave.") == "microwave"
+    assert _goal_class_from_text("Your task is to: look at alarmclock under the desklamp.") == "desklamp"
+    assert _goal_class_from_text("Your task is to: put a statue in sidetable.") == "sidetable"
+    assert _cls("fridge 1") == "fridge" and _cls("countertop 12") == "countertop"
