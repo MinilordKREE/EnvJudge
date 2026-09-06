@@ -1,0 +1,33 @@
+# P3a: released reasoning_bank_eval.yaml with model.name -> openai/qwen/qwen3-8b, splits 30/30 (first tasks of each split, start_seed 0),
+# concurrency 6. Everything else (SkillOS prompt, history_length 4, temperature 0.4, retrieval mmr top_k 5) unchanged.
+model:
+  name: openai/qwen/qwen3-8b
+  temperature: 0.4
+  max_response_tokens: 2048
+policy:
+  max_steps: 50
+  history_length: 4
+  prompt_style: skillos
+  inject_style: soft
+retrieval:
+  top_k: 5
+  mode: mmr
+  mmr_lambda: 0.5
+  query_field: task
+eval:
+  splits:
+    eval_in_distribution: 30
+    eval_out_of_distribution: 30
+  start_seed: 0
+  concurrency: 6
+env:
+  import_path: envharness.bridges.alfworld:AlfworldEnv
+  reset_options:
+    repetition_threshold: 0
+conditions:
+  nobank:
+    bank: null
+  orig:
+    bank: null
+  ours:
+    bank: null

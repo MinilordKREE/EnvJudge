@@ -1,0 +1,30 @@
+INDUCE_START 09:34
+  [orig] induced 67 items from 30 tasks
+    [orig] embedded + wrote 20/67 -> /home/kree/work/EnvJudge/scratch/e1pilot/results/e1pilot/banks/orig_qwen.jsonl
+    [orig] embedded + wrote 40/67 -> /home/kree/work/EnvJudge/scratch/e1pilot/results/e1pilot/banks/orig_qwen.jsonl
+    [orig] embedded + wrote 60/67 -> /home/kree/work/EnvJudge/scratch/e1pilot/results/e1pilot/banks/orig_qwen.jsonl
+    [orig] embedded + wrote 67/67 -> /home/kree/work/EnvJudge/scratch/e1pilot/results/e1pilot/banks/orig_qwen.jsonl
+[P3a] induced 67 items from 30 tasks -> /home/kree/work/EnvJudge/scratch/e1pilot/results/e1pilot/banks/orig_qwen.jsonl
+INDUCE_DONE 09:35
+SMOKE_START 09:35
+  nobank   0/4 = 0.0%
+  orig     0/4 = 0.0%
+
+
+=========================================================
+=== FINAL: 3-round mean ± std per (condition, split)
+=========================================================
+condition  split                        rounds       mean      std
+nobank     eval_in_distribution         n=1         0.0%     0.0
+nobank     eval_out_of_distribution     n=1         0.0%     0.0
+orig       eval_in_distribution         n=1         0.0%     0.0
+orig       eval_out_of_distribution     n=1         0.0%     0.0
+
+--- combined view (in-dist + OOD weighted by 274) ---
+condition  rounds     combined mean      std
+nobank     n=1                0.0%     0.0
+orig       n=1                0.0%     0.0
+=========================================================
+total wall time: 15.8 min
+[P3a] eval rep 0 rc=0 -> /home/kree/work/EnvJudge/scratch/e1pilot/work/runs/e1_p3a_eval_r0
+SMOKE_DONE 09:51

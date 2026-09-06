@@ -171,3 +171,44 @@ def build(info: TaskInfo, k: int) -> tuple[list[str] | None, str]:
 
 def to_candidate(actions: list[str]) -> Candidate:
     return Candidate(rules_code="", in_env_actions=[Action(name="do", kwargs={"text": a}) for a in actions], rationale="F_S0 structural displacement")
+
+
+# ---------------------------------------------------------------- PREREG3b F_S0′: expert as difficulty oracle
+def _expert_len_from_staged(task_id: int, actions: list[str], attempts: int = 3, max_steps: int = 50) -> tuple[int | None, list[str] | None]:
+    """Shortest certified expert plan length from the staged state over `attempts` runs (None if never passes)."""
+    from eobs.replay import open_session, run_expert
+    best = None
+    for _ in range(attempts):
+        s = open_session(to_candidate(actions), task_id)
+        try:
+            if s.won or s.done:
+                return None, None
+            r = run_expert(s, max_steps=max_steps)
+            if r.ok and (best is None or r.n_steps < best[0]):
+                best = (r.n_steps, list(r.actions))
+        finally:
+            s.close()
+    return (best[0], best[1]) if best else (None, None)
+
+
+def candidate_destinations(info: TaskInfo) -> list[tuple[str, list[str]]]:
+    """All feasible single-destination displacement lists (open receptacles k=1 style, closable containers k=2 style)."""
+    out = []
+    for k in (1, 2):
+        for acts in synthesize(info, k):
+            dest = next((a.split(" to ", 1)[1] for a in acts if a.startswith("move ")), None)
+            ok, _ = validate(info.task_id, acts)
+            if ok:
+                final = compact(info.task_id, acts)
+                out.append((dest, final))
+    return out
+
+
+def oracle_doses(info: TaskInfo, top: int = 2) -> list[dict]:
+    """Rank feasible destinations by the certified expert plan length from the staged state; return the top-`top`."""
+    rows = []
+    for dest, acts in candidate_destinations(info):
+        L, wit = _expert_len_from_staged(info.task_id, acts)
+        rows.append({"dest": dest, "actions": acts, "L_exp_staged": L, "witness": wit})
+    ranked = sorted([r for r in rows if r["L_exp_staged"] is not None], key=lambda r: -r["L_exp_staged"])
+    return ranked[:top], rows
