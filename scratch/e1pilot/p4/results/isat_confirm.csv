@@ -1,0 +1,10 @@
+task_id,env,p8_p2b,p8_new,p16,confirmed,omega,certified_by_p2b,primary
+7,F_H:13,0.625,0.625,0.625,True,0.625,R_exp_by_construction,True
+12,F_O:0.875,0.625,0.625,0.625,True,1.0,R_exp,True
+13,F_O:0.875,0.375,0.25,0.3125,True,1.0,R_exp,True
+15,F_O:0.75,0.5,0.25,0.375,True,1.0,R_exp,True
+19,F_O:0.75,0.375,0.625,0.5,True,1.0,R_exp,False
+21,F_O:0.875,0.625,0.75,0.6875,True,1.0,R_exp,True
+22,F_O:0.75,0.5,0.75,0.625,True,1.0,R_post_hoc,True
+23,F_O:0.75,0.625,0.375,0.5,True,1.0,R_exp,False
+29,F_O:0.9688,0.625,0.875,0.75,True,1.0,R_exp,True

@@ -86,9 +86,9 @@ def main(prereg_sha: str) -> None:
     for r in nsd:
         if r.get("rollouts"):
             fam_tasks[r["family"]].add(r["task_id"])
-            if r["class"] != "NOEFFECT":
-                fam_lev[r["family"]].add(r["task_id"])
-    L += ["", "Per-family leverage (tasks moved out of NOEFFECT / tasks reached): " + "; ".join(f"{f}: {len(fam_lev[f])}/{len(fam_tasks[f])}" for f in fam_tasks) + f". Rollouts: {sum(int(r.get('rollouts') or 0) for r in nsd)}; uncertified: {sum(r.get('class') == 'UNCERTIFIED' for r in nsd)}; infeasible/not built: {sum(r.get('class') in ('INFEASIBLE', 'NOT_BUILT') for r in nsd)}; confirmed: {sum(bool(r.get('confirmed')) for r in nsd)}.", ""]
+            if r["class"] != "NOEFFECT" and r.get("certified_by") not in (None, "uncertified_post_hoc"):
+                fam_lev[r["family"]].add(r["task_id"])   # leverage counted on certified doses only
+    L += ["", "Per-family leverage (tasks moved out of NOEFFECT / tasks reached): " + "; ".join(f"{f}: {len(fam_lev[f])}/{len(fam_tasks[f])}" for f in fam_tasks) + f". Rollouts: {sum(int(r.get('rollouts') or 0) for r in nsd)}; uncertified (incl. post-hoc): {sum(r.get('class') == 'UNCERTIFIED' or r.get('certified_by') == 'uncertified_post_hoc' for r in nsd)}; infeasible/not built: {sum(r.get('class') in ('INFEASIBLE', 'NOT_BUILT') for r in nsd)}; confirmed: {sum(bool(r.get('confirmed')) for r in nsd)}.", ""]
     # banks
     L += ["## P4.4 banks", "", f"{json.dumps({k: {kk: vv for kk, vv in v.items() if kk in ('built', 'items', 'items_matched', 'item_types', 'tasks', 'reason', 'matched_items')} for k, v in banks.items()}, indent=1)}", ""]
     # evals / H

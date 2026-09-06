@@ -87,6 +87,7 @@ class Session:
     actions: list[str] = field(default_factory=list)
     blocked: int = 0
     errors: list[str] = field(default_factory=list)
+    ended: bool = False          # set when the STACK reports terminated/truncated (e.g. a T-axis horizon squeeze); bridge.done alone misses it
 
     @property
     def won(self) -> bool:
@@ -94,7 +95,7 @@ class Session:
 
     @property
     def done(self) -> bool:
-        return bool(self.bridge.state.done)
+        return bool(self.bridge.state.done) or self.ended
 
     def expert_next(self) -> str | None:
         info = _unwrap(self.proxy.last_infos)
@@ -111,6 +112,8 @@ class Session:
         blocked = bool((resp.observation.data or {}).get("blocked"))
         if blocked:
             self.blocked += 1
+        if resp.terminated or resp.truncated:
+            self.ended = True
         self.actions.append(text)
         return {"blocked": blocked, "obs": resp.observation.text, "terminated": resp.terminated, "truncated": resp.truncated,
                 "won": bool(self.bridge.state.won), "effective": bool(resp.info.get("effective", True))}

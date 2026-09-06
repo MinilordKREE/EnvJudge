@@ -137,6 +137,8 @@ def main() -> None:
             cand = Candidate(rules_code=h_horizon.rules_code(m), in_env_actions=[], rationale="F_H")
             w, ok, n_w = omega(tid, cand)
             cert = "by_construction" if (L_exp[tid] is not None and L_exp[tid] <= m) else None
+            if cert is None and w is not None and w > 0:
+                cert = "R_pol"       # a verbatim replay of one of the policy's own P1 successes passes in E' (PREREG4: solvable = certified)
             if cert is None:
                 from eobs.replay import open_session, run_expert
                 for _ in range(3):
