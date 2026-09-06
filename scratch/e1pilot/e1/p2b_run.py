@@ -81,7 +81,7 @@ def main() -> None:
     types = {int(r["task_id"]): r["type"] for r in rows}
     print(f"[P2b] targets {targets} (primary {primary}, secondary {secondary})", flush=True)
     succ = defaultdict(list)
-    for t in _traces(WORK / "runs" / "e1_qwen_map" / "traces.jsonl"):
+    for t in _traces(WORK / "runs" / "e1_qwen_map"):   # run DIR (bug fixed after P2b: the file path made pol_wit empty)
         if t.get("success") and not t.get("error"):
             succ[int(t["rollout_seed"])].append([s["raw_action"]["kwargs"].get("text", "") for s in t["steps"]])
     pol_wit = {tid: min(v, key=len) for tid, v in succ.items()}

@@ -1,0 +1,65 @@
+[
+ {
+  "task_id": 7,
+  "env": "p2b-7-F_H-13",
+  "n_trajectories_each": 8,
+  "ctrl_successes": 5,
+  "orig_successes": 8
+ },
+ {
+  "task_id": 12,
+  "env": "p2b-12-F_O-0.875",
+  "n_trajectories_each": 8,
+  "ctrl_successes": 5,
+  "orig_successes": 8
+ },
+ {
+  "task_id": 13,
+  "env": "p2b-13-F_O-0.875",
+  "n_trajectories_each": 8,
+  "ctrl_successes": 3,
+  "orig_successes": 8
+ },
+ {
+  "task_id": 15,
+  "env": "p2b-15-F_O-0.75",
+  "n_trajectories_each": 8,
+  "ctrl_successes": 4,
+  "orig_successes": 8
+ },
+ {
+  "task_id": 19,
+  "env": "p2b-19-F_O-0.75",
+  "n_trajectories_each": 8,
+  "ctrl_successes": 3,
+  "orig_successes": 7
+ },
+ {
+  "task_id": 21,
+  "env": "p2b-21-F_O-0.875",
+  "n_trajectories_each": 8,
+  "ctrl_successes": 5,
+  "orig_successes": 8
+ },
+ {
+  "task_id": 22,
+  "env": "p2b-22-F_O-0.75",
+  "n_trajectories_each": 8,
+  "ctrl_successes": 4,
+  "orig_successes": 8
+ },
+ {
+  "task_id": 23,
+  "env": "p2b-23-F_O-0.75",
+  "n_trajectories_each": 8,
+  "ctrl_successes": 5,
+  "orig_successes": 7
+ },
+ {
+  "task_id": 29,
+  "env": "p2b-29-F_O-0.9688",
+  "n_trajectories_each": 8,
+  "ctrl_successes": 5,
+  "orig_successes": 8
+ }
+]

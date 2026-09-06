@@ -1,0 +1,7 @@
+condition,split,n_tasks,episodes,success,ci_lo,ci_hi,errors
+nobank,eval_in_distribution,30,90,0.444,0.300,0.589,0
+nobank,eval_out_of_distribution,30,90,0.322,0.178,0.478,0
+orig,eval_in_distribution,30,90,0.422,0.256,0.589,0
+orig,eval_out_of_distribution,30,90,0.433,0.267,0.600,0
+orig - nobank (paired per task),eval_in_distribution,30,,-0.022,-0.178,0.144,
+orig - nobank (paired per task),eval_out_of_distribution,30,,0.111,-0.100,0.322,

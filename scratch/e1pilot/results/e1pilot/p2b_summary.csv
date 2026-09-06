@@ -1,0 +1,12 @@
+task_id,type,hit,hit_family,hit_dose,rollouts_to_hit,total_rollouts,F_O,F_H,F_S0p,n_uncertified,n_infeasible,n_post_hoc,lambda_evals,lambda_monotonicity_violations,lambda_curve
+1,pick_clean_then_place_in_recep,False,,,,32,moved,noeffect,noeffect,0,0,0,4,0,0.75:NOEFFECT 0.875:NOEFFECT 0.9375:ZERO 0.9062:NOEFFECT
+2,pick_two_obj_and_place,False,,,,36,moved,none,noeffect,0,1,0,4,0,0.75:OVERSHOOT 0.625:ZERO 0.5625:NOEFFECT 0.5938:NEAR
+7,pick_and_place_simple,True,F_H,13,24,24,noeffect,moved,none,0,0,0,4,0,0.75:NOEFFECT 0.875:NOEFFECT 0.9375:NOEFFECT 0.9688:NOEFFECT
+12,pick_two_obj_and_place,True,F_O,0.875,12,12,moved,none,none,0,0,0,2,0,0.75:NOEFFECT 0.875:IN-BAND
+13,pick_clean_then_place_in_recep,True,F_O,0.875,12,12,moved,none,none,0,0,0,2,0,0.75:NOEFFECT 0.875:IN-BAND
+15,pick_cool_then_place_in_recep,True,F_O,0.75,8,8,moved,none,none,0,0,0,1,0,0.75:IN-BAND
+21,pick_and_place_simple,True,F_O,0.875,12,12,moved,none,none,0,0,0,2,0,0.75:NOEFFECT 0.875:IN-BAND
+22,pick_two_obj_and_place,True,F_O,0.75,8,8,moved,none,none,0,0,1,1,0,0.75:IN-BAND
+24,pick_cool_then_place_in_recep,False,,,,40,moved,noeffect,noeffect,0,0,0,4,0,0.75:NOEFFECT 0.875:NOEFFECT 0.9375:ZERO 0.9062:NOEFFECT
+25,look_at_obj_in_light,False,,,,32,noeffect,noeffect,none,0,1,0,4,0,0.75:NOEFFECT 0.875:NOEFFECT 0.9375:NOEFFECT 0.9688:NOEFFECT
+29,pick_clean_then_place_in_recep,True,F_O,0.9688,20,20,moved,none,none,0,0,0,4,0,0.75:NOEFFECT 0.875:NOEFFECT 0.9375:NOEFFECT 0.9688:IN-BAND
