@@ -69,10 +69,25 @@ def p2_tables() -> dict | None:
             "n_rollouts": sum(int(r.get("rollouts") or 0) for r in rows), "n_tasks": len(summ)}
 
 
+def _header_from_artifacts(prereg_sha: str, cfg_sha: str, led: dict) -> str:
+    """Header derived from the config actually used and the ledger (P4.0 fix: the first version hard-coded DashScope)."""
+    import yaml
+    cfg = yaml.safe_load((ROOT / "configs" / "qwen_map.yaml").read_text())
+    ik = cfg["policy"]["client_kwargs"]["inner_kwargs"]
+    rows = [json.loads(l) for l in (RES / "ledger.jsonl").read_text().splitlines() if l.strip()]
+    qrows = [r for r in rows if "qwen" in str(r.get("model", ""))]
+    providers = sorted({str(r.get("provider")) for r in qrows if r.get("provider")})
+    versions = sorted({str(r.get("pricing_version")) for r in qrows if r.get("pricing_version")})
+    cap = "pilot hard cap USD 115 / soft gate 100 (owner budget updates: 30 → 70/50 → 110/85 → 115/100)"
+    return (f"PREREG3 sha `{prereg_sha}`; qwen_map.yaml sha256 `{cfg_sha}`; policy model `{ik['model']}` at `{ik['api_base']}` "
+            f"(extra_body {json.dumps(ik.get('extra_body'))}); providers seen in the ledger for Qwen rows: {providers}; pricing versions: {versions} (Qwen) / "
+            f"{PRICING_VERSION} (DeepSeek); spend by phase (USD): { {k: round(v, 3) for k, v in led['by_phase'].items()} }; total USD {led['usd']:.2f}; {cap}.")
+
+
 def main(prereg_sha: str, cfg_sha: str) -> None:
     led = ledger_totals(RES / "ledger.jsonl")
     L = [f"# E1-pilot report — generated {time.strftime('%Y-%m-%d %H:%M UTC', time.gmtime())}", "",
-         f"PREREG3 sha `{prereg_sha}`; qwen_map.yaml sha256 `{cfg_sha}`; policy model `openai/qwen3-8b` at `https://dashscope-intl.aliyuncs.com/compatible-mode/v1` (enable_thinking=false); pricing {PRICING_VERSION_QWEN} (Qwen) / {PRICING_VERSION} (DeepSeek); spend by phase (USD): { {k: round(v, 3) for k, v in led['by_phase'].items()} }; total USD {led['usd']:.2f} of the 30 cap.", ""]
+         _header_from_artifacts(prereg_sha, cfg_sha, led), ""]
     # P0
     L += ["## P0 — ΔSR by operator type (E-obs H arm, saturated tasks)", "", "| set | operator | n | tasks | mean SR_c | share SR ≤ 0.6 | share in band | share accepted |", "|---|---|---|---|---|---|---|---|"]
     for r in csv.DictReader(open(RES / "p0_dsr_by_operator.csv")):

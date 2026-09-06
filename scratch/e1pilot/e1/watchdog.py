@@ -12,8 +12,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 LED = ROOT / "results" / "e1pilot" / "ledger.jsonl"
-SOFT = 85.0
-PHASE_CAPS = {"p1_map": 28.0, "p2_dose": 30.0, "p3_skills": 40.0}   # owner budget update (P1-gate decision, then 2026-09-07 update)
+SOFT = 100.0
+PHASE_CAPS = {"p1_map": 28.0, "p2_dose": 30.0, "p3_skills": 40.0, "p4": 70.0}   # owner budget update (P1-gate decision, then 2026-09-07 update)
 IN, OUT = 0.117e-6, 0.455e-6
 
 

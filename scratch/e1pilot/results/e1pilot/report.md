@@ -1,6 +1,6 @@
-# E1-pilot report — generated 2026-09-06 18:48 UTC
+# E1-pilot report — generated 2026-09-06 22:26 UTC
 
-PREREG3 sha `f8080d4`; qwen_map.yaml sha256 `d584098f2d7dfcd5f1152f18c93f595e380916bccabb454fff1100af6f3b5265`; policy model `openai/qwen3-8b` at `https://dashscope-intl.aliyuncs.com/compatible-mode/v1` (enable_thinking=false); pricing dashscope-qwen3-8b-2026-09-06 (Qwen) / deepseek-pricing-2026-09-03 (DeepSeek); spend by phase (USD): {'p1_probe': 0.001, 'p1_map': 21.457, 'p2_dose': 5.197, 'p3_induce': 0.13, 'p3_induce_embed': 0.0, 'p3_skills': 5.714, 'p3_skills_embed': 0.0}; total USD 32.50 of the 30 cap.
+PREREG3 sha `f8080d4`; qwen_map.yaml sha256 `d584098f2d7dfcd5f1152f18c93f595e380916bccabb454fff1100af6f3b5265`; policy model `openai/qwen/qwen3-8b` at `https://openrouter.ai/api/v1` (extra_body {"reasoning": {"enabled": false}, "provider": {"order": ["alibaba"], "allow_fallbacks": false}, "usage": {"include": true}}); providers seen in the ledger for Qwen rows: ['Alibaba']; pricing versions: ['dashscope-qwen3-8b-unverified', 'openrouter-qwen3-8b-2026-09-07'] (Qwen) / deepseek-pricing-2026-09-03 (DeepSeek); spend by phase (USD): {'p1_probe': 0.001, 'p1_map': 21.457, 'p2_dose': 5.197, 'p3_induce': 0.13, 'p3_induce_embed': 0.0, 'p3_skills': 5.714, 'p3_skills_embed': 0.0}; total USD 32.50; pilot hard cap USD 115 / soft gate 100 (owner budget updates: 30 → 70/50 → 110/85 → 115/100).
 
 ## P0 — ΔSR by operator type (E-obs H arm, saturated tasks)
 
