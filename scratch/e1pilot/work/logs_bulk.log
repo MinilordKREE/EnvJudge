@@ -1,0 +1,542 @@
+2026-09-05 23:45:02,425 INFO p1_start  n_tasks=30 k=16 conc=6 phase=p1_map
+2026-09-05 23:45:41,009 INFO rollout_done  iteration_id=baseline-0000 attempt=0 candidate_id=baseline rollout=3 seed=0 duration_ms=38580 success=True reward=1.0 steps=9 error=None
+2026-09-05 23:48:07,421 INFO rollout_done  iteration_id=baseline-0000 attempt=0 candidate_id=baseline rollout=4 seed=0 duration_ms=184992 success=False reward=0.0 steps=50 error=None
+2026-09-05 23:48:08,228 INFO rollout_done  iteration_id=baseline-0000 attempt=0 candidate_id=baseline rollout=5 seed=0 duration_ms=185798 success=False reward=0.0 steps=50 error=None
+2026-09-05 23:48:11,480 INFO rollout_done  iteration_id=baseline-0000 attempt=0 candidate_id=baseline rollout=0 seed=0 duration_ms=189054 success=False reward=0.0 steps=50 error=None
+2026-09-05 23:48:41,356 INFO rollout_done  iteration_id=baseline-0000 attempt=0 candidate_id=baseline rollout=1 seed=0 duration_ms=218929 success=False reward=0.0 steps=50 error=None
+2026-09-05 23:49:33,836 INFO rollout_done  iteration_id=baseline-0000 attempt=0 candidate_id=baseline rollout=2 seed=0 duration_ms=271407 success=False reward=0.0 steps=50 error=None
+2026-09-05 23:50:21,898 INFO rollout_done  iteration_id=baseline-0000 attempt=0 candidate_id=baseline rollout=6 seed=0 duration_ms=280889 success=False reward=0.0 steps=50 error=None
+2026-09-05 23:51:24,481 INFO rollout_done  iteration_id=baseline-0000 attempt=0 candidate_id=baseline rollout=8 seed=0 duration_ms=196252 success=False reward=0.0 steps=50 error=None
+2026-09-05 23:51:28,374 INFO rollout_done  iteration_id=baseline-0000 attempt=0 candidate_id=baseline rollout=7 seed=0 duration_ms=200953 success=False reward=0.0 steps=50 error=None
+2026-09-05 23:51:30,065 INFO rollout_done  iteration_id=baseline-0000 attempt=0 candidate_id=baseline rollout=9 seed=0 duration_ms=198584 success=False reward=0.0 steps=50 error=None
+2026-09-05 23:51:56,549 INFO rollout_done  iteration_id=baseline-0000 attempt=0 candidate_id=baseline rollout=10 seed=0 duration_ms=195193 success=False reward=0.0 steps=50 error=None
+2026-09-05 23:52:39,253 INFO rollout_done  iteration_id=baseline-0000 attempt=0 candidate_id=baseline rollout=11 seed=0 duration_ms=185417 success=False reward=0.0 steps=50 error=None
+2026-09-05 23:54:21,640 INFO rollout_done  iteration_id=baseline-0000 attempt=0 candidate_id=baseline rollout=15 seed=0 duration_ms=171575 success=False reward=0.0 steps=50 error=None
+2026-09-05 23:54:23,362 INFO rollout_done  iteration_id=baseline-0000 attempt=0 candidate_id=baseline rollout=13 seed=0 duration_ms=178881 success=False reward=0.0 steps=50 error=None
+2026-09-05 23:54:24,002 INFO rollout_done  iteration_id=baseline-0000 attempt=0 candidate_id=baseline rollout=12 seed=0 duration_ms=242105 success=False reward=0.0 steps=50 error=None
+2026-09-05 23:55:02,401 INFO rollout_done  iteration_id=baseline-0000 attempt=0 candidate_id=baseline rollout=14 seed=0 duration_ms=214027 success=False reward=0.0 steps=50 error=None
+2026-09-05 23:55:02,417 INFO p1_task_done  task_idx=0 task_id=0 k=16 sr=0.062 n_errors=0 wall_s=600.0
+[P1] task 0: sr=0.062 errors=0 600s
+2026-09-05 23:55:32,123 INFO rollout_done  iteration_id=baseline-0001 attempt=0 candidate_id=baseline rollout=1 seed=1 duration_ms=29704 success=True reward=1.0 steps=9 error=None
+2026-09-05 23:55:32,162 INFO rollout_done  iteration_id=baseline-0001 attempt=0 candidate_id=baseline rollout=0 seed=1 duration_ms=29743 success=True reward=1.0 steps=9 error=None
+2026-09-05 23:55:32,174 INFO rollout_done  iteration_id=baseline-0001 attempt=0 candidate_id=baseline rollout=4 seed=1 duration_ms=29754 success=True reward=1.0 steps=9 error=None
+2026-09-05 23:55:34,627 INFO rollout_done  iteration_id=baseline-0001 attempt=0 candidate_id=baseline rollout=2 seed=1 duration_ms=32207 success=True reward=1.0 steps=9 error=None
+2026-09-05 23:55:35,322 INFO rollout_done  iteration_id=baseline-0001 attempt=0 candidate_id=baseline rollout=3 seed=1 duration_ms=32902 success=True reward=1.0 steps=9 error=None
+2026-09-05 23:55:35,908 INFO rollout_done  iteration_id=baseline-0001 attempt=0 candidate_id=baseline rollout=5 seed=1 duration_ms=33487 success=True reward=1.0 steps=9 error=None
+2026-09-05 23:56:00,623 INFO rollout_done  iteration_id=baseline-0001 attempt=0 candidate_id=baseline rollout=8 seed=1 duration_ms=28448 success=True reward=1.0 steps=9 error=None
+2026-09-05 23:56:01,715 INFO rollout_done  iteration_id=baseline-0001 attempt=0 candidate_id=baseline rollout=6 seed=1 duration_ms=29592 success=True reward=1.0 steps=9 error=None
+2026-09-05 23:56:02,370 INFO rollout_done  iteration_id=baseline-0001 attempt=0 candidate_id=baseline rollout=7 seed=1 duration_ms=30207 success=True reward=1.0 steps=9 error=None
+2026-09-05 23:56:02,474 INFO rollout_done  iteration_id=baseline-0001 attempt=0 candidate_id=baseline rollout=9 seed=1 duration_ms=27847 success=True reward=1.0 steps=9 error=None
+2026-09-05 23:56:02,995 INFO rollout_done  iteration_id=baseline-0001 attempt=0 candidate_id=baseline rollout=10 seed=1 duration_ms=27673 success=True reward=1.0 steps=9 error=None
+2026-09-05 23:56:04,714 INFO rollout_done  iteration_id=baseline-0001 attempt=0 candidate_id=baseline rollout=11 seed=1 duration_ms=28806 success=True reward=1.0 steps=9 error=None
+2026-09-05 23:56:29,262 INFO rollout_done  iteration_id=baseline-0001 attempt=0 candidate_id=baseline rollout=14 seed=1 duration_ms=26893 success=True reward=1.0 steps=9 error=None
+2026-09-05 23:56:29,676 INFO rollout_done  iteration_id=baseline-0001 attempt=0 candidate_id=baseline rollout=15 seed=1 duration_ms=27201 success=True reward=1.0 steps=9 error=None
+2026-09-05 23:56:31,422 INFO rollout_done  iteration_id=baseline-0001 attempt=0 candidate_id=baseline rollout=13 seed=1 duration_ms=29707 success=True reward=1.0 steps=9 error=None
+2026-09-05 23:56:31,556 INFO rollout_done  iteration_id=baseline-0001 attempt=0 candidate_id=baseline rollout=12 seed=1 duration_ms=30932 success=True reward=1.0 steps=9 error=None
+2026-09-05 23:56:31,560 INFO p1_task_done  task_idx=1 task_id=1 k=16 sr=1.0 n_errors=0 wall_s=89.1
+[P1] task 1: sr=1.000 errors=0 89s
+2026-09-05 23:57:12,076 INFO rollout_done  iteration_id=baseline-0002 attempt=0 candidate_id=baseline rollout=0 seed=2 duration_ms=40514 success=True reward=1.0 steps=12 error=None
+2026-09-05 23:57:13,397 INFO rollout_done  iteration_id=baseline-0002 attempt=0 candidate_id=baseline rollout=1 seed=2 duration_ms=41835 success=True reward=1.0 steps=12 error=None
+2026-09-05 23:57:13,513 INFO rollout_done  iteration_id=baseline-0002 attempt=0 candidate_id=baseline rollout=4 seed=2 duration_ms=41950 success=True reward=1.0 steps=12 error=None
+2026-09-05 23:57:13,866 INFO rollout_done  iteration_id=baseline-0002 attempt=0 candidate_id=baseline rollout=3 seed=2 duration_ms=42303 success=True reward=1.0 steps=12 error=None
+2026-09-05 23:57:29,905 INFO rollout_done  iteration_id=baseline-0002 attempt=0 candidate_id=baseline rollout=2 seed=2 duration_ms=58343 success=True reward=1.0 steps=17 error=None
+2026-09-05 23:57:53,240 INFO rollout_done  iteration_id=baseline-0002 attempt=0 candidate_id=baseline rollout=7 seed=2 duration_ms=39843 success=True reward=1.0 steps=12 error=None
+2026-09-05 23:57:53,604 INFO rollout_done  iteration_id=baseline-0002 attempt=0 candidate_id=baseline rollout=9 seed=2 duration_ms=39737 success=True reward=1.0 steps=12 error=None
+2026-09-05 23:57:53,926 INFO rollout_done  iteration_id=baseline-0002 attempt=0 candidate_id=baseline rollout=8 seed=2 duration_ms=40412 success=True reward=1.0 steps=12 error=None
+2026-09-05 23:58:06,817 INFO rollout_done  iteration_id=baseline-0002 attempt=0 candidate_id=baseline rollout=6 seed=2 duration_ms=54740 success=True reward=1.0 steps=17 error=None
+2026-09-05 23:58:12,455 INFO rollout_done  iteration_id=baseline-0002 attempt=0 candidate_id=baseline rollout=10 seed=2 duration_ms=42549 success=True reward=1.0 steps=12 error=None
+2026-09-05 23:58:30,512 INFO rollout_done  iteration_id=baseline-0002 attempt=0 candidate_id=baseline rollout=11 seed=2 duration_ms=37272 success=True reward=1.0 steps=12 error=None
+2026-09-05 23:58:30,796 INFO rollout_done  iteration_id=baseline-0002 attempt=0 candidate_id=baseline rollout=13 seed=2 duration_ms=36870 success=True reward=1.0 steps=12 error=None
+2026-09-05 23:58:32,164 INFO rollout_done  iteration_id=baseline-0002 attempt=0 candidate_id=baseline rollout=12 seed=2 duration_ms=38560 success=True reward=1.0 steps=12 error=None
+2026-09-05 23:58:43,947 INFO rollout_done  iteration_id=baseline-0002 attempt=0 candidate_id=baseline rollout=14 seed=2 duration_ms=37131 success=True reward=1.0 steps=12 error=None
+2026-09-05 23:58:45,533 INFO rollout_done  iteration_id=baseline-0002 attempt=0 candidate_id=baseline rollout=5 seed=2 duration_ms=133970 success=True reward=1.0 steps=48 error=None
+2026-09-05 23:58:50,856 INFO rollout_done  iteration_id=baseline-0002 attempt=0 candidate_id=baseline rollout=15 seed=2 duration_ms=38401 success=True reward=1.0 steps=12 error=None
+2026-09-05 23:58:50,862 INFO p1_task_done  task_idx=2 task_id=2 k=16 sr=1.0 n_errors=0 wall_s=139.3
+[P1] task 2: sr=1.000 errors=0 139s
+2026-09-05 23:59:17,502 INFO rollout_done  iteration_id=baseline-0003 attempt=0 candidate_id=baseline rollout=1 seed=3 duration_ms=26638 success=True reward=1.0 steps=8 error=None
+2026-09-05 23:59:17,943 INFO rollout_done  iteration_id=baseline-0003 attempt=0 candidate_id=baseline rollout=3 seed=3 duration_ms=27077 success=True reward=1.0 steps=8 error=None
+2026-09-05 23:59:17,978 INFO rollout_done  iteration_id=baseline-0003 attempt=0 candidate_id=baseline rollout=4 seed=3 duration_ms=27112 success=True reward=1.0 steps=8 error=None
+2026-09-05 23:59:35,616 INFO rollout_done  iteration_id=baseline-0003 attempt=0 candidate_id=baseline rollout=0 seed=3 duration_ms=44752 success=True reward=1.0 steps=15 error=None
+2026-09-05 23:59:46,417 INFO rollout_done  iteration_id=baseline-0003 attempt=0 candidate_id=baseline rollout=7 seed=3 duration_ms=28474 success=True reward=1.0 steps=8 error=None
+2026-09-05 23:59:46,675 INFO rollout_done  iteration_id=baseline-0003 attempt=0 candidate_id=baseline rollout=8 seed=3 duration_ms=28697 success=True reward=1.0 steps=8 error=None
+2026-09-06 00:00:10,056 INFO rollout_done  iteration_id=baseline-0003 attempt=0 candidate_id=baseline rollout=6 seed=3 duration_ms=52554 success=True reward=1.0 steps=18 error=None
+2026-09-06 00:00:12,803 INFO rollout_done  iteration_id=baseline-0003 attempt=0 candidate_id=baseline rollout=11 seed=3 duration_ms=26128 success=True reward=1.0 steps=8 error=None
+2026-09-06 00:00:14,930 INFO rollout_done  iteration_id=baseline-0003 attempt=0 candidate_id=baseline rollout=10 seed=3 duration_ms=28513 success=True reward=1.0 steps=8 error=None
+2026-09-06 00:00:28,281 INFO rollout_done  iteration_id=baseline-0003 attempt=0 candidate_id=baseline rollout=9 seed=3 duration_ms=52664 success=True reward=1.0 steps=19 error=None
+2026-09-06 00:00:37,491 INFO rollout_done  iteration_id=baseline-0003 attempt=0 candidate_id=baseline rollout=12 seed=3 duration_ms=27434 success=True reward=1.0 steps=8 error=None
+2026-09-06 00:00:42,432 INFO rollout_done  iteration_id=baseline-0003 attempt=0 candidate_id=baseline rollout=13 seed=3 duration_ms=29628 success=True reward=1.0 steps=8 error=None
+2026-09-06 00:00:43,182 INFO rollout_done  iteration_id=baseline-0003 attempt=0 candidate_id=baseline rollout=14 seed=3 duration_ms=28252 success=True reward=1.0 steps=8 error=None
+2026-09-06 00:00:54,020 INFO rollout_done  iteration_id=baseline-0003 attempt=0 candidate_id=baseline rollout=15 seed=3 duration_ms=25739 success=True reward=1.0 steps=8 error=None
+2026-09-06 00:01:26,326 INFO rollout_done  iteration_id=baseline-0003 attempt=0 candidate_id=baseline rollout=5 seed=3 duration_ms=155461 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:01:44,488 INFO rollout_done  iteration_id=baseline-0003 attempt=0 candidate_id=baseline rollout=2 seed=3 duration_ms=173624 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:01:44,494 INFO p1_task_done  task_idx=3 task_id=3 k=16 sr=0.875 n_errors=0 wall_s=173.6
+[P1] task 3: sr=0.875 errors=0 174s
+2026-09-06 00:02:53,362 INFO rollout_done  iteration_id=baseline-0004 attempt=0 candidate_id=baseline rollout=5 seed=4 duration_ms=68864 success=True reward=1.0 steps=21 error=None
+2026-09-06 00:02:56,152 INFO rollout_done  iteration_id=baseline-0004 attempt=0 candidate_id=baseline rollout=4 seed=4 duration_ms=71655 success=True reward=1.0 steps=21 error=None
+2026-09-06 00:03:04,442 INFO rollout_done  iteration_id=baseline-0004 attempt=0 candidate_id=baseline rollout=0 seed=4 duration_ms=79947 success=True reward=1.0 steps=24 error=None
+2026-09-06 00:03:43,445 INFO rollout_done  iteration_id=baseline-0004 attempt=0 candidate_id=baseline rollout=2 seed=4 duration_ms=118949 success=True reward=1.0 steps=32 error=None
+2026-09-06 00:03:46,946 INFO rollout_done  iteration_id=baseline-0004 attempt=0 candidate_id=baseline rollout=1 seed=4 duration_ms=122451 success=True reward=1.0 steps=30 error=None
+2026-09-06 00:04:33,567 INFO rollout_done  iteration_id=baseline-0004 attempt=0 candidate_id=baseline rollout=8 seed=4 duration_ms=89124 success=True reward=1.0 steps=24 error=None
+2026-09-06 00:04:58,924 INFO rollout_done  iteration_id=baseline-0004 attempt=0 candidate_id=baseline rollout=6 seed=4 duration_ms=125561 success=True reward=1.0 steps=33 error=None
+2026-09-06 00:05:03,046 INFO rollout_done  iteration_id=baseline-0004 attempt=0 candidate_id=baseline rollout=3 seed=4 duration_ms=198549 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:05:25,911 INFO rollout_done  iteration_id=baseline-0004 attempt=0 candidate_id=baseline rollout=10 seed=4 duration_ms=98961 success=True reward=1.0 steps=25 error=None
+2026-09-06 00:05:57,164 INFO rollout_done  iteration_id=baseline-0004 attempt=0 candidate_id=baseline rollout=12 seed=4 duration_ms=58240 success=True reward=1.0 steps=17 error=None
+2026-09-06 00:05:58,884 INFO rollout_done  iteration_id=baseline-0004 attempt=0 candidate_id=baseline rollout=7 seed=4 duration_ms=182732 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:06:08,330 INFO rollout_done  iteration_id=baseline-0004 attempt=0 candidate_id=baseline rollout=9 seed=4 duration_ms=144885 success=True reward=1.0 steps=37 error=None
+2026-09-06 00:07:06,623 INFO rollout_done  iteration_id=baseline-0004 attempt=0 candidate_id=baseline rollout=14 seed=4 duration_ms=100715 success=True reward=1.0 steps=28 error=None
+2026-09-06 00:07:24,669 INFO rollout_done  iteration_id=baseline-0004 attempt=0 candidate_id=baseline rollout=15 seed=4 duration_ms=87504 success=True reward=1.0 steps=24 error=None
+2026-09-06 00:07:30,957 INFO rollout_done  iteration_id=baseline-0004 attempt=0 candidate_id=baseline rollout=11 seed=4 duration_ms=177390 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:08:11,636 INFO rollout_done  iteration_id=baseline-0004 attempt=0 candidate_id=baseline rollout=13 seed=4 duration_ms=188590 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:08:11,644 INFO p1_task_done  task_idx=4 task_id=4 k=16 sr=0.75 n_errors=0 wall_s=387.2
+[P1] task 4: sr=0.750 errors=0 387s
+2026-09-06 00:08:52,042 INFO rollout_done  iteration_id=baseline-0005 attempt=0 candidate_id=baseline rollout=5 seed=5 duration_ms=40395 success=True reward=1.0 steps=14 error=None
+2026-09-06 00:09:54,613 INFO rollout_done  iteration_id=baseline-0005 attempt=0 candidate_id=baseline rollout=2 seed=5 duration_ms=102966 success=True reward=1.0 steps=40 error=None
+2026-09-06 00:09:57,095 INFO rollout_done  iteration_id=baseline-0005 attempt=0 candidate_id=baseline rollout=0 seed=5 duration_ms=105448 success=True reward=1.0 steps=39 error=None
+2026-09-06 00:09:57,607 INFO rollout_done  iteration_id=baseline-0005 attempt=0 candidate_id=baseline rollout=3 seed=5 duration_ms=105960 success=True reward=1.0 steps=41 error=None
+2026-09-06 00:09:58,987 INFO rollout_done  iteration_id=baseline-0005 attempt=0 candidate_id=baseline rollout=1 seed=5 duration_ms=107340 success=True reward=1.0 steps=40 error=None
+2026-09-06 00:10:42,878 INFO rollout_done  iteration_id=baseline-0005 attempt=0 candidate_id=baseline rollout=4 seed=5 duration_ms=151231 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:11:06,470 INFO rollout_done  iteration_id=baseline-0005 attempt=0 candidate_id=baseline rollout=6 seed=5 duration_ms=134428 success=True reward=1.0 steps=43 error=None
+2026-09-06 00:11:44,214 INFO rollout_done  iteration_id=baseline-0005 attempt=0 candidate_id=baseline rollout=8 seed=5 duration_ms=107119 success=True reward=1.0 steps=40 error=None
+2026-09-06 00:11:46,305 INFO rollout_done  iteration_id=baseline-0005 attempt=0 candidate_id=baseline rollout=9 seed=5 duration_ms=108697 success=True reward=1.0 steps=40 error=None
+2026-09-06 00:12:26,422 INFO rollout_done  iteration_id=baseline-0005 attempt=0 candidate_id=baseline rollout=7 seed=5 duration_ms=151809 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:12:57,929 INFO rollout_done  iteration_id=baseline-0005 attempt=0 candidate_id=baseline rollout=12 seed=5 duration_ms=111459 success=True reward=1.0 steps=40 error=None
+2026-09-06 00:13:01,784 INFO rollout_done  iteration_id=baseline-0005 attempt=0 candidate_id=baseline rollout=10 seed=5 duration_ms=182797 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:13:15,488 INFO rollout_done  iteration_id=baseline-0005 attempt=0 candidate_id=baseline rollout=11 seed=5 duration_ms=152610 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:13:40,815 INFO rollout_done  iteration_id=baseline-0005 attempt=0 candidate_id=baseline rollout=14 seed=5 duration_ms=114510 success=True reward=1.0 steps=43 error=None
+2026-09-06 00:14:13,502 INFO rollout_done  iteration_id=baseline-0005 attempt=0 candidate_id=baseline rollout=13 seed=5 duration_ms=149288 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:14:54,004 INFO rollout_done  iteration_id=baseline-0005 attempt=0 candidate_id=baseline rollout=15 seed=5 duration_ms=147582 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:14:54,013 INFO p1_task_done  task_idx=5 task_id=5 k=16 sr=0.625 n_errors=0 wall_s=402.4
+[P1] task 5: sr=0.625 errors=0 402s
+2026-09-06 00:15:54,784 INFO rollout_done  iteration_id=baseline-0006 attempt=0 candidate_id=baseline rollout=3 seed=6 duration_ms=60767 success=True reward=1.0 steps=18 error=None
+2026-09-06 00:16:42,293 INFO rollout_done  iteration_id=baseline-0006 attempt=0 candidate_id=baseline rollout=4 seed=6 duration_ms=108276 success=True reward=1.0 steps=29 error=None
+2026-09-06 00:16:50,221 INFO rollout_done  iteration_id=baseline-0006 attempt=0 candidate_id=baseline rollout=1 seed=6 duration_ms=116206 success=True reward=1.0 steps=36 error=None
+2026-09-06 00:17:45,934 INFO rollout_done  iteration_id=baseline-0006 attempt=0 candidate_id=baseline rollout=2 seed=6 duration_ms=171918 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:18:04,790 INFO rollout_done  iteration_id=baseline-0006 attempt=0 candidate_id=baseline rollout=5 seed=6 duration_ms=190772 success=True reward=1.0 steps=50 error=None
+2026-09-06 00:18:14,914 INFO rollout_done  iteration_id=baseline-0006 attempt=0 candidate_id=baseline rollout=0 seed=6 duration_ms=200899 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:18:48,394 INFO rollout_done  iteration_id=baseline-0006 attempt=0 candidate_id=baseline rollout=6 seed=6 duration_ms=173610 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:19:40,844 INFO rollout_done  iteration_id=baseline-0006 attempt=0 candidate_id=baseline rollout=7 seed=6 duration_ms=178551 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:19:44,895 INFO rollout_done  iteration_id=baseline-0006 attempt=0 candidate_id=baseline rollout=8 seed=6 duration_ms=174672 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:19:54,621 INFO rollout_done  iteration_id=baseline-0006 attempt=0 candidate_id=baseline rollout=11 seed=6 duration_ms=99706 success=True reward=1.0 steps=30 error=None
+2026-09-06 00:20:29,439 INFO rollout_done  iteration_id=baseline-0006 attempt=0 candidate_id=baseline rollout=9 seed=6 duration_ms=163505 success=True reward=1.0 steps=44 error=None
+2026-09-06 00:20:39,225 INFO rollout_done  iteration_id=baseline-0006 attempt=0 candidate_id=baseline rollout=10 seed=6 duration_ms=154435 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:21:01,999 INFO rollout_done  iteration_id=baseline-0006 attempt=0 candidate_id=baseline rollout=14 seed=6 duration_ms=77104 success=True reward=1.0 steps=21 error=None
+2026-09-06 00:21:19,891 INFO rollout_done  iteration_id=baseline-0006 attempt=0 candidate_id=baseline rollout=15 seed=6 duration_ms=85270 success=True reward=1.0 steps=24 error=None
+2026-09-06 00:22:06,419 INFO rollout_done  iteration_id=baseline-0006 attempt=0 candidate_id=baseline rollout=12 seed=6 duration_ms=198025 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:22:52,701 INFO rollout_done  iteration_id=baseline-0006 attempt=0 candidate_id=baseline rollout=13 seed=6 duration_ms=191857 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:22:52,711 INFO p1_task_done  task_idx=6 task_id=6 k=16 sr=0.5 n_errors=0 wall_s=478.7
+[P1] task 6: sr=0.500 errors=0 479s
+2026-09-06 00:23:12,894 INFO rollout_done  iteration_id=baseline-0007 attempt=0 candidate_id=baseline rollout=1 seed=7 duration_ms=20181 success=True reward=1.0 steps=6 error=None
+2026-09-06 00:23:15,903 INFO rollout_done  iteration_id=baseline-0007 attempt=0 candidate_id=baseline rollout=2 seed=7 duration_ms=23190 success=True reward=1.0 steps=7 error=None
+2026-09-06 00:23:31,811 INFO rollout_done  iteration_id=baseline-0007 attempt=0 candidate_id=baseline rollout=7 seed=7 duration_ms=15907 success=True reward=1.0 steps=5 error=None
+2026-09-06 00:23:31,830 INFO rollout_done  iteration_id=baseline-0007 attempt=0 candidate_id=baseline rollout=4 seed=7 duration_ms=39115 success=True reward=1.0 steps=14 error=None
+2026-09-06 00:23:43,742 INFO rollout_done  iteration_id=baseline-0007 attempt=0 candidate_id=baseline rollout=5 seed=7 duration_ms=51026 success=True reward=1.0 steps=19 error=None
+2026-09-06 00:23:44,191 INFO rollout_done  iteration_id=baseline-0007 attempt=0 candidate_id=baseline rollout=0 seed=7 duration_ms=51478 success=True reward=1.0 steps=19 error=None
+2026-09-06 00:23:47,630 INFO rollout_done  iteration_id=baseline-0007 attempt=0 candidate_id=baseline rollout=8 seed=7 duration_ms=15819 success=True reward=1.0 steps=5 error=None
+2026-09-06 00:23:50,622 INFO rollout_done  iteration_id=baseline-0007 attempt=0 candidate_id=baseline rollout=3 seed=7 duration_ms=57907 success=True reward=1.0 steps=22 error=None
+2026-09-06 00:23:52,459 INFO rollout_done  iteration_id=baseline-0007 attempt=0 candidate_id=baseline rollout=9 seed=7 duration_ms=20629 success=True reward=1.0 steps=7 error=None
+2026-09-06 00:24:04,615 INFO rollout_done  iteration_id=baseline-0007 attempt=0 candidate_id=baseline rollout=12 seed=7 duration_ms=16984 success=True reward=1.0 steps=5 error=None
+2026-09-06 00:24:04,746 INFO rollout_done  iteration_id=baseline-0007 attempt=0 candidate_id=baseline rollout=10 seed=7 duration_ms=21004 success=True reward=1.0 steps=7 error=None
+2026-09-06 00:24:05,435 INFO rollout_done  iteration_id=baseline-0007 attempt=0 candidate_id=baseline rollout=6 seed=7 duration_ms=52541 success=True reward=1.0 steps=21 error=None
+2026-09-06 00:24:06,896 INFO rollout_done  iteration_id=baseline-0007 attempt=0 candidate_id=baseline rollout=13 seed=7 duration_ms=16274 success=True reward=1.0 steps=5 error=None
+2026-09-06 00:24:08,919 INFO rollout_done  iteration_id=baseline-0007 attempt=0 candidate_id=baseline rollout=14 seed=7 duration_ms=16460 success=True reward=1.0 steps=5 error=None
+2026-09-06 00:24:22,406 INFO rollout_done  iteration_id=baseline-0007 attempt=0 candidate_id=baseline rollout=11 seed=7 duration_ms=38215 success=True reward=1.0 steps=14 error=None
+2026-09-06 00:24:23,068 INFO rollout_done  iteration_id=baseline-0007 attempt=0 candidate_id=baseline rollout=15 seed=7 duration_ms=18453 success=True reward=1.0 steps=6 error=None
+2026-09-06 00:24:23,071 INFO p1_task_done  task_idx=7 task_id=7 k=16 sr=1.0 n_errors=0 wall_s=90.4
+[P1] task 7: sr=1.000 errors=0 90s
+2026-09-06 00:26:27,522 INFO rollout_done  iteration_id=baseline-0008 attempt=0 candidate_id=baseline rollout=2 seed=8 duration_ms=124449 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:26:31,964 INFO rollout_done  iteration_id=baseline-0008 attempt=0 candidate_id=baseline rollout=3 seed=8 duration_ms=128890 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:26:34,251 INFO rollout_done  iteration_id=baseline-0008 attempt=0 candidate_id=baseline rollout=1 seed=8 duration_ms=131179 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:26:42,624 INFO rollout_done  iteration_id=baseline-0008 attempt=0 candidate_id=baseline rollout=0 seed=8 duration_ms=139552 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:26:45,868 INFO rollout_done  iteration_id=baseline-0008 attempt=0 candidate_id=baseline rollout=5 seed=8 duration_ms=142792 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:27:00,352 INFO rollout_done  iteration_id=baseline-0008 attempt=0 candidate_id=baseline rollout=4 seed=8 duration_ms=157278 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:28:45,697 INFO rollout_done  iteration_id=baseline-0008 attempt=0 candidate_id=baseline rollout=8 seed=8 duration_ms=131445 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:28:53,759 INFO rollout_done  iteration_id=baseline-0008 attempt=0 candidate_id=baseline rollout=6 seed=8 duration_ms=146236 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:28:54,419 INFO rollout_done  iteration_id=baseline-0008 attempt=0 candidate_id=baseline rollout=11 seed=8 duration_ms=114066 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:28:54,532 INFO rollout_done  iteration_id=baseline-0008 attempt=0 candidate_id=baseline rollout=9 seed=8 duration_ms=131907 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:29:08,219 INFO rollout_done  iteration_id=baseline-0008 attempt=0 candidate_id=baseline rollout=10 seed=8 duration_ms=142350 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:29:10,320 INFO rollout_done  iteration_id=baseline-0008 attempt=0 candidate_id=baseline rollout=7 seed=8 duration_ms=158356 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:30:48,274 INFO rollout_done  iteration_id=baseline-0008 attempt=0 candidate_id=baseline rollout=14 seed=8 duration_ms=113855 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:30:50,131 INFO rollout_done  iteration_id=baseline-0008 attempt=0 candidate_id=baseline rollout=15 seed=8 duration_ms=115599 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:31:04,126 INFO rollout_done  iteration_id=baseline-0008 attempt=0 candidate_id=baseline rollout=13 seed=8 duration_ms=130367 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:31:04,556 INFO rollout_done  iteration_id=baseline-0008 attempt=0 candidate_id=baseline rollout=12 seed=8 duration_ms=138859 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:31:04,565 INFO p1_task_done  task_idx=8 task_id=8 k=16 sr=0.0 n_errors=0 wall_s=401.5
+[P1] task 8: sr=0.000 errors=0 401s
+2026-09-06 00:33:27,762 INFO rollout_done  iteration_id=baseline-0009 attempt=0 candidate_id=baseline rollout=3 seed=9 duration_ms=143193 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:33:27,913 INFO rollout_done  iteration_id=baseline-0009 attempt=0 candidate_id=baseline rollout=4 seed=9 duration_ms=143344 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:33:28,170 INFO rollout_done  iteration_id=baseline-0009 attempt=0 candidate_id=baseline rollout=1 seed=9 duration_ms=143603 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:33:41,916 INFO rollout_done  iteration_id=baseline-0009 attempt=0 candidate_id=baseline rollout=2 seed=9 duration_ms=157348 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:33:42,627 INFO rollout_done  iteration_id=baseline-0009 attempt=0 candidate_id=baseline rollout=0 seed=9 duration_ms=158060 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:33:56,957 INFO rollout_done  iteration_id=baseline-0009 attempt=0 candidate_id=baseline rollout=5 seed=9 duration_ms=172386 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:35:53,463 INFO rollout_done  iteration_id=baseline-0009 attempt=0 candidate_id=baseline rollout=7 seed=9 duration_ms=145549 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:35:59,417 INFO rollout_done  iteration_id=baseline-0009 attempt=0 candidate_id=baseline rollout=8 seed=9 duration_ms=151246 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:36:02,875 INFO rollout_done  iteration_id=baseline-0009 attempt=0 candidate_id=baseline rollout=6 seed=9 duration_ms=155114 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:36:13,059 INFO rollout_done  iteration_id=baseline-0009 attempt=0 candidate_id=baseline rollout=10 seed=9 duration_ms=150431 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:36:18,507 INFO rollout_done  iteration_id=baseline-0009 attempt=0 candidate_id=baseline rollout=9 seed=9 duration_ms=156591 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:36:30,508 INFO rollout_done  iteration_id=baseline-0009 attempt=0 candidate_id=baseline rollout=11 seed=9 duration_ms=153552 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:38:12,794 INFO rollout_done  iteration_id=baseline-0009 attempt=0 candidate_id=baseline rollout=13 seed=9 duration_ms=133377 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:38:22,438 INFO rollout_done  iteration_id=baseline-0009 attempt=0 candidate_id=baseline rollout=12 seed=9 duration_ms=148976 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:38:26,068 INFO rollout_done  iteration_id=baseline-0009 attempt=0 candidate_id=baseline rollout=14 seed=9 duration_ms=143192 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:38:42,465 INFO rollout_done  iteration_id=baseline-0009 attempt=0 candidate_id=baseline rollout=15 seed=9 duration_ms=149407 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:38:42,480 INFO p1_task_done  task_idx=9 task_id=9 k=16 sr=0.0 n_errors=0 wall_s=457.9
+[P1] task 9: sr=0.000 errors=0 458s
+2026-09-06 00:42:30,801 INFO rollout_done  iteration_id=baseline-0010 attempt=0 candidate_id=baseline rollout=4 seed=10 duration_ms=228312 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:42:38,635 INFO rollout_done  iteration_id=baseline-0010 attempt=0 candidate_id=baseline rollout=2 seed=10 duration_ms=236150 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:42:47,892 INFO rollout_done  iteration_id=baseline-0010 attempt=0 candidate_id=baseline rollout=3 seed=10 duration_ms=245405 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:42:57,185 INFO rollout_done  iteration_id=baseline-0010 attempt=0 candidate_id=baseline rollout=1 seed=10 duration_ms=254702 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:43:16,661 INFO rollout_done  iteration_id=baseline-0010 attempt=0 candidate_id=baseline rollout=5 seed=10 duration_ms=274171 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:43:33,709 INFO rollout_done  iteration_id=baseline-0010 attempt=0 candidate_id=baseline rollout=0 seed=10 duration_ms=291226 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:46:24,117 INFO rollout_done  iteration_id=baseline-0010 attempt=0 candidate_id=baseline rollout=7 seed=10 duration_ms=225480 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:46:32,434 INFO rollout_done  iteration_id=baseline-0010 attempt=0 candidate_id=baseline rollout=8 seed=10 duration_ms=224542 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:47:02,145 INFO rollout_done  iteration_id=baseline-0010 attempt=0 candidate_id=baseline rollout=9 seed=10 duration_ms=244959 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:47:11,626 INFO rollout_done  iteration_id=baseline-0010 attempt=0 candidate_id=baseline rollout=6 seed=10 duration_ms=280825 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:47:22,186 INFO rollout_done  iteration_id=baseline-0010 attempt=0 candidate_id=baseline rollout=10 seed=10 duration_ms=245527 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:47:58,743 INFO rollout_done  iteration_id=baseline-0010 attempt=0 candidate_id=baseline rollout=11 seed=10 duration_ms=265035 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:49:58,462 INFO rollout_done  iteration_id=baseline-0010 attempt=0 candidate_id=baseline rollout=12 seed=10 duration_ms=214346 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:50:48,577 INFO rollout_done  iteration_id=baseline-0010 attempt=0 candidate_id=baseline rollout=13 seed=10 duration_ms=256141 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:51:09,486 INFO rollout_done  iteration_id=baseline-0010 attempt=0 candidate_id=baseline rollout=14 seed=10 duration_ms=247341 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:51:42,712 INFO rollout_done  iteration_id=baseline-0010 attempt=0 candidate_id=baseline rollout=15 seed=10 duration_ms=271087 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:51:42,764 INFO p1_task_done  task_idx=10 task_id=10 k=16 sr=0.0 n_errors=0 wall_s=780.3
+[P1] task 10: sr=0.000 errors=0 780s
+2026-09-06 00:54:59,526 INFO rollout_done  iteration_id=baseline-0011 attempt=0 candidate_id=baseline rollout=4 seed=11 duration_ms=196749 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:55:00,868 INFO rollout_done  iteration_id=baseline-0011 attempt=0 candidate_id=baseline rollout=2 seed=11 duration_ms=198096 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:55:03,933 INFO rollout_done  iteration_id=baseline-0011 attempt=0 candidate_id=baseline rollout=5 seed=11 duration_ms=201153 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:55:08,840 INFO rollout_done  iteration_id=baseline-0011 attempt=0 candidate_id=baseline rollout=3 seed=11 duration_ms=206064 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:55:20,001 INFO rollout_done  iteration_id=baseline-0011 attempt=0 candidate_id=baseline rollout=0 seed=11 duration_ms=217234 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:55:20,483 INFO rollout_done  iteration_id=baseline-0011 attempt=0 candidate_id=baseline rollout=1 seed=11 duration_ms=217714 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:58:03,801 INFO rollout_done  iteration_id=baseline-0011 attempt=0 candidate_id=baseline rollout=6 seed=11 duration_ms=184274 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:58:18,778 INFO rollout_done  iteration_id=baseline-0011 attempt=0 candidate_id=baseline rollout=9 seed=11 duration_ms=189938 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:58:24,548 INFO rollout_done  iteration_id=baseline-0011 attempt=0 candidate_id=baseline rollout=8 seed=11 duration_ms=200614 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:58:25,315 INFO rollout_done  iteration_id=baseline-0011 attempt=0 candidate_id=baseline rollout=7 seed=11 duration_ms=204446 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:58:48,855 INFO rollout_done  iteration_id=baseline-0011 attempt=0 candidate_id=baseline rollout=11 seed=11 duration_ms=208372 success=False reward=0.0 steps=50 error=None
+2026-09-06 00:58:55,450 INFO rollout_done  iteration_id=baseline-0011 attempt=0 candidate_id=baseline rollout=10 seed=11 duration_ms=215449 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:00:55,068 INFO rollout_done  iteration_id=baseline-0011 attempt=0 candidate_id=baseline rollout=15 seed=11 duration_ms=149754 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:01:15,902 INFO rollout_done  iteration_id=baseline-0011 attempt=0 candidate_id=baseline rollout=12 seed=11 duration_ms=192102 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:01:31,800 INFO rollout_done  iteration_id=baseline-0011 attempt=0 candidate_id=baseline rollout=14 seed=11 duration_ms=187254 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:02:05,912 INFO rollout_done  iteration_id=baseline-0011 attempt=0 candidate_id=baseline rollout=13 seed=11 duration_ms=227134 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:02:05,941 INFO p1_task_done  task_idx=11 task_id=11 k=16 sr=0.0 n_errors=0 wall_s=623.2
+[P1] task 11: sr=0.000 errors=0 623s
+2026-09-06 01:02:36,508 INFO rollout_done  iteration_id=baseline-0012 attempt=0 candidate_id=baseline rollout=2 seed=12 duration_ms=30561 success=True reward=1.0 steps=8 error=None
+2026-09-06 01:02:36,646 INFO rollout_done  iteration_id=baseline-0012 attempt=0 candidate_id=baseline rollout=5 seed=12 duration_ms=30695 success=True reward=1.0 steps=8 error=None
+2026-09-06 01:02:47,046 INFO rollout_done  iteration_id=baseline-0012 attempt=0 candidate_id=baseline rollout=1 seed=12 duration_ms=41098 success=True reward=1.0 steps=12 error=None
+2026-09-06 01:02:47,372 INFO rollout_done  iteration_id=baseline-0012 attempt=0 candidate_id=baseline rollout=0 seed=12 duration_ms=41426 success=True reward=1.0 steps=12 error=None
+2026-09-06 01:02:47,445 INFO rollout_done  iteration_id=baseline-0012 attempt=0 candidate_id=baseline rollout=3 seed=12 duration_ms=41497 success=True reward=1.0 steps=12 error=None
+2026-09-06 01:02:48,239 INFO rollout_done  iteration_id=baseline-0012 attempt=0 candidate_id=baseline rollout=4 seed=12 duration_ms=42289 success=True reward=1.0 steps=12 error=None
+2026-09-06 01:03:14,197 INFO rollout_done  iteration_id=baseline-0012 attempt=0 candidate_id=baseline rollout=7 seed=12 duration_ms=37549 success=True reward=1.0 steps=12 error=None
+2026-09-06 01:03:14,885 INFO rollout_done  iteration_id=baseline-0012 attempt=0 candidate_id=baseline rollout=6 seed=12 duration_ms=38376 success=True reward=1.0 steps=12 error=None
+2026-09-06 01:03:26,148 INFO rollout_done  iteration_id=baseline-0012 attempt=0 candidate_id=baseline rollout=8 seed=12 duration_ms=39102 success=True reward=1.0 steps=12 error=None
+2026-09-06 01:03:26,366 INFO rollout_done  iteration_id=baseline-0012 attempt=0 candidate_id=baseline rollout=10 seed=12 duration_ms=38920 success=True reward=1.0 steps=12 error=None
+2026-09-06 01:03:26,471 INFO rollout_done  iteration_id=baseline-0012 attempt=0 candidate_id=baseline rollout=9 seed=12 duration_ms=39100 success=True reward=1.0 steps=12 error=None
+2026-09-06 01:03:29,574 INFO rollout_done  iteration_id=baseline-0012 attempt=0 candidate_id=baseline rollout=11 seed=12 duration_ms=41336 success=True reward=1.0 steps=12 error=None
+2026-09-06 01:03:52,069 INFO rollout_done  iteration_id=baseline-0012 attempt=0 candidate_id=baseline rollout=12 seed=12 duration_ms=37874 success=True reward=1.0 steps=12 error=None
+2026-09-06 01:03:52,787 INFO rollout_done  iteration_id=baseline-0012 attempt=0 candidate_id=baseline rollout=13 seed=12 duration_ms=37903 success=True reward=1.0 steps=12 error=None
+2026-09-06 01:04:03,729 INFO rollout_done  iteration_id=baseline-0012 attempt=0 candidate_id=baseline rollout=15 seed=12 duration_ms=37362 success=True reward=1.0 steps=12 error=None
+2026-09-06 01:04:03,884 INFO rollout_done  iteration_id=baseline-0012 attempt=0 candidate_id=baseline rollout=14 seed=12 duration_ms=37738 success=True reward=1.0 steps=12 error=None
+2026-09-06 01:04:03,899 INFO p1_task_done  task_idx=12 task_id=12 k=16 sr=1.0 n_errors=0 wall_s=118.0
+[P1] task 12: sr=1.000 errors=0 118s
+2026-09-06 01:05:06,088 INFO rollout_done  iteration_id=baseline-0013 attempt=0 candidate_id=baseline rollout=2 seed=13 duration_ms=62182 success=True reward=1.0 steps=18 error=None
+2026-09-06 01:05:06,143 INFO rollout_done  iteration_id=baseline-0013 attempt=0 candidate_id=baseline rollout=3 seed=13 duration_ms=62235 success=True reward=1.0 steps=18 error=None
+2026-09-06 01:05:29,632 INFO rollout_done  iteration_id=baseline-0013 attempt=0 candidate_id=baseline rollout=0 seed=13 duration_ms=85729 success=True reward=1.0 steps=31 error=None
+2026-09-06 01:05:30,955 INFO rollout_done  iteration_id=baseline-0013 attempt=0 candidate_id=baseline rollout=1 seed=13 duration_ms=87051 success=True reward=1.0 steps=30 error=None
+2026-09-06 01:05:32,212 INFO rollout_done  iteration_id=baseline-0013 attempt=0 candidate_id=baseline rollout=5 seed=13 duration_ms=88301 success=True reward=1.0 steps=30 error=None
+2026-09-06 01:05:32,791 INFO rollout_done  iteration_id=baseline-0013 attempt=0 candidate_id=baseline rollout=4 seed=13 duration_ms=88882 success=True reward=1.0 steps=30 error=None
+2026-09-06 01:06:28,517 INFO rollout_done  iteration_id=baseline-0013 attempt=0 candidate_id=baseline rollout=7 seed=13 duration_ms=82372 success=True reward=1.0 steps=30 error=None
+2026-09-06 01:06:28,880 INFO rollout_done  iteration_id=baseline-0013 attempt=0 candidate_id=baseline rollout=10 seed=13 duration_ms=56667 success=True reward=1.0 steps=18 error=None
+2026-09-06 01:06:29,425 INFO rollout_done  iteration_id=baseline-0013 attempt=0 candidate_id=baseline rollout=6 seed=13 duration_ms=83336 success=True reward=1.0 steps=30 error=None
+2026-09-06 01:06:44,794 INFO rollout_done  iteration_id=baseline-0013 attempt=0 candidate_id=baseline rollout=8 seed=13 duration_ms=75160 success=True reward=1.0 steps=30 error=None
+2026-09-06 01:06:51,965 INFO rollout_done  iteration_id=baseline-0013 attempt=0 candidate_id=baseline rollout=11 seed=13 duration_ms=79174 success=True reward=1.0 steps=30 error=None
+2026-09-06 01:06:51,967 INFO rollout_done  iteration_id=baseline-0013 attempt=0 candidate_id=baseline rollout=9 seed=13 duration_ms=81013 success=True reward=1.0 steps=30 error=None
+2026-09-06 01:07:24,353 INFO rollout_done  iteration_id=baseline-0013 attempt=0 candidate_id=baseline rollout=14 seed=13 duration_ms=54930 success=True reward=1.0 steps=18 error=None
+2026-09-06 01:07:48,815 INFO rollout_done  iteration_id=baseline-0013 attempt=0 candidate_id=baseline rollout=13 seed=13 duration_ms=79936 success=True reward=1.0 steps=30 error=None
+2026-09-06 01:07:49,132 INFO rollout_done  iteration_id=baseline-0013 attempt=0 candidate_id=baseline rollout=12 seed=13 duration_ms=80617 success=True reward=1.0 steps=30 error=None
+2026-09-06 01:08:01,681 INFO rollout_done  iteration_id=baseline-0013 attempt=0 candidate_id=baseline rollout=15 seed=13 duration_ms=76889 success=True reward=1.0 steps=30 error=None
+2026-09-06 01:08:01,704 INFO p1_task_done  task_idx=13 task_id=13 k=16 sr=1.0 n_errors=0 wall_s=237.8
+[P1] task 13: sr=1.000 errors=0 238s
+2026-09-06 01:10:44,434 INFO rollout_done  iteration_id=baseline-0014 attempt=0 candidate_id=baseline rollout=0 seed=14 duration_ms=162727 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:10:49,784 INFO rollout_done  iteration_id=baseline-0014 attempt=0 candidate_id=baseline rollout=3 seed=14 duration_ms=168075 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:10:51,470 INFO rollout_done  iteration_id=baseline-0014 attempt=0 candidate_id=baseline rollout=5 seed=14 duration_ms=169759 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:10:56,350 INFO rollout_done  iteration_id=baseline-0014 attempt=0 candidate_id=baseline rollout=1 seed=14 duration_ms=174643 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:10:57,487 INFO rollout_done  iteration_id=baseline-0014 attempt=0 candidate_id=baseline rollout=2 seed=14 duration_ms=175780 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:10:58,899 INFO rollout_done  iteration_id=baseline-0014 attempt=0 candidate_id=baseline rollout=4 seed=14 duration_ms=177190 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:13:18,664 INFO rollout_done  iteration_id=baseline-0014 attempt=0 candidate_id=baseline rollout=6 seed=14 duration_ms=154229 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:13:42,836 INFO rollout_done  iteration_id=baseline-0014 attempt=0 candidate_id=baseline rollout=10 seed=14 duration_ms=165348 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:13:49,560 INFO rollout_done  iteration_id=baseline-0014 attempt=0 candidate_id=baseline rollout=9 seed=14 duration_ms=173208 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:13:51,852 INFO rollout_done  iteration_id=baseline-0014 attempt=0 candidate_id=baseline rollout=11 seed=14 duration_ms=172952 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:13:52,477 INFO rollout_done  iteration_id=baseline-0014 attempt=0 candidate_id=baseline rollout=7 seed=14 duration_ms=182694 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:13:55,265 INFO rollout_done  iteration_id=baseline-0014 attempt=0 candidate_id=baseline rollout=8 seed=14 duration_ms=183796 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:16:08,738 INFO rollout_done  iteration_id=baseline-0014 attempt=0 candidate_id=baseline rollout=12 seed=14 duration_ms=170075 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:16:29,919 INFO rollout_done  iteration_id=baseline-0014 attempt=0 candidate_id=baseline rollout=13 seed=14 duration_ms=167083 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:16:39,013 INFO rollout_done  iteration_id=baseline-0014 attempt=0 candidate_id=baseline rollout=15 seed=14 duration_ms=167161 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:16:41,441 INFO rollout_done  iteration_id=baseline-0014 attempt=0 candidate_id=baseline rollout=14 seed=14 duration_ms=171883 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:16:41,467 INFO p1_task_done  task_idx=14 task_id=14 k=16 sr=0.0 n_errors=0 wall_s=519.8
+[P1] task 14: sr=0.000 errors=0 520s
+2026-09-06 01:17:42,379 INFO rollout_done  iteration_id=baseline-0015 attempt=0 candidate_id=baseline rollout=0 seed=15 duration_ms=60908 success=True reward=1.0 steps=18 error=None
+2026-09-06 01:17:42,711 INFO rollout_done  iteration_id=baseline-0015 attempt=0 candidate_id=baseline rollout=2 seed=15 duration_ms=61238 success=True reward=1.0 steps=18 error=None
+2026-09-06 01:17:43,145 INFO rollout_done  iteration_id=baseline-0015 attempt=0 candidate_id=baseline rollout=1 seed=15 duration_ms=61674 success=True reward=1.0 steps=18 error=None
+2026-09-06 01:17:43,594 INFO rollout_done  iteration_id=baseline-0015 attempt=0 candidate_id=baseline rollout=4 seed=15 duration_ms=62120 success=True reward=1.0 steps=18 error=None
+2026-09-06 01:17:51,599 INFO rollout_done  iteration_id=baseline-0015 attempt=0 candidate_id=baseline rollout=5 seed=15 duration_ms=70125 success=True reward=1.0 steps=23 error=None
+2026-09-06 01:18:11,181 INFO rollout_done  iteration_id=baseline-0015 attempt=0 candidate_id=baseline rollout=3 seed=15 duration_ms=89708 success=True reward=1.0 steps=29 error=None
+2026-09-06 01:18:39,150 INFO rollout_done  iteration_id=baseline-0015 attempt=0 candidate_id=baseline rollout=6 seed=15 duration_ms=56771 success=True reward=1.0 steps=18 error=None
+2026-09-06 01:18:41,798 INFO rollout_done  iteration_id=baseline-0015 attempt=0 candidate_id=baseline rollout=9 seed=15 duration_ms=58204 success=True reward=1.0 steps=18 error=None
+2026-09-06 01:18:43,222 INFO rollout_done  iteration_id=baseline-0015 attempt=0 candidate_id=baseline rollout=8 seed=15 duration_ms=60077 success=True reward=1.0 steps=18 error=None
+2026-09-06 01:18:52,784 INFO rollout_done  iteration_id=baseline-0015 attempt=0 candidate_id=baseline rollout=10 seed=15 duration_ms=61184 success=True reward=1.0 steps=18 error=None
+2026-09-06 01:18:52,817 INFO rollout_done  iteration_id=baseline-0015 attempt=0 candidate_id=baseline rollout=7 seed=15 duration_ms=70108 success=True reward=1.0 steps=19 error=None
+2026-09-06 01:19:10,578 INFO rollout_done  iteration_id=baseline-0015 attempt=0 candidate_id=baseline rollout=11 seed=15 duration_ms=59398 success=True reward=1.0 steps=18 error=None
+2026-09-06 01:19:36,864 INFO rollout_done  iteration_id=baseline-0015 attempt=0 candidate_id=baseline rollout=12 seed=15 duration_ms=57714 success=True reward=1.0 steps=18 error=None
+2026-09-06 01:19:45,116 INFO rollout_done  iteration_id=baseline-0015 attempt=0 candidate_id=baseline rollout=14 seed=15 duration_ms=61894 success=True reward=1.0 steps=19 error=None
+2026-09-06 01:19:51,498 INFO rollout_done  iteration_id=baseline-0015 attempt=0 candidate_id=baseline rollout=15 seed=15 duration_ms=58715 success=True reward=1.0 steps=19 error=None
+2026-09-06 01:19:57,508 INFO rollout_done  iteration_id=baseline-0015 attempt=0 candidate_id=baseline rollout=13 seed=15 duration_ms=75710 success=True reward=1.0 steps=27 error=None
+2026-09-06 01:19:57,521 INFO p1_task_done  task_idx=15 task_id=15 k=16 sr=1.0 n_errors=0 wall_s=196.1
+[P1] task 15: sr=1.000 errors=0 196s
+2026-09-06 01:21:22,898 INFO rollout_done  iteration_id=baseline-0016 attempt=0 candidate_id=baseline rollout=1 seed=16 duration_ms=85373 success=True reward=1.0 steps=30 error=None
+2026-09-06 01:22:01,591 INFO rollout_done  iteration_id=baseline-0016 attempt=0 candidate_id=baseline rollout=4 seed=16 duration_ms=124064 success=True reward=1.0 steps=39 error=None
+2026-09-06 01:22:15,151 INFO rollout_done  iteration_id=baseline-0016 attempt=0 candidate_id=baseline rollout=2 seed=16 duration_ms=137625 success=True reward=1.0 steps=41 error=None
+2026-09-06 01:22:22,249 INFO rollout_done  iteration_id=baseline-0016 attempt=0 candidate_id=baseline rollout=3 seed=16 duration_ms=144722 success=True reward=1.0 steps=42 error=None
+2026-09-06 01:22:30,729 INFO rollout_done  iteration_id=baseline-0016 attempt=0 candidate_id=baseline rollout=0 seed=16 duration_ms=153204 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:22:49,962 INFO rollout_done  iteration_id=baseline-0016 attempt=0 candidate_id=baseline rollout=6 seed=16 duration_ms=87064 success=True reward=1.0 steps=29 error=None
+2026-09-06 01:22:51,415 INFO rollout_done  iteration_id=baseline-0016 attempt=0 candidate_id=baseline rollout=5 seed=16 duration_ms=173888 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:24:09,250 INFO rollout_done  iteration_id=baseline-0016 attempt=0 candidate_id=baseline rollout=7 seed=16 duration_ms=127658 success=True reward=1.0 steps=40 error=None
+2026-09-06 01:24:17,995 INFO rollout_done  iteration_id=baseline-0016 attempt=0 candidate_id=baseline rollout=11 seed=16 duration_ms=88032 success=True reward=1.0 steps=29 error=None
+2026-09-06 01:24:54,260 INFO rollout_done  iteration_id=baseline-0016 attempt=0 candidate_id=baseline rollout=9 seed=16 duration_ms=152008 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:24:54,671 INFO rollout_done  iteration_id=baseline-0016 attempt=0 candidate_id=baseline rollout=8 seed=16 duration_ms=159521 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:25:24,778 INFO rollout_done  iteration_id=baseline-0016 attempt=0 candidate_id=baseline rollout=10 seed=16 duration_ms=174049 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:25:35,042 INFO rollout_done  iteration_id=baseline-0016 attempt=0 candidate_id=baseline rollout=12 seed=16 duration_ms=163628 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:25:56,246 INFO rollout_done  iteration_id=baseline-0016 attempt=0 candidate_id=baseline rollout=14 seed=16 duration_ms=98252 success=True reward=1.0 steps=33 error=None
+2026-09-06 01:27:03,618 INFO rollout_done  iteration_id=baseline-0016 attempt=0 candidate_id=baseline rollout=13 seed=16 duration_ms=174369 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:27:21,446 INFO rollout_done  iteration_id=baseline-0016 attempt=0 candidate_id=baseline rollout=15 seed=16 duration_ms=147189 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:27:21,471 INFO p1_task_done  task_idx=16 task_id=16 k=16 sr=0.5 n_errors=0 wall_s=443.9
+[P1] task 16: sr=0.500 errors=0 444s
+2026-09-06 01:29:47,328 INFO rollout_done  iteration_id=baseline-0017 attempt=0 candidate_id=baseline rollout=1 seed=17 duration_ms=145851 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:29:51,574 INFO rollout_done  iteration_id=baseline-0017 attempt=0 candidate_id=baseline rollout=3 seed=17 duration_ms=150096 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:30:00,317 INFO rollout_done  iteration_id=baseline-0017 attempt=0 candidate_id=baseline rollout=5 seed=17 duration_ms=158836 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:30:14,280 INFO rollout_done  iteration_id=baseline-0017 attempt=0 candidate_id=baseline rollout=4 seed=17 duration_ms=172800 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:30:15,252 INFO rollout_done  iteration_id=baseline-0017 attempt=0 candidate_id=baseline rollout=2 seed=17 duration_ms=173774 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:30:20,123 INFO rollout_done  iteration_id=baseline-0017 attempt=0 candidate_id=baseline rollout=0 seed=17 duration_ms=178648 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:32:22,972 INFO rollout_done  iteration_id=baseline-0017 attempt=0 candidate_id=baseline rollout=7 seed=17 duration_ms=151397 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:32:36,717 INFO rollout_done  iteration_id=baseline-0017 attempt=0 candidate_id=baseline rollout=11 seed=17 duration_ms=136591 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:32:42,820 INFO rollout_done  iteration_id=baseline-0017 attempt=0 candidate_id=baseline rollout=6 seed=17 duration_ms=175493 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:32:46,619 INFO rollout_done  iteration_id=baseline-0017 attempt=0 candidate_id=baseline rollout=9 seed=17 duration_ms=152337 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:33:01,077 INFO rollout_done  iteration_id=baseline-0017 attempt=0 candidate_id=baseline rollout=8 seed=17 duration_ms=180762 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:33:14,457 INFO rollout_done  iteration_id=baseline-0017 attempt=0 candidate_id=baseline rollout=10 seed=17 duration_ms=179205 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:35:00,427 INFO rollout_done  iteration_id=baseline-0017 attempt=0 candidate_id=baseline rollout=15 seed=17 duration_ms=133811 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:35:15,186 INFO rollout_done  iteration_id=baseline-0017 attempt=0 candidate_id=baseline rollout=13 seed=17 duration_ms=158471 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:35:34,560 INFO rollout_done  iteration_id=baseline-0017 attempt=0 candidate_id=baseline rollout=14 seed=17 duration_ms=171740 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:35:40,784 INFO rollout_done  iteration_id=baseline-0017 attempt=0 candidate_id=baseline rollout=12 seed=17 duration_ms=197812 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:35:40,816 INFO p1_task_done  task_idx=17 task_id=17 k=16 sr=0.0 n_errors=0 wall_s=499.3
+[P1] task 17: sr=0.000 errors=0 499s
+2026-09-06 01:38:50,431 INFO rollout_done  iteration_id=baseline-0018 attempt=0 candidate_id=baseline rollout=3 seed=18 duration_ms=189605 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:38:50,658 INFO rollout_done  iteration_id=baseline-0018 attempt=0 candidate_id=baseline rollout=0 seed=18 duration_ms=189836 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:38:57,337 INFO rollout_done  iteration_id=baseline-0018 attempt=0 candidate_id=baseline rollout=2 seed=18 duration_ms=196514 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:39:11,547 INFO rollout_done  iteration_id=baseline-0018 attempt=0 candidate_id=baseline rollout=1 seed=18 duration_ms=210725 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:39:12,672 INFO rollout_done  iteration_id=baseline-0018 attempt=0 candidate_id=baseline rollout=5 seed=18 duration_ms=211843 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:39:21,645 INFO rollout_done  iteration_id=baseline-0018 attempt=0 candidate_id=baseline rollout=4 seed=18 duration_ms=220819 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:42:18,698 INFO rollout_done  iteration_id=baseline-0018 attempt=0 candidate_id=baseline rollout=6 seed=18 duration_ms=208266 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:42:27,003 INFO rollout_done  iteration_id=baseline-0018 attempt=0 candidate_id=baseline rollout=8 seed=18 duration_ms=209665 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:42:29,152 INFO rollout_done  iteration_id=baseline-0018 attempt=0 candidate_id=baseline rollout=7 seed=18 duration_ms=218494 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:42:30,986 INFO rollout_done  iteration_id=baseline-0018 attempt=0 candidate_id=baseline rollout=9 seed=18 duration_ms=199438 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:42:44,996 INFO rollout_done  iteration_id=baseline-0018 attempt=0 candidate_id=baseline rollout=10 seed=18 duration_ms=212324 success=True reward=1.0 steps=50 error=None
+2026-09-06 01:43:01,715 INFO rollout_done  iteration_id=baseline-0018 attempt=0 candidate_id=baseline rollout=11 seed=18 duration_ms=220071 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:45:02,890 INFO rollout_done  iteration_id=baseline-0018 attempt=0 candidate_id=baseline rollout=12 seed=18 duration_ms=164193 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:45:18,439 INFO rollout_done  iteration_id=baseline-0018 attempt=0 candidate_id=baseline rollout=15 seed=18 duration_ms=167454 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:45:19,910 INFO rollout_done  iteration_id=baseline-0018 attempt=0 candidate_id=baseline rollout=14 seed=18 duration_ms=170759 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:45:49,118 INFO rollout_done  iteration_id=baseline-0018 attempt=0 candidate_id=baseline rollout=13 seed=18 duration_ms=202115 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:45:49,169 INFO p1_task_done  task_idx=18 task_id=18 k=16 sr=0.062 n_errors=0 wall_s=608.4
+[P1] task 18: sr=0.062 errors=0 608s
+2026-09-06 01:47:55,341 INFO rollout_done  iteration_id=baseline-0019 attempt=0 candidate_id=baseline rollout=0 seed=19 duration_ms=126167 success=True reward=1.0 steps=44 error=None
+2026-09-06 01:47:57,026 INFO rollout_done  iteration_id=baseline-0019 attempt=0 candidate_id=baseline rollout=2 seed=19 duration_ms=127851 success=True reward=1.0 steps=44 error=None
+2026-09-06 01:48:02,953 INFO rollout_done  iteration_id=baseline-0019 attempt=0 candidate_id=baseline rollout=4 seed=19 duration_ms=133773 success=True reward=1.0 steps=45 error=None
+2026-09-06 01:48:17,368 INFO rollout_done  iteration_id=baseline-0019 attempt=0 candidate_id=baseline rollout=1 seed=19 duration_ms=148193 success=True reward=1.0 steps=49 error=None
+2026-09-06 01:48:29,134 INFO rollout_done  iteration_id=baseline-0019 attempt=0 candidate_id=baseline rollout=5 seed=19 duration_ms=159951 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:48:36,539 INFO rollout_done  iteration_id=baseline-0019 attempt=0 candidate_id=baseline rollout=3 seed=19 duration_ms=167360 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:49:59,300 INFO rollout_done  iteration_id=baseline-0019 attempt=0 candidate_id=baseline rollout=6 seed=19 duration_ms=123959 success=True reward=1.0 steps=45 error=None
+2026-09-06 01:50:10,753 INFO rollout_done  iteration_id=baseline-0019 attempt=0 candidate_id=baseline rollout=7 seed=19 duration_ms=133726 success=True reward=1.0 steps=46 error=None
+2026-09-06 01:50:13,464 INFO rollout_done  iteration_id=baseline-0019 attempt=0 candidate_id=baseline rollout=8 seed=19 duration_ms=130510 success=True reward=1.0 steps=45 error=None
+2026-09-06 01:50:49,786 INFO rollout_done  iteration_id=baseline-0019 attempt=0 candidate_id=baseline rollout=11 seed=19 duration_ms=133247 success=True reward=1.0 steps=46 error=None
+2026-09-06 01:50:54,187 INFO rollout_done  iteration_id=baseline-0019 attempt=0 candidate_id=baseline rollout=9 seed=19 duration_ms=156820 success=True reward=1.0 steps=50 error=None
+2026-09-06 01:50:58,208 INFO rollout_done  iteration_id=baseline-0019 attempt=0 candidate_id=baseline rollout=10 seed=19 duration_ms=149076 success=True reward=1.0 steps=49 error=None
+2026-09-06 01:52:00,903 INFO rollout_done  iteration_id=baseline-0019 attempt=0 candidate_id=baseline rollout=12 seed=19 duration_ms=121603 success=True reward=1.0 steps=44 error=None
+2026-09-06 01:52:21,404 INFO rollout_done  iteration_id=baseline-0019 attempt=0 candidate_id=baseline rollout=14 seed=19 duration_ms=127942 success=True reward=1.0 steps=45 error=None
+2026-09-06 01:52:29,825 INFO rollout_done  iteration_id=baseline-0019 attempt=0 candidate_id=baseline rollout=13 seed=19 duration_ms=139073 success=True reward=1.0 steps=45 error=None
+2026-09-06 01:52:54,025 INFO rollout_done  iteration_id=baseline-0019 attempt=0 candidate_id=baseline rollout=15 seed=19 duration_ms=124239 success=True reward=1.0 steps=46 error=None
+2026-09-06 01:52:54,077 INFO p1_task_done  task_idx=19 task_id=19 k=16 sr=0.875 n_errors=0 wall_s=424.9
+[P1] task 19: sr=0.875 errors=0 425s
+2026-09-06 01:55:07,463 INFO rollout_done  iteration_id=baseline-0020 attempt=0 candidate_id=baseline rollout=5 seed=20 duration_ms=133371 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:55:46,638 INFO rollout_done  iteration_id=baseline-0020 attempt=0 candidate_id=baseline rollout=2 seed=20 duration_ms=172554 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:55:53,216 INFO rollout_done  iteration_id=baseline-0020 attempt=0 candidate_id=baseline rollout=4 seed=20 duration_ms=179126 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:55:57,549 INFO rollout_done  iteration_id=baseline-0020 attempt=0 candidate_id=baseline rollout=3 seed=20 duration_ms=183464 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:56:03,056 INFO rollout_done  iteration_id=baseline-0020 attempt=0 candidate_id=baseline rollout=0 seed=20 duration_ms=188974 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:56:04,022 INFO rollout_done  iteration_id=baseline-0020 attempt=0 candidate_id=baseline rollout=1 seed=20 duration_ms=189939 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:57:36,683 INFO rollout_done  iteration_id=baseline-0020 attempt=0 candidate_id=baseline rollout=6 seed=20 duration_ms=149218 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:58:32,598 INFO rollout_done  iteration_id=baseline-0020 attempt=0 candidate_id=baseline rollout=7 seed=20 duration_ms=165959 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:58:47,548 INFO rollout_done  iteration_id=baseline-0020 attempt=0 candidate_id=baseline rollout=8 seed=20 duration_ms=174331 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:58:48,553 INFO rollout_done  iteration_id=baseline-0020 attempt=0 candidate_id=baseline rollout=9 seed=20 duration_ms=171003 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:58:57,450 INFO rollout_done  iteration_id=baseline-0020 attempt=0 candidate_id=baseline rollout=11 seed=20 duration_ms=173428 success=False reward=0.0 steps=50 error=None
+2026-09-06 01:59:50,189 INFO rollout_done  iteration_id=baseline-0020 attempt=0 candidate_id=baseline rollout=10 seed=20 duration_ms=227134 success=False reward=0.0 steps=50 error=None
+2026-09-06 02:00:19,049 INFO rollout_done  iteration_id=baseline-0020 attempt=0 candidate_id=baseline rollout=12 seed=20 duration_ms=162369 success=False reward=0.0 steps=50 error=None
+2026-09-06 02:01:13,448 INFO rollout_done  iteration_id=baseline-0020 attempt=0 candidate_id=baseline rollout=13 seed=20 duration_ms=160850 success=False reward=0.0 steps=50 error=None
+2026-09-06 02:01:29,507 INFO rollout_done  iteration_id=baseline-0020 attempt=0 candidate_id=baseline rollout=15 seed=20 duration_ms=160955 success=False reward=0.0 steps=50 error=None
+2026-09-06 02:01:46,273 INFO rollout_done  iteration_id=baseline-0020 attempt=0 candidate_id=baseline rollout=14 seed=20 duration_ms=178726 success=False reward=0.0 steps=50 error=None
+2026-09-06 02:01:46,290 INFO p1_task_done  task_idx=20 task_id=20 k=16 sr=0.0 n_errors=0 wall_s=532.2
+[P1] task 20: sr=0.000 errors=0 532s
+2026-09-06 02:02:15,797 INFO rollout_done  iteration_id=baseline-0021 attempt=0 candidate_id=baseline rollout=3 seed=21 duration_ms=29501 success=True reward=1.0 steps=7 error=None
+2026-09-06 02:02:20,245 INFO rollout_done  iteration_id=baseline-0021 attempt=0 candidate_id=baseline rollout=5 seed=21 duration_ms=33946 success=True reward=1.0 steps=9 error=None
+2026-09-06 02:02:22,072 INFO rollout_done  iteration_id=baseline-0021 attempt=0 candidate_id=baseline rollout=2 seed=21 duration_ms=35778 success=True reward=1.0 steps=10 error=None
+2026-09-06 02:02:22,267 INFO rollout_done  iteration_id=baseline-0021 attempt=0 candidate_id=baseline rollout=1 seed=21 duration_ms=35974 success=True reward=1.0 steps=10 error=None
+2026-09-06 02:02:32,809 INFO rollout_done  iteration_id=baseline-0021 attempt=0 candidate_id=baseline rollout=4 seed=21 duration_ms=46513 success=True reward=1.0 steps=14 error=None
+2026-09-06 02:02:52,849 INFO rollout_done  iteration_id=baseline-0021 attempt=0 candidate_id=baseline rollout=0 seed=21 duration_ms=66556 success=True reward=1.0 steps=20 error=None
+2026-09-06 02:02:53,399 INFO rollout_done  iteration_id=baseline-0021 attempt=0 candidate_id=baseline rollout=8 seed=21 duration_ms=31326 success=True reward=1.0 steps=9 error=None
+2026-09-06 02:02:54,107 INFO rollout_done  iteration_id=baseline-0021 attempt=0 candidate_id=baseline rollout=7 seed=21 duration_ms=33861 success=True reward=1.0 steps=10 error=None
+2026-09-06 02:02:59,070 INFO rollout_done  iteration_id=baseline-0021 attempt=0 candidate_id=baseline rollout=10 seed=21 duration_ms=26261 success=True reward=1.0 steps=7 error=None
+2026-09-06 02:03:04,256 INFO rollout_done  iteration_id=baseline-0021 attempt=0 candidate_id=baseline rollout=9 seed=21 duration_ms=41988 success=True reward=1.0 steps=13 error=None
+2026-09-06 02:03:20,504 INFO rollout_done  iteration_id=baseline-0021 attempt=0 candidate_id=baseline rollout=11 seed=21 duration_ms=27655 success=True reward=1.0 steps=7 error=None
+2026-09-06 02:03:22,705 INFO rollout_done  iteration_id=baseline-0021 attempt=0 candidate_id=baseline rollout=13 seed=21 duration_ms=28599 success=True reward=1.0 steps=7 error=None
+2026-09-06 02:03:32,895 INFO rollout_done  iteration_id=baseline-0021 attempt=0 candidate_id=baseline rollout=14 seed=21 duration_ms=33826 success=True reward=1.0 steps=10 error=None
+2026-09-06 02:03:47,399 INFO rollout_done  iteration_id=baseline-0021 attempt=0 candidate_id=baseline rollout=15 seed=21 duration_ms=43143 success=True reward=1.0 steps=14 error=None
+2026-09-06 02:03:57,991 INFO rollout_done  iteration_id=baseline-0021 attempt=0 candidate_id=baseline rollout=12 seed=21 duration_ms=64592 success=True reward=1.0 steps=21 error=None
+2026-09-06 02:04:15,937 INFO rollout_done  iteration_id=baseline-0021 attempt=0 candidate_id=baseline rollout=6 seed=21 duration_ms=120141 success=True reward=1.0 steps=28 error=None
+2026-09-06 02:04:15,951 INFO p1_task_done  task_idx=21 task_id=21 k=16 sr=1.0 n_errors=0 wall_s=149.7
+[P1] task 21: sr=1.000 errors=0 150s
+2026-09-06 02:04:59,752 INFO rollout_done  iteration_id=baseline-0022 attempt=0 candidate_id=baseline rollout=4 seed=22 duration_ms=43795 success=True reward=1.0 steps=13 error=None
+2026-09-06 02:05:00,311 INFO rollout_done  iteration_id=baseline-0022 attempt=0 candidate_id=baseline rollout=5 seed=22 duration_ms=44354 success=True reward=1.0 steps=13 error=None
+2026-09-06 02:05:00,339 INFO rollout_done  iteration_id=baseline-0022 attempt=0 candidate_id=baseline rollout=2 seed=22 duration_ms=44384 success=True reward=1.0 steps=13 error=None
+2026-09-06 02:05:00,443 INFO rollout_done  iteration_id=baseline-0022 attempt=0 candidate_id=baseline rollout=1 seed=22 duration_ms=44489 success=True reward=1.0 steps=13 error=None
+2026-09-06 02:05:00,598 INFO rollout_done  iteration_id=baseline-0022 attempt=0 candidate_id=baseline rollout=3 seed=22 duration_ms=44643 success=True reward=1.0 steps=13 error=None
+2026-09-06 02:05:00,935 INFO rollout_done  iteration_id=baseline-0022 attempt=0 candidate_id=baseline rollout=0 seed=22 duration_ms=44981 success=True reward=1.0 steps=13 error=None
+2026-09-06 02:05:43,364 INFO rollout_done  iteration_id=baseline-0022 attempt=0 candidate_id=baseline rollout=6 seed=22 duration_ms=43611 success=True reward=1.0 steps=13 error=None
+2026-09-06 02:05:45,626 INFO rollout_done  iteration_id=baseline-0022 attempt=0 candidate_id=baseline rollout=11 seed=22 duration_ms=44690 success=True reward=1.0 steps=13 error=None
+2026-09-06 02:05:45,647 INFO rollout_done  iteration_id=baseline-0022 attempt=0 candidate_id=baseline rollout=7 seed=22 duration_ms=45334 success=True reward=1.0 steps=13 error=None
+2026-09-06 02:05:45,681 INFO rollout_done  iteration_id=baseline-0022 attempt=0 candidate_id=baseline rollout=8 seed=22 duration_ms=45341 success=True reward=1.0 steps=13 error=None
+2026-09-06 02:05:46,128 INFO rollout_done  iteration_id=baseline-0022 attempt=0 candidate_id=baseline rollout=9 seed=22 duration_ms=45686 success=True reward=1.0 steps=13 error=None
+2026-09-06 02:05:46,527 INFO rollout_done  iteration_id=baseline-0022 attempt=0 candidate_id=baseline rollout=10 seed=22 duration_ms=45928 success=True reward=1.0 steps=13 error=None
+2026-09-06 02:06:25,304 INFO rollout_done  iteration_id=baseline-0022 attempt=0 candidate_id=baseline rollout=12 seed=22 duration_ms=41941 success=True reward=1.0 steps=13 error=None
+2026-09-06 02:06:27,579 INFO rollout_done  iteration_id=baseline-0022 attempt=0 candidate_id=baseline rollout=15 seed=22 duration_ms=41899 success=True reward=1.0 steps=13 error=None
+2026-09-06 02:06:28,648 INFO rollout_done  iteration_id=baseline-0022 attempt=0 candidate_id=baseline rollout=14 seed=22 duration_ms=43002 success=True reward=1.0 steps=13 error=None
+2026-09-06 02:06:28,838 INFO rollout_done  iteration_id=baseline-0022 attempt=0 candidate_id=baseline rollout=13 seed=22 duration_ms=43213 success=True reward=1.0 steps=13 error=None
+2026-09-06 02:06:28,845 INFO p1_task_done  task_idx=22 task_id=22 k=16 sr=1.0 n_errors=0 wall_s=132.9
+[P1] task 22: sr=1.000 errors=0 133s
+2026-09-06 02:07:10,437 INFO rollout_done  iteration_id=baseline-0023 attempt=0 candidate_id=baseline rollout=3 seed=23 duration_ms=41585 success=True reward=1.0 steps=13 error=None
+2026-09-06 02:07:17,869 INFO rollout_done  iteration_id=baseline-0023 attempt=0 candidate_id=baseline rollout=2 seed=23 duration_ms=49020 success=True reward=1.0 steps=16 error=None
+2026-09-06 02:07:41,876 INFO rollout_done  iteration_id=baseline-0023 attempt=0 candidate_id=baseline rollout=5 seed=23 duration_ms=73027 success=True reward=1.0 steps=26 error=None
+2026-09-06 02:07:44,137 INFO rollout_done  iteration_id=baseline-0023 attempt=0 candidate_id=baseline rollout=1 seed=23 duration_ms=75290 success=True reward=1.0 steps=27 error=None
+2026-09-06 02:07:44,296 INFO rollout_done  iteration_id=baseline-0023 attempt=0 candidate_id=baseline rollout=4 seed=23 duration_ms=75447 success=True reward=1.0 steps=27 error=None
+2026-09-06 02:08:16,966 INFO rollout_done  iteration_id=baseline-0023 attempt=0 candidate_id=baseline rollout=8 seed=23 duration_ms=35087 success=True reward=1.0 steps=12 error=None
+2026-09-06 02:08:19,416 INFO rollout_done  iteration_id=baseline-0023 attempt=0 candidate_id=baseline rollout=6 seed=23 duration_ms=68981 success=True reward=1.0 steps=27 error=None
+2026-09-06 02:08:23,351 INFO rollout_done  iteration_id=baseline-0023 attempt=0 candidate_id=baseline rollout=9 seed=23 duration_ms=39213 success=True reward=1.0 steps=13 error=None
+2026-09-06 02:08:27,618 INFO rollout_done  iteration_id=baseline-0023 attempt=0 candidate_id=baseline rollout=7 seed=23 duration_ms=69749 success=True reward=1.0 steps=27 error=None
+2026-09-06 02:08:53,420 INFO rollout_done  iteration_id=baseline-0023 attempt=0 candidate_id=baseline rollout=10 seed=23 duration_ms=69122 success=True reward=1.0 steps=27 error=None
+2026-09-06 02:08:53,947 INFO rollout_done  iteration_id=baseline-0023 attempt=0 candidate_id=baseline rollout=12 seed=23 duration_ms=34531 success=True reward=1.0 steps=12 error=None
+2026-09-06 02:09:04,851 INFO rollout_done  iteration_id=baseline-0023 attempt=0 candidate_id=baseline rollout=14 seed=23 duration_ms=37233 success=True reward=1.0 steps=13 error=None
+2026-09-06 02:09:27,184 INFO rollout_done  iteration_id=baseline-0023 attempt=0 candidate_id=baseline rollout=11 seed=23 duration_ms=70220 success=True reward=1.0 steps=27 error=None
+2026-09-06 02:09:36,516 INFO rollout_done  iteration_id=baseline-0023 attempt=0 candidate_id=baseline rollout=13 seed=23 duration_ms=73165 success=True reward=1.0 steps=27 error=None
+2026-09-06 02:09:40,898 INFO rollout_done  iteration_id=baseline-0023 attempt=0 candidate_id=baseline rollout=0 seed=23 duration_ms=192052 success=False reward=0.0 steps=50 error=None
+2026-09-06 02:10:01,635 INFO rollout_done  iteration_id=baseline-0023 attempt=0 candidate_id=baseline rollout=15 seed=23 duration_ms=68217 success=True reward=1.0 steps=27 error=None
+2026-09-06 02:10:01,658 INFO p1_task_done  task_idx=23 task_id=23 k=16 sr=0.938 n_errors=0 wall_s=212.8
+[P1] task 23: sr=0.938 errors=0 213s
+2026-09-06 02:10:35,954 INFO rollout_done  iteration_id=baseline-0024 attempt=0 candidate_id=baseline rollout=4 seed=24 duration_ms=34290 success=True reward=1.0 steps=9 error=None
+2026-09-06 02:10:36,043 INFO rollout_done  iteration_id=baseline-0024 attempt=0 candidate_id=baseline rollout=0 seed=24 duration_ms=34384 success=True reward=1.0 steps=9 error=None
+2026-09-06 02:10:36,052 INFO rollout_done  iteration_id=baseline-0024 attempt=0 candidate_id=baseline rollout=3 seed=24 duration_ms=34389 success=True reward=1.0 steps=9 error=None
+2026-09-06 02:10:36,095 INFO rollout_done  iteration_id=baseline-0024 attempt=0 candidate_id=baseline rollout=5 seed=24 duration_ms=34432 success=True reward=1.0 steps=9 error=None
+2026-09-06 02:10:36,120 INFO rollout_done  iteration_id=baseline-0024 attempt=0 candidate_id=baseline rollout=1 seed=24 duration_ms=34459 success=True reward=1.0 steps=9 error=None
+2026-09-06 02:10:36,140 INFO rollout_done  iteration_id=baseline-0024 attempt=0 candidate_id=baseline rollout=2 seed=24 duration_ms=34478 success=True reward=1.0 steps=9 error=None
+2026-09-06 02:11:10,022 INFO rollout_done  iteration_id=baseline-0024 attempt=0 candidate_id=baseline rollout=8 seed=24 duration_ms=33970 success=True reward=1.0 steps=9 error=None
+2026-09-06 02:11:10,374 INFO rollout_done  iteration_id=baseline-0024 attempt=0 candidate_id=baseline rollout=11 seed=24 duration_ms=34233 success=True reward=1.0 steps=9 error=None
+2026-09-06 02:11:10,754 INFO rollout_done  iteration_id=baseline-0024 attempt=0 candidate_id=baseline rollout=6 seed=24 duration_ms=34799 success=True reward=1.0 steps=9 error=None
+2026-09-06 02:11:10,822 INFO rollout_done  iteration_id=baseline-0024 attempt=0 candidate_id=baseline rollout=7 seed=24 duration_ms=34776 success=True reward=1.0 steps=9 error=None
+2026-09-06 02:11:10,850 INFO rollout_done  iteration_id=baseline-0024 attempt=0 candidate_id=baseline rollout=9 seed=24 duration_ms=34755 success=True reward=1.0 steps=9 error=None
+2026-09-06 02:11:10,998 INFO rollout_done  iteration_id=baseline-0024 attempt=0 candidate_id=baseline rollout=10 seed=24 duration_ms=34878 success=True reward=1.0 steps=9 error=None
+2026-09-06 02:11:42,165 INFO rollout_done  iteration_id=baseline-0024 attempt=0 candidate_id=baseline rollout=12 seed=24 duration_ms=32143 success=True reward=1.0 steps=9 error=None
+2026-09-06 02:11:43,066 INFO rollout_done  iteration_id=baseline-0024 attempt=0 candidate_id=baseline rollout=14 seed=24 duration_ms=32313 success=True reward=1.0 steps=9 error=None
+2026-09-06 02:11:43,668 INFO rollout_done  iteration_id=baseline-0024 attempt=0 candidate_id=baseline rollout=15 seed=24 duration_ms=32847 success=True reward=1.0 steps=9 error=None
+2026-09-06 02:11:43,749 INFO rollout_done  iteration_id=baseline-0024 attempt=0 candidate_id=baseline rollout=13 seed=24 duration_ms=33376 success=True reward=1.0 steps=9 error=None
+2026-09-06 02:11:43,759 INFO p1_task_done  task_idx=24 task_id=24 k=16 sr=1.0 n_errors=0 wall_s=102.1
+[P1] task 24: sr=1.000 errors=0 102s
+2026-09-06 02:12:06,955 INFO rollout_done  iteration_id=baseline-0025 attempt=0 candidate_id=baseline rollout=1 seed=25 duration_ms=23192 success=True reward=1.0 steps=5 error=None
+2026-09-06 02:12:06,968 INFO rollout_done  iteration_id=baseline-0025 attempt=0 candidate_id=baseline rollout=3 seed=25 duration_ms=23203 success=True reward=1.0 steps=5 error=None
+2026-09-06 02:12:07,345 INFO rollout_done  iteration_id=baseline-0025 attempt=0 candidate_id=baseline rollout=4 seed=25 duration_ms=23577 success=True reward=1.0 steps=5 error=None
+2026-09-06 02:12:07,379 INFO rollout_done  iteration_id=baseline-0025 attempt=0 candidate_id=baseline rollout=5 seed=25 duration_ms=23611 success=True reward=1.0 steps=5 error=None
+2026-09-06 02:12:07,479 INFO rollout_done  iteration_id=baseline-0025 attempt=0 candidate_id=baseline rollout=0 seed=25 duration_ms=23715 success=True reward=1.0 steps=5 error=None
+2026-09-06 02:12:07,582 INFO rollout_done  iteration_id=baseline-0025 attempt=0 candidate_id=baseline rollout=2 seed=25 duration_ms=23817 success=True reward=1.0 steps=5 error=None
+2026-09-06 02:12:31,080 INFO rollout_done  iteration_id=baseline-0025 attempt=0 candidate_id=baseline rollout=7 seed=25 duration_ms=24110 success=True reward=1.0 steps=5 error=None
+2026-09-06 02:12:31,758 INFO rollout_done  iteration_id=baseline-0025 attempt=0 candidate_id=baseline rollout=10 seed=25 duration_ms=24279 success=True reward=1.0 steps=5 error=None
+2026-09-06 02:12:31,930 INFO rollout_done  iteration_id=baseline-0025 attempt=0 candidate_id=baseline rollout=8 seed=25 duration_ms=24585 success=True reward=1.0 steps=5 error=None
+2026-09-06 02:12:32,131 INFO rollout_done  iteration_id=baseline-0025 attempt=0 candidate_id=baseline rollout=11 seed=25 duration_ms=24549 success=True reward=1.0 steps=5 error=None
+2026-09-06 02:12:32,216 INFO rollout_done  iteration_id=baseline-0025 attempt=0 candidate_id=baseline rollout=6 seed=25 duration_ms=25261 success=True reward=1.0 steps=5 error=None
+2026-09-06 02:12:32,225 INFO rollout_done  iteration_id=baseline-0025 attempt=0 candidate_id=baseline rollout=9 seed=25 duration_ms=24846 success=True reward=1.0 steps=5 error=None
+2026-09-06 02:12:53,492 INFO rollout_done  iteration_id=baseline-0025 attempt=0 candidate_id=baseline rollout=12 seed=25 duration_ms=22413 success=True reward=1.0 steps=5 error=None
+2026-09-06 02:12:54,062 INFO rollout_done  iteration_id=baseline-0025 attempt=0 candidate_id=baseline rollout=13 seed=25 duration_ms=22305 success=True reward=1.0 steps=5 error=None
+2026-09-06 02:12:55,256 INFO rollout_done  iteration_id=baseline-0025 attempt=0 candidate_id=baseline rollout=15 seed=25 duration_ms=23125 success=True reward=1.0 steps=5 error=None
+2026-09-06 02:12:57,485 INFO rollout_done  iteration_id=baseline-0025 attempt=0 candidate_id=baseline rollout=14 seed=25 duration_ms=25555 success=True reward=1.0 steps=5 error=None
+2026-09-06 02:12:57,497 INFO p1_task_done  task_idx=25 task_id=25 k=16 sr=1.0 n_errors=0 wall_s=73.7
+[P1] task 25: sr=1.000 errors=0 74s
+2026-09-06 02:15:16,877 INFO rollout_done  iteration_id=baseline-0026 attempt=0 candidate_id=baseline rollout=1 seed=26 duration_ms=139375 success=True reward=1.0 steps=47 error=None
+2026-09-06 02:15:19,233 INFO rollout_done  iteration_id=baseline-0026 attempt=0 candidate_id=baseline rollout=3 seed=26 duration_ms=141726 success=True reward=1.0 steps=47 error=None
+2026-09-06 02:15:37,540 INFO rollout_done  iteration_id=baseline-0026 attempt=0 candidate_id=baseline rollout=5 seed=26 duration_ms=160023 success=False reward=0.0 steps=50 error=None
+2026-09-06 02:15:38,743 INFO rollout_done  iteration_id=baseline-0026 attempt=0 candidate_id=baseline rollout=0 seed=26 duration_ms=161242 success=False reward=0.0 steps=50 error=None
+2026-09-06 02:15:41,507 INFO rollout_done  iteration_id=baseline-0026 attempt=0 candidate_id=baseline rollout=4 seed=26 duration_ms=163994 success=False reward=0.0 steps=50 error=None
+2026-09-06 02:15:43,802 INFO rollout_done  iteration_id=baseline-0026 attempt=0 candidate_id=baseline rollout=2 seed=26 duration_ms=166299 success=False reward=0.0 steps=50 error=None
+2026-09-06 02:17:16,145 INFO rollout_done  iteration_id=baseline-0026 attempt=0 candidate_id=baseline rollout=6 seed=26 duration_ms=119267 success=True reward=1.0 steps=45 error=None
+2026-09-06 02:17:26,201 INFO rollout_done  iteration_id=baseline-0026 attempt=0 candidate_id=baseline rollout=7 seed=26 duration_ms=126967 success=True reward=1.0 steps=47 error=None
+2026-09-06 02:17:33,330 INFO rollout_done  iteration_id=baseline-0026 attempt=0 candidate_id=baseline rollout=8 seed=26 duration_ms=115790 success=True reward=1.0 steps=45 error=None
+2026-09-06 02:17:45,529 INFO rollout_done  iteration_id=baseline-0026 attempt=0 candidate_id=baseline rollout=10 seed=26 duration_ms=124020 success=True reward=1.0 steps=47 error=None
+2026-09-06 02:18:05,229 INFO rollout_done  iteration_id=baseline-0026 attempt=0 candidate_id=baseline rollout=9 seed=26 duration_ms=146487 success=False reward=0.0 steps=50 error=None
+2026-09-06 02:18:12,032 INFO rollout_done  iteration_id=baseline-0026 attempt=0 candidate_id=baseline rollout=11 seed=26 duration_ms=148230 success=False reward=0.0 steps=50 error=None
+2026-09-06 02:19:27,641 INFO rollout_done  iteration_id=baseline-0026 attempt=0 candidate_id=baseline rollout=13 seed=26 duration_ms=121441 success=True reward=1.0 steps=47 error=None
+2026-09-06 02:19:37,166 INFO rollout_done  iteration_id=baseline-0026 attempt=0 candidate_id=baseline rollout=14 seed=26 duration_ms=123837 success=True reward=1.0 steps=47 error=None
+2026-09-06 02:19:40,660 INFO rollout_done  iteration_id=baseline-0026 attempt=0 candidate_id=baseline rollout=12 seed=26 duration_ms=144516 success=False reward=0.0 steps=50 error=None
+2026-09-06 02:20:04,291 INFO rollout_done  iteration_id=baseline-0026 attempt=0 candidate_id=baseline rollout=15 seed=26 duration_ms=138763 success=False reward=0.0 steps=50 error=None
+2026-09-06 02:20:04,326 INFO p1_task_done  task_idx=26 task_id=26 k=16 sr=0.5 n_errors=0 wall_s=426.8
+[P1] task 26: sr=0.500 errors=0 427s
+2026-09-06 02:22:33,538 INFO rollout_done  iteration_id=baseline-0027 attempt=0 candidate_id=baseline rollout=5 seed=27 duration_ms=149205 success=False reward=0.0 steps=50 error=None
+2026-09-06 02:22:34,677 INFO rollout_done  iteration_id=baseline-0027 attempt=0 candidate_id=baseline rollout=0 seed=27 duration_ms=150348 success=False reward=0.0 steps=50 error=None
+2026-09-06 02:22:37,070 INFO rollout_done  iteration_id=baseline-0027 attempt=0 candidate_id=baseline rollout=4 seed=27 duration_ms=152737 success=False reward=0.0 steps=50 error=None
+2026-09-06 02:22:44,569 INFO rollout_done  iteration_id=baseline-0027 attempt=0 candidate_id=baseline rollout=2 seed=27 duration_ms=160238 success=False reward=0.0 steps=50 error=None
+2026-09-06 02:22:47,584 INFO rollout_done  iteration_id=baseline-0027 attempt=0 candidate_id=baseline rollout=1 seed=27 duration_ms=163255 success=False reward=0.0 steps=50 error=None
+2026-09-06 02:22:56,788 INFO rollout_done  iteration_id=baseline-0027 attempt=0 candidate_id=baseline rollout=3 seed=27 duration_ms=172458 success=False reward=0.0 steps=50 error=None
+2026-09-06 02:24:42,479 INFO rollout_done  iteration_id=baseline-0027 attempt=0 candidate_id=baseline rollout=8 seed=27 duration_ms=125409 success=False reward=0.0 steps=50 error=None
+2026-09-06 02:24:44,141 INFO rollout_done  iteration_id=baseline-0027 attempt=0 candidate_id=baseline rollout=6 seed=27 duration_ms=130601 success=False reward=0.0 steps=50 error=None
+2026-09-06 02:24:46,746 INFO rollout_done  iteration_id=baseline-0027 attempt=0 candidate_id=baseline rollout=9 seed=27 duration_ms=122177 success=False reward=0.0 steps=50 error=None
+2026-09-06 02:24:51,217 INFO rollout_done  iteration_id=baseline-0027 attempt=0 candidate_id=baseline rollout=10 seed=27 duration_ms=123632 success=False reward=0.0 steps=50 error=None
+2026-09-06 02:24:56,220 INFO rollout_done  iteration_id=baseline-0027 attempt=0 candidate_id=baseline rollout=7 seed=27 duration_ms=141543 success=False reward=0.0 steps=50 error=None
+2026-09-06 02:25:04,347 INFO rollout_done  iteration_id=baseline-0027 attempt=0 candidate_id=baseline rollout=11 seed=27 duration_ms=127559 success=False reward=0.0 steps=50 error=None
+2026-09-06 02:26:44,991 INFO rollout_done  iteration_id=baseline-0027 attempt=0 candidate_id=baseline rollout=12 seed=27 duration_ms=122512 success=False reward=0.0 steps=50 error=None
+2026-09-06 02:26:49,612 INFO rollout_done  iteration_id=baseline-0027 attempt=0 candidate_id=baseline rollout=13 seed=27 duration_ms=125472 success=False reward=0.0 steps=50 error=None
+2026-09-06 02:26:52,634 INFO rollout_done  iteration_id=baseline-0027 attempt=0 candidate_id=baseline rollout=14 seed=27 duration_ms=125889 success=False reward=0.0 steps=50 error=None
+2026-09-06 02:27:13,665 INFO rollout_done  iteration_id=baseline-0027 attempt=0 candidate_id=baseline rollout=15 seed=27 duration_ms=142449 success=False reward=0.0 steps=50 error=None
+2026-09-06 02:27:13,710 INFO p1_task_done  task_idx=27 task_id=27 k=16 sr=0.0 n_errors=0 wall_s=429.4
+[P1] task 27: sr=0.000 errors=0 429s
+2026-09-06 02:29:55,648 INFO rollout_done  iteration_id=baseline-0028 attempt=0 candidate_id=baseline rollout=2 seed=28 duration_ms=161932 success=False reward=0.0 steps=50 error=None
+2026-09-06 02:29:57,915 INFO rollout_done  iteration_id=baseline-0028 attempt=0 candidate_id=baseline rollout=1 seed=28 duration_ms=164201 success=True reward=1.0 steps=50 error=None
+2026-09-06 02:29:59,273 INFO rollout_done  iteration_id=baseline-0028 attempt=0 candidate_id=baseline rollout=0 seed=28 duration_ms=165560 success=True reward=1.0 steps=50 error=None
+2026-09-06 02:30:00,969 INFO rollout_done  iteration_id=baseline-0028 attempt=0 candidate_id=baseline rollout=3 seed=28 duration_ms=167254 success=False reward=0.0 steps=50 error=None
+2026-09-06 02:30:03,266 INFO rollout_done  iteration_id=baseline-0028 attempt=0 candidate_id=baseline rollout=4 seed=28 duration_ms=169549 success=False reward=0.0 steps=50 error=None
+2026-09-06 02:30:08,168 INFO rollout_done  iteration_id=baseline-0028 attempt=0 candidate_id=baseline rollout=5 seed=28 duration_ms=174451 success=False reward=0.0 steps=50 error=None
+2026-09-06 02:32:23,082 INFO rollout_done  iteration_id=baseline-0028 attempt=0 candidate_id=baseline rollout=8 seed=28 duration_ms=143807 success=True reward=1.0 steps=41 error=None
+2026-09-06 02:32:28,193 INFO rollout_done  iteration_id=baseline-0028 attempt=0 candidate_id=baseline rollout=6 seed=28 duration_ms=152545 success=True reward=1.0 steps=50 error=None
+2026-09-06 02:32:31,197 INFO rollout_done  iteration_id=baseline-0028 attempt=0 candidate_id=baseline rollout=10 seed=28 duration_ms=147931 success=True reward=1.0 steps=50 error=None
+2026-09-06 02:32:34,579 INFO rollout_done  iteration_id=baseline-0028 attempt=0 candidate_id=baseline rollout=11 seed=28 duration_ms=146410 success=True reward=1.0 steps=50 error=None
+2026-09-06 02:32:37,186 INFO rollout_done  iteration_id=baseline-0028 attempt=0 candidate_id=baseline rollout=9 seed=28 duration_ms=156217 success=False reward=0.0 steps=50 error=None
+2026-09-06 02:32:39,574 INFO rollout_done  iteration_id=baseline-0028 attempt=0 candidate_id=baseline rollout=7 seed=28 duration_ms=161659 success=False reward=0.0 steps=50 error=None
+2026-09-06 02:34:35,160 INFO rollout_done  iteration_id=baseline-0028 attempt=0 candidate_id=baseline rollout=12 seed=28 duration_ms=132079 success=True reward=1.0 steps=50 error=None
+2026-09-06 02:34:44,490 INFO rollout_done  iteration_id=baseline-0028 attempt=0 candidate_id=baseline rollout=13 seed=28 duration_ms=136298 success=False reward=0.0 steps=50 error=None
+2026-09-06 02:34:49,168 INFO rollout_done  iteration_id=baseline-0028 attempt=0 candidate_id=baseline rollout=14 seed=28 duration_ms=137971 success=False reward=0.0 steps=50 error=None
+2026-09-06 02:34:54,028 INFO rollout_done  iteration_id=baseline-0028 attempt=0 candidate_id=baseline rollout=15 seed=28 duration_ms=139449 success=True reward=1.0 steps=50 error=None
+2026-09-06 02:34:54,080 INFO p1_task_done  task_idx=28 task_id=28 k=16 sr=0.5 n_errors=0 wall_s=460.4
+[P1] task 28: sr=0.500 errors=0 460s
+2026-09-06 02:35:31,608 INFO rollout_done  iteration_id=baseline-0029 attempt=0 candidate_id=baseline rollout=1 seed=29 duration_ms=37521 success=True reward=1.0 steps=8 error=None
+2026-09-06 02:35:32,136 INFO rollout_done  iteration_id=baseline-0029 attempt=0 candidate_id=baseline rollout=3 seed=29 duration_ms=38047 success=True reward=1.0 steps=8 error=None
+2026-09-06 02:35:32,312 INFO rollout_done  iteration_id=baseline-0029 attempt=0 candidate_id=baseline rollout=2 seed=29 duration_ms=38226 success=True reward=1.0 steps=8 error=None
+2026-09-06 02:35:32,863 INFO rollout_done  iteration_id=baseline-0029 attempt=0 candidate_id=baseline rollout=4 seed=29 duration_ms=38774 success=True reward=1.0 steps=8 error=None
+2026-09-06 02:35:33,297 INFO rollout_done  iteration_id=baseline-0029 attempt=0 candidate_id=baseline rollout=5 seed=29 duration_ms=39206 success=True reward=1.0 steps=8 error=None
+2026-09-06 02:35:33,947 INFO rollout_done  iteration_id=baseline-0029 attempt=0 candidate_id=baseline rollout=0 seed=29 duration_ms=39861 success=True reward=1.0 steps=8 error=None
+2026-09-06 02:36:07,052 INFO rollout_done  iteration_id=baseline-0029 attempt=0 candidate_id=baseline rollout=6 seed=29 duration_ms=35446 success=True reward=1.0 steps=8 error=None
+2026-09-06 02:36:08,113 INFO rollout_done  iteration_id=baseline-0029 attempt=0 candidate_id=baseline rollout=7 seed=29 duration_ms=35978 success=True reward=1.0 steps=8 error=None
+2026-09-06 02:36:08,125 INFO rollout_done  iteration_id=baseline-0029 attempt=0 candidate_id=baseline rollout=8 seed=29 duration_ms=35812 success=True reward=1.0 steps=8 error=None
+2026-09-06 02:36:08,203 INFO rollout_done  iteration_id=baseline-0029 attempt=0 candidate_id=baseline rollout=9 seed=29 duration_ms=35340 success=True reward=1.0 steps=8 error=None
+2026-09-06 02:36:10,341 INFO rollout_done  iteration_id=baseline-0029 attempt=0 candidate_id=baseline rollout=11 seed=29 duration_ms=36396 success=True reward=1.0 steps=8 error=None
+2026-09-06 02:36:10,650 INFO rollout_done  iteration_id=baseline-0029 attempt=0 candidate_id=baseline rollout=10 seed=29 duration_ms=37354 success=True reward=1.0 steps=8 error=None
+2026-09-06 02:36:41,278 INFO rollout_done  iteration_id=baseline-0029 attempt=0 candidate_id=baseline rollout=12 seed=29 duration_ms=34226 success=True reward=1.0 steps=8 error=None
+2026-09-06 02:36:42,257 INFO rollout_done  iteration_id=baseline-0029 attempt=0 candidate_id=baseline rollout=13 seed=29 duration_ms=34145 success=True reward=1.0 steps=8 error=None
+2026-09-06 02:36:42,264 INFO rollout_done  iteration_id=baseline-0029 attempt=0 candidate_id=baseline rollout=14 seed=29 duration_ms=34140 success=True reward=1.0 steps=8 error=None
+2026-09-06 02:36:42,926 INFO rollout_done  iteration_id=baseline-0029 attempt=0 candidate_id=baseline rollout=15 seed=29 duration_ms=34723 success=True reward=1.0 steps=8 error=None
+2026-09-06 02:36:42,944 INFO p1_task_done  task_idx=29 task_id=29 k=16 sr=1.0 n_errors=0 wall_s=108.9
+[P1] task 29: sr=1.000 errors=0 109s
+2026-09-06 02:36:42,944 INFO p1_end  n_traces=480

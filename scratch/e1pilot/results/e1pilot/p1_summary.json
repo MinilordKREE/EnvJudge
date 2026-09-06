@@ -1,0 +1,16 @@
+{
+ "K1": "both-sides",
+ "zero+edge-low": 0.333,
+ "saturated+edge-high": 0.467,
+ "parse_stats": {
+  "episodes": 480,
+  "steps": 15645,
+  "no_action_tag": 0,
+  "inadmissible": 2021,
+  "parse_fail_rate": 0.12917865132630232,
+  "mean_per_episode": 0.09460820537357435,
+  "errors": 0,
+  "mean_steps": 32.59375
+ },
+ "mean_p16_qwen": 0.5729166666666666
+}

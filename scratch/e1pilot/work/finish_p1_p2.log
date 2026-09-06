@@ -1,0 +1,83 @@
+P1_BULK_DONE 07:37
+  "errors": 0,
+  "mean_steps": 32.59375
+ },
+ "mean_p16_qwen": 0.5729166666666666
+}
+{'consumer': 'Qwen3-8B p16', 'zero': '0.267 [0.133, 0.433]', 'edge-low': '0.067 [0.000, 0.167]', 'band': '0.200 [0.067, 0.367]', 'edge-high': '0.100 [0.000, 0.233]', 'saturated': '0.367 [0.200, 0.533]'}
+{'consumer': 'Pro p16', 'zero': '0.033 [0.000, 0.100]', 'edge-low': '0.133 [0.033, 0.267]', 'band': '0.200 [0.067, 0.333]', 'edge-high': '0.267 [0.133, 0.433]', 'saturated': '0.367 [0.200, 0.533]'}
+{'consumer': 'Flash p8', 'zero': '0.000 [0.000, 0.000]', 'edge-low': '0.033 [0.000, 0.100]', 'band': '0.200 [0.067, 0.367]', 'edge-high': '0.167 [0.033, 0.300]', 'saturated': '0.600 [0.433, 0.767]'}
+saturated+edge-high=0.467
+P2 regime: qwen  07:37
+[P2] regime=qwen targets=[1, 2, 7, 12, 13, 15, 21, 22, 24, 25, 29] (n=11) config=qwen_map.yaml max_rollouts/dose=8
+[P2] task 1: targets [('egg 3', 'garbagecan 1')] (14s)
+[P2] task 1 F_S0 dose 1: NOEFFECT cert=R_pol p=1.0 rollouts=4 (41.2s)
+[P2] task 1 F_S0 dose 2: NOEFFECT cert=R_pol p=1.0 rollouts=4 (39.8s)
+[P2] task 1 F_S0 dose 3: UNCERTIFIED cert=uncertified p=None rollouts=0 (59.7s)
+[P2] task 1 F_O dose 0.5: NOEFFECT cert=R_pol p=0.875 rollouts=8 (186.9s)
+[P2] task 1 F_O dose 1.0: ZERO cert=R_pol p=0.0 rollouts=4 (133.7s)
+[P2] task 2: targets [('lettuce 2', 'countertop 2'), ('lettuce 1', 'countertop 2')] (15s)
+[P2] task 2 F_S0 dose 1: UNCERTIFIED cert=uncertified p=None rollouts=0 (67.0s)
+[P2] task 2 F_S0 dose 2: INFEASIBLE cert=None p=None rollouts=0 (54.1s)
+[P2] task 2 F_S0 dose 3: INFEASIBLE cert=None p=None rollouts=0 (56.7s)
+[P2] task 2 F_O dose 0.5: NOEFFECT cert=R_pol p=1.0 rollouts=4 (47.8s)
+[P2] task 2 F_O dose 1.0: ZERO cert=R_pol p=0.0 rollouts=4 (142.8s)
+[P2] task 7: targets [('statue 3', 'shelf 2')] (2s)
+[P2] task 7 F_S0 dose 1: NOEFFECT cert=R_exp p=1.0 rollouts=4 (24.5s)
+[P2] task 7 F_S0 dose 2: INFEASIBLE cert=None p=None rollouts=0 (0.0s)
+[P2] task 7 F_S0 dose 3: INFEASIBLE cert=None p=None rollouts=0 (0.0s)
+[P2] task 7 F_O dose 0.5: NOEFFECT cert=R_pol p=1.0 rollouts=4 (45.3s)
+[P2] task 7 F_O dose 1.0: ZERO cert=R_pol p=0.0 rollouts=4 (126.4s)
+[P2] task 12: targets [('alarmclock 1', 'shelf 1'), ('alarmclock 2', 'shelf 1')] (4s)
+[P2] task 12 F_S0 dose 1: INFEASIBLE cert=None p=None rollouts=0 (5.0s)
+[P2] task 12 F_S0 dose 2: INFEASIBLE cert=None p=None rollouts=0 (0.0s)
+[P2] task 12 F_S0 dose 3: INFEASIBLE cert=None p=None rollouts=0 (0.0s)
+[P2] task 12 F_O dose 0.5: NOEFFECT cert=R_pol p=1.0 rollouts=4 (31.5s)
+[P2] task 12 F_O dose 1.0: ZERO cert=R_pol p=0.0 rollouts=4 (133.0s)
+[P2] task 13: targets [('mug 2', 'fridge 1')] (10s)
+[P2] task 13 F_S0 dose 1: NOEFFECT cert=R_pol p=1.0 rollouts=4 (42.3s)
+[P2] task 13 F_S0 dose 2: NOEFFECT cert=R_pol p=1.0 rollouts=4 (46.7s)
+[P2] task 13 F_S0 dose 3: INFEASIBLE cert=None p=None rollouts=0 (281.5s)
+[P2] task 13 F_O dose 0.5: NOEFFECT cert=R_pol p=1.0 rollouts=4 (156.0s)
+[P2] task 13 F_O dose 1.0: ZERO cert=R_pol p=0.0 rollouts=4 (127.6s)
+[P2] task 15: targets [('mug 1', 'countertop 1')] (10s)
+[P2] task 15 F_S0 dose 1: NOEFFECT cert=R_exp p=1.0 rollouts=4 (44.3s)
+[P2] task 15 F_S0 dose 2: UNCERTIFIED cert=uncertified p=None rollouts=0 (34.6s)
+[P2] task 15 F_S0 dose 3: UNCERTIFIED cert=uncertified p=None rollouts=0 (41.2s)
+[P2] task 15 F_O dose 0.5: NOEFFECT cert=R_pol p=1.0 rollouts=4 (94.9s)
+[P2] task 15 F_O dose 1.0: ZERO cert=R_pol p=0.0 rollouts=4 (137.2s)
+[P2] task 21: targets [('pencil 1', 'garbagecan 1')] (3s)
+[P2] task 21 F_S0 dose 1: NOEFFECT cert=R_pol p=1.0 rollouts=4 (26.0s)
+[P2] task 21 F_S0 dose 2: NOEFFECT cert=R_pol p=1.0 rollouts=4 (28.3s)
+[P2] task 21 F_S0 dose 3: NOEFFECT cert=R_pol p=1.0 rollouts=4 (50.2s)
+[P2] task 21 F_O dose 0.5: IN-BAND cert=R_pol p=0.625 rollouts=8 (282.9s)
+[P2] task 21 F_O dose 1.0: ZERO cert=R_pol p=0.0 rollouts=4 (126.4s)
+[P2] task 22: targets [('watch 1', 'diningtable 1'), ('watch 2', 'diningtable 1')] (10s)
+[P2] task 22 F_S0 dose 1: UNCERTIFIED cert=uncertified p=None rollouts=0 (30.9s)
+[P2] task 22 F_S0 dose 2: UNCERTIFIED cert=uncertified p=None rollouts=0 (30.6s)
+[P2] task 22 F_S0 dose 3: UNCERTIFIED cert=uncertified p=None rollouts=0 (31.8s)
+[P2] task 22 F_O dose 0.5: NOEFFECT cert=R_pol p=1.0 rollouts=4 (77.7s)
+[P2] task 22 F_O dose 1.0: ZERO cert=R_pol p=0.0 rollouts=4 (124.8s)
+[P2] task 24: targets [('mug 1', 'countertop 2')] (15s)
+[P2] task 24 F_S0 dose 1: UNCERTIFIED cert=uncertified p=None rollouts=0 (48.5s)
+[P2] task 24 F_S0 dose 2: NOEFFECT cert=R_exp p=1.0 rollouts=4 (176.6s)
+[P2] task 24 F_S0 dose 3: UNCERTIFIED cert=uncertified p=None rollouts=0 (60.8s)
+[P2] task 24 F_O dose 0.5: NOEFFECT cert=R_pol p=1.0 rollouts=4 (87.8s)
+[P2] task 24 F_O dose 1.0: ZERO cert=R_pol p=0.0 rollouts=4 (154.2s)
+[P2] task 25: targets [('pillow 1', 'bed 1')] (3s)
+[P2] task 25 F_S0 dose 1: INFEASIBLE cert=None p=None rollouts=0 (4.3s)
+[P2] task 25 F_S0 dose 2: INFEASIBLE cert=None p=None rollouts=0 (5.0s)
+[P2] task 25 F_S0 dose 3: INFEASIBLE cert=None p=None rollouts=0 (5.3s)
+[P2] task 25 F_O dose 0.5: NOEFFECT cert=R_pol p=1.0 rollouts=4 (31.5s)
+[P2] task 25 F_O dose 1.0: ZERO cert=R_pol p=0.0 rollouts=4 (130.0s)
+[P2] task 29: targets [('egg 2', 'microwave 1')] (21s)
+[P2] task 29 F_S0 dose 1: NOEFFECT cert=R_pol p=1.0 rollouts=4 (61.5s)
+[P2] task 29 F_S0 dose 2: NOEFFECT cert=R_pol p=1.0 rollouts=4 (243.1s)
+[P2] task 29 F_S0 dose 3: INFEASIBLE cert=None p=None rollouts=0 (240.2s)
+[P2] task 29 F_O dose 0.5: NOEFFECT cert=R_pol p=1.0 rollouts=4 (42.7s)
+[P2] task 29 F_O dose 1.0: ZERO cert=R_pol p=0.0 rollouts=4 (140.3s)
+[P2] done
+P2_DONE 08:52
+| set | operator | n | tasks | mean SR_c | share SR ≤ 0.6 | share in band | share accepted |
+|---|---|---|---|---|---|---|---|
+PIPELINE_DONE 08:52

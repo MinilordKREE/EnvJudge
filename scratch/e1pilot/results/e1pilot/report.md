@@ -1,6 +1,6 @@
-# E1-pilot report — generated 2026-09-06 03:55 UTC
+# E1-pilot report — generated 2026-09-06 08:52 UTC
 
-PREREG3 sha `f8080d4`; qwen_map.yaml sha256 `101bfad5ec3285d75054f0bbd06cfcfbd01176150485906d7646c5b88d805501`; policy model `openai/qwen3-8b` at `https://dashscope-intl.aliyuncs.com/compatible-mode/v1` (enable_thinking=false); pricing dashscope-qwen3-8b-2026-09-06 (Qwen) / deepseek-pricing-2026-09-03 (DeepSeek); spend by phase (USD): {'p1_probe': 0.0}; total USD 0.00 of the 30 cap.
+PREREG3 sha `f8080d4`; qwen_map.yaml sha256 `d584098f2d7dfcd5f1152f18c93f595e380916bccabb454fff1100af6f3b5265`; policy model `openai/qwen3-8b` at `https://dashscope-intl.aliyuncs.com/compatible-mode/v1` (enable_thinking=false); pricing dashscope-qwen3-8b-2026-09-06 (Qwen) / deepseek-pricing-2026-09-03 (DeepSeek); spend by phase (USD): {'p1_probe': 0.001, 'p1_map': 21.457, 'p2_dose': 1.531}; total USD 22.99 of the 30 cap.
 
 ## P0 — ΔSR by operator type (E-obs H arm, saturated tasks)
 
@@ -37,12 +37,40 @@ PREREG3 sha `f8080d4`; qwen_map.yaml sha256 `101bfad5ec3285d75054f0bbd06cfcfbd01
 
 ## P1 — Qwen3-8B regime map
 
-P1 not run (DashScope model access pending).
+| consumer | zero | edge-low | band | edge-high | saturated |
+|---|---|---|---|---|---|
+| Qwen3-8B p16 | 0.267 [0.133, 0.433] | 0.067 [0.000, 0.167] | 0.200 [0.067, 0.367] | 0.100 [0.000, 0.233] | 0.367 [0.200, 0.533] |
+| Pro p16 | 0.033 [0.000, 0.100] | 0.133 [0.033, 0.267] | 0.200 [0.067, 0.333] | 0.267 [0.133, 0.433] | 0.367 [0.200, 0.533] |
+| Flash p8 | 0.000 [0.000, 0.000] | 0.033 [0.000, 0.100] | 0.200 [0.067, 0.367] | 0.167 [0.033, 0.300] | 0.600 [0.433, 0.767] |
+
+Mean p16 (Qwen) = 0.573; parse-failure rate = 0.129 of 15645 policy steps (0 without an <action> tag, 2021 inadmissible); episodes 480, errors 0, mean steps 32.594.
+
+**K1 outcome: both-sides** — zero + edge-low = 0.333, saturated + edge-high = 0.467.
 
 ## P2 — structural hardening dose pilot
 
-P2 not run.
+Targets: 11 tasks; regime qwen; rollouts 144; dose outcomes {'NOEFFECT': 22, 'UNCERTIFIED': 9, 'ZERO': 11, 'INFEASIBLE': 12, 'IN-BAND': 1}; certificate sources {'R_pol': 31, 'uncertified': 9, 'R_exp': 3}.
 
+| task | type | hit | hit dose | rollouts to hit | total rollouts | F_S0 max-dose class | F_O max-dose class | infeasible | uncertified |
+|---|---|---|---|---|---|---|---|---|---|
+| 1 | pick_clean_then_place_in_recep | False |  |  | 20 | NOEFFECT | ZERO | 0 | 1 |
+| 2 | pick_two_obj_and_place | False |  |  | 8 | none-feasible | ZERO | 2 | 1 |
+| 7 | pick_and_place_simple | False |  |  | 12 | NOEFFECT | ZERO | 2 | 0 |
+| 12 | pick_two_obj_and_place | False |  |  | 8 | none-feasible | ZERO | 3 | 0 |
+| 13 | pick_clean_then_place_in_recep | False |  |  | 16 | NOEFFECT | ZERO | 1 | 0 |
+| 15 | pick_cool_then_place_in_recep | False |  |  | 12 | NOEFFECT | ZERO | 0 | 2 |
+| 21 | pick_and_place_simple | True | F_O:0.5 | 20 | 24 | NOEFFECT | ZERO | 0 | 0 |
+| 22 | pick_two_obj_and_place | False |  |  | 8 | none-feasible | ZERO | 0 | 3 |
+| 24 | pick_cool_then_place_in_recep | False |  |  | 12 | NOEFFECT | ZERO | 0 | 2 |
+| 25 | look_at_obj_in_light | False |  |  | 8 | none-feasible | ZERO | 3 | 0 |
+| 29 | pick_clean_then_place_in_recep | False |  |  | 16 | NOEFFECT | ZERO | 1 | 0 |
+
+Share of target tasks reaching IN-BAND with ≤ 16 rollouts = 0.000 [0.000, 0.000] (n=11, tasks=11); median rollouts-to-hit = 20.
+Share still NOEFFECT (or infeasible) at the maximum feasible dose of BOTH families = 0.000 [0.000, 0.000] (n=11, tasks=11).
+
+**K2 outcome: dead for this policy (< 0.30)**; **K2′: no expressivity ceiling (< 0.40)**.
+
+Dose–response rows (all doses with rollouts) are in p2_curves.csv.
 
 ## P3 — downstream skill sanity
 

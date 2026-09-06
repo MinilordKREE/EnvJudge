@@ -107,7 +107,17 @@ def outputs(k: int) -> None:
     for tid in range(30):
         rs_ = by.get(tid, [])
         p = sum(x["success"] for x in rs_) / len(rs_) if rs_ else None
-        rows.append({"task_id": tid, "type": tasks[tid]["type"], "p16_qwen": "" if p is None else round(p, 4), "n_qwen": len(rs_), "p16_pro": tasks[tid]["p16"], "p8_flash": flash[tid]["p8_flash"]})
+        n_steps = n_inadm = n_cap = 0
+        for t in rs_:
+            prev = None
+            for s in t.get("steps", []):
+                n_steps += 1
+                text = (s.get("raw_action") or {}).get("kwargs", {}).get("text", "")
+                n_inadm += int(prev is not None and text not in prev)
+                prev = ((s.get("raw_observation") or {}).get("data") or {}).get("admissible_commands")
+            n_cap += int(t.get("duration_steps", 0) >= 50 and not t.get("success"))
+        rows.append({"task_id": tid, "type": tasks[tid]["type"], "p16_qwen": "" if p is None else round(p, 4), "n_qwen": len(rs_), "p16_pro": tasks[tid]["p16"], "p8_flash": flash[tid]["p8_flash"],
+                     "inadmissible_rate": round(n_inadm / n_steps, 4) if n_steps else "", "cap50_share": round(n_cap / len(rs_), 4) if rs_ else "", "mean_steps": round(sum(t.get("duration_steps", 0) for t in rs_) / len(rs_), 1) if rs_ else ""})
     with open(RES / "qwen_p16.csv", "w", newline="") as fh:
         w = csv.DictWriter(fh, fieldnames=list(rows[0].keys())); w.writeheader(); w.writerows(rows)
     def regime(p):

@@ -173,13 +173,14 @@ def main() -> None:
                     row.update({"rollouts": 0, "successes": 0, "p_hat": None, "class": "UNCERTIFIED"})
                 else:
                     tag = f"p2-{tid}-{fam}-{dose}"
-                    succs = 0; n = 0
-                    for k in range(4):
-                        tr = runner.episode(cand, tid, tag); n += 1; succs += int(bool(tr.success))
+                    from concurrent.futures import ThreadPoolExecutor
+                    def _batch(nb: int) -> int:
+                        with ThreadPoolExecutor(max_workers=nb) as pool:
+                            return sum(int(bool(t.success)) for t in pool.map(lambda _: runner.episode(cand, tid, tag), range(nb)))
+                    succs = _batch(4); n = 4
                     cls4 = classify_after4(succs)
                     if cls4 is None and kmax > 4:
-                        for k in range(4, kmax):
-                            tr = runner.episode(cand, tid, tag); n += 1; succs += int(bool(tr.success))
+                        succs += _batch(kmax - 4); n = kmax
                         cls = classify8(succs) if n == 8 else ("IN-BAND" if 0.375 <= succs / n <= 0.625 else "OTHER")
                     else:
                         cls = cls4 or ("IN-BAND" if 0.375 <= succs / n <= 0.625 else "OTHER")
