@@ -1,0 +1,7 @@
+stat,value
+accepted SR_c distribution,"{""0.4"": 6, ""0.6"": 6, ""0.8"": 7}"
+"accepted outside [0.4, 0.6]",7/19 = 0.368
+accepted SR_c values outside band,0.8 0.8 0.8 0.8 0.8 0.8 0.8
+tasks without ACCEPT,10
+of which best attempt in band,0
+validation rollouts per ACCEPT (all H validation / accepts),530/19

@@ -1,0 +1,10 @@
+stat,value
+prefix flip rate P(not all three equal),"0.114 [0.046, 0.200] (n=1785, tasks=19)"
+P(C_1 = 1 | C_any3 = 1),"0.827 [0.693, 0.930] (n=718, tasks=19)"
+expert failure rate from reset on these tasks (witness attempts),0.211 (57 attempts on 19 tasks)
+share L_1 >= 2,"0.943 [0.857, 1.000] (n=35, tasks=19)"
+share L_any3 >= 2,"0.943 [0.857, 1.000] (n=35, tasks=19)"
+share non-monotone (attempt 1),"0.571 [0.368, 0.778] (n=35, tasks=19)"
+share non-monotone_any3,"0.514 [0.306, 0.714] (n=35, tasks=19)"
+share non-monotone_maj3,"0.486 [0.286, 0.694] (n=35, tasks=19)"
+n trajectories / prefixes,35 / 1785

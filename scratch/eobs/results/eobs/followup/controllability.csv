@@ -1,0 +1,11 @@
+set,rate,rate_point,ci_lo,ci_hi,n,tasks
+S_H,P(toward band | SR_i above band),0.222,0.111,0.364,45,15
+S_H,P(toward band | SR_i below band),0.000,0.000,0.000,2,2
+S_H,P(toward band | SR_i outside band),0.213,0.109,0.350,47,15
+S_H,P(next milder (SR up) | ZERO or OVERSHOOT),1.000,1.000,1.000,2,2
+S_H,P(next harder (SR down) | NOEFFECT),0.244,0.135,0.378,45,15
+S_H_prime,P(toward band | SR_i above band),0.245,0.133,0.391,53,18
+S_H_prime,P(toward band | SR_i below band),0.000,0.000,0.000,3,3
+S_H_prime,P(toward band | SR_i outside band),0.232,0.123,0.365,56,18
+S_H_prime,P(next milder (SR up) | ZERO or OVERSHOOT),1.000,1.000,1.000,3,3
+S_H_prime,P(next harder (SR down) | NOEFFECT),0.264,0.150,0.405,53,18
