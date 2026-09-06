@@ -1,0 +1,46 @@
+{
+  "rows": [
+    {
+      "condition": "orig_m",
+      "split": "eval_in_distribution",
+      "n_won": 18,
+      "n": 30,
+      "sr": 0.6,
+      "start_seed": 0,
+      "round": 1
+    },
+    {
+      "condition": "orig_m",
+      "split": "eval_out_of_distribution",
+      "n_won": 13,
+      "n": 30,
+      "sr": 0.43333333333333335,
+      "start_seed": 0,
+      "round": 1
+    },
+    {
+      "condition": "ours",
+      "split": "eval_in_distribution",
+      "n_won": 11,
+      "n": 30,
+      "sr": 0.36666666666666664,
+      "start_seed": 0,
+      "round": 1
+    },
+    {
+      "condition": "ours",
+      "split": "eval_out_of_distribution",
+      "n_won": 8,
+      "n": 30,
+      "sr": 0.26666666666666666,
+      "start_seed": 0,
+      "round": 1
+    }
+  ],
+  "config_path": "/home/kree/work/EnvJudge/scratch/e1pilot/configs/reasoning_bank_eval_qwen.yaml",
+  "start_seeds": [
+    0
+  ],
+  "concurrency": 6,
+  "n_api_keys": 1
+}

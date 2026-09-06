@@ -83,9 +83,10 @@ def tables(reps: list[int]) -> None:
     for rep in reps:
         for run, conds in ((f"e1_p3a_eval_r{rep}", ("nobank", "orig")), (f"e1_p3b_eval_r{rep}", ("orig_m", "ours"))):
             for p in sorted((WORK / "runs" / run).rglob("*.jsonl")):
-                cond, _, split = p.stem.partition("_")
-                if cond not in conds:
+                cond = next((c for c in sorted(conds, key=len, reverse=True) if p.stem.startswith(c + "_")), None)   # 'orig_m' contains '_'
+                if cond is None:
                     continue
+                split = p.stem[len(cond) + 1:]
                 for r in _traces(p):
                     rows.append({"rep": rep, "condition": cond, "split": split, "seed": r["seed"], "success": bool(r["success"]), "steps": r["duration_steps"], "error": r.get("error", "")})
     with open(RES / "p3b_episodes.csv", "w", newline="") as fh:

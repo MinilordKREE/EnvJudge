@@ -102,7 +102,21 @@ def main(prereg_sha: str, cfg_sha: str) -> None:
               f"**K2 outcome: {p2['k2_text']}**; **K2′: {p2['k2p_text']}**.", "", "Dose–response rows (all doses with rollouts) are in p2_curves.csv."]
     else:
         L += ["P2 not run.", ""]
-    L += ["", "## P3 — downstream skill sanity", "", "Not run (gated; owner approval after P2)." if not (RES / "p3_skills.csv").exists() else "see p3_skills.csv", "",
+    L += ["", "## P3 — downstream skill sanity (P3a: nobank / orig; P3b: orig_m / ours)", ""]
+    if (RES / "p3_skills.csv").exists():
+        L += ["| condition | split | tasks | episodes | success | CI |", "|---|---|---|---|---|---|"]
+        for r in csv.DictReader(open(RES / "p3_skills.csv")):
+            L.append(f"| {r['condition']} | {r['split']} | {r['n_tasks']} | {r['episodes']} | {r['success']} | [{r['ci_lo']}, {r['ci_hi']}] |")
+        if (RES / "p3b_summary.json").exists():
+            k3 = json.loads((RES / "p3b_summary.json").read_text())
+            idd = k3["K3"].get("eval_in_distribution"); ood = k3["K3"].get("eval_out_of_distribution")
+            L += ["", f"Held-out = first 30 tasks of each released split (start seed 0), the SAME tasks × 3 replicates (owner deviation from the released 0/1000/2000 rounds). Banks: orig = P3a bank from all 30 train tasks; orig_m = matched-original (8 P1 trajectories on each of the 9 in-band tasks); ours = 8 Qwen rollouts on each in-band controlled env (P2b hit dose). Item counts: orig 67, orig_m 23, ours 9 (trajectory counts matched; the released induction emits fewer items from paired success/failure trajectories).", "",
+                  f"**K3 outcome: {k3['verdict']}** — ours − orig_m (paired per task): in-distribution {fmt(idd[0])} [{fmt(idd[1])}, {fmt(idd[2])}]; out-of-distribution {fmt(ood[0])} [{fmt(ood[1])}, {fmt(ood[2])}]; threshold −0.02 on the in-distribution split."]
+        else:
+            L += ["", "K3: not evaluable, pending P3b."]
+    else:
+        L += ["Not run."]
+    L += ["",
           "## Measurement notes", "", "- Parse failure = no <action> tag or a command outside the admissible list shown to the policy; computed per step from traces.",
           "- Certificates: R_pol replays the shortest successful baseline trajectory of the same policy; R_exp is the stochastic handcoded expert (≤ 3 attempts) from the staged state; uncertified doses are skipped and counted.",
           "- F_S0 placement verb fixed to `move <obj> to <recep>` before any dose was run (LOG).", "",

@@ -1,6 +1,6 @@
-# E1-pilot report — generated 2026-09-06 08:52 UTC
+# E1-pilot report — generated 2026-09-06 18:48 UTC
 
-PREREG3 sha `f8080d4`; qwen_map.yaml sha256 `d584098f2d7dfcd5f1152f18c93f595e380916bccabb454fff1100af6f3b5265`; policy model `openai/qwen3-8b` at `https://dashscope-intl.aliyuncs.com/compatible-mode/v1` (enable_thinking=false); pricing dashscope-qwen3-8b-2026-09-06 (Qwen) / deepseek-pricing-2026-09-03 (DeepSeek); spend by phase (USD): {'p1_probe': 0.001, 'p1_map': 21.457, 'p2_dose': 1.531}; total USD 22.99 of the 30 cap.
+PREREG3 sha `f8080d4`; qwen_map.yaml sha256 `d584098f2d7dfcd5f1152f18c93f595e380916bccabb454fff1100af6f3b5265`; policy model `openai/qwen3-8b` at `https://dashscope-intl.aliyuncs.com/compatible-mode/v1` (enable_thinking=false); pricing dashscope-qwen3-8b-2026-09-06 (Qwen) / deepseek-pricing-2026-09-03 (DeepSeek); spend by phase (USD): {'p1_probe': 0.001, 'p1_map': 21.457, 'p2_dose': 5.197, 'p3_induce': 0.13, 'p3_induce_embed': 0.0, 'p3_skills': 5.714, 'p3_skills_embed': 0.0}; total USD 32.50 of the 30 cap.
 
 ## P0 — ΔSR by operator type (E-obs H arm, saturated tasks)
 
@@ -72,9 +72,28 @@ Share still NOEFFECT (or infeasible) at the maximum feasible dose of BOTH famili
 
 Dose–response rows (all doses with rollouts) are in p2_curves.csv.
 
-## P3 — downstream skill sanity
+## P3 — downstream skill sanity (P3a: nobank / orig; P3b: orig_m / ours)
 
-Not run (gated; owner approval after P2).
+| condition | split | tasks | episodes | success | CI |
+|---|---|---|---|---|---|
+| nobank | eval_in_distribution | 30 | 90 | 0.444 | [0.300, 0.589] |
+| nobank | eval_out_of_distribution | 30 | 90 | 0.322 | [0.178, 0.478] |
+| orig | eval_in_distribution | 30 | 90 | 0.422 | [0.256, 0.589] |
+| orig | eval_out_of_distribution | 30 | 90 | 0.433 | [0.267, 0.600] |
+| orig_m | eval_in_distribution | 30 | 90 | 0.589 | [0.422, 0.756] |
+| orig_m | eval_out_of_distribution | 30 | 90 | 0.467 | [0.311, 0.622] |
+| ours | eval_in_distribution | 30 | 90 | 0.344 | [0.189, 0.511] |
+| ours | eval_out_of_distribution | 30 | 90 | 0.289 | [0.144, 0.444] |
+| ours - orig_m (paired per task) | eval_in_distribution | 30 |  | -0.244 | [-0.411, -0.078] |
+| ours - orig (paired per task) | eval_in_distribution | 30 |  | -0.078 | [-0.278, 0.122] |
+| ours - nobank (paired per task) | eval_in_distribution | 30 |  | -0.100 | [-0.222, 0.011] |
+| ours - orig_m (paired per task) | eval_out_of_distribution | 30 |  | -0.178 | [-0.378, 0.022] |
+| ours - orig (paired per task) | eval_out_of_distribution | 30 |  | -0.144 | [-0.400, 0.111] |
+| ours - nobank (paired per task) | eval_out_of_distribution | 30 |  | -0.033 | [-0.200, 0.144] |
+
+Held-out = first 30 tasks of each released split (start seed 0), the SAME tasks × 3 replicates (owner deviation from the released 0/1000/2000 rounds). Banks: orig = P3a bank from all 30 train tasks; orig_m = matched-original (8 P1 trajectories on each of the 9 in-band tasks); ours = 8 Qwen rollouts on each in-band controlled env (P2b hit dose). Item counts: orig 67, orig_m 23, ours 9 (trajectory counts matched; the released induction emits fewer items from paired success/failure trajectories).
+
+**K3 outcome: SL line at risk (< −0.02); the RL Study becomes the primary downstream evidence** — ours − orig_m (paired per task): in-distribution -0.244 [-0.411, -0.078]; out-of-distribution -0.178 [-0.378, 0.022]; threshold −0.02 on the in-distribution split.
 
 ## Measurement notes
 

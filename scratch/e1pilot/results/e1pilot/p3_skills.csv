@@ -1,7 +1,15 @@
-condition,split,n_tasks,episodes,success,ci_lo,ci_hi,errors
-nobank,eval_in_distribution,30,90,0.444,0.300,0.589,0
-nobank,eval_out_of_distribution,30,90,0.322,0.178,0.478,0
-orig,eval_in_distribution,30,90,0.422,0.256,0.589,0
-orig,eval_out_of_distribution,30,90,0.433,0.267,0.600,0
-orig - nobank (paired per task),eval_in_distribution,30,,-0.022,-0.178,0.144,
-orig - nobank (paired per task),eval_out_of_distribution,30,,0.111,-0.100,0.322,
+condition,split,n_tasks,episodes,success,ci_lo,ci_hi
+nobank,eval_in_distribution,30,90,0.444,0.300,0.589
+nobank,eval_out_of_distribution,30,90,0.322,0.178,0.478
+orig,eval_in_distribution,30,90,0.422,0.256,0.589
+orig,eval_out_of_distribution,30,90,0.433,0.267,0.600
+orig_m,eval_in_distribution,30,90,0.589,0.422,0.756
+orig_m,eval_out_of_distribution,30,90,0.467,0.311,0.622
+ours,eval_in_distribution,30,90,0.344,0.189,0.511
+ours,eval_out_of_distribution,30,90,0.289,0.144,0.444
+ours - orig_m (paired per task),eval_in_distribution,30,,-0.244,-0.411,-0.078
+ours - orig (paired per task),eval_in_distribution,30,,-0.078,-0.278,0.122
+ours - nobank (paired per task),eval_in_distribution,30,,-0.100,-0.222,0.011
+ours - orig_m (paired per task),eval_out_of_distribution,30,,-0.178,-0.378,0.022
+ours - orig (paired per task),eval_out_of_distribution,30,,-0.144,-0.400,0.111
+ours - nobank (paired per task),eval_out_of_distribution,30,,-0.033,-0.200,0.144

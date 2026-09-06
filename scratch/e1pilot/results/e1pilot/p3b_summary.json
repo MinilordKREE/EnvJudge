@@ -1,0 +1,15 @@
+{
+ "K3": {
+  "eval_in_distribution": [
+   -0.24444444444444446,
+   -0.41111111111111115,
+   -0.07777777777777778
+  ],
+  "eval_out_of_distribution": [
+   -0.17777777777777776,
+   -0.3777777777777777,
+   0.022222222222222213
+  ]
+ },
+ "verdict": "SL line at risk (< \u22120.02); the RL Study becomes the primary downstream evidence"
+}

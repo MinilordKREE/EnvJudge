@@ -1,1 +1,58 @@
 P3B_BANKS_START 15:41
+[P3b] bank sources: [{'task_id': 7, 'env': 'p2b-7-F_H-13', 'n_trajectories_each': 8, 'ctrl_successes': 5, 'orig_successes': 8}, {'task_id': 12, 'env': 'p2b-12-F_O-0.875', 'n_trajectories_each': 8, 'ctrl_successes': 5, 'orig_successes': 8}, {'task_id': 13, 'env': 'p2b-13-F_O-0.875', 'n_trajectories_each': 8, 'ctrl_successes': 3, 'orig_successes': 8}, {'task_id': 15, 'env': 'p2b-15-F_O-0.75', 'n_trajectories_each': 8, 'ctrl_successes': 4, 'orig_successes': 8}, {'task_id': 19, 'env': 'p2b-19-F_O-0.75', 'n_trajectories_each': 8, 'ctrl_successes': 3, 'orig_successes': 7}, {'task_id': 21, 'env': 'p2b-21-F_O-0.875', 'n_trajectories_each': 8, 'ctrl_successes': 5, 'orig_successes': 8}, {'task_id': 22, 'env': 'p2b-22-F_O-0.75', 'n_trajectories_each': 8, 'ctrl_successes': 4, 'orig_successes': 8}, {'task_id': 23, 'env': 'p2b-23-F_O-0.75', 'n_trajectories_each': 8, 'ctrl_successes': 5, 'orig_successes': 7}, {'task_id': 29, 'env': 'p2b-29-F_O-0.9688', 'n_trajectories_each': 8, 'ctrl_successes': 5, 'orig_successes': 8}]
+  [ours] induced 9 items from 9 tasks
+    [ours] embedded + wrote 9/9 -> /home/kree/work/EnvJudge/scratch/e1pilot/results/e1pilot/banks/ours_qwen.jsonl
+[P3b] ours: 9 items -> /home/kree/work/EnvJudge/scratch/e1pilot/results/e1pilot/banks/ours_qwen.jsonl
+  [orig_m] induced 23 items from 9 tasks
+    [orig_m] embedded + wrote 20/23 -> /home/kree/work/EnvJudge/scratch/e1pilot/results/e1pilot/banks/orig_m_qwen.jsonl
+    [orig_m] embedded + wrote 23/23 -> /home/kree/work/EnvJudge/scratch/e1pilot/results/e1pilot/banks/orig_m_qwen.jsonl
+[P3b] orig_m: 23 items -> /home/kree/work/EnvJudge/scratch/e1pilot/results/e1pilot/banks/orig_m_qwen.jsonl
+P3B_BANKS_DONE 15:42
+P3B REP 1 START 15:42
+  orig_m   31/60 = 51.7%
+  ours     19/60 = 31.7%
+=== FINAL: 3-round mean ± std per (condition, split)
+orig_m     eval_in_distribution         n=1        60.0%     0.0
+orig_m     eval_out_of_distribution     n=1        43.3%     0.0
+ours       eval_in_distribution         n=1        36.7%     0.0
+ours       eval_out_of_distribution     n=1        26.7%     0.0
+orig_m     n=1               51.7%     0.0
+ours       n=1               31.7%     0.0
+[P3b] eval rep 1 rc=0 -> /home/kree/work/EnvJudge/scratch/e1pilot/work/runs/e1_p3b_eval_r1
+P3B REP 1 DONE 16:44
+P3B REP 2 START 16:44
+  orig_m   34/60 = 56.7%
+  ours     20/60 = 33.3%
+=== FINAL: 3-round mean ± std per (condition, split)
+orig_m     eval_in_distribution         n=1        63.3%     0.0
+orig_m     eval_out_of_distribution     n=1        50.0%     0.0
+ours       eval_in_distribution         n=1        36.7%     0.0
+ours       eval_out_of_distribution     n=1        30.0%     0.0
+orig_m     n=1               56.7%     0.0
+ours       n=1               33.3%     0.0
+[P3b] eval rep 2 rc=0 -> /home/kree/work/EnvJudge/scratch/e1pilot/work/runs/e1_p3b_eval_r2
+P3B REP 2 DONE 17:43
+P3B REP 3 START 17:43
+  orig_m   30/60 = 50.0%
+  ours     18/60 = 30.0%
+=== FINAL: 3-round mean ± std per (condition, split)
+orig_m     eval_in_distribution         n=1        53.3%     0.0
+orig_m     eval_out_of_distribution     n=1        46.7%     0.0
+ours       eval_in_distribution         n=1        30.0%     0.0
+ours       eval_out_of_distribution     n=1        30.0%     0.0
+orig_m     n=1               50.0%     0.0
+ours       n=1               30.0%     0.0
+[P3b] eval rep 3 rc=0 -> /home/kree/work/EnvJudge/scratch/e1pilot/work/runs/e1_p3b_eval_r3
+P3B REP 3 DONE 18:47
+{'condition': 'nobank', 'split': 'eval_in_distribution', 'n_tasks': 30, 'episodes': 90, 'success': '0.444', 'ci_lo': '0.300', 'ci_hi': '0.589'}
+{'condition': 'nobank', 'split': 'eval_out_of_distribution', 'n_tasks': 30, 'episodes': 90, 'success': '0.322', 'ci_lo': '0.178', 'ci_hi': '0.478'}
+{'condition': 'orig', 'split': 'eval_in_distribution', 'n_tasks': 30, 'episodes': 90, 'success': '0.422', 'ci_lo': '0.256', 'ci_hi': '0.589'}
+{'condition': 'orig', 'split': 'eval_out_of_distribution', 'n_tasks': 30, 'episodes': 90, 'success': '0.433', 'ci_lo': '0.267', 'ci_hi': '0.600'}
+{'condition': 'ours', 'split': 'eval_in_distribution', 'n_tasks': 30, 'episodes': 90, 'success': '0.344', 'ci_lo': '0.189', 'ci_hi': '0.511'}
+{'condition': 'ours', 'split': 'eval_out_of_distribution', 'n_tasks': 30, 'episodes': 90, 'success': '0.289', 'ci_lo': '0.144', 'ci_hi': '0.444'}
+{'condition': 'ours - orig (paired per task)', 'split': 'eval_in_distribution', 'n_tasks': 30, 'episodes': '', 'success': '-0.078', 'ci_lo': '-0.278', 'ci_hi': '0.122'}
+{'condition': 'ours - nobank (paired per task)', 'split': 'eval_in_distribution', 'n_tasks': 30, 'episodes': '', 'success': '-0.100', 'ci_lo': '-0.222', 'ci_hi': '0.011'}
+{'condition': 'ours - orig (paired per task)', 'split': 'eval_out_of_distribution', 'n_tasks': 30, 'episodes': '', 'success': '-0.144', 'ci_lo': '-0.400', 'ci_hi': '0.111'}
+{'condition': 'ours - nobank (paired per task)', 'split': 'eval_out_of_distribution', 'n_tasks': 30, 'episodes': '', 'success': '-0.033', 'ci_lo': '-0.200', 'ci_hi': '0.144'}
+K3: {} None
+P3B_DONE 18:47
