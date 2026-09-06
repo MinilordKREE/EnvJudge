@@ -65,24 +65,48 @@ def _reasoning_content_present(raw) -> bool:
     return bool(rc)
 
 
+PROVIDER_ALLOWLIST = {
+    # api_key_env -> (allowed api_base values, required model prefix). Refuse construction otherwise: the key for one
+    # provider must never be sent to another endpoint (E1-pilot extension, 2026-09-06; backward-compatible).
+    "DEEPSEEK_API_KEY": ({"https://api.deepseek.com"}, "openai/deepseek"),
+    "DASHSCOPE_API_KEY": ({"https://dashscope.aliyuncs.com/compatible-mode/v1", "https://dashscope-intl.aliyuncs.com/compatible-mode/v1"}, "openai/qwen"),
+}
+
+
+def _secret_for(api_key_env: str) -> str:
+    from eobs.settings import secrets
+    s = secrets()
+    val = getattr(s, api_key_env.lower(), None)
+    if val is None:
+        raise ValueError(f"LedgerLLMClient: secret {api_key_env} is not configured")
+    return val.get_secret_value()
+
+
 class LedgerLLMClient(LLMClient):
     def __init__(self, inner_factory: str, inner_kwargs: dict, ledger_path: str, role: str = "",
-                 run_id: str = "", phase: str = "", arm: str = ""):
+                 run_id: str = "", phase: str = "", arm: str = "", api_key_env: str | None = None):
         cls = import_symbol(inner_factory)
         kw = dict(inner_kwargs)
-        # Routing guard: the DeepSeek key travels as OPENAI_API_KEY, so any path that forgets api_base would send it to
-        # api.openai.com. Refuse to construct unless the kwargs pin the DeepSeek endpoint and a deepseek model.
-        if kw.get("api_base") != "https://api.deepseek.com" or not str(kw.get("model", "")).startswith("openai/deepseek"):
-            raise ValueError(f"LedgerLLMClient: refusing model/api_base {kw.get('model')!r} / {kw.get('api_base')!r}; "
-                             "expected openai/deepseek-* at https://api.deepseek.com")
-        # api key from the environment (exported by the launcher from pydantic-settings); never from YAML
-        if "api_key" not in kw and os.environ.get("OPENAI_API_KEY"):
-            kw["api_key"] = os.environ["OPENAI_API_KEY"]
+        model, base = str(kw.get("model", "")), kw.get("api_base")
+        if api_key_env is None:
+            # Legacy path (E-obs): the DeepSeek key travels as OPENAI_API_KEY exported by the launcher.
+            if base != "https://api.deepseek.com" or not model.startswith("openai/deepseek"):
+                raise ValueError(f"LedgerLLMClient: refusing model/api_base {model!r} / {base!r}; expected openai/deepseek-* at https://api.deepseek.com")
+            if "api_key" not in kw and os.environ.get("OPENAI_API_KEY"):
+                kw["api_key"] = os.environ["OPENAI_API_KEY"]
+        else:
+            if api_key_env not in PROVIDER_ALLOWLIST:
+                raise ValueError(f"LedgerLLMClient: unknown api_key_env {api_key_env!r}")
+            bases, prefix = PROVIDER_ALLOWLIST[api_key_env]
+            if base not in bases or not model.startswith(prefix):
+                raise ValueError(f"LedgerLLMClient: refusing {api_key_env} with model/api_base {model!r} / {base!r}; allowed bases {sorted(bases)}, model prefix {prefix!r}")
+            kw["api_key"] = _secret_for(api_key_env)     # per-call key for litellm; never from YAML, never logged
         self.inner: LLMClient = cls(**kw)
         self.model_id = getattr(self.inner, "model_id", kw.get("model", ""))
         self.ledger_path = Path(ledger_path)
         self.ledger_path.parent.mkdir(parents=True, exist_ok=True)
         self.role, self.run_id, self.phase, self.arm = role, run_id, phase, arm
+        self.api_key_env = api_key_env
 
     def chat(self, messages, tools=None, tool_choice="auto", temperature=0.7, max_tokens=None, **kwargs):
         t0 = time.time()
@@ -117,7 +141,7 @@ class LedgerLLMClient(LLMClient):
             "candidate_id": os.environ.get("EOBS_CANDIDATE_ID", ""),
             "seed": os.environ.get("EOBS_SEED", ""),
             "role": self.role, "model": self.model_id, "pid": os.getpid(),
-            "pricing_version": PRICING_VERSION, **fields,
+            "pricing_version": (__import__("eobs.settings", fromlist=["PRICING_VERSION_QWEN"]).PRICING_VERSION_QWEN if "qwen" in str(self.model_id) else PRICING_VERSION), **fields,
         }
         line = json.dumps(row, ensure_ascii=False, default=str) + "\n"
         with _LOCK:

@@ -133,3 +133,24 @@ def test_ledger_client_routing_guard(tmp_path, monkeypatch):
         L.LedgerLLMClient("x:Fake", {"model": "openai/deepseek-v4-pro"}, ledger_path=str(tmp_path / "l.jsonl"))
     with pytest.raises(ValueError):
         L.LedgerLLMClient("x:Fake", {"model": "openai/gpt-4.1-mini", "api_base": "https://api.deepseek.com"}, ledger_path=str(tmp_path / "l.jsonl"))
+
+
+def test_provider_allowlist_guard(tmp_path, monkeypatch):
+    import eobs.llm as L
+    monkeypatch.setattr(L, "import_symbol", lambda name: _FakeInner)
+    monkeypatch.setattr(L, "_secret_for", lambda env: "sk-fake")
+    DS = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    ok = L.LedgerLLMClient("x:Fake", {"model": "openai/qwen3-8b", "api_base": DS}, ledger_path=str(tmp_path / "l.jsonl"), api_key_env="DASHSCOPE_API_KEY")
+    assert ok.inner.model_id == "openai/qwen3-8b"
+    L.LedgerLLMClient("x:Fake", {"model": "openai/deepseek-v4-pro", "api_base": "https://api.deepseek.com"}, ledger_path=str(tmp_path / "l.jsonl"), api_key_env="DEEPSEEK_API_KEY")
+    for kwargs, env in (({"model": "openai/qwen3-8b", "api_base": "https://api.deepseek.com"}, "DASHSCOPE_API_KEY"),      # DashScope key to DeepSeek base
+                        ({"model": "openai/deepseek-v4-pro", "api_base": DS}, "DEEPSEEK_API_KEY"),                          # DeepSeek key to DashScope base
+                        ({"model": "openai/gpt-4.1-mini", "api_base": DS}, "DASHSCOPE_API_KEY"),                            # wrong model family
+                        ({"model": "openai/qwen3-8b", "api_base": "https://api.openai.com/v1"}, "DASHSCOPE_API_KEY"),      # foreign base
+                        ({"model": "openai/qwen3-8b", "api_base": DS}, "OPENAI_API_KEY")):                                  # unknown env
+        with pytest.raises(ValueError):
+            L.LedgerLLMClient("x:Fake", kwargs, ledger_path=str(tmp_path / "l.jsonl"), api_key_env=env)
+    # identity property still holds on the new path
+    msgs = [object()]
+    r = ok.chat(msgs, tools=None, temperature=0.5)
+    assert ok.inner.calls[0]["messages"] is msgs and r.content == "<action>look</action>"

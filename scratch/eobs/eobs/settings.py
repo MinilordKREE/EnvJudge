@@ -23,7 +23,11 @@ PRICING_VERSION = "deepseek-pricing-2026-09-03"
 PRICES = {
     "deepseek-v4-pro": {"peak": {"miss": 1.32, "hit": 0.044, "out": 3.96}, "offpeak": {"miss": 0.66, "hit": 0.022, "out": 1.98}},
     "deepseek-v4-flash": {"peak": {"miss": 0.44, "hit": 0.014, "out": 1.32}, "offpeak": {"miss": 0.22, "hit": 0.007, "out": 0.66}},
+    # E1-pilot: Qwen3-8B on DashScope (no peak tariff). Filled by the price lookup in scratch/e1pilot/LOG.md; placeholder is the
+    # conservative USD 0.50 / 2.00 per M in/out until verified (PRICING_VERSION_QWEN says which).
+    "qwen3-8b": {"peak": {"miss": 0.18, "hit": 0.18, "out": 0.70}, "offpeak": {"miss": 0.18, "hit": 0.18, "out": 0.70}},
 }
+PRICING_VERSION_QWEN = "dashscope-qwen3-8b-2026-09-06"   # Model Studio intl (Singapore) price page: USD 0.18 in / 0.70 out per M, same for both modes
 BUDGET_HARD_USD = 120.0
 BUDGET_SOFT_USD = 80.0
 
@@ -31,6 +35,7 @@ BUDGET_SOFT_USD = 80.0
 class Secrets(BaseSettings):
     model_config = SettingsConfigDict(env_file=(str(REPO_ROOT / ".env"),), env_file_encoding="utf-8", extra="ignore")
     deepseek_api_key: SecretStr
+    dashscope_api_key: SecretStr | None = None   # E1-pilot (2026-09-06): second provider, optional
 
 
 @functools.lru_cache(maxsize=1)
