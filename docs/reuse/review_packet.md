@@ -136,5 +136,7 @@ every request (cb97026); (2) the designer re-emitted the exemplars verbatim (one
 raw designer calls are recorded (213793e); (3) corpus `game_file` was absolute, now relative to
 `$ALFWORLD_DATA`.
 
-Open: the fixed proposer has not yet produced a live proposal (both designer runs predate the
-fix); one more paid designer call on a saturated task (~USD 0.05) would confirm it.
+Confirmed after the fix (three direct designer calls, USD 0.006): DeepSeek V4 Pro proposed two
+validated new families for a pick_and_place task — `observation_whitespace_noise` (O axis, nested)
+and `action_list_shuffle` (declared A; permutes the footer order) — both loading through the
+released `code_loader`, referencing `DOSE`, and passing the d = 1 smoke; no exemplar copies.
