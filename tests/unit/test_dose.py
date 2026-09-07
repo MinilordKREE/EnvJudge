@@ -62,17 +62,59 @@ def test_classify_matches_spec() -> None:
 
 
 def test_next_dose_directions_and_halving() -> None:
-    assert next_dose([DoseEval(1.0, 8, 8, "NOEFFECT")], CFG) is None  # cannot raise above 1
-    assert (
-        next_dose([DoseEval(1.0, 0, 4, "ZERO")], CFG) == 0.5
-    )  # 0/4 at d=1 -> search down from 0.5
-    h = [DoseEval(1.0, 0, 4, "ZERO"), DoseEval(0.5, 7, 8, "HIGH")]
-    assert next_dose(h, CFG) == 0.375  # step halves: 0.25 -> 0.125
-    h.append(DoseEval(0.375, 1, 8, "LOW"))
-    assert next_dose(h, CFG) == 0.4375
-    h.append(DoseEval(0.4375, 4, 8, "IN_BAND"))
-    assert next_dose(h, CFG) is None
-    assert next_dose([DoseEval(1.0, 0, 4, "ZERO")] * 4, CFG) is None  # <= 4 evaluations
+    assert next_dose([DoseEval(1.0, 8, 8, "NOEFFECT")], CFG) is None  # no leverage at d = 1
+    assert next_dose([DoseEval(1.0, 7, 8, "HIGH")], CFG) is None  # too easy even at d = 1
+    assert next_dose([DoseEval(1.0, 0, 4, "ZERO")], CFG) == 0.5  # search from the midpoint
+    assert next_dose([DoseEval(1.0, 2, 8, "LOW")], CFG) == 0.75  # too hard at 1: lower by one step
+    # midpoint start, step 0.25 halved after each SEARCH evaluation: 0.5 -> 0.75 -> 0.875 -> 0.9375
+    h = [DoseEval(1.0, 0, 4, "ZERO"), DoseEval(0.5, 4, 4, "NOEFFECT")]
+    assert next_dose(h, CFG) == 0.75
+    h.append(DoseEval(0.75, 4, 4, "NOEFFECT"))
+    assert next_dose(h, CFG) == 0.875
+    h.append(DoseEval(0.875, 7, 8, "HIGH"))
+    assert next_dose(h, CFG) == 0.9375
+    # LOW (too hard) lowers the dose, HIGH raises it
+    low = [DoseEval(1.0, 0, 4, "ZERO"), DoseEval(0.5, 2, 8, "LOW")]
+    nxt = next_dose(low, CFG)
+    assert nxt is not None and nxt < 0.5 and nxt == 0.25
+    high = [DoseEval(1.0, 0, 4, "ZERO"), DoseEval(0.5, 6, 8, "HIGH")]
+    assert next_dose(high, CFG) == 0.75
+    # at most max_dose_evals SEARCH evaluations (the leverage test is not counted)
+    four = [
+        DoseEval(1.0, 0, 4, "ZERO"),
+        DoseEval(0.5, 4, 4, "NOEFFECT"),
+        DoseEval(0.75, 4, 4, "NOEFFECT"),
+        DoseEval(0.875, 4, 4, "NOEFFECT"),
+        DoseEval(0.9375, 4, 4, "NOEFFECT"),
+    ]
+    assert next_dose(four, CFG) is None
+    assert next_dose([DoseEval(1.0, 0, 4, "ZERO"), DoseEval(0.5, 4, 4, "IN_BAND")], CFG) is None
+
+
+def test_p2b_footer_curve_reachable_within_cap() -> None:
+    """The P2b footer-mask hits sat at 0.75 / 0.875 / 0.9688: with 4/4 at 0.5 and 0.75 the search
+    reaches 0.875 and can top it up to 8 inside the 30 cap (10 estimate + 4 + 4 + 4 + 8 = 30)."""
+    script = {
+        1.0: [0, 0, 0, 0],
+        0.5: [1, 1, 1, 1],
+        0.75: [1, 1, 1, 1],
+        0.875: [1, 0, 1, 0, 1, 1, 0, 0],
+    }
+    pos = {d: 0 for d in script}
+    spent = {"n": 10}  # the estimate already charged 10
+
+    def run(d: float, n: int) -> list[Trace]:
+        if spent["n"] + n > 30:
+            raise BudgetExhausted("cap", budget="search", cap=30, spent=spent["n"], task_id="t")
+        spent["n"] += n
+        out = script[d][pos[d] : pos[d] + n]
+        pos[d] += n
+        return [_trace(bool(x)) for x in out]
+
+    result = dose_search(run, CFG)
+    assert [h.d for h in result.history] == [1.0, 0.5, 0.75, 0.875]
+    assert result.status == "accepted" and result.accepted is not None
+    assert result.accepted.d == 0.875 and result.accepted.successes == 4 and spent["n"] == 30
 
 
 def test_cliff_curve_accepts_on_the_cliff() -> None:
@@ -102,7 +144,8 @@ def test_non_monotone_is_recorded_not_corrected() -> None:
         DoseEval(1.0, 8, 8, "NOEFFECT"),
     ]
     assert non_monotone_pairs(h) == 2
-    script = {1.0: [0, 0, 0, 0], 0.5: [1, 0, 0, 0, 1, 0, 0, 0], 0.625: [1, 1, 0, 0, 1, 1, 0, 1]}
+    # a monotone script: 0/4 at 1 -> 6/8 HIGH at 0.5 -> raise to 0.75 -> 4/8 in band
+    script = {1.0: [0, 0, 0, 0], 0.5: [1, 1, 0, 1, 1, 1, 0, 1], 0.75: [1, 0, 0, 1, 1, 0, 0, 1]}
     pos = {d: 0 for d in script}
 
     def run(d: float, n: int) -> list[Trace]:
@@ -110,15 +153,15 @@ def test_non_monotone_is_recorded_not_corrected() -> None:
         pos[d] += n
         return [_trace(bool(x)) for x in out]
 
-    result = dose_search(
-        run, CFG
-    )  # 0/4 -> 2/8 LOW at 0.5 -> raise by 0.125 -> 5/8 IN_BAND at 0.625
-    assert (
-        result.status == "accepted" and result.accepted is not None and result.accepted.d == 0.625
+    result = dose_search(run, CFG)
+    assert [h.d for h in result.history] == [1.0, 0.5, 0.75]
+    assert result.status == "accepted" and result.accepted is not None and result.accepted.d == 0.75
+    assert result.non_monotone == 0  # success falls with the dose: no violation
+    assert all(
+        b.d > a.d
+        for a, b in zip(result.history[1:], result.history[2:], strict=False)
+        if a.cls == "HIGH"
     )
-    assert (
-        result.non_monotone == 1
-    )  # p_hat(0.5)=0.25 < p_hat(0.625)=0.625: recorded, the acceptance stands
 
 
 def test_budget_exhaustion_stops_the_search() -> None:

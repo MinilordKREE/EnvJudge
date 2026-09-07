@@ -137,3 +137,61 @@ def test_ledger_rows_and_summary(tmp_path: Path) -> None:
         summary.budget_exhausted,
     ) == (1, 1, 1, 1)
     assert summary.rollouts == 1 and summary.rollouts_by_budget == {"search": 1}
+
+
+def test_per_task_totals_merge_call_and_rollout_rows(tmp_path: Path) -> None:
+    from datetime import UTC, datetime
+
+    from aea.llm.ledger import per_task_totals
+    from aea.llm.pricing import CostBreakdown
+    from aea.llm.types import ChatResponse
+
+    ledger = Ledger(tmp_path / "ledger.jsonl", "r1")
+    att = Attribution(phase="estimate", budget="search", arm="A", task_id="7")
+    request = ChatRequest(
+        model="m", messages=(ChatMessage(role="user", content="x"),), seed=7, attribution=att
+    )
+    for i in range(3):
+        response = ChatResponse(
+            content="a",
+            reasoning=None,
+            finish_reason="stop",
+            usage=Usage(prompt_tokens=100 * (i + 1), completion_tokens=10),
+            model="m",
+            provider="Alibaba",
+            upstream_cost=None,
+            response_id=None,
+            request_sha256="s",
+            latency_ms=1,
+            created_at=datetime.now(UTC),
+        )
+        ledger.record_call(
+            request,
+            response,
+            cost=CostBreakdown(usd=0.01 * (i + 1), tier="flat", pricing_version="v"),
+            attempt=1,
+        )
+    ledger.record_rollout(
+        attribution=att,
+        seed=7,
+        model="m",
+        rollout_uid="u1",
+        usage=Usage(prompt_tokens=0, completion_tokens=0),
+        cost=CostBreakdown(usd=0.0, tier="flat", pricing_version="rollout"),
+        steps=3,
+        success=True,
+    )
+    ledger.record_rollout(
+        attribution=Attribution(phase="estimate", budget="search", arm="A", task_id="8"),
+        seed=8,
+        model="m",
+        rollout_uid="u2",
+        usage=Usage(prompt_tokens=0, completion_tokens=0),
+        cost=CostBreakdown(usd=0.0, tier="flat", pricing_version="rollout"),
+        steps=1,
+        success=False,
+    )
+    totals = per_task_totals(read_ledger(ledger.path))
+    assert totals["7"].rollouts == 1 and totals["7"].calls == 3
+    assert abs(totals["7"].usd - 0.06) < 1e-12 and totals["7"].prompt_tokens == 600
+    assert totals["8"].rollouts == 1 and totals["8"].usd == 0.0

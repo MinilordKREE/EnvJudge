@@ -91,6 +91,24 @@ def read_corpus(path: Path) -> list[CorpusEntry]:
     return [CorpusEntry.model_validate(r) for r in read_jsonl(path)]
 
 
+HINT_CANDIDATE_ID = "hint"
+
+
+def mark_hint(trace: Trace) -> Trace:
+    """R_hint rollouts (expert plan in the prompt) are witness searches, never training data."""
+    trace.candidate_id = HINT_CANDIDATE_ID
+    return trace
+
+
+def is_hint_trace(trace: Trace) -> bool:
+    return bool(trace.candidate_id == HINT_CANDIDATE_ID or trace.iteration_id.startswith("hint:"))
+
+
+def training_traces(path: Path) -> list[Trace]:
+    """The traces induction and bank building may use: every rollout except hint rollouts."""
+    return [t for t in TraceStore(path).all() if not is_hint_trace(t)]
+
+
 class TraceWriter:
     """Thin wrapper over the released ``TraceStore`` (append-only JSONL of ``Trace``)."""
 

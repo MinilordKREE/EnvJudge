@@ -26,6 +26,8 @@ class TaskAccount:
     cap: int
     charged: dict[BudgetName, int] = field(default_factory=lambda: defaultdict(int))
     by_phase: dict[tuple[BudgetName, Phase], int] = field(default_factory=lambda: defaultdict(int))
+    infra_errors: int = 0
+    """Rollouts that ended in an environment/infrastructure error: refunded, never counted."""
     status: str = "open"
 
     @property
@@ -76,6 +78,18 @@ class Budget:
             acct.by_phase[(budget, phase)] += n
         return acct
 
+    def refund(
+        self, task_id: str, n: int, *, budget: BudgetName, phase: Phase, round_index: int = 0
+    ) -> TaskAccount:
+        """Give back ``n`` rollouts that errored (spec section 2: errors are never counted) and
+        count them as infrastructure errors in the accounting."""
+        acct = self.account(task_id, round_index)
+        with self._lock:
+            acct.charged[budget] = max(acct.charged[budget] - n, 0)
+            acct.by_phase[(budget, phase)] = max(acct.by_phase[(budget, phase)] - n, 0)
+            acct.infra_errors += n
+        return acct
+
     def accounting_rows(self) -> list[dict[str, object]]:
         """One row per (task, round, budget, phase) for ``accounting.csv``."""
         rows: list[dict[str, object]] = []
@@ -91,6 +105,7 @@ class Budget:
                             "rollouts": n,
                             "search_total": acct.search_spent,
                             "cap": acct.cap,
+                            "infra_errors": acct.infra_errors,
                             "status": acct.status,
                         }
                     )

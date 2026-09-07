@@ -55,6 +55,7 @@ def test_saturated_footer_policy_searches_the_footer_dose(tmp_path: Path) -> Non
         "accepted_knob",
         "exhausted",
         "frozen_no_leverage",
+        "budget_cap_hit",  # 10 + 4 + 8 + 8 = 30: a third search dose cannot start
     )
     events = read_trace(tmp_path / "run" / "events.jsonl")
     ds = next(e for e in events if e.kind == "dose_search")
@@ -108,3 +109,68 @@ def test_concurrency_keeps_per_task_accounts(tmp_path: Path) -> None:
         assert ctrl.budget.account(task_id).search_spent <= 30
     events = read_trace(tmp_path / "run" / "events.jsonl")
     assert len([e for e in events if e.kind == "task_done"]) == 3
+
+
+def test_errored_rollouts_are_refunded_and_hint_traces_marked(tmp_path: Path) -> None:
+    from envharness.core.types import Candidate, Trace
+
+    from aea.io import is_hint_trace, training_traces
+
+    sub = FakeSubstrate({"2": "expert"}, seed=1)
+    ctrl = Controller(AEAConfig(), sub, tmp_path / "run", "r3", arm="A", use_designer=False)
+    task = TaskRef("2", 2)
+    real = sub.rollouts
+
+    def flaky(task_ref: TaskRef, candidate: Candidate, n: int, **kw: Any) -> list[Trace]:
+        traces = real(task_ref, candidate, n, **kw)
+        traces[0] = traces[0].model_copy(update={"error": "subprocess timeout", "success": False})
+        return traces
+
+    setattr(sub, "rollouts", flaky)  # noqa: B010 - scripted fault injection
+    traces = ctrl._charged_rollouts(task, Candidate(), 4, "estimate")
+    assert len(traces) == 4 and ctrl.budget.account("2").search_spent == 3
+    assert ctrl.budget.account("2").infra_errors == 1
+    setattr(sub, "rollouts", real)  # noqa: B010
+    hinted = ctrl._charged_rollouts(task, Candidate(), 1, "hint:footer_mask", hint=["go to a"])
+    assert is_hint_trace(hinted[0])
+    kept = training_traces(tmp_path / "run" / "traces.jsonl")
+    assert len(kept) == 4 and not any(is_hint_trace(t) for t in kept)
+
+
+def test_exhausted_family_does_not_end_the_task(tmp_path: Path) -> None:
+    from aea import controller as ctl
+
+    sub = FakeSubstrate({"2": "expert"}, seed=1)
+    ctrl = Controller(AEAConfig(), sub, tmp_path / "run", "r4", arm="A", use_designer=False)
+    seen: list[str] = []
+    real = ctrl._try_family
+
+    def spy(task: TaskRef, knob: Any, ctx: Any, witnesses: Any, est: Any) -> Any:
+        seen.append(knob.name)
+        if knob.name == "footer_mask":
+            return ctl.TaskOutcome(
+                task, "exhausted", "saturated", 1.0, detail={"family": "footer_mask"}
+            )
+        return real(task, knob, ctx, witnesses, est)
+
+    ctrl._try_family = spy  # type: ignore[method-assign]
+    out = ctrl.run([TaskRef("2", 2)])[0]
+    assert seen == ["footer_mask", "horizon_squeeze", "displacement"]  # the loop continued
+    assert out.status == "exhausted" and out.detail["exhausted"] == ["footer_mask"]
+
+
+def test_budget_limited_probes_get_their_own_status_and_no_handoff(tmp_path: Path) -> None:
+    cfg = AEAConfig(
+        search_cap=14
+    )  # estimate 10 + one probe of 4: candidates beyond that are skipped
+    sub = FakeSubstrate({"9": "random"}, seed=2)
+    ctrl = Controller(
+        cfg, sub, tmp_path / "run", "r5", arm="A", use_designer=False, with_handoff=True
+    )
+    out = ctrl.run([TaskRef("9", 9)])[0]
+    assert out.status == "unresolved_budget_limited" and out.detail["skipped"]
+    assert not (tmp_path / "run" / "handoff.jsonl").exists()
+    events = read_trace(tmp_path / "run" / "events.jsonl")
+    assert any(e.kind == "probe_skipped_budget" for e in events) and not any(
+        e.kind == "handoff" for e in events
+    )

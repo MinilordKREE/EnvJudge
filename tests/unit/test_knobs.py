@@ -5,6 +5,8 @@ import subprocess
 import sys
 from datetime import UTC, datetime
 
+from envharness.core.types import Action
+
 from aea import exemplars
 from aea.certs import replay_actions
 from aea.knobs import (
@@ -196,3 +198,13 @@ def test_proposer_call_and_ordering() -> None:
     assert [k.name for k in ordered[:2]] == ["horizon_squeeze", "lamp"]
     assert [k.name for k in order_families(knobs, [])] == [k.name for k in EXEMPLARS] + ["lamp"]
     assert isinstance(ordered[1], ProposedKnob)
+
+
+def test_horizon_squeeze_success_signals_exist_on_the_bridge_contract() -> None:
+    """The exemplar guards on ``raw_response.info["success"]`` and ``env_state.won``; the fake
+    bridge mirrors the real one (bridge.py:300-330). A renamed bridge field must fail here."""
+    template = exemplars.prompt_text("horizon_squeeze")
+    assert 'info.get("success")' in template and '"won"' in template
+    sess = make_open(PLAN)(None)
+    resp = sess.stack.step(Action(name="do", kwargs={"text": "look"}))
+    assert "success" in resp.info and hasattr(sess.bridge.state, "won")

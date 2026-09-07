@@ -33,7 +33,14 @@ from aea.core.trace import read_trace
 from aea.errors import BudgetExhausted, InfraError
 from aea.estimate import EstimateResult, estimate
 from aea.handoff import handoff
-from aea.io import AeaMeta, TraceWriter, entry_from_candidate, write_accounting, write_corpus_entry
+from aea.io import (
+    AeaMeta,
+    TraceWriter,
+    entry_from_candidate,
+    mark_hint,
+    write_accounting,
+    write_corpus_entry,
+)
 from aea.knobs import EXEMPLARS, Knob, KnobContext, order_families, propose_knobs
 from aea.llm.types import Attribution, BudgetName, ChatRequest, ChatResponse
 from aea.stage import StagedCandidate, build_stage_candidates, seeded_failures, trace_actions
@@ -47,6 +54,7 @@ type TaskStatus = Literal[
     "exhausted",
     "accepted_stage",
     "unresolved",
+    "unresolved_budget_limited",
     "budget_cap_hit",
     "infra_error",
     "no_failed_trajectory",
@@ -126,6 +134,7 @@ class Controller:
         self.traces = TraceWriter(run_dir / "traces.jsonl")
         self.handoffs = TraceWriter(run_dir / "handoff.jsonl")
         self.corpus_path = run_dir / "corpus.jsonl"
+        self._estimates: dict[str, EstimateResult] = {}
 
     # ------------------------------------------------------------------ plumbing
     def _attr(self, task: TaskRef, phase: str, budget: BudgetName = "search") -> Attribution:
@@ -153,7 +162,17 @@ class Controller:
             reset_options=reset_options,
             hint=hint,
         )
+        errored = sum(1 for t in traces if t.error)
+        if errored:  # environment / infrastructure errors are refunded and never counted
+            self.budget.refund(
+                task.task_id, errored, budget="search", phase=phase, round_index=self.round_index
+            )
+            self.events.write(
+                "rollout_errors", {"task_id": task.task_id, "phase": phase, "n": errored}
+            )
         for t in traces:
+            if hint:
+                mark_hint(t)
             self.traces.add(t)
         self.events.write(
             "rollouts",
@@ -202,8 +221,13 @@ class Controller:
         try:
             outcome = self._run_task(task)
         except BudgetExhausted as exc:
+            est = self._estimates.get(task.task_id)
             outcome = TaskOutcome(
-                task, "budget_cap_hit", detail={"spent": exc.spent, "budget": exc.budget}
+                task,
+                "budget_cap_hit",
+                est.regime if est else None,
+                est.p_hat if est else None,
+                detail={"spent": exc.spent, "budget": exc.budget},
             )
         except InfraError as exc:
             outcome = TaskOutcome(task, "infra_error", detail={"error": str(exc), "kind": exc.kind})
@@ -223,6 +247,7 @@ class Controller:
 
     def _run_task(self, task: TaskRef) -> TaskOutcome:
         est = self._estimate(task)
+        self._estimates[task.task_id] = est
         self.events.write(
             "estimate",
             {
@@ -274,16 +299,22 @@ class Controller:
             setup_builder=self.substrate.setup_builder(task),
         )
         families = self._families(task, lengths)
+        exhausted: list[str] = []
         for knob in families:
             outcome = self._try_family(task, knob, ctx, witnesses, est)
-            if outcome is not None:
-                return outcome
+            if outcome is None:
+                continue
+            if outcome.status == "exhausted":  # spec section 9: only acceptance breaks the loop
+                exhausted.append(knob.name)
+                continue
+            return outcome
+        status: TaskStatus = "exhausted" if exhausted else "frozen_no_leverage"
         return TaskOutcome(
             task,
-            "frozen_no_leverage",
+            status,
             "saturated",
             est.p_hat,
-            detail={"families": [k.name for k in families]},
+            detail={"families": [k.name for k in families], "exhausted": exhausted},
         )
 
     def _families(self, task: TaskRef, lengths: tuple[int, ...]) -> list[Knob]:
@@ -511,6 +542,18 @@ class Controller:
                 cap=self.config.search_cap,
                 spent=self.budget.account(task.task_id, self.round_index).search_spent,
                 task_id=task.task_id,
+            )
+        if skipped:  # probes cut by the remaining budget: not an exhaustive verdict, no hand-off
+            return TaskOutcome(
+                task,
+                "unresolved_budget_limited",
+                "zero",
+                est.p_hat,
+                detail={
+                    "profile": profile,
+                    "too_easy": [e.candidate.t for e in result.too_easy],
+                    "skipped": [c.id for c in skipped],
+                },
             )
         if self.with_handoff:
             demo = handoff(

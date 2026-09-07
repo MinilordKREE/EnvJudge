@@ -282,3 +282,40 @@ def summarize(rows: list[LedgerRow]) -> LedgerSummary:
     return LedgerSummary(
         **counts, usd=usd, rollouts_by_budget=by_budget, usd_by_budget=usd_by_budget
     )
+
+
+class TaskTotals(StrictModel):
+    rollouts: int = 0
+    calls: int = 0
+    prompt_tokens: int = 0
+    completion_tokens: int = 0
+    usd: float = 0.0
+
+
+def per_task_totals(rows: list[LedgerRow]) -> dict[str, TaskTotals]:
+    """Merge ``rollout`` rows (episode counts, no tokens) with ``call`` rows (tokens and cost) per
+    task: the cost of a task is the sum of its call rows, the rollout count the number of rollout
+    rows. Analysis scripts use this instead of reading either row kind alone."""
+    out: dict[str, dict[str, float]] = {}
+    for row in rows:
+        acc = out.setdefault(
+            row.task_id,
+            {"rollouts": 0, "calls": 0, "prompt_tokens": 0, "completion_tokens": 0, "usd": 0.0},
+        )
+        if row.event == "rollout":
+            acc["rollouts"] += 1
+        elif row.event == "call":
+            acc["calls"] += 1
+            acc["prompt_tokens"] += row.prompt_tokens
+            acc["completion_tokens"] += row.completion_tokens
+            acc["usd"] += row.usd
+    return {
+        k: TaskTotals(
+            rollouts=int(v["rollouts"]),
+            calls=int(v["calls"]),
+            prompt_tokens=int(v["prompt_tokens"]),
+            completion_tokens=int(v["completion_tokens"]),
+            usd=v["usd"],
+        )
+        for k, v in out.items()
+    }

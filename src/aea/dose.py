@@ -1,10 +1,11 @@
 """The unified acceptance rule, the leverage test and the sequential dose search (spec section 4).
 
 Any dose, any source: 4 rollouts; 4/4 -> NOEFFECT; 0/4 -> ZERO; 1-3/4 -> top up to 8; accept iff
-3-5/8 (B_T); 1-2/8 -> lower the dose; 6-7/8 -> raise it. The leverage test is the same rule at
-d = 1: 4/4 -> change family; 0/4 -> search downward from d = 0.5; 3-5/8 -> accept d = 1. Step 0.25,
-halved after each evaluation; at most ``max_dose_evals`` evaluations or the budget; non-monotone
-responses are recorded, never corrected.
+3-5/8 (B_T); 1-2/8 (too hard) -> lower the dose; 6-7/8 (too easy) -> raise it. The leverage test
+is the same rule at d = 1: 4/4 or 6-7/8 -> change family; 0/4 -> search from d = 0.5; 1-2/8 ->
+search from 0.75; 3-5/8 -> accept d = 1. Step 0.25, halved after each SEARCH evaluation (the
+leverage test is not counted): 0.5 -> 0.75 -> 0.875 -> 0.9375; at most ``max_dose_evals`` search
+evaluations or the budget; non-monotone responses are recorded, never corrected.
 
 Pilot oracle: docs/pilots/e1pilot/e1/controller.py (``classify_after4`` / ``classify8``),
 lam_search.py (``next_lambda``), p2b_run.py (``run_dose``); fixture
@@ -55,6 +56,7 @@ class DoseEval:
 
     @property
     def p_hat(self) -> float:
+        """The empirical rate s/n (not the posterior mean); the classes are defined on counts."""
         return self.successes / self.n if self.n else 0.0
 
 
@@ -73,25 +75,30 @@ def evaluate_dose(d: float, run: BatchFn, config: AEAConfig) -> DoseEval:
 
 
 def next_dose(history: list[DoseEval], config: AEAConfig) -> float | None:
-    """Direction from the last class; step 0.25 then halved per evaluation; None when the search
-    ends."""
+    """The next dose after ``history`` (leverage test at d = 1 first, then the search).
+
+    Direction: NOEFFECT / HIGH (too easy) -> raise; ZERO / LOW (too hard) -> lower. After the
+    leverage test the search starts at the midpoint (0/4 at d = 1 -> 0.5; LOW at d = 1 -> 0.75)
+    with step ``dose_step``, halved after every SEARCH evaluation (the leverage test is not
+    counted):
+    0.5 -> 0.75 -> 0.875 -> 0.9375. At most ``max_dose_evals`` search evaluations; ``None`` ends the
+    search."""
     if not history:
         return 1.0
-    if len(history) >= config.max_dose_evals or history[-1].cls == "IN_BAND":
-        return None
     last = history[-1]
-    step = config.dose_step / (2 ** (len(history) - 1))
-    proposal: float | None
-    if last.cls in ("NOEFFECT", "LOW"):
-        proposal = last.d + step if last.d < 1.0 else None
-    elif last.cls in ("ZERO", "HIGH"):
-        proposal = (
-            0.5 if (len(history) == 1 and last.d == 1.0 and last.cls == "ZERO") else last.d - step
-        )
-    else:
-        proposal = None
-    if proposal is None:
+    if last.cls == "IN_BAND":
         return None
+    searched = len(history) - 1  # evaluations after the leverage test
+    if searched == 0:  # the leverage test at d = 1 decides where the search starts
+        if last.cls == "ZERO":
+            return 0.5
+        if last.cls == "LOW":
+            return round(1.0 - config.dose_step, 6)
+        return None  # NOEFFECT / HIGH at d = 1: the family has no leverage here
+    if searched >= config.max_dose_evals:
+        return None
+    step = config.dose_step / (2 ** (searched - 1))
+    proposal = last.d + step if last.cls in ("NOEFFECT", "HIGH") else last.d - step
     clipped: float = round(min(max(proposal, 0.0), 1.0), 6)
     if any(abs(clipped - h.d) < 1e-9 for h in history) or clipped <= 0.0:
         return None
@@ -127,7 +134,7 @@ def dose_search(run: BatchFn, config: AEAConfig) -> DoseSearchResult:
             history.append(ev)
             if ev.cls == "IN_BAND":
                 return DoseSearchResult("accepted", history, ev, non_monotone_pairs(history))
-            if len(history) == 1 and ev.cls == "NOEFFECT":
+            if len(history) == 1 and ev.cls in ("NOEFFECT", "HIGH"):
                 return DoseSearchResult("no_leverage", history, None, 0)
             d = next_dose(history, config)
     except BudgetExhausted:
