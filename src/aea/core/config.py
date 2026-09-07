@@ -63,7 +63,9 @@ class LLMConfig(StrictModel):
     response from any other provider aborts the call. ``None`` for endpoints without routing."""
     temperature: float = Field(default=0.5, ge=0.0, le=2.0)
     max_tokens: int = Field(default=2048, ge=1)
-    thinking: bool = False
+    thinking: bool | None = False
+    """Three-state: ``None`` = send no reasoning parameter (provider default, identical for all
+    arms); ``False`` = explicitly off (required on the Qwen path); ``True`` = on."""
     reasoning_effort: ReasoningEffort | None = None
     timeout_s: float = Field(default=120.0, gt=0.0)
     cost_tolerance: float = Field(default=1e-6, ge=0.0)

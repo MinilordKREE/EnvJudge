@@ -15,6 +15,7 @@ parameter; DeepSeek thinking is toggled through ``extra_body.thinking``.
 
 from __future__ import annotations
 
+import json
 import logging
 import time
 from collections.abc import Callable
@@ -82,14 +83,14 @@ def build_wire_request(request: ChatRequest, config: LLMConfig) -> dict[str, Any
         "timeout": request.timeout_s,
     }
     extra: dict[str, Any] = {}
-    if config.provider == "deepseek":
+    if config.provider == "deepseek" and request.thinking is not None:
         extra["thinking"] = {"type": "enabled" if request.thinking else "disabled"}
     if config.provider == "openrouter":
         extra["usage"] = {"include": True}
         if config.provider_pin is not None:
             extra["provider"] = {"order": [config.provider_pin], "allow_fallbacks": False}
-        if not request.thinking and request.reasoning_effort is None:
-            extra["reasoning"] = {"enabled": False}
+        if request.thinking is not None:
+            extra["reasoning"] = {"enabled": bool(request.thinking)}
     if request.reasoning_effort is not None:
         body["reasoning_effort"] = request.reasoning_effort
     if not (config.provider == "deepseek" and request.thinking):
@@ -145,8 +146,6 @@ def parse_completion(
         arguments = function.arguments
         parsed: dict[str, object]
         if isinstance(arguments, str):
-            import json
-
             try:
                 loaded = json.loads(arguments)
             except json.JSONDecodeError:
@@ -276,4 +275,15 @@ def _wire_message(message: ChatMessage) -> dict[str, object]:
         body["name"] = message.name
     if message.tool_call_id is not None:
         body["tool_call_id"] = message.tool_call_id
+    if message.tool_calls:
+        if message.role != "assistant":
+            raise ConfigError("tool_calls are only valid on assistant messages")
+        body["tool_calls"] = [
+            {
+                "id": t.id,
+                "type": "function",
+                "function": {"name": t.name, "arguments": json.dumps(t.arguments)},
+            }
+            for t in message.tool_calls
+        ]
     return body

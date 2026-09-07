@@ -66,11 +66,22 @@ fixtures come from their archived outputs; nothing imports from `docs/pilots/` a
 - Every provider implements `aea.llm.provider.Provider.complete(ChatRequest) -> ChatResponse`.
   The production client is `aea.llm.client.OpenAICompatibleClient` (OpenRouter or DeepSeek);
   envharness's policies and designer reach it through `aea.llm.envharness_client.AeaLLMClient`
-  (`client_factory`), which reads the attribution from `AEA_*` environment variables the
-  controller sets per episode.
-- `reasoning_effort` is a top-level request parameter. DeepSeek thinking is toggled with
-  `extra_body.thinking`; on OpenRouter, `reasoning: {enabled: false}` is sent unless a reasoning
-  effort is requested.
+  (`client_factory`).
+- Attribution (`phase, budget, arm, task_id, seed`) is bound with `aea.llm.attribution.attributed`
+  (a `contextvars` context, thread-safe) in the parent; `aea.runner.AeaSubprocessRunner` exports it
+  as `AEA_*` variables into each episode's subprocess. The parent never writes `os.environ`.
+  Each process appends to its own `ledger.<pid>.jsonl`; `aea.runner.merge_ledgers` folds them into
+  `ledger.jsonl` by run id.
+- `thinking` is three-state and set by config, identical for all arms: `None` sends no reasoning
+  parameter (provider default, the released client's behaviour), `False` switches it off explicitly
+  (the Qwen path), `True` switches it on. `reasoning_effort` is a top-level request parameter.
+  DeepSeek thinking is toggled with `extra_body.thinking`; on OpenRouter with `reasoning.enabled`.
+- Assistant messages carrying `tool_calls` are serialised on the wire; a non-assistant message with
+  tool calls is a `ConfigError`. Nothing is dropped silently.
+- The released evaluation (`reasoning_bank_eval.py`) keeps its own `completion_with_retry` path
+  (comparability); accounting there is an in-process success callback only, with the provider pin
+  and reasoning setting supplied through the eval yaml's `completion_kwargs`, and a guard mismatch
+  inside the callback aborts the run.
 - OpenRouter calls carry `provider.order=[pin]` with `allow_fallbacks=false` and `usage.include`.
   A response from another provider, or an upstream cost that disagrees with the price table by
   more than `cost_tolerance`, raises `InfraError` after the ledger row is written.

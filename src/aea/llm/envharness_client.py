@@ -9,8 +9,9 @@ No reference source copied.
 
 The orchestrator instantiates clients through ``client_factory`` + ``client_kwargs`` (subprocess
 runners included), so the adapter builds its own client from a serialisable ``LLMConfig`` dict
-and a ledger path; the attribution comes from environment variables the controller sets per
-episode (``AEA_RUN_ID``, ``AEA_PHASE``, ``AEA_BUDGET``, ``AEA_ARM``, ``AEA_TASK_ID``, ``AEA_SEED``).
+and a ledger directory; the attribution comes from :mod:`aea.llm.attribution` (a contextvar in the
+parent, the ``AEA_*`` variables exported by :class:`aea.runner.AeaSubprocessRunner` in a worker).
+Each process appends to its own ``ledger.<pid>.jsonl`` (merged by ``aea.runner.merge_ledgers``).
 """
 
 from __future__ import annotations
@@ -23,31 +24,20 @@ from envharness.infra.llm import ChatResponse as EHChatResponse
 from envharness.infra.llm import LLMClient, Message, ToolCall
 
 from aea.core.config import LLMConfig
+from aea.llm.attribution import current_attribution
 from aea.llm.client import OpenAICompatibleClient, make_openai_transport
 from aea.llm.ledger import Ledger
 from aea.llm.pricing import load_pricing
-from aea.llm.types import Attribution, BudgetName, ChatMessage, ChatRequest, ChatResponse
+from aea.llm.types import ChatMessage, ChatRequest, ChatResponse
+from aea.llm.types import ToolCall as AeaToolCall
 from aea.settings import load_settings
-
-
-def attribution_from_env() -> tuple[Attribution, int]:
-    budget = cast(BudgetName, os.environ.get("AEA_BUDGET", "none"))
-    return (
-        Attribution(
-            phase=os.environ.get("AEA_PHASE", "none"),
-            budget=budget,
-            arm=os.environ.get("AEA_ARM", "none"),
-            task_id=os.environ.get("AEA_TASK_ID", "none"),
-        ),
-        int(os.environ.get("AEA_SEED", "0") or 0),
-    )
 
 
 class AeaLLMClient(LLMClient):  # type: ignore[misc]  # envharness ships no type information
     """Drop-in ``client_factory`` for envharness configs; every call becomes a ledger row."""
 
     def __init__(
-        self, *, llm: dict[str, Any], ledger_path: str, pricing_path: str = "configs/pricing.yaml"
+        self, *, llm: dict[str, Any], ledger_dir: str, pricing_path: str = "configs/pricing.yaml"
     ) -> None:
         self.config = LLMConfig.model_validate(llm)
         self.model_id = self.config.model
@@ -57,10 +47,11 @@ class AeaLLMClient(LLMClient):  # type: ignore[misc]  # envharness ships no type
             api_key=key, base_url=self.config.base_url, timeout_s=self.config.timeout_s
         )
         run_id = os.environ.get("AEA_RUN_ID", "unset")
+        ledger_path = Path(ledger_dir) / f"ledger.{os.getpid()}.jsonl"
         self._client = OpenAICompatibleClient(
             config=self.config,
             transport=transport,
-            ledger=Ledger(Path(ledger_path), run_id),
+            ledger=Ledger(ledger_path, run_id),
             pricing=load_pricing(Path(pricing_path)),
         )
 
@@ -73,7 +64,7 @@ class AeaLLMClient(LLMClient):  # type: ignore[misc]  # envharness ships no type
         max_tokens: int | None = None,
         **kwargs: Any,
     ) -> EHChatResponse:
-        attribution, seed = attribution_from_env()
+        attribution, seed = current_attribution()
         request = ChatRequest(
             model=self.config.model,
             messages=tuple(
@@ -82,6 +73,11 @@ class AeaLLMClient(LLMClient):  # type: ignore[misc]  # envharness ships no type
                     content=m.content or "",
                     name=m.name,
                     tool_call_id=m.tool_call_id,
+                    tool_calls=tuple(
+                        AeaToolCall(id=t.id, name=t.name, arguments=dict(t.arguments))
+                        for t in (m.tool_calls or [])
+                    )
+                    or None,
                 )
                 for m in messages
             ),

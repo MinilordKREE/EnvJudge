@@ -42,8 +42,14 @@ def test_wire_request_openrouter_and_deepseek() -> None:
     wire = build_wire_request(_request(), LLMConfig())
     assert wire["extra_body"]["provider"] == {"order": ["alibaba"], "allow_fallbacks": False}
     assert wire["extra_body"]["usage"] == {"include": True}
-    assert wire["extra_body"]["reasoning"] == {"enabled": False}
+    assert (
+        "reasoning" not in wire["extra_body"]
+    )  # ChatRequest.thinking defaults to None: provider default
     assert wire["temperature"] == 0.5 and "reasoning_effort" not in wire
+    off = build_wire_request(_request(thinking=False), LLMConfig())
+    assert off["extra_body"]["reasoning"] == {"enabled": False}
+    on = build_wire_request(_request(thinking=True, reasoning_effort="low"), LLMConfig())
+    assert on["extra_body"]["reasoning"] == {"enabled": True} and on["reasoning_effort"] == "low"
     ds = LLMConfig(
         provider="deepseek",
         base_url="https://api.deepseek.com",

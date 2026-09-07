@@ -27,11 +27,19 @@ type BudgetName = Literal["search", "confirm", "train", "probe_cert", "designer"
 free of the rollout budget but logged; ``eval`` is the released downstream evaluation."""
 
 
+class ToolCall(StrictModel):
+    id: str
+    name: str
+    arguments: dict[str, object]
+
+
 class ChatMessage(StrictModel):
     role: Role
     content: str
     name: str | None = None
     tool_call_id: str | None = None
+    tool_calls: tuple[ToolCall, ...] | None = None
+    """Assistant-side tool calls of an earlier turn; serialised on the wire, never dropped."""
 
 
 class Attribution(StrictModel):
@@ -51,18 +59,14 @@ class ChatRequest(StrictModel):
     temperature: float = Field(default=0.0, ge=0.0, le=2.0)
     seed: int = 0
     max_tokens: int = Field(default=2048, ge=1)
-    thinking: bool = False
+    thinking: bool | None = None
+    """``None`` sends no reasoning parameter (provider default, the released client's behaviour);
+    ``False`` switches reasoning off explicitly (the Qwen path); ``True`` switches it on."""
     reasoning_effort: ReasoningEffort | None = None
     timeout_s: float = Field(default=120.0, gt=0.0)
     attribution: Attribution = Attribution()
     tools: tuple[dict[str, object], ...] | None = None
     tool_choice: str | dict[str, object] | None = None
-
-
-class ToolCall(StrictModel):
-    id: str
-    name: str
-    arguments: dict[str, object]
 
 
 class Usage(StrictModel):
