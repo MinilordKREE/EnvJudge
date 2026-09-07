@@ -1,0 +1,33 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: ^(docs/pilots/|third_party/)
+      - id: end-of-file-fixer
+        exclude: ^(docs/pilots/|third_party/)
+      - id: check-yaml
+        exclude: ^(docs/pilots/|third_party/)
+      - id: check-added-large-files
+        args: [--maxkb=1500]
+      - id: check-merge-conflict
+      - id: detect-private-key
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.16.6
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+  - repo: local
+    hooks:
+      - id: mypy
+        name: mypy --strict
+        entry: uv run mypy
+        language: system
+        pass_filenames: false
+        types: [python]
+      - id: no-dotenv
+        name: refuse to commit .env
+        entry: bash -c 'echo ".env must never be committed" && exit 1'
+        language: system
+        files: ^\.env$

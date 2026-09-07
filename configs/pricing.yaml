@@ -1,0 +1,39 @@
+# Versioned list prices, USD per 1M tokens. Bump a model's pricing_version whenever any of its numbers
+# change; ledger rows record the version they were priced with together with the raw token counts.
+currency: USD
+unit: per_1m_tokens
+models:
+  # Qwen3-8B via OpenRouter, sole endpoint Alibaba; verified against usage.cost in the E1-pilot ledger
+  # (docs/pilots/e1pilot/LOG.md, 2026-09-07).
+  qwen/qwen3-8b:
+    pricing_version: "openrouter-qwen3-8b-2026-09-07"
+    as_of: 2026-09-07
+    source: https://openrouter.ai/api/v1/models/qwen/qwen3-8b/endpoints
+    flat: {input_cache_hit: 0.117, input_cache_miss: 0.117, output: 0.455}
+  # Gemini 3.1 Flash-Lite via OpenRouter, Google AI Studio standard tier (endpoint list, 2026-09-07).
+  google/gemini-3.1-flash-lite:
+    pricing_version: "openrouter-gemini-3.1-flash-lite-2026-09-07"
+    as_of: 2026-09-07
+    source: https://openrouter.ai/api/v1/models/google/gemini-3.1-flash-lite/endpoints
+    flat: {input_cache_hit: 0.025, input_cache_miss: 0.25, output: 1.50}
+  # DeepSeek direct API (peak = Beijing Mon-Fri 09:00-12:00 and 14:00-18:00, i.e. the UTC windows below).
+  deepseek-v4-pro:
+    pricing_version: "deepseek-pricing-2026-09-03"
+    as_of: 2026-09-03
+    source: https://api-docs.deepseek.com/quick_start/pricing
+    peak: {input_cache_hit: 0.044, input_cache_miss: 1.32, output: 3.96}
+    off_peak: {input_cache_hit: 0.022, input_cache_miss: 0.66, output: 1.98}
+    schedule:
+      description: "Monday-Friday 01:00-04:00 and 06:00-10:00 UTC; start inclusive, end exclusive"
+      weekdays: [0, 1, 2, 3, 4]
+      utc_windows: [["01:00", "04:00"], ["06:00", "10:00"]]
+  deepseek-v4-flash:
+    pricing_version: "deepseek-pricing-2026-09-03"
+    as_of: 2026-09-03
+    source: https://api-docs.deepseek.com/quick_start/pricing
+    peak: {input_cache_hit: 0.014, input_cache_miss: 0.44, output: 1.32}
+    off_peak: {input_cache_hit: 0.007, input_cache_miss: 0.22, output: 0.66}
+    schedule:
+      description: "Monday-Friday 01:00-04:00 and 06:00-10:00 UTC; start inclusive, end exclusive"
+      weekdays: [0, 1, 2, 3, 4]
+      utc_windows: [["01:00", "04:00"], ["06:00", "10:00"]]

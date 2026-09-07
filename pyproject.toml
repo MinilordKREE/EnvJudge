@@ -1,0 +1,78 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "aea"
+version = "0.1.0"
+description = "Asymmetric Environment Adaptation: controller and tooling on top of the released envharness substrate"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.12"
+dependencies = [
+  "envharness",
+  "litellm>=1.50",
+  "numpy>=2.0",
+  "openai>=1.50",
+  "pydantic>=2.7",
+  "pydantic-settings>=2.3",
+  "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+# ALFWorld + TextWorld are needed only by the `integration` tests and by experiments; CI never installs them.
+alfworld = ["alfworld>=0.4.2", "textworld>=1.7.0"]
+
+[project.scripts]
+aea = "aea.cli:main"
+
+[dependency-groups]
+dev = [
+  "mypy>=1.11",
+  "pre-commit>=3.7",
+  "pytest>=8.2",
+  "ruff>=0.6",
+  "types-pyyaml>=6.0",
+]
+
+[tool.uv.sources]
+envharness = { path = "third_party/envharness", editable = true }
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/aea"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+extend-exclude = ["third_party", "docs/pilots", "scratch", "experiments"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "B", "UP", "N", "SIM", "RUF", "T20", "PTH", "RET", "ERA"]
+ignore = ["RUF012"]
+
+[tool.ruff.lint.per-file-ignores]
+"src/aea/cli.py" = ["T201"]
+"tests/**" = ["T201"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["aea"]
+
+[tool.mypy]
+python_version = "3.12"
+plugins = ["pydantic.mypy"]
+strict = true
+files = ["src", "tests"]
+warn_unreachable = true
+pretty = true
+
+[[tool.mypy.overrides]]
+module = ["envharness.*", "litellm.*", "alfworld.*", "textworld.*", "numpy.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q -m 'not integration'"
+markers = [
+  "integration: needs ALFWorld/TextWorld installed (LLM-free); run with `make test-integration`",
+]

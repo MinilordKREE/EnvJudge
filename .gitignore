@@ -1,7 +1,23 @@
+# secrets
 .env
+.env.*
+!.env.example
+
+# python
 __pycache__/
-*.pyc
-scratch/emin/work/
-scratch/emin/.tools/
+*.py[cod]
+.venv/
+*.egg-info/
+dist/
+build/
+.mypy_cache/
+.ruff_cache/
 .pytest_cache/
-scratch/eobs/work/
+
+# runs and pilot working directories (archived pilots keep their tracked results only)
+runs/
+.cache/
+docs/pilots/emin/work/
+docs/pilots/emin/.tools/
+docs/pilots/eobs/work/
+docs/pilots/e1pilot/work/

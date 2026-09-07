@@ -4,3 +4,11 @@ Overall we have 3553 games in split=train
 Training with 3553 games
 {'task_id': 7, 'env': 'F_H:13', 'omega': 1.0, 'survived': 16, 'n_witnesses': 16, 'p8_p2b': 0.625}
 {'task_id': 12, 'env': 'F_O:0.875', 'omega': 1.0, 'survived': 16, 'n_witnesses': 16, 'p8_p2b': 0.625}
+{'task_id': 13, 'env': 'F_O:0.875', 'omega': 1.0, 'survived': 16, 'n_witnesses': 16, 'p8_p2b': 0.375}
+{'task_id': 15, 'env': 'F_O:0.75', 'omega': 1.0, 'survived': 16, 'n_witnesses': 16, 'p8_p2b': 0.5}
+{'task_id': 19, 'env': 'F_O:0.75', 'omega': 1.0, 'survived': 14, 'n_witnesses': 14, 'p8_p2b': 0.375}
+{'task_id': 21, 'env': 'F_O:0.875', 'omega': 1.0, 'survived': 16, 'n_witnesses': 16, 'p8_p2b': 0.625}
+{'task_id': 22, 'env': 'F_O:0.75', 'omega': 1.0, 'survived': 16, 'n_witnesses': 16, 'p8_p2b': 0.5}
+{'task_id': 23, 'env': 'F_O:0.75', 'omega': 1.0, 'survived': 15, 'n_witnesses': 15, 'p8_p2b': 0.625}
+{'task_id': 29, 'env': 'F_O:0.9688', 'omega': 1.0, 'survived': 16, 'n_witnesses': 16, 'p8_p2b': 0.625}
+omega written

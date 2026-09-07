@@ -13,3 +13,26 @@ Initializing AlfredTWEnv...
  94%|█████████▍| 8275/8810 [00:23<00:01, 319.34it/s] 95%|█████████▍| 8335/8810 [00:23<00:01, 379.10it/s] 95%|█████████▌| 8381/8810 [00:23<00:01, 395.39it/s] 96%|█████████▌| 8427/8810 [00:23<00:00, 410.05it/s] 96%|█████████▌| 8476/8810 [00:24<00:00, 428.33it/s] 97%|█████████▋| 8523/8810 [00:24<00:00, 393.06it/s] 97%|█████████▋| 8566/8810 [00:24<00:00, 336.08it/s] 98%|█████████▊| 8620/8810 [00:24<00:00, 377.17it/s] 98%|█████████▊| 8661/8810 [00:24<00:00, 246.89it/s] 99%|█████████▉| 8716/8810 [00:24<00:00, 302.73it/s]100%|█████████▉| 8778/8810 [00:24<00:00, 368.42it/s]100%|██████████| 8810/8810 [00:25<00:00, 352.06it/s]
 [P4.2] 300/3672 226s
 [P4.2] 600/3672 330s
+[P4.2] 900/3672 439s
+[P4.2] 1200/3672 911s
+[P4.2] 1500/3672 1246s
+[P4.2] 1800/3672 1561s
+[P4.2] 2100/3672 1696s
+[P4.2] 2400/3672 1862s
+[P4.2] 2700/3672 2122s
+[P4.2] 3000/3672 2280s
+[P4.2] 3300/3672 2488s
+[P4.2] 3600/3672 2882s
+Overall we have 3553 games in split=train
+Training with 3553 games
+Overall we have 3553 games in split=train
+Training with 3553 games
+Overall we have 3553 games in split=train
+Training with 3553 games
+Overall we have 3553 games in split=train
+Training with 3553 games
+Overall we have 3553 games in split=train
+Training with 3553 games
+Overall we have 3553 games in split=train
+Training with 3553 games
+[P4.2] certify done 3000s
