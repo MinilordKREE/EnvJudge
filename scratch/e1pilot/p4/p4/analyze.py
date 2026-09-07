@@ -129,6 +129,12 @@ def main(prereg_sha: str) -> None:
             order = "supported (ω≤0.5 ≥ ω≈1)" if g["nsat"] >= g["isat"] else "not supported (ω≤0.5 < ω≈1)"
             if "fhmid" in g:
                 order += "; three-level ordering nsat ≥ fhmid ≥ isat " + ("holds" if g["nsat"] >= g["fhmid"] >= g["isat"] else "does not hold")
+        L += ["", "Descriptive: paired difference vs nobank (same seeds), ID / OOD:", "", "| condition | ID − nobank | OOD − nobank |", "|---|---|---|"]
+        for c in ("orig_m", "isat_m", "origc_isat_m", "isat_full", "nsat_m", "origc_nsat_m", "nsat_full", "fhmid_m", "origc_fhmid_m", "fhmid_full"):
+            a, b = paired(ev, c, "nobank", "eval_in_distribution"), paired(ev, c, "nobank", "eval_out_of_distribution")
+            if a:
+                L.append(f"| {c} | {ps(a)} | {ps(b)} |")
+        L += [""]
         L += [f"**H4 (descriptive ω ordering: arms with ω ≤ 0.5 show ID gains ≥ arms with ω ≈ 1): {order}** — ID gains vs own control: " + "; ".join(gains) + ". F_H-mid is supplementary (owner decision at the P4.3 gate); it is excluded from H2a and K4."]
     # unlock
     if unl:
@@ -143,6 +149,13 @@ def main(prereg_sha: str) -> None:
     h2a, h2b = st.get("H2a"), st.get("H2b")
     if h2a is None and h2b is None:
         k4 = "not evaluable (neither novelty arm built)"
+    elif h2b is None:
+        k4 = ("H2b not evaluable (N-zero NOT_BUILT under the ≥ 3-env rule); H2a holds → the saturated side stays in SL (pilot-grade); the zero side awaits the formal CHS"
+              if h2a == "holds" else
+              "H2b not evaluable (N-zero NOT_BUILT under the ≥ 3-env rule); H2a fails → no SL evidence from the saturated side (pilot-grade, 2 envs / 4 items); K4 cannot be resolved until the zero side is evaluated with the formal CHS (stage budget re-based, p4/docs/stage_budget_audit.md)")
+    elif h2a is None:
+        k4 = ("H2a not evaluable (N-sat not built); H2b holds → the SL evidence is zero-side (CHS) only" if h2b == "holds" else
+              "H2a not evaluable (N-sat not built); H2b fails → no SL evidence from the zero side; the saturated side is untested")
     elif h2a == "fails" and h2b == "fails":
         k4 = "H2a and H2b both fail → skills from any transformed environment do not help this consumer; the SL line is dead; the RL Study is the downstream evidence"
     elif h2b == "holds" and h2a != "holds":
