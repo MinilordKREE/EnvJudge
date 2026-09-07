@@ -1,0 +1,323 @@
+{
+ "source": "docs/pilots/e1pilot/work/runs/e1_qwen_map/traces.jsonl (P1, Qwen3-8B, first failed rollout per task, first 20 steps)",
+ "trajectories": [
+  {
+   "task_id": 9,
+   "episode_id": "13db349133",
+   "steps": [
+    {
+     "action": "go to desk 1",
+     "obs": "Task: Your task is to: look at alarmclock under the desklamp.\n\nYou arrive at desk 1. On the desk 1, you see a book 1, and a laptop 1.\n\nAdmissible commands: examine desk 1, go to bed 1, go to desk 2, go to garbagecan 1, go to shelf 1, go to shelf 2, go to shelf 3, go to shelf 4, go to shelf 5, help, inventory, look, take book 1 from desk 1, take laptop 1 from desk 1",
+     "effective": true
+    },
+    {
+     "action": "examine desk 1",
+     "obs": "Task: Your task is to: look at alarmclock under the desklamp.\n\nOn the desk 1, you see a book 1, and a laptop 1.\n\nAdmissible commands: examine desk 1, go to bed 1, go to desk 2, go to garbagecan 1, go to shelf 1, go to shelf 2, go to shelf 3, go to shelf 4, go to shelf 5, help, inventory, look, take book 1 from desk 1, take laptop 1 from desk 1",
+     "effective": true
+    },
+    {
+     "action": "examine desk 1",
+     "obs": "Task: Your task is to: look at alarmclock under the desklamp.\n\nOn the desk 1, you see a book 1, and a laptop 1.\n\nAdmissible commands: examine desk 1, go to bed 1, go to desk 2, go to garbagecan 1, go to shelf 1, go to shelf 2, go to shelf 3, go to shelf 4, go to shelf 5, help, inventory, look, take book 1 from desk 1, take laptop 1 from desk 1",
+     "effective": true
+    },
+    {
+     "action": "go to desk 2",
+     "obs": "Task: Your task is to: look at alarmclock under the desklamp.\n\nYou arrive at desk 2. On the desk 2, you see a cd 2, a cellphone 2, a keychain 1, a pen 3, and a pen 1.\n\nAdmissible commands: examine desk 2, go to bed 1, go to desk 1, go to garbagecan 1, go to shelf 1, go to shelf 2, go to shelf 3, go to shelf 4, go to shelf 5, help, inventory, look, take cd 2 from desk 2, take cellphone 2 from desk 2, take keychain 1 from desk 2, take pen 1 from desk 2, take pen 3 from desk 2",
+     "effective": true
+    },
+    {
+     "action": "go to shelf 1",
+     "obs": "Task: Your task is to: look at alarmclock under the desklamp.\n\nYou arrive at shelf 1. On the shelf 1, you see a cd 1, and a cellphone 1.\n\nAdmissible commands: examine shelf 1, go to bed 1, go to desk 1, go to desk 2, go to garbagecan 1, go to shelf 2, go to shelf 3, go to shelf 4, go to shelf 5, help, inventory, look, take cd 1 from shelf 1, take cellphone 1 from shelf 1",
+     "effective": true
+    },
+    {
+     "action": "go to shelf 2",
+     "obs": "Task: Your task is to: look at alarmclock under the desklamp.\n\nYou arrive at shelf 2. On the shelf 2, you see a alarmclock 2, a alarmclock 1, and a desklamp 1.\n\nAdmissible commands: examine shelf 2, go to bed 1, go to desk 1, go to desk 2, go to garbagecan 1, go to shelf 1, go to shelf 3, go to shelf 4, go to shelf 5, help, inventory, look, take alarmclock 1 from shelf 2, take alarmclock 2 from shelf 2, use desklamp 1",
+     "effective": true
+    },
+    {
+     "action": "use desklamp 1",
+     "obs": "Task: Your task is to: look at alarmclock under the desklamp.\n\nYou turn on the desklamp 1.\n\nAdmissible commands: examine shelf 2, go to bed 1, go to desk 1, go to desk 2, go to garbagecan 1, go to shelf 1, go to shelf 3, go to shelf 4, go to shelf 5, help, inventory, look, take alarmclock 1 from shelf 2, take alarmclock 2 from shelf 2, use desklamp 1",
+     "effective": true
+    },
+    {
+     "action": "look",
+     "obs": "Task: Your task is to: look at alarmclock under the desklamp.\n\nYou are facing the shelf 2. Next to it, you see nothing.\n\nAdmissible commands: examine shelf 2, go to bed 1, go to desk 1, go to desk 2, go to garbagecan 1, go to shelf 1, go to shelf 3, go to shelf 4, go to shelf 5, help, inventory, look, take alarmclock 1 from shelf 2, take alarmclock 2 from shelf 2, use desklamp 1",
+     "effective": true
+    },
+    {
+     "action": "examine shelf 2",
+     "obs": "Task: Your task is to: look at alarmclock under the desklamp.\n\nOn the shelf 2, you see a alarmclock 2, a alarmclock 1, and a desklamp 1.\n\nAdmissible commands: examine shelf 2, go to bed 1, go to desk 1, go to desk 2, go to garbagecan 1, go to shelf 1, go to shelf 3, go to shelf 4, go to shelf 5, help, inventory, look, take alarmclock 1 from shelf 2, take alarmclock 2 from shelf 2, use desklamp 1",
+     "effective": true
+    },
+    {
+     "action": "examine shelf 2",
+     "obs": "Task: Your task is to: look at alarmclock under the desklamp.\n\nOn the shelf 2, you see a alarmclock 2, a alarmclock 1, and a desklamp 1.\n\nAdmissible commands: examine shelf 2, go to bed 1, go to desk 1, go to desk 2, go to garbagecan 1, go to shelf 1, go to shelf 3, go to shelf 4, go to shelf 5, help, inventory, look, take alarmclock 1 from shelf 2, take alarmclock 2 from shelf 2, use desklamp 1",
+     "effective": true
+    },
+    {
+     "action": "use desklamp 1",
+     "obs": "Task: Your task is to: look at alarmclock under the desklamp.\n\nYou turn on the desklamp 1.\n\nAdmissible commands: examine shelf 2, go to bed 1, go to desk 1, go to desk 2, go to garbagecan 1, go to shelf 1, go to shelf 3, go to shelf 4, go to shelf 5, help, inventory, look, take alarmclock 1 from shelf 2, take alarmclock 2 from shelf 2, use desklamp 1",
+     "effective": true
+    },
+    {
+     "action": "look",
+     "obs": "Task: Your task is to: look at alarmclock under the desklamp.\n\nYou are facing the shelf 2. Next to it, you see nothing.\n\nAdmissible commands: examine shelf 2, go to bed 1, go to desk 1, go to desk 2, go to garbagecan 1, go to shelf 1, go to shelf 3, go to shelf 4, go to shelf 5, help, inventory, look, take alarmclock 1 from shelf 2, take alarmclock 2 from shelf 2, use desklamp 1",
+     "effective": true
+    },
+    {
+     "action": "look",
+     "obs": "Task: Your task is to: look at alarmclock under the desklamp.\n\nYou are facing the shelf 2. Next to it, you see nothing.\n\nAdmissible commands: examine shelf 2, go to bed 1, go to desk 1, go to desk 2, go to garbagecan 1, go to shelf 1, go to shelf 3, go to shelf 4, go to shelf 5, help, inventory, look, take alarmclock 1 from shelf 2, take alarmclock 2 from shelf 2, use desklamp 1",
+     "effective": true
+    },
+    {
+     "action": "look",
+     "obs": "Task: Your task is to: look at alarmclock under the desklamp.\n\nYou are facing the shelf 2. Next to it, you see nothing.\n\nAdmissible commands: examine shelf 2, go to bed 1, go to desk 1, go to desk 2, go to garbagecan 1, go to shelf 1, go to shelf 3, go to shelf 4, go to shelf 5, help, inventory, look, take alarmclock 1 from shelf 2, take alarmclock 2 from shelf 2, use desklamp 1",
+     "effective": true
+    },
+    {
+     "action": "look",
+     "obs": "Task: Your task is to: look at alarmclock under the desklamp.\n\nYou are facing the shelf 2. Next to it, you see nothing.\n\nAdmissible commands: examine shelf 2, go to bed 1, go to desk 1, go to desk 2, go to garbagecan 1, go to shelf 1, go to shelf 3, go to shelf 4, go to shelf 5, help, inventory, look, take alarmclock 1 from shelf 2, take alarmclock 2 from shelf 2, use desklamp 1",
+     "effective": true
+    },
+    {
+     "action": "examine shelf 2",
+     "obs": "Task: Your task is to: look at alarmclock under the desklamp.\n\nOn the shelf 2, you see a alarmclock 2, a alarmclock 1, and a desklamp 1.\n\nAdmissible commands: examine shelf 2, go to bed 1, go to desk 1, go to desk 2, go to garbagecan 1, go to shelf 1, go to shelf 3, go to shelf 4, go to shelf 5, help, inventory, look, take alarmclock 1 from shelf 2, take alarmclock 2 from shelf 2, use desklamp 1",
+     "effective": true
+    },
+    {
+     "action": "look",
+     "obs": "Task: Your task is to: look at alarmclock under the desklamp.\n\nYou are facing the shelf 2. Next to it, you see nothing.\n\nAdmissible commands: examine shelf 2, go to bed 1, go to desk 1, go to desk 2, go to garbagecan 1, go to shelf 1, go to shelf 3, go to shelf 4, go to shelf 5, help, inventory, look, take alarmclock 1 from shelf 2, take alarmclock 2 from shelf 2, use desklamp 1",
+     "effective": true
+    },
+    {
+     "action": "look",
+     "obs": "Task: Your task is to: look at alarmclock under the desklamp.\n\nYou are facing the shelf 2. Next to it, you see nothing.\n\nAdmissible commands: examine shelf 2, go to bed 1, go to desk 1, go to desk 2, go to garbagecan 1, go to shelf 1, go to shelf 3, go to shelf 4, go to shelf 5, help, inventory, look, take alarmclock 1 from shelf 2, take alarmclock 2 from shelf 2, use desklamp 1",
+     "effective": true
+    },
+    {
+     "action": "use desklamp 1",
+     "obs": "Task: Your task is to: look at alarmclock under the desklamp.\n\nYou turn on the desklamp 1.\n\nAdmissible commands: examine shelf 2, go to bed 1, go to desk 1, go to desk 2, go to garbagecan 1, go to shelf 1, go to shelf 3, go to shelf 4, go to shelf 5, help, inventory, look, take alarmclock 1 from shelf 2, take alarmclock 2 from shelf 2, use desklamp 1",
+     "effective": true
+    },
+    {
+     "action": "look",
+     "obs": "Task: Your task is to: look at alarmclock under the desklamp.\n\nYou are facing the shelf 2. Next to it, you see nothing.\n\nAdmissible commands: examine shelf 2, go to bed 1, go to desk 1, go to desk 2, go to garbagecan 1, go to shelf 1, go to shelf 3, go to shelf 4, go to shelf 5, help, inventory, look, take alarmclock 1 from shelf 2, take alarmclock 2 from shelf 2, use desklamp 1",
+     "effective": true
+    }
+   ]
+  },
+  {
+   "task_id": 14,
+   "episode_id": "0331d3d7cc",
+   "steps": [
+    {
+     "action": "go to desk 1",
+     "obs": "Task: Your task is to: look at book under the desklamp.\n\nYou arrive at desk 1. On the desk 1, you see a bowl 1, a cd 2, a keychain 3, a keychain 1, a mug 2, and a pencil 1.\n\nAdmissible commands: examine desk 1, go to bed 1, go to drawer 1, go to drawer 2, go to drawer 3, go to drawer 4, go to drawer 5, go to dresser 1, go to garbagecan 1, go to laundryhamper 1, go to shelf 1, help, inventory, look, take bowl 1 from desk 1, take cd 2 from desk 1, take keychain 1 from desk 1, take keychain 3 from desk 1, take mug 2 from desk 1, take pencil 1 from desk 1",
+     "effective": true
+    },
+    {
+     "action": "examine desk 1",
+     "obs": "Task: Your task is to: look at book under the desklamp.\n\nOn the desk 1, you see a bowl 1, a cd 2, a keychain 3, a keychain 1, a mug 2, and a pencil 1.\n\nAdmissible commands: examine desk 1, go to bed 1, go to drawer 1, go to drawer 2, go to drawer 3, go to drawer 4, go to drawer 5, go to dresser 1, go to garbagecan 1, go to laundryhamper 1, go to shelf 1, help, inventory, look, take bowl 1 from desk 1, take cd 2 from desk 1, take keychain 1 from desk 1, take keychain 3 from desk 1, take mug 2 from desk 1, take pencil 1 from desk 1",
+     "effective": true
+    },
+    {
+     "action": "look",
+     "obs": "Task: Your task is to: look at book under the desklamp.\n\nYou are facing the desk 1. Next to it, you see nothing.\n\nAdmissible commands: examine desk 1, go to bed 1, go to drawer 1, go to drawer 2, go to drawer 3, go to drawer 4, go to drawer 5, go to dresser 1, go to garbagecan 1, go to laundryhamper 1, go to shelf 1, help, inventory, look, take bowl 1 from desk 1, take cd 2 from desk 1, take keychain 1 from desk 1, take keychain 3 from desk 1, take mug 2 from desk 1, take pencil 1 from desk 1",
+     "effective": true
+    },
+    {
+     "action": "examine desk 1",
+     "obs": "Task: Your task is to: look at book under the desklamp.\n\nOn the desk 1, you see a bowl 1, a cd 2, a keychain 3, a keychain 1, a mug 2, and a pencil 1.\n\nAdmissible commands: examine desk 1, go to bed 1, go to drawer 1, go to drawer 2, go to drawer 3, go to drawer 4, go to drawer 5, go to dresser 1, go to garbagecan 1, go to laundryhamper 1, go to shelf 1, help, inventory, look, take bowl 1 from desk 1, take cd 2 from desk 1, take keychain 1 from desk 1, take keychain 3 from desk 1, take mug 2 from desk 1, take pencil 1 from desk 1",
+     "effective": true
+    },
+    {
+     "action": "go to drawer 1",
+     "obs": "Task: Your task is to: look at book under the desklamp.\n\nYou arrive at drawer 1. The drawer 1 is closed.\n\nAdmissible commands: examine drawer 1, go to bed 1, go to desk 1, go to drawer 2, go to drawer 3, go to drawer 4, go to drawer 5, go to dresser 1, go to garbagecan 1, go to laundryhamper 1, go to shelf 1, help, inventory, look, open drawer 1",
+     "effective": true
+    },
+    {
+     "action": "open drawer 1",
+     "obs": "Task: Your task is to: look at book under the desklamp.\n\nYou open the drawer 1. The drawer 1 is open. In it, you see a keychain 2, and a pen 2.\n\nAdmissible commands: close drawer 1, examine drawer 1, go to bed 1, go to desk 1, go to drawer 2, go to drawer 3, go to drawer 4, go to drawer 5, go to dresser 1, go to garbagecan 1, go to laundryhamper 1, go to shelf 1, help, inventory, look, take keychain 2 from drawer 1, take pen 2 from drawer 1",
+     "effective": true
+    },
+    {
+     "action": "go to desk 1",
+     "obs": "Task: Your task is to: look at book under the desklamp.\n\nYou arrive at desk 1. On the desk 1, you see a bowl 1, a cd 2, a keychain 3, a keychain 1, a mug 2, and a pencil 1.\n\nAdmissible commands: examine desk 1, go to bed 1, go to drawer 1, go to drawer 2, go to drawer 3, go to drawer 4, go to drawer 5, go to dresser 1, go to garbagecan 1, go to laundryhamper 1, go to shelf 1, help, inventory, look, take bowl 1 from desk 1, take cd 2 from desk 1, take keychain 1 from desk 1, take keychain 3 from desk 1, take mug 2 from desk 1, take pencil 1 from desk 1",
+     "effective": true
+    },
+    {
+     "action": "examine desk 1",
+     "obs": "Task: Your task is to: look at book under the desklamp.\n\nOn the desk 1, you see a bowl 1, a cd 2, a keychain 3, a keychain 1, a mug 2, and a pencil 1.\n\nAdmissible commands: examine desk 1, go to bed 1, go to drawer 1, go to drawer 2, go to drawer 3, go to drawer 4, go to drawer 5, go to dresser 1, go to garbagecan 1, go to laundryhamper 1, go to shelf 1, help, inventory, look, take bowl 1 from desk 1, take cd 2 from desk 1, take keychain 1 from desk 1, take keychain 3 from desk 1, take mug 2 from desk 1, take pencil 1 from desk 1",
+     "effective": true
+    },
+    {
+     "action": "examine desk 1",
+     "obs": "Task: Your task is to: look at book under the desklamp.\n\nOn the desk 1, you see a bowl 1, a cd 2, a keychain 3, a keychain 1, a mug 2, and a pencil 1.\n\nAdmissible commands: examine desk 1, go to bed 1, go to drawer 1, go to drawer 2, go to drawer 3, go to drawer 4, go to drawer 5, go to dresser 1, go to garbagecan 1, go to laundryhamper 1, go to shelf 1, help, inventory, look, take bowl 1 from desk 1, take cd 2 from desk 1, take keychain 1 from desk 1, take keychain 3 from desk 1, take mug 2 from desk 1, take pencil 1 from desk 1",
+     "effective": true
+    },
+    {
+     "action": "examine desk 1",
+     "obs": "Task: Your task is to: look at book under the desklamp.\n\nOn the desk 1, you see a bowl 1, a cd 2, a keychain 3, a keychain 1, a mug 2, and a pencil 1.\n\nAdmissible commands: examine desk 1, go to bed 1, go to drawer 1, go to drawer 2, go to drawer 3, go to drawer 4, go to drawer 5, go to dresser 1, go to garbagecan 1, go to laundryhamper 1, go to shelf 1, help, inventory, look, take bowl 1 from desk 1, take cd 2 from desk 1, take keychain 1 from desk 1, take keychain 3 from desk 1, take mug 2 from desk 1, take pencil 1 from desk 1",
+     "effective": true
+    },
+    {
+     "action": "go to shelf 1",
+     "obs": "Task: Your task is to: look at book under the desklamp.\n\nYou arrive at shelf 1. On the shelf 1, you see a alarmclock 2, a mug 1, and a pen 1.\n\nAdmissible commands: examine shelf 1, go to bed 1, go to desk 1, go to drawer 1, go to drawer 2, go to drawer 3, go to drawer 4, go to drawer 5, go to dresser 1, go to garbagecan 1, go to laundryhamper 1, help, inventory, look, take alarmclock 2 from shelf 1, take mug 1 from shelf 1, take pen 1 from shelf 1",
+     "effective": true
+    },
+    {
+     "action": "go to desk 1",
+     "obs": "Task: Your task is to: look at book under the desklamp.\n\nYou arrive at desk 1. On the desk 1, you see a bowl 1, a cd 2, a keychain 3, a keychain 1, a mug 2, and a pencil 1.\n\nAdmissible commands: examine desk 1, go to bed 1, go to drawer 1, go to drawer 2, go to drawer 3, go to drawer 4, go to drawer 5, go to dresser 1, go to garbagecan 1, go to laundryhamper 1, go to shelf 1, help, inventory, look, take bowl 1 from desk 1, take cd 2 from desk 1, take keychain 1 from desk 1, take keychain 3 from desk 1, take mug 2 from desk 1, take pencil 1 from desk 1",
+     "effective": true
+    },
+    {
+     "action": "examine desk 1",
+     "obs": "Task: Your task is to: look at book under the desklamp.\n\nOn the desk 1, you see a bowl 1, a cd 2, a keychain 3, a keychain 1, a mug 2, and a pencil 1.\n\nAdmissible commands: examine desk 1, go to bed 1, go to drawer 1, go to drawer 2, go to drawer 3, go to drawer 4, go to drawer 5, go to dresser 1, go to garbagecan 1, go to laundryhamper 1, go to shelf 1, help, inventory, look, take bowl 1 from desk 1, take cd 2 from desk 1, take keychain 1 from desk 1, take keychain 3 from desk 1, take mug 2 from desk 1, take pencil 1 from desk 1",
+     "effective": true
+    },
+    {
+     "action": "examine desk 1",
+     "obs": "Task: Your task is to: look at book under the desklamp.\n\nOn the desk 1, you see a bowl 1, a cd 2, a keychain 3, a keychain 1, a mug 2, and a pencil 1.\n\nAdmissible commands: examine desk 1, go to bed 1, go to drawer 1, go to drawer 2, go to drawer 3, go to drawer 4, go to drawer 5, go to dresser 1, go to garbagecan 1, go to laundryhamper 1, go to shelf 1, help, inventory, look, take bowl 1 from desk 1, take cd 2 from desk 1, take keychain 1 from desk 1, take keychain 3 from desk 1, take mug 2 from desk 1, take pencil 1 from desk 1",
+     "effective": true
+    },
+    {
+     "action": "examine desk 1",
+     "obs": "Task: Your task is to: look at book under the desklamp.\n\nOn the desk 1, you see a bowl 1, a cd 2, a keychain 3, a keychain 1, a mug 2, and a pencil 1.\n\nAdmissible commands: examine desk 1, go to bed 1, go to drawer 1, go to drawer 2, go to drawer 3, go to drawer 4, go to drawer 5, go to dresser 1, go to garbagecan 1, go to laundryhamper 1, go to shelf 1, help, inventory, look, take bowl 1 from desk 1, take cd 2 from desk 1, take keychain 1 from desk 1, take keychain 3 from desk 1, take mug 2 from desk 1, take pencil 1 from desk 1",
+     "effective": true
+    },
+    {
+     "action": "go to drawer 1",
+     "obs": "Task: Your task is to: look at book under the desklamp.\n\nYou arrive at drawer 1. The drawer 1 is open. In it, you see a keychain 2, and a pen 2.\n\nAdmissible commands: close drawer 1, examine drawer 1, go to bed 1, go to desk 1, go to drawer 2, go to drawer 3, go to drawer 4, go to drawer 5, go to dresser 1, go to garbagecan 1, go to laundryhamper 1, go to shelf 1, help, inventory, look, take keychain 2 from drawer 1, take pen 2 from drawer 1",
+     "effective": true
+    },
+    {
+     "action": "go to desk 1",
+     "obs": "Task: Your task is to: look at book under the desklamp.\n\nYou arrive at desk 1. On the desk 1, you see a bowl 1, a cd 2, a keychain 3, a keychain 1, a mug 2, and a pencil 1.\n\nAdmissible commands: examine desk 1, go to bed 1, go to drawer 1, go to drawer 2, go to drawer 3, go to drawer 4, go to drawer 5, go to dresser 1, go to garbagecan 1, go to laundryhamper 1, go to shelf 1, help, inventory, look, take bowl 1 from desk 1, take cd 2 from desk 1, take keychain 1 from desk 1, take keychain 3 from desk 1, take mug 2 from desk 1, take pencil 1 from desk 1",
+     "effective": true
+    },
+    {
+     "action": "examine desk 1",
+     "obs": "Task: Your task is to: look at book under the desklamp.\n\nOn the desk 1, you see a bowl 1, a cd 2, a keychain 3, a keychain 1, a mug 2, and a pencil 1.\n\nAdmissible commands: examine desk 1, go to bed 1, go to drawer 1, go to drawer 2, go to drawer 3, go to drawer 4, go to drawer 5, go to dresser 1, go to garbagecan 1, go to laundryhamper 1, go to shelf 1, help, inventory, look, take bowl 1 from desk 1, take cd 2 from desk 1, take keychain 1 from desk 1, take keychain 3 from desk 1, take mug 2 from desk 1, take pencil 1 from desk 1",
+     "effective": true
+    },
+    {
+     "action": "go to dresser 1",
+     "obs": "Task: Your task is to: look at book under the desklamp.\n\nYou arrive at dresser 1. On the dresser 1, you see a cd 3, a creditcard 1, a desklamp 1, a mug 3, and a pen 3.\n\nAdmissible commands: examine dresser 1, go to bed 1, go to desk 1, go to drawer 1, go to drawer 2, go to drawer 3, go to drawer 4, go to drawer 5, go to garbagecan 1, go to laundryhamper 1, go to shelf 1, help, inventory, look, take cd 3 from dresser 1, take creditcard 1 from dresser 1, take mug 3 from dresser 1, take pen 3 from dresser 1, use desklamp 1",
+     "effective": true
+    },
+    {
+     "action": "use desklamp 1",
+     "obs": "Task: Your task is to: look at book under the desklamp.\n\nYou turn on the desklamp 1.\n\nAdmissible commands: examine dresser 1, go to bed 1, go to desk 1, go to drawer 1, go to drawer 2, go to drawer 3, go to drawer 4, go to drawer 5, go to garbagecan 1, go to laundryhamper 1, go to shelf 1, help, inventory, look, take cd 3 from dresser 1, take creditcard 1 from dresser 1, take mug 3 from dresser 1, take pen 3 from dresser 1, use desklamp 1",
+     "effective": true
+    }
+   ]
+  },
+  {
+   "task_id": 20,
+   "episode_id": "048f0d5a94",
+   "steps": [
+    {
+     "action": "go to sinkbasin 1",
+     "obs": "Task: Your task is to: put a clean soapbar in cabinet.\n\nYou arrive at sinkbasin 1. On the sinkbasin 1, you see nothing.\n\nAdmissible commands: examine sinkbasin 1, go to bathtubbasin 1, go to cabinet 1, go to cabinet 2, go to cabinet 3, go to cabinet 4, go to countertop 1, go to drawer 1, go to drawer 2, go to drawer 3, go to drawer 4, go to dresser 1, go to garbagecan 1, go to handtowelholder 1, go to sinkbasin 2, go to toilet 1, go to toiletpaperhanger 1, go to towelholder 1, help, inventory, look",
+     "effective": true
+    },
+    {
+     "action": "go to bathtubbasin 1",
+     "obs": "Task: Your task is to: put a clean soapbar in cabinet.\n\nYou arrive at bathtubbasin 1. On the bathtubbasin 1, you see a cloth 1.\n\nAdmissible commands: examine bathtubbasin 1, go to cabinet 1, go to cabinet 2, go to cabinet 3, go to cabinet 4, go to countertop 1, go to drawer 1, go to drawer 2, go to drawer 3, go to drawer 4, go to dresser 1, go to garbagecan 1, go to handtowelholder 1, go to sinkbasin 1, go to sinkbasin 2, go to toilet 1, go to toiletpaperhanger 1, go to towelholder 1, help, inventory, look, take cloth 1 from bathtubbasin 1",
+     "effective": true
+    },
+    {
+     "action": "go to sinkbasin 1",
+     "obs": "Task: Your task is to: put a clean soapbar in cabinet.\n\nYou arrive at sinkbasin 1. On the sinkbasin 1, you see nothing.\n\nAdmissible commands: examine sinkbasin 1, go to bathtubbasin 1, go to cabinet 1, go to cabinet 2, go to cabinet 3, go to cabinet 4, go to countertop 1, go to drawer 1, go to drawer 2, go to drawer 3, go to drawer 4, go to dresser 1, go to garbagecan 1, go to handtowelholder 1, go to sinkbasin 2, go to toilet 1, go to toiletpaperhanger 1, go to towelholder 1, help, inventory, look",
+     "effective": true
+    },
+    {
+     "action": "go to countertop 1",
+     "obs": "Task: Your task is to: put a clean soapbar in cabinet.\n\nYou arrive at countertop 1. On the countertop 1, you see nothing.\n\nAdmissible commands: examine countertop 1, go to bathtubbasin 1, go to cabinet 1, go to cabinet 2, go to cabinet 3, go to cabinet 4, go to drawer 1, go to drawer 2, go to drawer 3, go to drawer 4, go to dresser 1, go to garbagecan 1, go to handtowelholder 1, go to sinkbasin 1, go to sinkbasin 2, go to toilet 1, go to toiletpaperhanger 1, go to towelholder 1, help, inventory, look",
+     "effective": true
+    },
+    {
+     "action": "go to drawer 1",
+     "obs": "Task: Your task is to: put a clean soapbar in cabinet.\n\nYou arrive at drawer 1. On the drawer 1, you see nothing.\n\nAdmissible commands: examine drawer 1, examine drawer 2, examine drawer 3, examine drawer 4, examine dresser 1, go to bathtubbasin 1, go to cabinet 1, go to cabinet 2, go to cabinet 3, go to cabinet 4, go to countertop 1, go to garbagecan 1, go to handtowelholder 1, go to sinkbasin 1, go to sinkbasin 2, go to toilet 1, go to toiletpaperhanger 1, go to towelholder 1, help, inventory, look, take spraybottle 1 from dresser 1, take toiletpaper 1 from drawer 3",
+     "effective": true
+    },
+    {
+     "action": "examine drawer 2",
+     "obs": "Task: Your task is to: put a clean soapbar in cabinet.\n\nOn the drawer 2, you see nothing.\n\nAdmissible commands: examine drawer 1, examine drawer 2, examine drawer 3, examine drawer 4, examine dresser 1, go to bathtubbasin 1, go to cabinet 1, go to cabinet 2, go to cabinet 3, go to cabinet 4, go to countertop 1, go to garbagecan 1, go to handtowelholder 1, go to sinkbasin 1, go to sinkbasin 2, go to toilet 1, go to toiletpaperhanger 1, go to towelholder 1, help, inventory, look, take spraybottle 1 from dresser 1, take toiletpaper 1 from drawer 3",
+     "effective": true
+    },
+    {
+     "action": "examine drawer 3",
+     "obs": "Task: Your task is to: put a clean soapbar in cabinet.\n\nOn the drawer 3, you see a toiletpaper 1.\n\nAdmissible commands: examine drawer 1, examine drawer 2, examine drawer 3, examine drawer 4, examine dresser 1, go to bathtubbasin 1, go to cabinet 1, go to cabinet 2, go to cabinet 3, go to cabinet 4, go to countertop 1, go to garbagecan 1, go to handtowelholder 1, go to sinkbasin 1, go to sinkbasin 2, go to toilet 1, go to toiletpaperhanger 1, go to towelholder 1, help, inventory, look, take spraybottle 1 from dresser 1, take toiletpaper 1 from drawer 3",
+     "effective": true
+    },
+    {
+     "action": "examine drawer 4",
+     "obs": "Task: Your task is to: put a clean soapbar in cabinet.\n\nOn the drawer 4, you see nothing.\n\nAdmissible commands: examine drawer 1, examine drawer 2, examine drawer 3, examine drawer 4, examine dresser 1, go to bathtubbasin 1, go to cabinet 1, go to cabinet 2, go to cabinet 3, go to cabinet 4, go to countertop 1, go to garbagecan 1, go to handtowelholder 1, go to sinkbasin 1, go to sinkbasin 2, go to toilet 1, go to toiletpaperhanger 1, go to towelholder 1, help, inventory, look, take spraybottle 1 from dresser 1, take toiletpaper 1 from drawer 3",
+     "effective": true
+    },
+    {
+     "action": "examine dresser 1",
+     "obs": "Task: Your task is to: put a clean soapbar in cabinet.\n\nOn the dresser 1, you see a spraybottle 1.\n\nAdmissible commands: examine drawer 1, examine drawer 2, examine drawer 3, examine drawer 4, examine dresser 1, go to bathtubbasin 1, go to cabinet 1, go to cabinet 2, go to cabinet 3, go to cabinet 4, go to countertop 1, go to garbagecan 1, go to handtowelholder 1, go to sinkbasin 1, go to sinkbasin 2, go to toilet 1, go to toiletpaperhanger 1, go to towelholder 1, help, inventory, look, take spraybottle 1 from dresser 1, take toiletpaper 1 from drawer 3",
+     "effective": true
+    },
+    {
+     "action": "go to cabinet 1",
+     "obs": "Task: Your task is to: put a clean soapbar in cabinet.\n\nYou arrive at cabinet 1. The cabinet 1 is closed.\n\nAdmissible commands: examine cabinet 1, go to bathtubbasin 1, go to cabinet 2, go to cabinet 3, go to cabinet 4, go to countertop 1, go to drawer 1, go to drawer 2, go to drawer 3, go to drawer 4, go to dresser 1, go to garbagecan 1, go to handtowelholder 1, go to sinkbasin 1, go to sinkbasin 2, go to toilet 1, go to toiletpaperhanger 1, go to towelholder 1, help, inventory, look, open cabinet 1",
+     "effective": true
+    },
+    {
+     "action": "open cabinet 1",
+     "obs": "Task: Your task is to: put a clean soapbar in cabinet.\n\nYou open the cabinet 1. The cabinet 1 is open. In it, you see a toiletpaper 3.\n\nAdmissible commands: close cabinet 1, examine cabinet 1, go to bathtubbasin 1, go to cabinet 2, go to cabinet 3, go to cabinet 4, go to countertop 1, go to drawer 1, go to drawer 2, go to drawer 3, go to drawer 4, go to dresser 1, go to garbagecan 1, go to handtowelholder 1, go to sinkbasin 1, go to sinkbasin 2, go to toilet 1, go to toiletpaperhanger 1, go to towelholder 1, help, inventory, look, take toiletpaper 3 from cabinet 1",
+     "effective": true
+    },
+    {
+     "action": "go to cabinet 2",
+     "obs": "Task: Your task is to: put a clean soapbar in cabinet.\n\nYou arrive at cabinet 2. The cabinet 2 is closed.\n\nAdmissible commands: examine cabinet 2, examine garbagecan 1, go to bathtubbasin 1, go to cabinet 1, go to cabinet 3, go to cabinet 4, go to countertop 1, go to drawer 1, go to drawer 2, go to drawer 3, go to drawer 4, go to dresser 1, go to handtowelholder 1, go to sinkbasin 1, go to sinkbasin 2, go to toilet 1, go to toiletpaperhanger 1, go to towelholder 1, help, inventory, look, open cabinet 2, take soapbar 2 from garbagecan 1",
+     "effective": true
+    },
+    {
+     "action": "examine garbagecan 1",
+     "obs": "Task: Your task is to: put a clean soapbar in cabinet.\n\nOn the garbagecan 1, you see a soapbar 2.\n\nAdmissible commands: examine cabinet 2, examine garbagecan 1, go to bathtubbasin 1, go to cabinet 1, go to cabinet 3, go to cabinet 4, go to countertop 1, go to drawer 1, go to drawer 2, go to drawer 3, go to drawer 4, go to dresser 1, go to handtowelholder 1, go to sinkbasin 1, go to sinkbasin 2, go to toilet 1, go to toiletpaperhanger 1, go to towelholder 1, help, inventory, look, open cabinet 2, take soapbar 2 from garbagecan 1",
+     "effective": true
+    },
+    {
+     "action": "take soapbar 2 from garbagecan 1",
+     "obs": "Task: Your task is to: put a clean soapbar in cabinet.\n\nYou pick up the soapbar 2 from the garbagecan 1.\n\nAdmissible commands: examine cabinet 2, examine garbagecan 1, examine soapbar 2, go to bathtubbasin 1, go to cabinet 1, go to cabinet 3, go to cabinet 4, go to countertop 1, go to drawer 1, go to drawer 2, go to drawer 3, go to drawer 4, go to dresser 1, go to handtowelholder 1, go to sinkbasin 1, go to sinkbasin 2, go to toilet 1, go to toiletpaperhanger 1, go to towelholder 1, help, inventory, look, move soapbar 2 to garbagecan 1, open cabinet 2",
+     "effective": true
+    },
+    {
+     "action": "go to cabinet 1",
+     "obs": "Task: Your task is to: put a clean soapbar in cabinet.\n\nYou arrive at cabinet 1. The cabinet 1 is open. In it, you see a toiletpaper 3.\n\nAdmissible commands: close cabinet 1, examine cabinet 1, examine soapbar 2, go to bathtubbasin 1, go to cabinet 2, go to cabinet 3, go to cabinet 4, go to countertop 1, go to drawer 1, go to drawer 2, go to drawer 3, go to drawer 4, go to dresser 1, go to garbagecan 1, go to handtowelholder 1, go to sinkbasin 1, go to sinkbasin 2, go to toilet 1, go to toiletpaperhanger 1, go to towelholder 1, help, inventory, look, move soapbar 2 to cabinet 1",
+     "effective": true
+    },
+    {
+     "action": "move soapbar 2 to cabinet 1",
+     "obs": "Task: Your task is to: put a clean soapbar in cabinet.\n\nYou move the soapbar 2 to the cabinet 1.\n\nAdmissible commands: close cabinet 1, examine cabinet 1, go to bathtubbasin 1, go to cabinet 2, go to cabinet 3, go to cabinet 4, go to countertop 1, go to drawer 1, go to drawer 2, go to drawer 3, go to drawer 4, go to dresser 1, go to garbagecan 1, go to handtowelholder 1, go to sinkbasin 1, go to sinkbasin 2, go to toilet 1, go to toiletpaperhanger 1, go to towelholder 1, help, inventory, look, take soapbar 2 from cabinet 1, take toiletpaper 3 from cabinet 1",
+     "effective": true
+    },
+    {
+     "action": "examine soapbar 2",
+     "obs": "Task: Your task is to: put a clean soapbar in cabinet.\n\nNothing happens.\n\nAdmissible commands: close cabinet 1, examine cabinet 1, go to bathtubbasin 1, go to cabinet 2, go to cabinet 3, go to cabinet 4, go to countertop 1, go to drawer 1, go to drawer 2, go to drawer 3, go to drawer 4, go to dresser 1, go to garbagecan 1, go to handtowelholder 1, go to sinkbasin 1, go to sinkbasin 2, go to toilet 1, go to toiletpaperhanger 1, go to towelholder 1, help, inventory, look, take soapbar 2 from cabinet 1, take toiletpaper 3 from cabinet 1",
+     "effective": false
+    },
+    {
+     "action": "examine soapbar 2",
+     "obs": "Task: Your task is to: put a clean soapbar in cabinet.\n\nNothing happens.\n\nAdmissible commands: close cabinet 1, examine cabinet 1, go to bathtubbasin 1, go to cabinet 2, go to cabinet 3, go to cabinet 4, go to countertop 1, go to drawer 1, go to drawer 2, go to drawer 3, go to drawer 4, go to dresser 1, go to garbagecan 1, go to handtowelholder 1, go to sinkbasin 1, go to sinkbasin 2, go to toilet 1, go to toiletpaperhanger 1, go to towelholder 1, help, inventory, look, take soapbar 2 from cabinet 1, take toiletpaper 3 from cabinet 1",
+     "effective": false
+    },
+    {
+     "action": "take soapbar 2 from cabinet 1",
+     "obs": "Task: Your task is to: put a clean soapbar in cabinet.\n\nYou pick up the soapbar 2 from the cabinet 1.\n\nAdmissible commands: close cabinet 1, examine cabinet 1, examine soapbar 2, go to bathtubbasin 1, go to cabinet 2, go to cabinet 3, go to cabinet 4, go to countertop 1, go to drawer 1, go to drawer 2, go to drawer 3, go to drawer 4, go to dresser 1, go to garbagecan 1, go to handtowelholder 1, go to sinkbasin 1, go to sinkbasin 2, go to toilet 1, go to toiletpaperhanger 1, go to towelholder 1, help, inventory, look, move soapbar 2 to cabinet 1",
+     "effective": true
+    },
+    {
+     "action": "move soapbar 2 to cabinet 1",
+     "obs": "Task: Your task is to: put a clean soapbar in cabinet.\n\nYou move the soapbar 2 to the cabinet 1.\n\nAdmissible commands: close cabinet 1, examine cabinet 1, go to bathtubbasin 1, go to cabinet 2, go to cabinet 3, go to cabinet 4, go to countertop 1, go to drawer 1, go to drawer 2, go to drawer 3, go to drawer 4, go to dresser 1, go to garbagecan 1, go to handtowelholder 1, go to sinkbasin 1, go to sinkbasin 2, go to toilet 1, go to toiletpaperhanger 1, go to towelholder 1, help, inventory, look, take soapbar 2 from cabinet 1, take toiletpaper 3 from cabinet 1",
+     "effective": true
+    }
+   ]
+  }
+ ]
+}
