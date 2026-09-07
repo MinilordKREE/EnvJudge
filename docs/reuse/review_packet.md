@@ -87,14 +87,24 @@ C.6 budget invariants: traces written = rollouts charged = substrate calls, no t
    cannot prove nestedness of an arbitrary proposal (declared by the designer, tested only for the
    exemplars).
 
-## 6. Items needing an owner decision (numbered)
+## 6. Owner decisions (2026-09-07 review) and how they were applied
 
-1. Whether `unresolved` with `budget_limited: true` (probes cut by the remaining budget) is the
-   intended status, or whether the task should be `budget_cap_hit`.
-2. Whether hint rollouts (R_hint) should carry the expert plan in the task prompt (current: a
-   one-line preamble with the action sequence) or as an in-observation hint.
-3. `rollout` ledger rows carry no tokens (cost is on the per-call rows written in the worker); merge
-   by `rollout_uid` is left to the analysis scripts — acceptable, or should the substrate sum them?
+1. Probes cut by the remaining budget end the task as `unresolved_budget_limited` (own status,
+   counted separately in the main table); `budget_cap_hit` is the hard stop mid-search. Hand-off
+   fires only on an exhaustive `unresolved`.
+2. R_hint rollouts carry the expert plan in the task-prompt preamble; their traces are marked
+   (`candidate_id = "hint"`, iteration id `hint:*`) and `aea.io.training_traces` excludes them from
+   induction and bank building (asserted in tests).
+3. `rollout` rows carry no tokens; `aea.llm.ledger.per_task_totals` merges rollout counts with the
+   per-call cost rows per task (asserted in tests).
+
+## 7. Review fixes applied before Phase D
+
+- Dose direction: LOW (1-2/8) lowers, HIGH (6-7/8) raises; the leverage test is not a search
+  evaluation, so the sequence from a 0/4 leverage is 0.5 -> 0.75 -> 0.875 -> 0.9375 and the P2b
+  footer curve is reachable within the 30 cap (10 + 4 + 4 + 4 + 8) — tested.
+- A family that ends `exhausted` no longer ends the task; the loop moves to the next family.
+- Errored rollouts are refunded to the search budget and counted as `infra_errors` in accounting.
 
 ## 7. Deviations found by the integration run (fixed before tagging)
 

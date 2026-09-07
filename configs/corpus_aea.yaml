@@ -1,0 +1,25 @@
+# aea corpus-protocol config: the released experiments/alfworld/corpus.yaml env / policy / orchestrator blocks
+# (task_description verbatim, action_format think_action, max_history 200, temperature 0.5, 50 steps); the policy
+# client is supplied by aea.substrate (AeaLLMClient) from the run's LLMConfig, never from this file.
+env:
+  import_path: envharness.bridges.alfworld:AlfworldEnv
+  reset_options:
+    split: train
+    repetition_threshold: 0
+policy:
+  action_format: think_action
+  max_history: 200
+  temperature: 0.5
+  task_description: |
+    You are an agent in a text-based household environment (ALFWorld).
+    Each turn you receive an observation and a list of admissible
+    commands. First reason step-by-step about the current situation
+    inside <think>...</think> tags. Then pick ONE admissible command
+    and output it inside <action>...</action> tags.
+orchestrator:
+  task_id: alfworld-corpus-ours-release
+  task_description: |
+    Mutate train tasks where the Policy is currently weak; only emit
+    harnesses that exercise failure-recovery skills WITHOUT shifting
+    the env's surface presentation.
+  max_episode_steps: 50
