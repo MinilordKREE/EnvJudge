@@ -1,4 +1,5 @@
-"""Episode dispatch on the released runner with attribution and per-process ledgers (spec §0, §9).
+"""Episode dispatch on the released runner with attribution and per-process ledgers (spec section 0,
+section 9).
 
 Reference (wrapped): third_party/envharness ``envharness/orchestration/runner.py`` —
 ``SubprocessRunner`` (316-420; ``_child_env`` 397-419 builds the child's environment),

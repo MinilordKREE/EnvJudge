@@ -1,0 +1,27 @@
+import hashlib
+
+
+class _Rules(Rules):
+    """FooterMask (O axis, harder with DOSE): hide the admissible-commands footer at a
+    deterministic fraction DOSE of the steps. bucket = sha256(f"{task_id}:{step}")[:8] % 10000;
+    masked iff bucket < DOSE * 10000, so the masked step set is nested in DOSE. Solvable by
+    construction (the world is untouched)."""
+
+    DOSE = __DOSE__
+    TASK_ID = __TASK_ID__
+
+    def _masked(self, env_state):
+        step = int(getattr(env_state, "step_count", 0) or 0)
+        digest = hashlib.sha256(f"{self.TASK_ID}:{step}".encode("utf-8")).hexdigest()
+        return (int(digest[:8], 16) % 10000) < int(self.DOSE * 10000)
+
+    def filter_observation(self, obs, env_state):
+        if not self._masked(env_state):
+            return obs
+        text = obs.text
+        cut = text.find("\n\nAdmissible commands: ")
+        if cut >= 0:
+            text = text[:cut]
+        data = dict(obs.data or {})
+        data.pop("admissible_commands", None)
+        return Observation(text=text, data=data)

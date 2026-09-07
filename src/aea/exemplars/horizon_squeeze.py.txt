@@ -1,0 +1,23 @@
+class _Rules(Rules):
+    """HorizonSqueeze (T axis, harder with DOSE): the episode is truncated (not terminated) once
+    step_count >= M without success. M = the (1 - DOSE) quantile of the policy's successful
+    episode lengths, so M >= the shortest success: solvable by construction. A step that completes
+    the task at exactly step M is returned unchanged (success is checked first)."""
+
+    DOSE = __DOSE__
+    M = __M__
+
+    def modify_transition(self, action, raw_response, env_state):
+        if raw_response.info.get("success") is True or bool(getattr(env_state, "won", False)):
+            return raw_response
+        if raw_response.terminated or raw_response.truncated:
+            return raw_response
+        if int(getattr(env_state, "step_count", 0) or 0) >= self.M:
+            return EnvResponse(
+                observation=raw_response.observation,
+                reward=raw_response.reward,
+                terminated=False,
+                truncated=True,
+                info={**raw_response.info, "horizon_squeeze": self.M},
+            )
+        return raw_response
