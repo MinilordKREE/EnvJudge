@@ -1,0 +1,9 @@
+bank_successes,confirmed,earliest_learnable_t,n_candidates,n_dead,n_learnable,n_saturated,p12,profile,selected_episode,selected_t,staged_len,status,task_id
+4,True,38,6,4,2,0,0.5833,50:3/4 50:0/4 38:1/4 25:0/4 13:0/4 12:0/4,6353684edf,50,41,selected,8
+5,True,38,6,0,4,2,0.6667,50:3/4 50:2/4 50:3/4 38:2/4 25:4/4 13:4/4,61cfdf7066,50,50,selected,9
+0,False,25,6,4,2,0,0.0833,50:1/4 38:0/4 25:1/4 13:0/4 8:0/4 3:0/4,bf621a2c31,50,17,selected,10
+,False,,3,3,0,0,,1:0/4 1:0/4 1:0/4,,,,all_dead,11
+,False,,6,6,0,0,,50:0/4 50:0/4 50:0/4 38:0/4 25:0/4 13:0/4,,,,all_dead,14
+,False,,6,6,0,0,,50:0/4 50:0/4 50:0/4 38:0/4 25:0/4 13:0/4,,,,all_dead,17
+,False,,6,5,0,1,,50:0/4 39:0/4 38:0/4 25:0/4 18:0/4 13:4/4,,,,mixed_dead_saturated,20
+6,True,13,6,0,5,1,0.6667,50:2/4 50:4/4 50:3/4 38:3/4 25:1/4 13:3/4,44b03a4408,50,51,selected,27

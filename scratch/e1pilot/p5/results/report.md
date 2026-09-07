@@ -1,6 +1,6 @@
-# P5 report — CHS fork test, induction-mode control, bank-size dose — generated 2026-09-07 07:21 UTC
+# P5 report — CHS fork test, induction-mode control, bank-size dose — generated 2026-09-07 11:20 UTC
 
-PREREG5 sha `804f958`; inputs P4 @ b22f07d; config sha256 (16 hex): vendored base_config `2fb5f24f344eaaf1`, alfworld_config_100 `0342a74443beae56`; policy openai/qwen/qwen3-8b via OpenRouter (provider Alibaba, 0.117/0.455 USD/M); induction DeepSeek V4 Pro; P5 spend USD 0.24 of 35 ({'p5_eval_embed': 0.0, 'p5_eval': 0.18, 'p5_induce': 0.06, 'p5_induce_embed': 0.0}); pilot total USD 52.06 (hard 150 / soft 130).
+PREREG5 sha `804f958`; inputs P4 @ b22f07d; config sha256 (16 hex): vendored base_config `2fb5f24f344eaaf1`, alfworld_config_100 `0342a74443beae56`; policy openai/qwen/qwen3-8b via OpenRouter (provider Alibaba, 0.117/0.455 USD/M); induction DeepSeek V4 Pro; P5 spend USD 22.05 of 35 ({'p5_eval_embed': 0.0, 'p5_eval': 8.69, 'p5_induce': 0.06, 'p5_induce_embed': 0.0, 'p5_chs': 13.3}); pilot total USD 73.87 (hard 150 / soft 130).
 
 ## P5.1 Certified Hindsight Staging with the re-based budget (100-config; policy budget 50)
 
@@ -8,13 +8,77 @@ Certificates C_any3 recomputed for every prefix of the 24 P4.2 trajectories (exp
 
 | task | trajectory | L_any3 (P4, residual budget) | L_any3 (P5, 100-config) | certified states P4 → P5 |
 |---|---|---|---|---|
-| 8 | 6353684e | 46 | 27 | 45 → 25 |
+| 8 | 6353684e | 46 | 50 | 45 → 47 |
 | 8 | 7e048535 | 45 | 50 | 42 → 48 |
 | 8 | b48f2bb4 | 44 | 50 | 41 → 49 |
+| 9 | 61cfdf70 | 48 | 50 | 48 → 50 |
+| 9 | cd27c4f0 | 48 | 50 | 48 → 50 |
+| 9 | e4b69a57 | 48 | 50 | 48 → 50 |
+| 10 | 7473aeab | 3 | 3 | 3 → 3 |
+| 10 | bf621a2c | 45 | 50 | 45 → 50 |
+| 10 | c8a00bc6 | 11 | 11 | 11 → 11 |
+| 11 | 0f5a2909 | 1 | 1 | 1 → 1 |
+| 11 | 7fbda3f9 | 1 | 1 | 1 → 1 |
+| 11 | cdad228a | 1 | 1 | 1 → 1 |
+| 14 | 5a1b1931 | 46 | 50 | 46 → 50 |
+| 14 | db3013da | 40 | 50 | 40 → 50 |
+| 14 | e15d9f1a | 46 | 50 | 46 → 50 |
+| 17 | 88268360 | 40 | 50 | 40 → 48 |
+| 17 | bdad0a7b | 46 | 50 | 45 → 50 |
+| 17 | d9876928 | 41 | 50 | 39 → 47 |
+| 20 | 13df6f63 | 43 | 50 | 31 → 47 |
+| 20 | 8a405c58 | 44 | 50 | 22 → 30 |
+| 20 | cad4cab2 | 45 | 50 | 33 → 39 |
+| 27 | 44b03a44 | 43 | 50 | 43 → 50 |
+| 27 | 62d8c821 | 42 | 50 | 42 → 50 |
+| 27 | 6acfcf6f | 43 | 50 | 43 → 50 |
 
-States that gained a certificate under the 100-config: 14 (sum over trajectories of the increase in certified-state counts).
+States that gained a certificate under the 100-config: 118 (sum over trajectories of the increase in certified-state counts).
 
-(probe not run yet)
+### Learnability profiles p̂_4(t) — ALL candidates probed (4 corpus-protocol rollouts each; 0/4 dead, 4/4 saturated, 1–3 learnable)
+
+| task | t (kind): successes/4 … | learnable | dead | saturated | earliest learnable t | selected t | p̂_12 | confirmed | status |
+|---|---|---|---|---|---|---|---|---|---|
+| 8 | 50(L):3/4 50(L):0/4 38(3L/4):1/4 25(L/2):0/4 13(L/4):0/4 12(L/4):0/4 | 2 | 4 | 0 | 38 | 50 | 0.5833 | True | selected |
+| 9 | 50(L):3/4 50(L):2/4 50(L):3/4 38(3L/4):2/4 25(L/2):4/4 13(L/4):4/4 | 4 | 0 | 2 | 38 | 50 | 0.6667 | True | selected |
+| 10 | 50(L):1/4 38(3L/4):0/4 25(L/2):1/4 13(L/4):0/4 8(3L/4):0/4 3(L/4):0/4 | 2 | 4 | 0 | 25 | 50 | 0.0833 | False | selected |
+| 11 | 1(L):0/4 1(L):0/4 1(L):0/4 | 0 | 3 | 0 |  |  |  | False | all_dead |
+| 14 | 50(L):0/4 50(L):0/4 50(L):0/4 38(3L/4):0/4 25(L/2):0/4 13(L/4):0/4 | 0 | 6 | 0 |  |  |  | False | all_dead |
+| 17 | 50(L):0/4 50(L):0/4 50(L):0/4 38(3L/4):0/4 25(L/2):0/4 13(L/4):0/4 | 0 | 6 | 0 |  |  |  | False | all_dead |
+| 20 | 50(L):0/4 39(3L/4):0/4 38(3L/4):0/4 25(L/2):0/4 18(L/2):0/4 13(L/4):4/4 | 0 | 5 | 1 |  |  |  | False | mixed_dead_saturated |
+| 27 | 50(L):2/4 50(L):4/4 50(L):3/4 38(3L/4):3/4 25(L/2):1/4 13(L/4):3/4 | 5 | 0 | 1 | 13 | 50 | 0.6667 | True | selected |
+
+**K5: 3/8 zero tasks with a confirmed selected env (p̂_12 ∈ [0.2, 0.8]) → 2–3 → marginal: the design meeting decides with the profiles in hand.**
+
+## P5.2 Induction-mode control (single_succ on both sides; matched items)
+
+Banks: isat_ss 27 items, origc_isat_ss 27 items, all single_succ; matched = 27 (seed 20260914).
+
+| condition | ID | OOD |
+|---|---|---|
+| nobank | 0.444 [0.300, 0.589] (n=90, tasks=30) | 0.322 [0.178, 0.478] (n=90, tasks=30) |
+| orig_m | 0.589 [0.422, 0.756] (n=90, tasks=30) | 0.467 [0.311, 0.633] (n=90, tasks=30) |
+| isat_m | 0.400 [0.244, 0.567] (n=90, tasks=30) | 0.256 [0.100, 0.422] (n=90, tasks=30) |
+| origc_isat_m | 0.444 [0.289, 0.600] (n=90, tasks=30) | 0.578 [0.422, 0.733] (n=90, tasks=30) |
+| isat_ss | 0.556 [0.389, 0.722] (n=90, tasks=30) | 0.544 [0.378, 0.711] (n=90, tasks=30) |
+| origc_isat_ss | 0.433 [0.278, 0.589] (n=90, tasks=30) | 0.389 [0.244, 0.544] (n=90, tasks=30) |
+
+**H5 (isat_ss(m) − origc_isat_ss(m), ID, paired): 0.122 [-0.044, 0.289] (n=30) → H5a: environment content not shown harmful; the P3/P4 deficits are attributed to induction mode and bank size; the interface/Goodhart claim is withdrawn from the method's claims.** OOD: 0.156 [0.022, 0.300] (n=30); P4 paired-diff comparison for reference: isat_m − origc_isat_m ID -0.044 [-0.189, 0.100] (n=30).
+
+vs nobank (ID): isat_ss 0.111 [-0.044, 0.278] (n=30); origc_isat_ss -0.011 [-0.156, 0.133] (n=30).
+
+## P5.3 Bank-size dose on orig_m (single_succ items; seeded subsamples 20260915)
+
+Retrieval: top_k = 5 (mmr); banks with ≤ top_k items inject every item on every step (marked ★).
+
+| bank size | ID | OOD | ID − nobank | OOD − nobank |
+|---|---|---|---|---|
+| 3 ★ | 0.478 [0.300, 0.644] (n=90, tasks=30) | 0.233 [0.100, 0.389] (n=90, tasks=30) | 0.033 [-0.089, 0.167] (n=30) | -0.089 [-0.200, 0.011] (n=30) |
+| 6 | 0.389 [0.244, 0.544] (n=90, tasks=30) | 0.311 [0.167, 0.467] (n=90, tasks=30) | -0.056 [-0.167, 0.067] (n=30) | -0.011 [-0.144, 0.122] (n=30) |
+| 9 | 0.344 [0.200, 0.500] (n=90, tasks=30) | 0.300 [0.133, 0.467] (n=90, tasks=30) | -0.100 [-0.222, 0.033] (n=30) | -0.022 [-0.178, 0.133] (n=30) |
+| 15 | 0.489 [0.322, 0.656] (n=90, tasks=30) | 0.422 [0.256, 0.589] (n=90, tasks=30) | 0.044 [-0.100, 0.200] (n=30) | 0.100 [-0.067, 0.278] (n=30) |
+| 23 | 0.589 [0.422, 0.756] (n=90, tasks=30) | 0.467 [0.311, 0.622] (n=90, tasks=30) | 0.144 [0.011, 0.289] (n=30) | 0.144 [-0.011, 0.311] (n=30) |
+| 0 (nobank) | 0.444 [0.300, 0.589] (n=90, tasks=30) | 0.322 [0.178, 0.478] (n=90, tasks=30) | — | — |
 
 ## P5.4 RL Phase-A audit (p5/docs/rl_audit.md)
 
