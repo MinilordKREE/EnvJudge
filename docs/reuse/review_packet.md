@@ -113,3 +113,28 @@ C.6 budget invariants: traces written = rollouts charged = substrate calls, no t
   by the controller — it took the pilot an hour per 8 tasks and is not what §5 specifies.
 - The fidelity check keeps the synthetic trailing `look` only when the archived prefix itself ended
   with `look`.
+
+## 8. Phase D paid smoke (2026-09-07; runs/smoke-20260907, runs/smoke2-designer-20260907)
+
+Qwen3-8B via OpenRouter (Alibaba, reasoning off) as policy, DeepSeek V4 Pro (thinking off) as
+designer, executed with the pilot venv (ALFWorld) and `PYTHONPATH=src`. Total spend USD 1.36.
+
+| task (pilot regime) | outcome | rollouts | USD |
+|---|---|---|---|
+| 6 (band, p16 0.5) | `band` after 8 rollouts (p_hat 0.5); corpus entry unchanged env | 8 | 0.30 |
+| 1 (saturated) | `accepted_knob`: footer_mask 1.0 ZERO -> 0.5 NOEFFECT -> 0.75 NOEFFECT -> 0.875 3/8 IN_BAND, exactly at the 30 cap (the P2b curve, live) | 30 | 0.35 |
+| 9 (zero) | `accepted_stage`: 6 compiled Setups certified on the 100-config, fidelity ok, latest state t = 50 learnable 3/4; one candidate skipped for budget | 14 | 0.50 |
+| 7 (saturated, second run) | `budget_cap_hit`: footer_mask exhausted (cliff above 0.9375), loop moved to horizon_squeeze, the cap stopped it | 30 | 0.19 |
+
+Ledger: every priced row provider Alibaba; rollout rows by budget `search` only; per-task totals
+merge (`per_task_totals`) consistent with the accounting table.
+
+Live bugs found and fixed: (1) the designer request carried no thinking flag, so DeepSeek answered
+400 "thinking mode does not support this tool_choice" — the config's `thinking` now applies to
+every request (cb97026); (2) the designer re-emitted the exemplars verbatim (one with an unfilled
+`__M__`), which validation now rejects as duplicates, the contract asks for new families only, and
+raw designer calls are recorded (213793e); (3) corpus `game_file` was absolute, now relative to
+`$ALFWORLD_DATA`.
+
+Open: the fixed proposer has not yet produced a live proposal (both designer runs predate the
+fix); one more paid designer call on a saturated task (~USD 0.05) would confirm it.
