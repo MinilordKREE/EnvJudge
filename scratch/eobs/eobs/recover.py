@@ -10,8 +10,8 @@ from __future__ import annotations
 from eobs.replay import EXPERT_MAX_STEPS, RECOVER_MODE, open_session, replay_actions, run_expert
 
 
-def c_at(seed: int, prefix: list[str], max_steps: int = EXPERT_MAX_STEPS) -> tuple[int, str]:
-    sess = open_session(None, seed)
+def c_at(seed: int, prefix: list[str], max_steps: int = EXPERT_MAX_STEPS, reset_options: dict | None = None) -> tuple[int, str]:
+    sess = open_session(None, seed, reset_options)   # reset_options: P5 passes the 100-step config via config_path
     try:
         if prefix:
             rp = replay_actions(sess, prefix)

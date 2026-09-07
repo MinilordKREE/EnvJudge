@@ -135,13 +135,16 @@ def _base_bridge(reset_options: dict, seed: int):
     re-selects the game deterministically (same `_safe_seed` path as a fresh instance) without re-scanning
     the game files; equivalence with fresh instances is checked in tests/test_integration.py."""
     from envharness.bridges.alfworld import AlfworldEnv
-    if "bridge" not in _CACHED:
+    # P5 (2026-09-07): one cached bridge per config_path (the ALFWorld config, incl. max_nb_steps_per_episode, is read
+    # once per bridge instance), so staged sessions on the 100-step config never share a bridge with default sessions.
+    key = ("bridge", reset_options.get("config_path") or "")
+    if key not in _CACHED:
         b = AlfworldEnv()
         b.reset(seed=seed, options={**reset_options, "task_id": TASK_LABEL})
         proxy = RecordingProxy(b._env)
         b._env = proxy
-        _CACHED["bridge"], _CACHED["proxy"] = b, proxy
-    return _CACHED["bridge"], _CACHED["proxy"]
+        _CACHED[key] = (b, proxy)
+    return _CACHED[key]
 
 
 def open_session(candidate: Candidate | None, seed: int, reset_options: dict | None = None) -> Session:
