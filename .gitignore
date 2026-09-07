@@ -21,3 +21,10 @@ docs/pilots/emin/work/
 docs/pilots/emin/.tools/
 docs/pilots/eobs/work/
 docs/pilots/e1pilot/work/
+# Raw experiment artifacts
+**/work/runs/
+**/traces.jsonl
+**/ledger.jsonl
+
+# Temporary / scratch run outputs
+scratch/**/work/
