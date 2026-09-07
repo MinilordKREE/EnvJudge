@@ -18,7 +18,7 @@ stack-level `terminated`/`truncated`.
 ## Invariants relied on
 
 - ✓ `Rules.evaluate` / `Setup.evaluate` delegate to the base env, so `stack.evaluate().success` is the
-  bridge's `won` (rules.py:158, setup.py:98, bridge.py:341-352).
+  bridge's `won` (delegation rules.py:167, setup.py:95, core/envharness.py:162; bridge.py:341-352).
 - ✓ `extra.expert_plan` exists only on the train split with `expert_type` configured
   (`alfred_tw_env.py:263-267`); the expert is stochastic (pilot: 3 attempts).
 - The `_env` attribute is a private bridge member: the proxy reads it and never writes (M0 do-not list).

@@ -20,7 +20,7 @@ named; nothing is assumed.
 ## ActionableEnv (`envharness/core/actionable_env.py`) — import
 
 `reset(seed, options)` 106; `step(action)` 111; `observe()` 114; `evaluate()` 125 (success is read
-from the BASE env: `Rules`/`Setup` inherit delegation, rules.py:158, setup.py:98);
+from the BASE env: `Rules`/`Setup` inherit delegation: rules.py:167, setup.py:95, implemented in core/envharness.py:162);
 `notify_replay_complete()` 208 (called by `Setup` after replay); `close()` 236.
 
 ## Runner (`envharness/orchestration/runner.py`) — wrap
