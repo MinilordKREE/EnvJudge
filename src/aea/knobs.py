@@ -259,7 +259,9 @@ CONTRACT_TEXT = (
     "difficulty must increase with DOSE (direction harder_with_d); prefer nested perturbations "
     "(d1 < d2 => the perturbed step set at d1 is a subset of the set at d2); the task must stay "
     "solvable at DOSE = 1; only the names Rules, Action, Blocked, Observation, EnvResponse and the "
-    "standard library are available; no Chain/Link. Acceptance is decided by rollouts, not by you."
+    "standard library are available; no Chain/Link. Acceptance is decided by rollouts, not by you. "
+    "The three exemplars are ALWAYS tried by the controller: do not re-propose them or trivial "
+    "variants; propose NEW perturbation families for this task (or none)."
 )
 
 
@@ -284,6 +286,17 @@ def proposer_messages(task_description: str, success_summary: str) -> tuple[Chat
     )
 
 
+def _is_exemplar_copy(name: str, template: str) -> bool:
+    """A proposal that re-emits an exemplar (by name or by body) adds nothing."""
+    if name in {k.name for k in EXEMPLARS}:
+        return True
+    body = "".join(template.split())
+    return any(
+        "".join(exemplars.prompt_text(n).split())[:400] in body
+        for n in ("footer_mask", "horizon_squeeze")
+    )
+
+
 def parse_proposals(
     arguments: dict[str, Any], *, max_families: int
 ) -> tuple[list[ProposedKnob], list[str]]:
@@ -295,8 +308,11 @@ def parse_proposals(
             rejected.append("knob entry is not an object")
             continue
         template = str(raw.get("rules_code") or "")
-        report = validate_rules_template(template)
         name = str(raw.get("name") or "llm_knob")
+        if _is_exemplar_copy(name, template):
+            rejected.append(f"{name}: duplicate of an exemplar (always tried anyway)")
+            continue
+        report = validate_rules_template(template)
         if not report.ok:
             rejected.append(f"{name}: " + "; ".join(report.reasons))
             continue
@@ -325,8 +341,12 @@ def propose_knobs(
     max_families: int,
     attribution: Any,
     seed: int = 0,
+    record: Callable[[dict[str, Any]], None] | None = None,
 ) -> tuple[list[ProposedKnob], list[str], list[str]]:
-    """One designer call (free of the rollout budget, ledgered as budget=designer)."""
+    """One designer call (free of the rollout budget, ledgered as budget=designer).
+
+    ``record`` receives the raw tool-call arguments and the parse outcome (the run's
+    ``designer_calls.jsonl``)."""
     request = ChatRequest(
         model=model,
         messages=proposer_messages(task_description, success_summary),
@@ -339,12 +359,26 @@ def propose_knobs(
     )
     response = complete(request)
     if not response.tool_calls:
+        if record is not None:
+            record(
+                {"content": response.content[:2000], "tool_calls": [], "rejected": ["no tool call"]}
+            )
         return [], ["designer returned no tool call"], []
     args = response.tool_calls[0].arguments
     if isinstance(args, str):
         args = json.loads(args)
     knobs, rejected = parse_proposals(dict(args), max_families=max_families)
-    return knobs, rejected, [str(x) for x in (dict(args).get("ranking") or [])]
+    ranking = [str(x) for x in (dict(args).get("ranking") or [])]
+    if record is not None:
+        record(
+            {
+                "arguments": dict(args),
+                "accepted": [k.name for k in knobs],
+                "rejected": rejected,
+                "ranking": ranking,
+            }
+        )
+    return knobs, rejected, ranking
 
 
 def order_families(proposed: Sequence[Knob], ranking: Sequence[str]) -> list[Knob]:

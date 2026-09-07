@@ -4,12 +4,14 @@ import json
 import subprocess
 import sys
 from datetime import UTC, datetime
+from typing import Any
 
 from envharness.core.types import Action
 
 from aea import exemplars
 from aea.certs import replay_actions
 from aea.knobs import (
+    CONTRACT_TEXT,
     EXEMPLARS,
     Displacement,
     FooterMask,
@@ -208,3 +210,57 @@ def test_horizon_squeeze_success_signals_exist_on_the_bridge_contract() -> None:
     sess = make_open(PLAN)(None)
     resp = sess.stack.step(Action(name="do", kwargs={"text": "look"}))
     assert "success" in resp.info and hasattr(sess.bridge.state, "won")
+
+
+def test_exemplar_copies_are_rejected_and_calls_recorded() -> None:
+    copy = exemplars.prompt_text("footer_mask")
+    knobs, rejected = parse_proposals(
+        {"knobs": [{"name": "my_mask", "axis": "O", "rules_code": copy, "nested": True}]},
+        max_families=2,
+    )
+    assert not knobs and "duplicate of an exemplar" in rejected[0]
+    knobs, rejected = parse_proposals(
+        {
+            "knobs": [
+                {
+                    "name": "horizon_squeeze",
+                    "axis": "T",
+                    "rules_code": "class _Rules(Rules):\n    DOSE = __DOSE__\n",
+                    "nested": True,
+                }
+            ]
+        },
+        max_families=2,
+    )
+    assert not knobs and "duplicate" in rejected[0]
+    recorded: list[dict[str, Any]] = []
+
+    def complete(request: ChatRequest) -> ChatResponse:
+        return ChatResponse(
+            content="",
+            reasoning=None,
+            tool_calls=(
+                ToolCall(id="c", name="propose_knobs", arguments={"knobs": [], "ranking": []}),
+            ),
+            finish_reason="stop",
+            usage=Usage(prompt_tokens=1, completion_tokens=1),
+            model="m",
+            provider="fake",
+            upstream_cost=None,
+            response_id=None,
+            request_sha256="s",
+            latency_ms=0,
+            created_at=datetime.now(UTC),
+        )
+
+    knobs, rejected, _ranking = propose_knobs(
+        complete,
+        model="m",
+        task_description="t",
+        success_summary="s",
+        max_families=2,
+        attribution=Attribution(budget="designer"),
+        record=recorded.append,
+    )
+    assert knobs == [] and recorded and recorded[0]["arguments"] == {"knobs": [], "ranking": []}
+    assert "do not re-propose" in CONTRACT_TEXT

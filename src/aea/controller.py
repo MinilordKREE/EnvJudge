@@ -28,6 +28,7 @@ from aea import probe as probe_mod
 from aea.budget import Budget
 from aea.certs import Session, certify
 from aea.config import AEAConfig
+from aea.core.io import append_jsonl
 from aea.core.trace import TraceWriter as EventWriter
 from aea.core.trace import read_trace
 from aea.errors import BudgetExhausted, InfraError
@@ -321,6 +322,7 @@ class Controller:
         designer = self.substrate.designer() if self.use_designer else None
         if designer is None or self.config.max_designer_families == 0:
             return list(EXEMPLARS)
+        calls_path = self.run_dir / "designer_calls.jsonl"
         try:
             proposed, rejected, ranking = propose_knobs(
                 designer,
@@ -330,6 +332,9 @@ class Controller:
                 max_families=self.config.max_designer_families,
                 attribution=self._attr(task, "propose", "designer"),
                 seed=task.seed,
+                record=lambda payload: append_jsonl(
+                    calls_path, {"task_id": task.task_id, **payload}
+                ),
             )
         except InfraError as exc:
             self.events.write("designer_failed", {"task_id": task.task_id, "error": str(exc)})

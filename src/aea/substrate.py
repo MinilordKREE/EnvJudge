@@ -24,6 +24,7 @@ from aea.certs import Session, open_session
 from aea.config import AEAConfig
 from aea.controller import TaskRef
 from aea.core.config import LLMConfig
+from aea.io import relative_game_file
 from aea.llm.attribution import attributed
 from aea.llm.client import OpenAICompatibleClient, make_openai_transport
 from aea.llm.ledger import Ledger
@@ -153,7 +154,7 @@ class AeaSubstrate:
     ) -> Session:
         opts = {**self.reset_options, **(reset_options or {})}
         sess = open_session(candidate, task.seed, opts)
-        self._gamefiles.setdefault(task.task_id, sess.gamefile)
+        self._gamefiles.setdefault(task.task_id, relative_game_file(sess.gamefile))
         return sess
 
     def game_file(self, task: TaskRef) -> str:
