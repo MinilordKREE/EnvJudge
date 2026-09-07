@@ -30,7 +30,19 @@ def conditions() -> dict[str, Path]:
     return conds
 
 
-def run_rep(rep: int, concurrency: int = 6) -> None:
+def done_conditions(rep: int, n: int = 30) -> list[str]:
+    """Conditions whose two cell files (ID/OOD) already hold n rows each in run dir e1_p4_eval_r<rep> (checkpoint/resume: the
+    released script rewrites a cell from scratch, so only complete cells are kept; partial cells are re-run)."""
+    d = ROOT / "work" / "runs" / f"e1_p4_eval_r{rep}" / "round1"
+    out = []
+    for c in conditions():
+        files = [d / f"{c}_{s}.jsonl" for s in ("eval_in_distribution", "eval_out_of_distribution")]
+        if all(f.exists() and sum(1 for l in f.read_text().splitlines() if l.strip()) >= n for f in files):
+            out.append(c)
+    return out
+
+
+def run_rep(rep: int, concurrency: int = 6, skip_done: bool = False) -> None:
     p3a.install_wrappers("p4_eval", "openrouter")
     os.environ["EOBS_RUN_ID"] = f"e1_p4_eval_r{rep}"
     sys.path.insert(0, str(ENVHARNESS_ROOT)); sys.path.insert(0, str(ENVHARNESS_ROOT / "experiments" / "alfworld"))
@@ -38,6 +50,12 @@ def run_rep(rep: int, concurrency: int = 6) -> None:
     import reasoning_bank_eval as rbe
     cfg = p3a.make_eval_config(30, 30, concurrency)
     conds = conditions()
+    if skip_done:
+        done = done_conditions(rep)
+        conds = {c: p for c, p in conds.items() if c not in done}
+        print(f"[P4.5] rep {rep} resume: skipping complete conditions {done}; running {list(conds)}", flush=True)
+        if not conds:
+            print(f"[P4.5] rep {rep} rc=0 (nothing to run)", flush=True); return
     out = ROOT / "work" / "runs" / f"e1_p4_eval_r{rep}"
     argv = ["--config", str(cfg), "--out-dir", str(out), "--start-seeds", "0", "--conditions", ",".join(conds), "--concurrency", str(concurrency),
             "--bank-overrides", ",".join(f"{c}={p}" for c, p in conds.items())]
@@ -65,5 +83,6 @@ def tables(reps=(1, 2, 3)) -> None:
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(); ap.add_argument("--stage", choices=["eval", "tables"], required=True); ap.add_argument("--rep", type=int, default=1); ap.add_argument("--concurrency", type=int, default=6)
+    ap.add_argument("--skip-done", action="store_true", help="resume: skip conditions whose ID and OOD cells are complete")
     a = ap.parse_args()
-    run_rep(a.rep, a.concurrency) if a.stage == "eval" else tables()
+    run_rep(a.rep, a.concurrency, a.skip_done) if a.stage == "eval" else tables()
