@@ -82,18 +82,25 @@ def build_wire_request(request: ChatRequest, config: LLMConfig) -> dict[str, Any
         "stream": False,
         "timeout": request.timeout_s,
     }
+    # The config decides the reasoning setting (identical for all arms); a request may override it.
+    thinking = request.thinking if request.thinking is not None else config.thinking
+    effort = (
+        request.reasoning_effort
+        if request.reasoning_effort is not None
+        else config.reasoning_effort
+    )
     extra: dict[str, Any] = {}
-    if config.provider == "deepseek" and request.thinking is not None:
-        extra["thinking"] = {"type": "enabled" if request.thinking else "disabled"}
+    if config.provider == "deepseek" and thinking is not None:
+        extra["thinking"] = {"type": "enabled" if thinking else "disabled"}
     if config.provider == "openrouter":
         extra["usage"] = {"include": True}
         if config.provider_pin is not None:
             extra["provider"] = {"order": [config.provider_pin], "allow_fallbacks": False}
-        if request.thinking is not None:
-            extra["reasoning"] = {"enabled": bool(request.thinking)}
-    if request.reasoning_effort is not None:
-        body["reasoning_effort"] = request.reasoning_effort
-    if not (config.provider == "deepseek" and request.thinking):
+        if thinking is not None:
+            extra["reasoning"] = {"enabled": bool(thinking)}
+    if effort is not None:
+        body["reasoning_effort"] = effort
+    if not (config.provider == "deepseek" and thinking):
         body["temperature"] = request.temperature
     if request.tools:
         body["tools"] = [dict(t) for t in request.tools]
