@@ -30,7 +30,7 @@ from aea.core.trace import read_trace
 from aea.io import read_corpus
 from aea.knobs import FooterMask, HorizonSqueeze, KnobContext, footer_masked
 from aea.llm.types import Attribution
-from aea.stage import compile_prefix, stage_candidate, stage_reset_options
+from aea.stage import compile_prefix, fidelity_check, stage_candidate, stage_reset_options
 
 pytestmark = pytest.mark.integration
 
@@ -47,7 +47,9 @@ def _load(name: str) -> Any:
 # ----------------------------------------------------------------------------- C.1 fidelity
 def test_config100_route_gives_12_vs_62_policy_steps() -> None:
     fx = _load("stage8.json")
-    cand = stage_candidate(fx["compiled_actions"][:-1])  # the archived list already ends with look
+    cand = stage_candidate(
+        fx["compiled_actions"]
+    )  # 38 actions incl. the trailing look (pilot check)
     counts = {}
     for label, opts in (("default", DEFAULT_RESET_OPTIONS), ("config_100", RO100)):
         sess = open_session(cand, fx["task_id"], opts)
@@ -68,20 +70,27 @@ def test_compiled_prefix_replay_reproduces_archived_observation() -> None:
     for traj in fx["trajectories"]:
         steps = traj["steps"]
         t = min(12, len(steps))
-        prefix = [s["action"] for s in steps[:t]]
         task_id = int(traj["task_id"])
 
-        def opener(c: Candidate | None, ro: dict[str, Any] | None, t: int = task_id) -> Session:
-            return open_session(c, t, ro)
+        def opener(c: Candidate | None, ro: dict[str, Any] | None, t_id: int = task_id) -> Session:
+            return open_session(c, t_id, ro)
 
+        prefix = [s["action"] for s in steps[:t]]
         compiled = compile_prefix(opener, prefix, RO100)
-        body = compiled[:-1] if compiled[-1] == "look" else compiled
-        sess = open_session(stage_candidate(body) if body else None, traj["task_id"], RO100)
-        try:
-            replayed = sess.stack.observe().text
-        finally:
-            sess.close()
-        assert " ".join(replayed.split()) == " ".join(steps[t - 1]["obs"].split()), traj["task_id"]
+        trace = Trace(
+            episode_id=traj["episode_id"],
+            iteration_id="fx",
+            task_id="lbl",
+            candidate=Candidate(),
+            steps=[
+                Step(
+                    raw_action=Action(name="do", kwargs={"text": s["action"]}),
+                    filtered_observation=Observation(text=s["obs"]),
+                )
+                for s in steps[:t]
+            ],
+        )
+        assert fidelity_check(opener, trace, t, compiled, RO100), task_id
         checked += 1
     assert checked == 3
 
@@ -318,16 +327,15 @@ class PrefixThenRandomSubstrate(ExpertSubstrate):
                 for _i in range(50):
                     if sess.done or sess.won:
                         break
-                    expert = sess.expert_next()
                     if plan:
                         nxt = plan.pop(0)
-                    else:
+                    else:  # navigation only: the task cannot be solved without manipulation
                         choices = [
                             a
                             for a in sess.admissible()
-                            if a != expert and not a.startswith("move") and not a.startswith("put")
-                        ] or ["look"]
-                        nxt = rng.choice(choices)
+                            if a.startswith("go to ") or a in ("look", "inventory")
+                        ]
+                        nxt = rng.choice(choices or ["look"])
                     r = sess.step_text(nxt)
                     actions.append(nxt)
                     obs.append(str(r["obs"]))

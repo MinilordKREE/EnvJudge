@@ -34,3 +34,5 @@ via `reset_options.config_path` → replay → certify that environment (expert 
 - Fidelity check per task: after `Setup.reset`, the observation text equals the observation recorded at
   the cut in the source trajectory (the pilot's check on three trajectories, docs/pilots/e1pilot/LOG.md).
 - Candidate id = `f"{task_id}:{sha256(canonical_json(compiled_prefix))[:16]}"`.
+- Candidate states are the fractions {1, 3/4, 1/2, 1/4} of each failed trajectory's length (spec §5);
+  the pilot's L-based rule stays available as `select_candidates` for fixtures.

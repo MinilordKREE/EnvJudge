@@ -7,9 +7,10 @@ environment with the expert x3 (``aea.certs``) -> only then probe. Candidate id 
 ``task_id + sha256(compiled prefix)``. One fidelity check per task: the observation after replay
 equals the archived observation at the cut.
 
-Candidates: the latest certified state of each of ``n_failed_trajectories`` seeded failed rollouts
-and the certified states nearest fractions {1, 3/4, 1/2, 1/4} of it; union, latest-first, capped at
-``max_candidates`` by dropping the candidate nearest in t to another kept one.
+Candidates (spec section 5): for each of ``n_failed_trajectories`` seeded failed rollouts of length
+T, the prefixes t in {T, 3T/4, T/2, T/4}; union, latest-first, capped at ``max_candidates`` by
+dropping the candidate nearest in t to another kept one. Each candidate is compiled, replayed and
+certified individually (no prefix sweep).
 
 Pilot oracle: docs/pilots/e1pilot/p5/p5/chs100.py (``staged_actions``, ``select_candidates``),
 docs/pilots/eobs/eobs/recover.py (``c_at``), docs/pilots/e1pilot/p4/docs/stage_budget_audit.md.
@@ -131,18 +132,34 @@ class StageResult:
     fidelity_checked: bool = False
 
 
-def certified_prefix_states(
-    open_fn: OpenFn, trace: Trace, reset_options: dict[str, Any], config: AEAConfig
-) -> list[int]:
-    """Prefix lengths t (1..T) from which the expert x3 recovers on the staged config."""
-    actions = trace_actions(trace)
-    out: list[int] = []
-    for t in range(1, min(len(actions), config.policy_max_steps) + 1):
-        compiled = compile_prefix(open_fn, actions[:t], reset_options)
-        cert = certify(stage_candidate(compiled), lambda c: open_fn(c, reset_options), config)
-        if cert.certified:
-            out.append(t)
-    return out
+def candidate_states(
+    lengths: dict[str, int], fractions: Sequence[float], cap: int
+) -> list[tuple[str, int, str]]:
+    """Prefix lengths at the fractions of each trajectory's length T; union latest-first; capped."""
+    valid = {eid: total for eid, total in lengths.items() if total > 0}
+    return _fraction_candidates(valid, fractions, cap)
+
+
+def _fraction_candidates(
+    lengths: dict[str, int], fractions: Sequence[float], cap: int
+) -> list[tuple[str, int, str]]:
+    cands: dict[tuple[str, int], str] = {}
+    for eid, total in lengths.items():
+        for frac in fractions:
+            t = max(1, round(frac * total))
+            kind = "T" if frac == 1.0 else f"{frac:g}T"
+            cands.setdefault((eid, t), kind)
+    items = sorted(cands.items(), key=lambda kv: (-kv[0][1], kv[0][0]))
+    while len(items) > cap:
+        head = items[0]
+
+        def gap(it: tuple[tuple[str, int], str]) -> tuple[int, int]:
+            others = [o for o in items if o is not it]
+            return (min(abs(it[0][1] - o[0][1]) for o in others), it[0][1])
+
+        drop = min((it for it in items if it is not head), key=gap)
+        items.remove(drop)
+    return [(eid, t, kind) for (eid, t), kind in items]
 
 
 def build_stage_candidates(
@@ -154,17 +171,21 @@ def build_stage_candidates(
     *,
     certified_states: dict[str, list[int]] | None = None,
 ) -> StageResult:
-    """Select candidate states, compile each prefix, replay it, certify that environment."""
+    """Select candidate states, compile each prefix, replay it, certify that environment.
+
+    ``certified_states`` (tests / pilot fixtures) overrides the T-fraction rule with explicit
+    prefix lengths per trajectory."""
     result = StageResult()
     by_traj = {t.episode_id: t for t in failures}
-    states = certified_states or {
-        eid: certified_prefix_states(open_fn, tr, reset_options, config)
-        for eid, tr in by_traj.items()
-    }
+    if certified_states is not None:
+        selected = select_candidates(
+            certified_states, config.candidate_fractions, config.max_candidates
+        )
+    else:
+        lengths = {eid: min(len(tr.steps), config.policy_max_steps) for eid, tr in by_traj.items()}
+        selected = candidate_states(lengths, config.candidate_fractions, config.max_candidates)
     seen: set[str] = set()
-    for eid, t, kind in select_candidates(
-        states, config.candidate_fractions, config.max_candidates
-    ):
+    for eid, t, kind in selected:
         actions = trace_actions(by_traj[eid])[:t]
         compiled = compile_prefix(open_fn, actions, reset_options)
         cid = candidate_id(task_id, compiled)
@@ -187,16 +208,23 @@ def build_stage_candidates(
 def fidelity_check(
     open_fn: OpenFn, trace: Trace, t: int, compiled: Sequence[str], reset_options: dict[str, Any]
 ) -> bool:
-    """The replayed observation equals the archived observation at the cut (before the trailing
-    look)."""
+    """The replayed observation equals the archived observation at the cut.
+
+    The synthetic trailing ``look`` is left out unless the archived prefix itself ended with
+    ``look`` (then it IS the cut step and its observation is the archived one)."""
     steps = trace.steps[:t]
     archived = steps[-1].filtered_observation or steps[-1].raw_observation
     if archived is None:
         return False
-    body = list(compiled[:-1]) if compiled and compiled[-1] == "look" else list(compiled)
+    prefix_ended_with_look = (
+        bool(steps) and str(steps[-1].raw_action.kwargs.get("text", "")) == "look"
+    )
+    body = list(compiled)
+    if body and body[-1] == "look" and not prefix_ended_with_look:
+        body = body[:-1]
     sess = open_fn(stage_candidate(body) if body else None, reset_options)
     try:
-        replayed = sess.stack.observe().text if hasattr(sess.stack, "observe") else ""
+        replayed = sess.stack.observe().text
     finally:
         sess.close()
     return _norm(replayed) == _norm(archived.text)

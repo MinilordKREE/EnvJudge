@@ -208,3 +208,14 @@ def test_p5_profiles_reproduce_selection() -> None:
         result = probe(cands, run, CFG)
         got = result.accepted.candidate.t if result.accepted else None
         assert got == want, (task, got, want)
+
+
+def test_candidate_states_at_fractions_of_length() -> None:
+    from aea.stage import candidate_states
+
+    out = candidate_states({"a": 40, "b": 12}, (1.0, 0.75, 0.5, 0.25), 6)
+    assert out[0] == ("a", 40, "T") and out == sorted(out, key=lambda x: -x[1]) and len(out) == 6
+    assert ("a", 30, "0.75T") in out and ("a", 20, "0.5T") in out and ("b", 12, "T") in out
+    assert candidate_states({"a": 0}, (1.0,), 6) == [] and candidate_states(
+        {"a": 1}, (1.0, 0.25), 6
+    ) == [("a", 1, "T")]
