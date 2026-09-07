@@ -23,7 +23,7 @@ BANKS = RES / "banks"
 def conditions() -> dict[str, Path]:
     meta = json.loads((RES / "banks.json").read_text())
     conds = {}
-    for arm in ("isat", "nsat", "nzero"):
+    for arm in ("isat", "nsat", "nzero", "fhmid"):
         if not meta.get(arm, {}).get("built"):
             continue
         conds[f"{arm}_m"] = BANKS / f"{arm}_m.jsonl"; conds[f"origc_{arm}_m"] = BANKS / f"origc_{arm}_m.jsonl"; conds[f"{arm}_full"] = BANKS / f"{arm}_full.jsonl"

@@ -75,7 +75,7 @@ def main(prereg_sha: str) -> None:
         k2b_corr = n_conf_prim / 11
         L += ["", f"Confirmed at K = 16: {len(conf)}/{len(isat)} envs = {rs(rc)}; primary confirmed {n_conf_prim}/7. **K2b correction: {'share of the 9 in-band envs confirmed ≥ 0.60 — K2b stands' if rc[0] >= 0.60 else f'confirmed share < 0.60 → K2b restated on the confirmed count: {n_conf_prim}/11 = {fmt(k2b_corr)}'}**", ""]
     # N-zero
-    L += ["## P4.2 N-zero (CHS) environments", "", "| task | candidates | visited (t: successes/4) | status | selected t | p̂_12 | staged len |", "|---|---|---|---|---|---|---|"]
+    L += ["## P4.2 N-zero (CHS) environments", "", "Candidate rule: owner Option A at the P4.3 gate — certified states with t ≤ 30 (residual budget ≥ 20 underlying steps): latest, nearest t = 15, nearest t = 25; walk latest-first (1–3/4 selects, 4/4 → earlier, 0/4 → later within the set). The first probe (latest certified states, t ≈ 43–48) is a residual-budget artifact and is archived in nzero_envs_v1_budget_artifact.csv.", "", "| task | candidates | visited (t: successes/4) | status | selected t | p̂_12 | staged len |", "|---|---|---|---|---|---|---|"]
     for r in nz:
         L.append(f"| {r['task_id']} | {r['n_candidates']} | {r['visited']} | {r['status']} | {r.get('selected_t', '')} | {r.get('p12', '')} | {r.get('staged_len', '')} |")
     # N-sat
@@ -89,13 +89,22 @@ def main(prereg_sha: str) -> None:
             if r["class"] != "NOEFFECT" and r.get("certified_by") not in (None, "uncertified_post_hoc"):
                 fam_lev[r["family"]].add(r["task_id"])   # leverage counted on certified doses only
     L += ["", "Per-family leverage (tasks moved out of NOEFFECT / tasks reached): " + "; ".join(f"{f}: {len(fam_lev[f])}/{len(fam_tasks[f])}" for f in fam_tasks) + f". Rollouts: {sum(int(r.get('rollouts') or 0) for r in nsd)}; uncertified (incl. post-hoc): {sum(r.get('class') == 'UNCERTIFIED' or r.get('certified_by') == 'uncertified_post_hoc' for r in nsd)}; infeasible/not built: {sum(r.get('class') in ('INFEASIBLE', 'NOT_BUILT') for r in nsd)}; confirmed: {sum(bool(r.get('confirmed')) for r in nsd)}.", ""]
+    fm = _jsonl(RES / "fhmid_confirm.jsonl")
+    if fm:
+        L += ["### Supplementary arm F_H-mid (owner decision at the P4.3 gate; ω ∈ (0.5, 1]; H4 only)", "", "| task | dose m | ω | certified by | p̂_8 | p̂_16 | confirmed |", "|---|---|---|---|---|---|---|"]
+        for r in fm:
+            L.append(f"| {r['task_id']} | {r['dose']} | {r['omega']} | {r['certified_by']} | {r['successes8'] / 8:.3f} | {r['p16']} | {r['confirmed']} |")
+        L.append("")
+    if nz:
+        n_sel = sum(r.get("status") == "selected" for r in nz)
+        L += [f"N-zero (residual-budget rule t ≤ 30, owner Option A): {n_sel}/8 tasks selected → arm {'BUILT' if n_sel >= 3 else 'NOT_BUILT (< 3 selected; H2b and H3 not evaluable; P4.6 skipped)'}.", ""]
     # banks
     L += ["## P4.4 banks", "", f"{json.dumps({k: {kk: vv for kk, vv in v.items() if kk in ('built', 'items', 'items_matched', 'item_types', 'tasks', 'reason', 'matched_items')} for k, v in banks.items()}, indent=1)}", ""]
     # evals / H
     st = {}
     if ev:
         L += ["## P4.5 held-out evals (released protocol; 30 ID + 30 OOD; 3 same-task replicates)", "", "| condition | ID | OOD |", "|---|---|---|"]
-        for c in ("nobank", "orig", "orig_m", "ours", "isat_m", "origc_isat_m", "isat_full", "nsat_m", "origc_nsat_m", "nsat_full", "nzero_m", "origc_nzero_m", "nzero_full"):
+        for c in ("nobank", "orig", "orig_m", "ours", "isat_m", "origc_isat_m", "isat_full", "nsat_m", "origc_nsat_m", "nsat_full", "nzero_m", "origc_nzero_m", "nzero_full", "fhmid_m", "origc_fhmid_m", "fhmid_full"):
             a, b = rate(ev, c, "eval_in_distribution"), rate(ev, c, "eval_out_of_distribution")
             if a or b:
                 L.append(f"| {c} | {rs(a) if a else 'n/a'} | {rs(b) if b else 'n/a'} |")
@@ -104,16 +113,23 @@ def main(prereg_sha: str) -> None:
         st["H1"] = None if h1 is None else ("holds" if h1[0] <= -0.02 else "fails")
         st["H2a"] = None if h2a is None else ("holds" if h2a[0] >= -0.02 else "fails")
         st["H2b"] = None if h2b is None else ("holds" if (h2b[0] >= -0.02 and h2b2 is not None and h2b2[0] >= 0) else "fails")
+        nsat_items = banks.get("nsat", {}).get("items_matched", "n/a"); nsat_envs = len(banks.get("nsat", {}).get("tasks", []))
+        h2a_width = "n/a" if h2a is None else fmt(h2a[2] - h2a[1])
         L += ["", f"**H1 (interface replication, I-sat(m) − orig_c(I)(m) ≤ −0.02): {st['H1'] or 'not evaluable'}** — {ps(h1)}; OOD {ps(paired(ev, 'isat_m', 'origc_isat_m', 'eval_out_of_distribution'))}.",
-              f"**H2a (saturated-side novelty, N-sat(m) − orig_c(N-sat)(m) ≥ −0.02): {st['H2a'] or 'not evaluable (arm not built)'}** — {ps(h2a)}; OOD {ps(paired(ev, 'nsat_m', 'origc_nsat_m', 'eval_out_of_distribution'))}.",
+              f"**H2a (saturated-side novelty, N-sat(m) − orig_c(N-sat)(m) ≥ −0.02): {st['H2a'] or 'not evaluable (arm not built)'}** — PILOT-GRADE: N-sat bank = {nsat_envs} envs, {nsat_items} matched items; 95% CI width {h2a_width}. {ps(h2a)}; OOD {ps(paired(ev, 'nsat_m', 'origc_nsat_m', 'eval_out_of_distribution'))}.",
               f"**H2b (zero-side novelty, N-zero(m) − orig_c(N-zero)(m) ≥ −0.02 and N-zero(m) − nobank ≥ 0): {st['H2b'] or 'not evaluable (arm not built)'}** — vs control {ps(h2b)}; vs nobank {ps(h2b2)}; OOD vs control {ps(paired(ev, 'nzero_m', 'origc_nzero_m', 'eval_out_of_distribution'))}."]
         # H4 descriptive: ID gain vs own control by ω group
-        gains = []
-        for arm, w in (("isat", "ω≈1 (interface)"), ("nsat", "ω≤0.5 (novel)"), ("nzero", "ω n/a (CHS)")):
+        gains = []; g = {}
+        for arm, w in (("isat", "ω≈1 (interface)"), ("fhmid", "ω∈(0.5,1] (F_H-mid, supplementary)"), ("nsat", "ω≤0.5 (novel)"), ("nzero", "ω n/a (CHS)")):
             d = paired(ev, f"{arm}_m", f"origc_{arm}_m", "eval_in_distribution")
             if d:
-                gains.append(f"{arm} [{w}]: {fmt(d[0])}")
-        L += [f"H4 (descriptive): ID gains vs own control — " + "; ".join(gains) + "."]
+                gains.append(f"{arm} [{w}]: {ps(d)}"); g[arm] = d[0]
+        order = "n/a"
+        if "isat" in g and "nsat" in g:
+            order = "supported (ω≤0.5 ≥ ω≈1)" if g["nsat"] >= g["isat"] else "not supported (ω≤0.5 < ω≈1)"
+            if "fhmid" in g:
+                order += "; three-level ordering nsat ≥ fhmid ≥ isat " + ("holds" if g["nsat"] >= g["fhmid"] >= g["isat"] else "does not hold")
+        L += [f"**H4 (descriptive ω ordering: arms with ω ≤ 0.5 show ID gains ≥ arms with ω ≈ 1): {order}** — ID gains vs own control: " + "; ".join(gains) + ". F_H-mid is supplementary (owner decision at the P4.3 gate); it is excluded from H2a and K4."]
     # unlock
     if unl:
         L += ["", "## P4.6 unlock on the 8 zero tasks (original env, eval protocol, 8 rollouts each)", "", "| condition | unlocked tasks | unlock share | mean success | per task |", "|---|---|---|---|---|"]

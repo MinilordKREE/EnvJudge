@@ -107,6 +107,38 @@ def candidates() -> dict[int, list[dict]]:
     return out
 
 
+def candidates_budget(t_max: int = 30, anchors=(15, 25)) -> dict[int, list[dict]]:
+    """Owner Option A (P4.3 gate): candidate states restricted to residual budget >= 20 underlying steps (t <= t_max).
+    Among the certified states (any of the 3 trajectories) with 0 < t <= t_max: the latest, the one nearest t = 15 and the
+    one nearest t = 25; ties broken by a seeded RNG; duplicates dropped."""
+    traj = sample_trajectories()
+    cert = defaultdict(lambda: defaultdict(list))
+    for r in _jsonl(RES / "nzero_states.jsonl"):
+        cert[r["episode_id"]][r["t"]].append(r["C"])
+    rnd = random.Random(SEED)
+    out = {}
+    for tid, ts in traj.items():
+        pool = []
+        for t in ts:
+            acts = [s["raw_action"]["kwargs"]["text"] for s in t["steps"]]
+            for k, cs in cert[t["episode_id"]].items():
+                if any(cs) and 0 < k <= t_max:
+                    pool.append({"episode_id": t["episode_id"], "t": k, "prefix": acts[:k], "task_id": tid})
+        cands = []
+        def pick(kind, key):
+            if not pool:
+                return
+            best = min(key(c) for c in pool)
+            c = rnd.choice([c for c in pool if key(c) == best])
+            if not any(x["episode_id"] == c["episode_id"] and x["t"] == c["t"] for x in cands):
+                cands.append({**c, "kind": kind})
+        pick("latest", lambda c: -c["t"])
+        for a in anchors:
+            pick(f"near{a}", lambda c, a=a: abs(c["t"] - a))
+        out[tid] = cands
+    return out
+
+
 def staged_actions(tid: int, prefix: list[str]) -> list[str]:
     """Drop no-op actions (those the env answered with 'Nothing happens' or that were inadmissible) by replaying; end with look."""
     from eobs.replay import open_session
@@ -125,13 +157,14 @@ def staged_actions(tid: int, prefix: list[str]) -> list[str]:
     return kept
 
 
-def probe(kmax_bank: int = 8) -> None:
+def probe(kmax_bank: int = 8, rule: str = "v1", out_csv: str = "nzero_envs.csv") -> None:
     from envharness.core.types import Action, Candidate
     from e1.p2_run import Runner
     os.environ["EOBS_PHASE"] = "p4_build"
     runner = Runner(ROOT / "configs" / "qwen_map.yaml", "e1_p4_nzero", "qwen")
     os.environ["EOBS_PHASE"] = "p4_build"
-    cands = candidates()
+    cands = candidates() if rule == "v1" else candidates_budget()
+    print(f"[P4.2] rule={rule} candidates", {t: [(c["episode_id"][:6], c["t"], c["kind"]) for c in cs] for t, cs in cands.items()}, flush=True)
     probes = _jsonl(RES / "nzero_probe.jsonl")
     done = {(r["task_id"], r["episode_id"], r["t"]): r for r in probes}
     results = []
@@ -175,12 +208,13 @@ def probe(kmax_bank: int = 8) -> None:
             s12 = selected["probe_successes"] + sum(bool(t["success"]) for t in bank)
             row.update({"bank_successes": sum(bool(t["success"]) for t in bank), "p12": round(s12 / (4 + len(bank)), 4), "staged_len": len(acts)})
         results.append(row); print("[P4.2]", row, flush=True)
-    with open(RES / "nzero_envs.csv", "w", newline="") as fh:
+    with open(RES / out_csv, "w", newline="") as fh:
         keys = sorted({k for r in results for k in r})
         w = csv.DictWriter(fh, fieldnames=keys); w.writeheader(); w.writerows(results)
 
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(); ap.add_argument("--stage", choices=["certify", "probe"], required=True); ap.add_argument("--workers", type=int, default=6)
+    ap.add_argument("--rule", choices=["v1", "budget"], default="v1"); ap.add_argument("--out", default="nzero_envs.csv")
     a = ap.parse_args()
-    certify(a.workers) if a.stage == "certify" else probe()
+    certify(a.workers) if a.stage == "certify" else probe(rule=a.rule, out_csv=a.out)

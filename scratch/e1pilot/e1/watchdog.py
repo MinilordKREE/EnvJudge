@@ -30,8 +30,9 @@ def scan() -> tuple[float, str | None]:
         usd += float(r.get("usd") or 0.0)
         by_phase[r.get("phase", "")] = by_phase.get(r.get("phase", ""), 0.0) + float(r.get("usd") or 0.0)
         for ph, cap in PHASE_CAPS.items():
-            if by_phase.get(ph, 0.0) >= cap:
-                return usd, f"phase cap: {ph} USD {by_phase[ph]:.2f} >= {cap}"
+            tot = sum(v for k, v in by_phase.items() if k == ph or k.startswith(ph + "_"))   # "p4" covers p4_build/p4_induce/p4_eval/p4_unlock
+            if tot >= cap:
+                return usd, f"phase cap: {ph} USD {tot:.2f} >= {cap}"
         if not r.get("ok") or "qwen" not in str(r.get("model", "")):
             continue
         if r.get("provider") != "Alibaba":

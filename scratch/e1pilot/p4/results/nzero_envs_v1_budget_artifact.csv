@@ -1,0 +1,9 @@
+bank_successes,n_candidates,p12,selected_episode,selected_t,staged_len,status,task_id,visited
+0,4,0.0833,6353684edf,46,38,selected,8,"[[46, 1]]"
+,4,,,,,dead_all_0of4,9,"[[48, 0]]"
+,4,,,,,dead_all_0of4,10,"[[45, 0]]"
+,3,,,,,dead_all_0of4,11,"[[1, 0]]"
+,4,,,,,dead_all_0of4,14,"[[46, 0]]"
+,4,,,,,dead_all_0of4,17,"[[46, 0]]"
+,4,,,,,dead_all_0of4,20,"[[45, 0]]"
+,4,,,,,dead_all_0of4,27,"[[43, 0]]"

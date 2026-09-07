@@ -30,7 +30,7 @@ def _jsonl(p: Path) -> list[dict]:
 
 def arm_trajectories() -> dict[str, dict[str, list[dict]]]:
     """arm -> {task_id: [trace dicts]} for the three treatment arms (confirmed/selected envs only)."""
-    arms: dict[str, dict[str, list[dict]]] = {"isat": {}, "nsat": {}, "nzero": {}}
+    arms: dict[str, dict[str, list[dict]]] = {"isat": {}, "nsat": {}, "nzero": {}, "fhmid": {}}
     isat = [r for r in csv.DictReader(open(RES / "isat_confirm.csv")) if r["confirmed"] == "True"]
     tr = _jsonl(ROOT / "work" / "runs" / "e1_p4_isat" / "traces.jsonl")
     for r in isat:
@@ -41,6 +41,10 @@ def arm_trajectories() -> dict[str, dict[str, list[dict]]]:
     for r in nsat:
         tag = (f"p4nsat-{r['task_id']}-F_H-{r['dose']}-bank" if r["family"] == "F_H" else f"p4nsat-{r['task_id']}-Chain-2-{r['partner']}-bank")
         arms["nsat"][str(r["task_id"])] = [t for t in tr if t["candidate_id"] == tag and not t.get("error")][:8]
+    # F_H-mid (owner decision at the P4.3 gate): confirmed in-band F_H doses with omega in (0.5, 1]; own control; H4 only
+    for r in [r for r in _jsonl(RES / "fhmid_confirm.jsonl") if r.get("confirmed")]:
+        tag = f"p4nsat-{r['task_id']}-F_H-{r['dose']}-bank"
+        arms["fhmid"][str(r["task_id"])] = [t for t in tr if t["candidate_id"] == tag and not t.get("error")][:8]
     nz = [r for r in csv.DictReader(open(RES / "nzero_envs.csv")) if r.get("status") == "selected"]
     tr = _jsonl(ROOT / "work" / "runs" / "e1_p4_nzero" / "traces.jsonl")
     for r in nz:
@@ -65,8 +69,8 @@ def main() -> None:
     arms = arm_trajectories()
     meta = {}
     for arm, by in arms.items():
-        if not by:
-            meta[arm] = {"built": False, "reason": "no confirmed/selected env"}; continue
+        if not by or (arm == "nzero" and len(by) < 3):
+            meta[arm] = {"built": False, "reason": "no confirmed/selected env" if not by else f"only {len(by)} selected N-zero envs (< 3, owner rule at the P4.3 gate)"}; continue
         ctrl = control_trajectories(sorted(by))
         for cond, traces in ((arm, by), (f"origc_{arm}", ctrl)):
             out = BANKS / f"{cond}_full.jsonl"
