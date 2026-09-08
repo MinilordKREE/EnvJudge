@@ -116,7 +116,70 @@ Per corpus episode USD 0.0239 (policy only; designer adds 0.0003). Per eval epis
 - Eval seeds ran as three parallel invocations of the released driver (one seed each, concurrency 8,
   `eval/seeds-<s>/`), identical to one three-round invocation (rounds are independent).
 
+## 7. Owner decisions at the gate (2026-09-08; LOG, PREREG7 Amendment 1 @ ba8bdfc)
+
+1. Diagnosis: rebuild orig and R on the same 20-task corpus with the released pipeline and evaluate
+   on 3 seeds; sign returns → attributed to induction mode + subset; else D1 (R on 100 tasks); else
+   release with backbone and N as standing differences. Round 1 reports both induction modes for
+   every arm (single-success primary, released mode as the baseline-protocol row). See §8.
+2. N = 30 and Flash-Lite confirmed by rule. Regime map of the 20 corpus tasks from the 100 baseline
+   rollouts (`scripts/e0.py --stage regime`, `results/e0-20260907/regime.md`):
+
+| task | baseline s/n | class | accepted candidates | rejected | accepted-env s/n |
+|---|---|---|---|---|---|
+| 0 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 1 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 2 | 5/5 | saturated | 0 | 0 | 0/0 |
+| 3 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 4 | 4/5 | high | 1 | 0 | 4/5 |
+| 5 | 5/5 | saturated | 1 | 0 | 4/5 |
+| 6 | 5/5 | saturated | 0 | 0 | 0/0 |
+| 7 | 5/5 | saturated | 0 | 0 | 0/0 |
+| 8 | 3/5 | mid | 1 | 0 | 5/5 |
+| 9 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 10 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 11 | 0/5 | zero | 1 | 1 | 0/5 |
+| 12 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 13 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 14 | 5/5 | saturated | 0 | 0 | 0/0 |
+| 15 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 16 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 17 | 5/5 | saturated | 0 | 0 | 0/0 |
+| 18 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 19 | 5/5 | saturated | 1 | 0 | 5/5 |
+
+Classes on the baseline rollouts: zero = 0/n; marginal-low = 1/n; mid = 2-3/5; high = 4/5; saturated = n/n.
+Counts: zero 1, marginal-low 0, mid 1, high 1, saturated 17 (of 20).
+Zero + marginal-low: 1/20 = 5% (below the owner's 10% thin-evidence line).
+Designer: 15/20 tasks with an accepted candidate (15 accepted, 1 rejected).
+
+   Reading: Flash-Lite is saturated on 17/20 released tasks; the released designer's accepted
+   candidates leave 13 of the 14 scaffolded tasks at 4–5/5, i.e. the accepted environments are not
+   harder for this policy (consistent with the owner's mechanism note: the scaffold does steps for
+   the policy). Zero + marginal-low = 1/20 (5%) is below the 10% line, so the round-1 zero-side
+   evidence will be thin on this task set; no design change (paper-level decision on a second
+   consumer). Correction to the note's count: 15/20 tasks had a candidate accepted (one rejection);
+   R's bank covers 14 because task 11's accepted environment scored 0/5.
+3. PREREG7 Amendment 1 committed before any round-1 rollout: Protocol T2 (primary for C2) and
+   Protocol U (reported); C1 primary counts learnable transformed environments; both induction
+   modes for every arm in round 1.
+4. E1-SL hard cap USD 560, soft gate USD 500.
+
+## 8. Diagnosis (decision 1): released Stage 2 + Stage 3 on the E0 corpus
+
+Premise check against `experiments/alfworld/reproduce.py`: the released headline evaluates the
+FULL Stage-2 banks; the Stage-3 one-per-task subsets are built as a secondary reference only.
+Stage 2 (`scripts/induce_pair.py` main) differs from E0's banks in two ways at once: paired-diff
+wherever a task has both a success and a failure, and a per-task cascade for "ours" (accepted
+rollouts where the task has them, else the task's baseline rollouts, so ours covers the same 20
+tasks as orig — closer to Protocol U than to T2). The diagnosis therefore runs the released Stage 2
+verbatim (`--stage banks_released`, both banks), builds the subsets at no cost, and evaluates the
+full banks (`orig_rel`, `R_rel`) on seeds 0/1000/2000 (~USD 20); the subset eval (another ~USD 20)
+is held for the owner since it is not part of the headline.
+
+Result: pending (this section is completed by the report once the three seeds finish).
+
 ## STOP
 
-Phase 0b complete. Waiting for the owner: (1) OOD-sign diagnosis choice (§2, or waive), (2) N = 30 and
-Flash-Lite per the rules above, (3) go/no-go for round 1.
+Phase 0b complete pending the diagnosis result (§8). N = 30, Flash-Lite, Amendment 1 and the caps
+are settled (§7).
