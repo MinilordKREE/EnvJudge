@@ -48,3 +48,35 @@ T2 is the published comparison and isolates the transformation itself; U answers
 
 Budget: E1-SL hard cap USD 560, soft gate USD 500 (covers the Phase 0b diagnosis and the second-induction-mode evaluations of round 1).
 N = 30 and the Flash-Lite backbone are confirmed by the Phase 0b rules above.
+
+---
+```
+# PREREG7 Amendment 2 (2026-09-08; owner decisions at the Phase-0b gate; no Round-1 rollout has run)
+
+A2.1 Protocol per comparison (supersedes Amendment 1's single primary):
+  - C1 (learnable transformed environments per 1,000 search rollouts): Protocol T2 for every arm.
+  - C2 A vs O: Protocol U (both banks cover every task with ≥ 1 success; the comparison isolates what the
+    transformed items add on the same base).
+  - C2 A vs R (and vs G): reported under BOTH T2 and U; the pre-registered inequality A ≥ R is evaluated under U,
+    T2 is the transformation-only isolation.
+  - Definitions unchanged: T2 = single-success induction over the arm's transformed environments only;
+    U = T2 ∪ single-success over the arm's unchanged tasks with ≥ 1 success during its own search
+    (R/G: skipped and all-rejected tasks; A-family: band, frozen, exhausted tasks; O: all tasks).
+
+A2.2 Evaluation seeds:
+  - Primary arms A, R, O, N: 6 seeds (0, 1000, 2000, 3000, 4000, 5000), full ID (140) + OOD (134).
+  - Ablation arms G, G+, A-ex, A+H: 3 seeds (0, 1000, 2000).
+  - Seed-extension rule (sequential, pre-registered): after Round 1, if on ID either A − R (U) or A − O (U) has
+    |gap| between 1 and 2 SE (pooled normal SE), A, R, O, N are extended to 12 seeds (6000…11000) before the
+    stop rule is applied. No other extension.
+
+A2.3 Second induction mode: the released Stage 2 verbatim (cascade + automatic mode) is run for A and R only
+  (row "released-protocol"); all other arms single-success only.
+
+A2.4 Concurrency: total eval concurrency ≤ 16; corpus arms ≤ 8 tasks in parallel.
+
+A2.5 Budget: E1-SL hard cap USD 560, soft gate USD 500 (Phase 0 spent USD 99.08 under owner-approved diagnostics).
+
+Standing differences recorded for the paper: backbone (Gemini 3.1 Flash-Lite via OpenRouter, Google AI Studio pin,
+no thinking parameter) and N = 30 train tasks; EnvHarness Table 2's OOD sign was not reproduced in three attempts.
+```
