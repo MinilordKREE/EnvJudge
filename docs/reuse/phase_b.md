@@ -33,3 +33,10 @@ Deviations from the contracts noted for review:
 - Non-monotone dose responses are counted as pairs whose success rate rises with the dose.
 - `Displacement`'s ALFWorld builder (expert-discovered targets) is not ported yet; the knob is
   wired (`KnobContext.setup_builder`) and reports infeasible when no builder is supplied.
+
+## Phase 0a additions (E1-SL v2)
+
+| module | lines | imports (envharness) | wraps | rewritten from (pilot oracle) | spec |
+|---|---|---|---|---|---|
+| `aea/displacement.py` | ~230 | `Action`, `Candidate` | certs sessions (expert plan through the proxy) | `e1/operators/s0_displace.py` (`discover`, `synthesize`, `validate`, `compact`, `build`; goal-receptacle exclusion; already-won guard) | §3 exemplar 3 |
+| `aea/evalhook.py` | ~200 | — | `litellm.completion` in the eval driver (observe-and-route, docs/reuse/eval_hook.md) | `e1/p3a.py:install_wrappers` | budgets §0 (`eval`) |

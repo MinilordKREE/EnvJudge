@@ -21,7 +21,7 @@ dependencies = [
 
 [project.optional-dependencies]
 # ALFWorld + TextWorld are needed only by the `integration` tests and by experiments; CI never installs them.
-alfworld = ["alfworld>=0.4.2", "textworld>=1.7.0"]
+alfworld = ["alfworld[full]>=0.4.2", "textworld==1.7.0"]
 
 [project.scripts]
 aea = "aea.cli:main"
@@ -32,8 +32,19 @@ dev = [
   "pre-commit>=3.7",
   "pytest>=8.2",
   "ruff>=0.6",
+  "setuptools<81",
   "types-pyyaml>=6.0",
 ]
+
+[tool.uv]
+# TextWorld / visdom ship setup.py builds that import pkg_resources: give their isolated builds an
+# old setuptools (the Makefile's setup-alfworld recipe mirrors this for the environment itself).
+build-constraint-dependencies = ["setuptools<81"]
+
+[tool.uv.extra-build-dependencies]
+visdom = ["setuptools<81"]
+textworld = ["setuptools<81", "wheel"]
+alfworld = ["setuptools<81"]
 
 [tool.uv.sources]
 envharness = { path = "third_party/envharness", editable = true }

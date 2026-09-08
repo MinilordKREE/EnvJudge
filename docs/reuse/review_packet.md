@@ -28,11 +28,9 @@ Source: 4,767 lines under `src/aea`; tests 3,093 lines.
 ```
 make setup                 # uv sync --locked, pre-commit
 make check                 # ruff, ruff format --check, mypy --strict (src + tests), unit tests
-# integration (ALFWorld + TextWorld + game data; LLM-free):
-PYTHONPATH=src ALFWORLD_DATA=~/eh_alfworld_data <alfworld-venv>/bin/python -m pytest tests/integration -m integration -o addopts=""
+make setup-alfworld        # ALFWorld/TextWorld extra into the uv environment (Phase 0a)
+ALFWORLD_DATA=~/eh_alfworld_data make test-integration   # LLM-free, real bridge
 ```
-The `alfworld` extra (`make setup-alfworld`) installs ALFWorld/TextWorld into the uv environment;
-the checks above were run with the pilot venv that already has them.
 
 ## 3. Verification results (2026-09-07)
 
@@ -117,7 +115,7 @@ C.6 budget invariants: traces written = rollouts charged = substrate calls, no t
 ## 8. Phase D paid smoke (2026-09-07; runs/smoke-20260907, runs/smoke2-designer-20260907)
 
 Qwen3-8B via OpenRouter (Alibaba, reasoning off) as policy, DeepSeek V4 Pro (thinking off) as
-designer, executed with the pilot venv (ALFWorld) and `PYTHONPATH=src`. Total spend USD 1.36.
+designer, executed with the pilot venv before the uv ALFWorld extra existed (Phase 0a added it). Total spend USD 1.36.
 
 | task (pilot regime) | outcome | rollouts | USD |
 |---|---|---|---|

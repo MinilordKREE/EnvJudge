@@ -291,7 +291,9 @@ class ExpertSubstrate:
         return ""
 
     def setup_builder(self, task: TaskRef) -> Any:
-        return None
+        from aea.displacement import setup_builder
+
+        return setup_builder(lambda c: self.open_session(task, c, None))
 
 
 class PrefixThenRandomSubstrate(ExpertSubstrate):
@@ -459,3 +461,118 @@ def test_budget_invariants_hold(tmp_path: Path) -> None:
     assert not [
         e for e in events if e.kind == "rollouts" and e.payload["phase"] == "confirm"
     ]  # confirm never runs here
+
+
+# --------------------------------------------------------------------------- 0a.1 Displacement
+def test_displacement_replays_the_pilot_seeds() -> None:
+    """docs/pilots/e1pilot/LOG.md (F_S0 validated on seeds 7, 9, 2, 0): k=1 feasible on all four;
+    k=2/3 infeasible on 7 (no closable receptacle) and 2 (only the goal fridge is compatible);
+    k=2 and k=3 feasible on 0."""
+    from aea.displacement import build, discover
+
+    expected = {
+        7: {1: True, 2: False, 3: False},
+        9: {1: True},
+        2: {1: True, 2: False, 3: False},
+        0: {1: True, 2: True, 3: True},
+    }
+    for seed, want in expected.items():
+
+        def opener(c: Candidate | None, s: int = seed) -> Session:
+            return open_session(c, s, DEFAULT_RESET_OPTIONS)
+
+        info = discover(opener)
+        assert info is not None, seed
+        for k, feasible in want.items():
+            actions, status = build(opener, info, k)
+            assert (actions is not None) == feasible, (seed, k, status)
+            if actions is not None:
+                assert actions[-1] == "look" and any(a.startswith("move ") for a in actions)
+                sess = opener(
+                    Candidate(
+                        in_env_actions=[Action(name="do", kwargs={"text": a}) for a in actions]
+                    )
+                )
+                try:
+                    assert (
+                        not sess.won and not sess.done
+                    )  # a displacement never pre-solves the task
+                finally:
+                    sess.close()
+
+
+# --------------------------------------------------------------------------- 0a.2 eval hook
+def test_eval_hook_on_one_released_eval_episode(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """One released eval episode with a scripted litellm beneath the hook (LLM-free): the released
+    code path runs unchanged, the hook routes and writes `eval` ledger rows, the guard passes."""
+    import importlib
+    from types import SimpleNamespace
+
+    import litellm
+    import yaml
+
+    from aea.core.config import LLMConfig
+    from aea.evalhook import EvalHook, check_guard, install
+    from aea.llm.ledger import Ledger, read_ledger
+    from aea.llm.pricing import load_pricing
+
+    sys.path.insert(0, str(ROOT / "third_party" / "envharness" / "experiments" / "alfworld"))
+    sys.path.insert(0, str(ROOT / "third_party" / "envharness"))
+    rbe = importlib.import_module("reasoning_bank_eval")
+    cfg = yaml.safe_load(
+        (
+            ROOT
+            / "third_party"
+            / "envharness"
+            / "experiments"
+            / "alfworld"
+            / "reasoning_bank_eval.yaml"
+        ).read_text()
+    )
+    cfg["model"]["name"] = "openai/qwen/qwen3-8b"
+    cfg["policy"]["max_steps"] = 3
+    usd = (300 * 0.117 + 8 * 0.455) / 1e6
+    seen: list[dict[str, Any]] = []
+
+    def scripted(**kwargs: Any) -> Any:
+        seen.append(kwargs)
+        usage = SimpleNamespace(
+            prompt_tokens=300,
+            completion_tokens=8,
+            prompt_tokens_details=None,
+            completion_tokens_details=None,
+            cost=usd,
+        )
+        return SimpleNamespace(
+            usage=usage,
+            choices=[
+                SimpleNamespace(
+                    message=SimpleNamespace(content="<action>look</action>"), finish_reason="stop"
+                )
+            ],
+            model="qwen/qwen3-8b",
+            provider="Alibaba",
+            id="x",
+        )
+
+    monkeypatch.setattr(litellm, "completion", scripted)
+    monkeypatch.setenv("OPENAI_API_KEY", "not-used")
+    hook = EvalHook(
+        config=LLMConfig(),
+        ledger=Ledger(tmp_path / "ledger.jsonl", "eval-int"),
+        pricing=load_pricing(ROOT / "configs" / "pricing.yaml"),
+        run_dir=tmp_path,
+        api_key="sk-test",
+    )
+    original = install(hook)
+    try:
+        rec = rbe.run_episode(cfg=cfg, bank=None, seed=0, split="train", gemini_api_key=None)
+    finally:
+        litellm.completion = original
+    assert rec["error"] == "" and rec["duration_steps"] == 3
+    assert len(seen) == 3 and seen[0]["api_base"] == "https://openrouter.ai/api/v1"
+    assert seen[0]["extra_body"]["provider"] == {"order": ["alibaba"], "allow_fallbacks": False}
+    rows = read_ledger(tmp_path / "ledger.jsonl")
+    assert len(rows) == 3 and {r.budget for r in rows} == {"eval"} and check_guard(tmp_path) is None

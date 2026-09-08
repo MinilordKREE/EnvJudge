@@ -1,3 +1,5 @@
+> **SUPERSEDED (2026-09-07).** This pre-registration never governed a rollout. The pre-registration of record for E1-SL is `PREREG7.md` (spec `docs/spec/AEA_v2.md`); see `PREREG6_SUPERSEDED.md` for the five conflicts.
+
 # E1-SL pre-registration — frozen 2026-09-07 (inputs: pilots through P5 @ 441310d)
 
 Setting: ALFWorld; envharness @ fab7d574; backbone Gemini 3.1 Flash-Lite as designer, policy and consumer for all arms

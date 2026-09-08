@@ -181,7 +181,9 @@ class AeaSubstrate:
         return self._designer_model
 
     def setup_builder(self, task: TaskRef) -> Callable[[float], list[str] | None] | None:
-        return None  # Displacement's ALFWorld builder lands with the integration tests (Phase C)
+        from aea.displacement import setup_builder
+
+        return setup_builder(lambda c: self.open_session(task, c, None))
 
 
 def now_utc() -> datetime:

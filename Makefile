@@ -10,8 +10,11 @@ setup:  ## install uv if missing, sync the locked environment, install hooks
 	$(UV) sync --locked
 	$(UV) run pre-commit install
 
-setup-alfworld:  ## add the ALFWorld/TextWorld extra (integration tests and experiments only)
+setup-alfworld:  ## ALFWorld/TextWorld extra (integration tests and experiments). The setup.py builds of
+	## textworld / visdom / alfworld need an old setuptools: pyproject's [tool.uv.extra-build-dependencies]
+	## and build-constraint-dependencies supply setuptools<81 to their isolated builds.
 	$(UV) sync --locked --extra alfworld
+	@echo "set ALFWORLD_DATA to the game data directory (e.g. export ALFWORLD_DATA=~/eh_alfworld_data)"
 
 lock:  ## regenerate uv.lock after editing pyproject dependencies
 	$(UV) lock

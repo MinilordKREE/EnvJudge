@@ -1,8 +1,8 @@
 """Phase D paid smoke: the AEA controller on three known-regime ALFWorld tasks (one band, one
 saturated, one zero); Qwen3-8B via OpenRouter (Alibaba, reasoning off), DeepSeek V4 Pro designer.
 
-Run from the repository root with a Python that has ALFWorld installed:
-    PYTHONPATH=src python scripts/aea_smoke.py --tasks 6 1 9 --cap-usd 10 --run-id smoke-<date>
+Run from the repository root (uv environment with the alfworld extra):
+    uv run python scripts/aea_smoke.py --tasks 6 1 9 --cap-usd 10 --run-id smoke-<date>
 """
 
 from __future__ import annotations
