@@ -10,7 +10,8 @@ models:
     as_of: 2026-09-07
     source: https://openrouter.ai/api/v1/models/qwen/qwen3-8b/endpoints
     flat: {input_cache_hit: 0.117, input_cache_miss: 0.117, output: 0.455}
-  # Gemini 3.1 Flash-Lite via OpenRouter, Google AI Studio standard tier (endpoint list, 2026-09-07).
+  # Gemini 3.1 Flash-Lite via OpenRouter, Google AI Studio standard tier (endpoint list, 2026-09-07); verified against
+  # usage.cost on 5 probe calls incl. implicit-cache hits (cached_tokens reported; no cache-write charge), 2026-09-07.
   google/gemini-3.1-flash-lite:
     pricing_version: "openrouter-gemini-3.1-flash-lite-2026-09-07"
     as_of: 2026-09-07
