@@ -900,21 +900,65 @@ def eval_dir(cond: str, seed: int) -> Path:
     return RUNS / "r1-eval" / f"{cond}-seeds-{seed}"
 
 
+def cell_files(d: Path, cond: str, split: str) -> list[Path]:
+    files = sorted(d.glob(f"round*/{cond}_eval_{split}.jsonl"))
+    files += sorted(d.parent.glob(f"{d.name}-resume-*/round*/{cond}_eval_{split}.jsonl"))
+    return files
+
+
+def cell_records(d: Path, cond: str, split: str) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    for f in cell_files(d, cond, split):
+        for line in f.read_text(encoding="utf-8", errors="replace").splitlines():
+            line = line.strip().strip("\0")
+            if line:
+                try:
+                    out.append(json.loads(line))
+                except ValueError:
+                    continue
+    return out
+
+
 def cell_count(d: Path, cond: str, split: str) -> int:
-    n = 0
-    for f in d.glob(f"round*/{cond}_eval_{split}.jsonl"):
-        n += sum(
-            1
-            for line in f.read_text(encoding="utf-8", errors="replace").splitlines()
-            if line.strip().strip("\0")
-        )
-    for f in d.parent.glob(f"{d.name}-resume-*/round*/{cond}_eval_{split}.jsonl"):
-        n += sum(
-            1
-            for line in f.read_text(encoding="utf-8", errors="replace").splitlines()
-            if line.strip().strip("\0")
-        )
-    return n
+    """Complete (non-errored) records of the cell across the job dir and its resume dirs."""
+    return sum(1 for r in cell_records(d, cond, split) if not r.get("error"))
+
+
+def drop_errored(d: Path, cond: str, split: str) -> list[int]:
+    """Remove errored episode records (a guard abort inside a worker, an env error) from the cell
+    files so the missing seeds are re-run; the original file is kept as ``.with_errors``."""
+    dropped: list[int] = []
+    for f in cell_files(d, cond, split):
+        recs = []
+        for line in f.read_text(encoding="utf-8", errors="replace").splitlines():
+            line = line.strip().strip("\0")
+            if not line:
+                continue
+            try:
+                r = json.loads(line)
+            except ValueError:
+                continue
+            if r.get("error"):
+                dropped.append(int(r["seed"]))
+            else:
+                recs.append(r)
+        if dropped:
+            shutil.copy(f, f.with_suffix(".jsonl.with_errors"))
+            f.write_text("".join(json.dumps(r) + "\n" for r in recs), encoding="utf-8")
+    return dropped
+
+
+def missing_runs(d: Path, cond: str, split: str, seed: int, n: int) -> list[tuple[int, int]]:
+    """Contiguous runs (start, length) of episode seeds not yet recorded for the cell."""
+    have = {int(r["seed"]) for r in cell_records(d, cond, split) if not r.get("error")}
+    missing = [s for s in range(seed, seed + n) if s not in have]
+    runs: list[tuple[int, int]] = []
+    for s in missing:
+        if runs and runs[-1][0] + runs[-1][1] == s:
+            runs[-1] = (runs[-1][0], runs[-1][1] + 1)
+        else:
+            runs.append((s, 1))
+    return runs
 
 
 def reuse_n_from_e0() -> None:
@@ -940,7 +984,8 @@ def reuse_n_from_e0() -> None:
 
 
 def stage_eval_job(cond: str, seed: int, concurrency: int) -> None:
-    """One (condition, seed): both splits, or only what is missing after a crash."""
+    """One (condition, seed): both splits fresh, or exactly the missing episode seeds after a
+    crash / guard abort (one released invocation per contiguous run of missing seeds)."""
     arm, bank = conditions()[cond]
     if bank is not None and (not bank.exists() or bank.stat().st_size == 0):
         print(json.dumps({"eval_job": cond, "seed": seed, "skipped": "empty bank"}))
@@ -948,48 +993,60 @@ def stage_eval_job(cond: str, seed: int, concurrency: int) -> None:
     policy, _ = backbone()
     pricing = load_pricing(PRICING)
     base = eval_dir(cond, seed)
-    todo: dict[str, tuple[int, int]] = {}  # split -> (start seed, n)
+    for split in SPLITS:
+        dropped = drop_errored(base, cond, split)
+        if dropped:
+            print(
+                json.dumps(
+                    {"eval_job": cond, "seed": seed, "split": split, "dropped_errored": dropped}
+                )
+            )
+    plan: list[tuple[str, int, int]] = []  # (split, start, n)
     for split, n in SPLITS.items():
-        have = cell_count(base, cond, split)
-        if have < n:
-            todo[split] = (seed + have, n - have)
-    if not todo:
+        plan += [(split, st, k) for st, k in missing_runs(base, cond, split, seed, n)]
+    if not plan:
         print(json.dumps({"eval_job": cond, "seed": seed, "complete": True}))
         return
-    fresh = all(start == seed for start, _ in todo.values()) and len(todo) == len(SPLITS)
-    out_dir = base if fresh else base.parent / f"{base.name}-resume-{int(time.time())}"
+    fresh = plan == [(split, seed, n) for split, n in SPLITS.items()]
     eval_yaml = ENVHARNESS / "experiments" / "alfworld" / "reasoning_bank_eval.yaml"
-    cfg = yaml.safe_load(eval_yaml.read_text(encoding="utf-8"))
-    cfg["model"]["name"] = f"openai/{policy.model}"
-    cfg["eval"]["concurrency"] = concurrency
-    if fresh:
-        cfg["eval"]["splits"] = {f"eval_{k}": v for k, v in SPLITS.items()}
-        start_seed = seed
-    else:  # the released loop uses one start seed for every split: resume one split per invocation
-        split, (start_seed, n) = next(iter(todo.items()))
-        cfg["eval"]["splits"] = {f"eval_{split}": n}
-    out_dir.mkdir(parents=True, exist_ok=True)
-    resolved = out_dir / "reasoning_bank_eval_r1.yaml"
-    resolved.write_text(yaml.safe_dump(cfg, sort_keys=False), encoding="utf-8")
     os.environ.setdefault("ALFWORLD_DATA", str(Path.home() / "eh_alfworld_data"))
-    rc = run_eval(
-        arm=arm,
-        conditions={cond: bank},
-        config_yaml=resolved,
-        out_dir=out_dir,
-        start_seeds=(start_seed,),
-        concurrency=concurrency,
-        llm=policy,
-        pricing=pricing,
-        run_id="r1-eval",
-        envharness_root=ENVHARNESS,
-    )
-    merge_ledgers(out_dir, "r1-eval")
-    print(
-        json.dumps({"eval_job": cond, "seed": seed, "rc": rc, "out_dir": str(out_dir)}), flush=True
-    )
-    if not fresh and len(todo) > 1:  # the other split still missing: run again
-        stage_eval_job(cond, seed, concurrency)
+    invocations = [(None, seed, SPLITS)] if fresh else [(sp, st, {sp: k}) for sp, st, k in plan]
+    for only_split, start_seed, splits in invocations:
+        cfg = yaml.safe_load(eval_yaml.read_text(encoding="utf-8"))
+        cfg["model"]["name"] = f"openai/{policy.model}"
+        cfg["eval"]["concurrency"] = concurrency
+        cfg["eval"]["splits"] = {f"eval_{k}": v for k, v in splits.items()}
+        out_dir = base if fresh else base.parent / f"{base.name}-resume-{int(time.time() * 1000)}"
+        out_dir.mkdir(parents=True, exist_ok=True)
+        resolved = out_dir / "reasoning_bank_eval_r1.yaml"
+        resolved.write_text(yaml.safe_dump(cfg, sort_keys=False), encoding="utf-8")
+        rc = run_eval(
+            arm=arm,
+            conditions={cond: bank},
+            config_yaml=resolved,
+            out_dir=out_dir,
+            start_seeds=(start_seed,),
+            concurrency=concurrency,
+            llm=policy,
+            pricing=pricing,
+            run_id="r1-eval",
+            envharness_root=ENVHARNESS,
+        )
+        merge_ledgers(out_dir, "r1-eval")
+        print(
+            json.dumps(
+                {
+                    "eval_job": cond,
+                    "seed": seed,
+                    "split": only_split,
+                    "start": start_seed,
+                    "n": sum(splits.values()),
+                    "rc": rc,
+                    "out_dir": str(out_dir),
+                }
+            ),
+            flush=True,
+        )
 
 
 def stage_evals(workers: int, per_job: int) -> None:
