@@ -87,8 +87,16 @@ def run_dir_for(run_id: str) -> Path:
     return ROOT / "runs" / run_id
 
 
-def stage_corpus(run_id: str, n_tasks: int, fallback: bool) -> None:
+def stage_corpus(
+    run_id: str, n_tasks: int, fallback: bool, task_ids: tuple[int, int] | None = None
+) -> None:
+    """``task_ids=(a, b)`` runs the released corpus on task ids a..b-1 through the orchestrator's
+    ``explicit_task_ids`` override (D1: seeds 20-99 on top of E0's 0-19; corpus.yaml uses
+    stride 1 / offset 0, so explicit ids equal the formula's ids)."""
     policy, designer = backbone(fallback)
+    explicit = list(range(*task_ids)) if task_ids else None
+    if explicit:
+        n_tasks = len(explicit)
     run_config = RunConfig(
         schema_version=1,
         name="e0-corpus",
@@ -123,6 +131,7 @@ def stage_corpus(run_id: str, n_tasks: int, fallback: bool) -> None:
             "stage": "corpus",
             "arm": "R",
             "n_tasks": n_tasks,
+            "explicit_task_ids": [explicit[0], explicit[-1]] if explicit else None,
             "policy_endpoint_pin": policy.provider_pin,
             "designer_endpoint_pin": designer.provider_pin,
             "thinking": policy.thinking,
@@ -143,9 +152,10 @@ def stage_corpus(run_id: str, n_tasks: int, fallback: bool) -> None:
     os.environ["OPENAI_API_KEY"] = "routed-by-aea"  # the released key presence check only
     os.environ["AEA_RUN_ID"] = ctx.run_id
     run_harness = importlib.import_module("run_harness")
-    orch = run_harness.build_from_config(
-        cfg_path, run_id, overrides={"n_tasks": n_tasks, "n_iterations": n_tasks}
-    )
+    overrides: dict[str, Any] = {"n_tasks": n_tasks, "n_iterations": n_tasks}
+    if explicit:
+        overrides["explicit_task_ids"] = explicit
+    orch = run_harness.build_from_config(cfg_path, run_id, overrides=overrides)
     orch.runner = AeaSubprocessRunner(
         ctx.run_id,
         default=(Attribution(phase="corpus", budget="search", arm="R", task_id="e0"), 0),
@@ -238,7 +248,7 @@ def _load_released(name: str, rel: str) -> Any:
     return mod
 
 
-def stage_banks_released(run_id: str, fallback: bool) -> None:
+def stage_banks_released(run_id: str, fallback: bool, merge_traces: tuple[str, ...] = ()) -> None:
     """Owner decision 1 (Phase 0b gate): the released Stage 2 and Stage 3 exactly as
     experiments/alfworld/reproduce.py runs them, on this run's traces.jsonl. Stage 2 (induce_pair
     main) builds orig_full from the baseline rollouts and ours_full by per-task cascade (accepted
@@ -259,11 +269,19 @@ def stage_banks_released(run_id: str, fallback: bool) -> None:
     sub = _load_released("subset", "scripts/subset.py")
     out = run_dir / "banks_released"
     out.mkdir(exist_ok=True)
+    traces_path = run_dir / "traces.jsonl"
+    if merge_traces:  # D1: the 100-task corpus = this run's tasks + the E0 run's tasks
+        traces_path = run_dir / "traces_merged.jsonl"
+        parts = [run_dir_for(r) / "traces.jsonl" for r in merge_traces] + [run_dir / "traces.jsonl"]
+        traces_path.write_text(
+            "".join(p.read_text(encoding="utf-8") for p in parts), encoding="utf-8"
+        )
+        print(json.dumps({"merged_traces": [str(p) for p in parts]}), flush=True)
     with attributed(induce, seed=0):
         rc = ip.main(
             [
                 "--traces",
-                str(run_dir / "traces.jsonl"),
+                str(traces_path),
                 "--out-dir",
                 str(out),
                 "--llm-model",
@@ -549,7 +567,7 @@ def _signs(cells: Cells, n: str, orig: str, r: str) -> list[str]:
     ]
 
 
-def stage_report(run_id: str) -> None:
+def stage_report(run_id: str, n_from: str = "") -> None:
     run_dir = run_dir_for(run_id)
     rows = read_ledger(run_dir / "ledger.jsonl") if (run_dir / "ledger.jsonl").exists() else []
     eval_root = run_dir / "eval"
@@ -578,6 +596,8 @@ def stage_report(run_id: str) -> None:
 
     e0 = _cells(eval_root, "seeds-*")  # E0: single-success banks, transformed environments only
     rel = _cells(eval_root, "released-*")  # diagnosis: released Stage 2 full banks
+    if n_from:  # D1 run: the N cells live in the E0 run
+        e0["nobank"] = _cells(run_dir_for(n_from) / "eval", "seeds-*").get("nobank", {})
     for cond in ("nobank",):  # N is shared by both protocols
         if cond in e0:
             rel[cond] = e0[cond]
@@ -596,15 +616,17 @@ def stage_report(run_id: str) -> None:
         *_signs(e0, "nobank", "orig", "R"),
     ]
     if any(k != "nobank" for k in rel):
+        orig_c = next(k for k in rel if k.startswith("orig"))
+        r_c = next(k for k in rel if k.startswith("R"))
         lines += [
             "",
             "## Diagnosis (owner decision 1): released Stage 2 banks (per-task cascade, "
             "paired-diff "
             "where a failure exists), full banks as in reproduce.py's headline eval",
             "",
-            *_table(rel, [("nobank", "N"), ("orig_rel", "orig"), ("R_rel", "EnvHarness")]),
+            *_table(rel, [("nobank", "N"), (orig_c, "orig"), (r_c, "EnvHarness")]),
             "",
-            *_signs(rel, "nobank", "orig_rel", "R_rel"),
+            *_signs(rel, "nobank", orig_c, r_c),
         ]
     per_corpus = corpus_usd / episodes if episodes else float("nan")
     per_eval = eval_usd / eval_episodes if eval_episodes else float("nan")
@@ -646,6 +668,9 @@ def main(argv: list[str] | None = None) -> int:
     )
     ap.add_argument("--run-id", required=True)
     ap.add_argument("--n-tasks", type=int, default=20)
+    ap.add_argument("--task-ids", type=int, nargs=2, default=None, help="corpus: ids a b (a..b-1)")
+    ap.add_argument("--merge-traces", nargs="*", default=[], help="banks_released: other run ids")
+    ap.add_argument("--n-from", default="", help="report: run id holding the nobank cells")
     ap.add_argument("--fallback", action="store_true")
     ap.add_argument("--seeds", type=int, nargs="+", default=[0, 1000, 2000])
     ap.add_argument("--concurrency", type=int, default=6)
@@ -659,11 +684,16 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
     try:
         if args.stage == "corpus":
-            stage_corpus(args.run_id, args.n_tasks, args.fallback)
+            stage_corpus(
+                args.run_id,
+                args.n_tasks,
+                args.fallback,
+                tuple(args.task_ids) if args.task_ids else None,
+            )
         elif args.stage == "banks":
             stage_banks(args.run_id, args.fallback)
         elif args.stage == "banks_released":
-            stage_banks_released(args.run_id, args.fallback)
+            stage_banks_released(args.run_id, args.fallback, tuple(args.merge_traces))
         elif args.stage == "eval":
             stage_eval(
                 args.run_id,
@@ -683,7 +713,7 @@ def main(argv: list[str] | None = None) -> int:
         elif args.stage == "regime":
             stage_regime(args.run_id)
         else:
-            stage_report(args.run_id)
+            stage_report(args.run_id, args.n_from)
     except ConfigError as exc:
         print(f"config error: {exc}", file=sys.stderr)
         return 2
