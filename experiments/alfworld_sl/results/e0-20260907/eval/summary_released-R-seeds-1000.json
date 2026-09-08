@@ -1,0 +1,28 @@
+{
+  "rows": [
+    {
+      "condition": "R_rel",
+      "split": "eval_in_distribution",
+      "n_won": 91,
+      "n": 140,
+      "sr": 0.65,
+      "start_seed": 1000,
+      "round": 1
+    },
+    {
+      "condition": "R_rel",
+      "split": "eval_out_of_distribution",
+      "n_won": 93,
+      "n": 134,
+      "sr": 0.6940298507462687,
+      "start_seed": 1000,
+      "round": 1
+    }
+  ],
+  "config_path": "/home/kree/work/EnvJudge/runs/e0-20260907/reasoning_bank_eval_e0.yaml",
+  "start_seeds": [
+    1000
+  ],
+  "concurrency": 8,
+  "n_api_keys": 1
+}

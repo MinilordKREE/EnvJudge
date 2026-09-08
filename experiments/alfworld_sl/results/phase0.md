@@ -177,9 +177,48 @@ verbatim (`--stage banks_released`, both banks), builds the subsets at no cost, 
 full banks (`orig_rel`, `R_rel`) on seeds 0/1000/2000 (~USD 20); the subset eval (another ~USD 20)
 is held for the owner since it is not part of the headline.
 
-Result: pending (this section is completed by the report once the three seeds finish).
+Result (`scripts/e0.py --stage report`, verbatim; N row shared with §1):
+
+Seeds: seeds-0, seeds-1000, seeds-2000; success % pooled (per-seed values in brackets).
+
+| condition | ID (ours) | OOD (ours) | ID (Table 2) | OOD (Table 2) |
+|---|---|---|---|---|
+| nobank (N) | 61.7 (n=420) [63.6 / 57.1 / 64.3] | 63.9 (n=402) [66.4 / 67.2 / 58.2] | 62.6 | 60.7 |
+| orig_rel (orig) | 68.6 (n=420) [71.4 / 63.6 / 70.7] | 69.4 (n=402) [70.9 / 70.9 / 66.4] | 63.3 | 61.4 |
+| R_rel (EnvHarness) | 68.1 (n=420) [72.1 / 65.0 / 67.1] | 68.9 (n=402) [72.4 / 69.4 / 64.9] | 66.2 | 70.4 |
+
+Sign check (PREREG7 reproduction sanity):
+- orig > N on ID: ours +6.9 pts (Table 2 +0.7) -> REPRODUCED
+- EnvRigger > orig on OOD: ours -0.5 pts (Table 2 +9.0) -> NOT reproduced
+- (reported, not a gate) EnvRigger vs N: ID +6.4, OOD +5.0 (Table 2 +3.6 / +9.7)
+
+Pooled gaps with normal-approximation SE (points):
+- orig_rel minus nobank: ID +6.9 ± 3.3, OOD +5.5 ± 3.3
+- R_rel minus orig_rel: ID -0.5 ± 3.2, OOD -0.5 ± 3.3
+- R_rel minus nobank: ID +6.4 ± 3.3, OOD +5.0 ± 3.3
+
+Reading:
+- The released Stage 2 on this corpus is almost entirely single-success: paired-diff fired on 1
+  of 20 tasks (`banks_released.json`: orig_full 47 single_succ + 1 single_fail; ours_full 46
+  single_succ + 1 paired_diff + 1 single_fail), because Flash-Lite is saturated on 17/20 tasks and
+  there are no failures to pair. The induction-mode explanation therefore cannot be tested on this
+  corpus; what the diagnosis changed is the per-task cascade (ours covers all 20 tasks: 15 accepted
+  + 5 baseline fallback, where E0's R covered the 14 transformed tasks only) and one induction resample.
+- With the cascade, R's OOD deficit against N disappears (E0: −0.7; released: +5.0 ± 3.3) and R sits
+  level with orig on both splits (−0.5 ± 3.2 ID, −0.5 ± 3.3 OOD). The Table 2 sign (EnvRigger > orig
+  on OOD by +9.0) does not return: on this backbone the transformed environments add nothing over
+  the baseline trajectories of the same tasks. The E0 −6.0 OOD gap was coverage (14 vs 19 tasks),
+  not a penalty from the transformed environments.
+- orig_rel reproduces E0's orig within noise (ID 68.6 both; OOD 69.4 vs 69.2): the single-success
+  induction resample is stable at this scale.
+- Per the owner's decision tree the sign has not returned → D1 (R on 100 tasks) runs next; if it
+  still does not return, backbone and N are recorded as standing differences and round 1 proceeds.
+
+Cost of the diagnosis: banks USD 0.045; evals USD 20.14 for 1,644 recorded episodes (USD 9.30 of it
+in the run interrupted by the machine reboot, whose in-flight episodes were re-run; see LOG).
+Phase 0 spend to date: USD 54.0.
 
 ## STOP
 
-Phase 0b complete pending the diagnosis result (§8). N = 30, Flash-Lite, Amendment 1 and the caps
-are settled (§7).
+Phase 0b: diagnosis D2+D3 done (§8, sign not returned); D1 (R on 100 tasks) is the next pre-authorised
+step. N = 30, Flash-Lite, Amendment 1 and the caps are settled (§7).
