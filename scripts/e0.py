@@ -9,7 +9,12 @@ Stages (resumable, each writes into runs/<run-id>/):
           via OpenRouter)
   eval    aea.evaldriver.run_eval for N / orig / R, full ID + OOD, start seeds 0/1000/2000
   report  table next to EnvHarness Table 2, USD per corpus episode and per eval episode, projection
-Run: uv run python scripts/e0.py --stage corpus|banks|eval|report --run-id e0-<date>
+  regime  per-task baseline success of the corpus (Flash-Lite regime map; no LLM call)
+  banks_released  the released Stage 2 + Stage 3 verbatim (scripts/induce_pair.py main: per-task
+          cascade, paired-diff wherever a failure exists; scripts/subset.py) into banks_released/
+          -- the Phase 0b diagnosis banks (owner decision 1)
+Run: uv run python scripts/e0.py --stage corpus|banks|banks_released|eval|regime|report --run-id ...
+     eval takes --tag <name> and --conditions name=path,... to evaluate other banks
 """
 
 from __future__ import annotations
@@ -223,7 +228,174 @@ def stage_banks(run_id: str, fallback: bool) -> None:
     merge_ledgers(run_dir, ctx.run_id)
 
 
-def stage_eval(run_id: str, fallback: bool, seeds: tuple[int, ...], concurrency: int) -> None:
+def _load_released(name: str, rel: str) -> Any:
+    sys.path.insert(0, str(ENVHARNESS))
+    spec = importlib.util.spec_from_file_location(name, ENVHARNESS / rel)
+    assert spec and spec.loader
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def stage_banks_released(run_id: str, fallback: bool) -> None:
+    """Owner decision 1 (Phase 0b gate): the released Stage 2 and Stage 3 exactly as
+    experiments/alfworld/reproduce.py runs them, on this run's traces.jsonl. Stage 2 (induce_pair
+    main) builds orig_full from the baseline rollouts and ours_full by per-task cascade (accepted
+    rollouts where the task has them, else its baseline rollouts), paired-diff wherever a task has
+    both a success and a failure, single-success otherwise. Stage 3 (subset.py) samples one item
+    per shared task. The headline eval of reproduce.py uses the FULL banks."""
+    run_dir = run_dir_for(run_id)
+    ctx, _manifest = load_run_context(run_dir)
+    policy, _ = backbone(fallback)
+    pricing = load_pricing(ROOT / "configs" / "pricing.yaml")
+    induce = Attribution(phase="induce_released", budget="eval", arm="R", task_id="e0")
+    hook = make_hook(
+        policy, run_dir=run_dir, run_id=ctx.run_id, pricing=pricing, default=(induce, 0)
+    )
+    install(hook)
+    os.environ["OPENAI_API_KEY"] = "routed-by-aea"
+    ip = _load_released("induce_pair", "scripts/induce_pair.py")
+    sub = _load_released("subset", "scripts/subset.py")
+    out = run_dir / "banks_released"
+    out.mkdir(exist_ok=True)
+    with attributed(induce, seed=0):
+        rc = ip.main(
+            [
+                "--traces",
+                str(run_dir / "traces.jsonl"),
+                "--out-dir",
+                str(out),
+                "--llm-model",
+                f"openai/{policy.model}",
+                "--embed-model",
+                "openai/google/gemini-embedding-001",
+                "--concurrency",
+                "4",
+            ]
+        )
+        if rc:
+            raise ConfigError(f"released induce_pair exited {rc}")
+        rc = sub.main(
+            [
+                "--orig",
+                str(out / "orig_full.jsonl"),
+                "--ours",
+                str(out / "ours_full.jsonl"),
+                "--out-dir",
+                str(out),
+            ]
+        )
+        if rc:
+            raise ConfigError(f"released subset exited {rc}")
+    merge_ledgers(run_dir, ctx.run_id)
+    meta: dict[str, Any] = {}
+    for name in ("orig_full", "ours_full", "orig_subset", "ours_subset_matched"):
+        items = [
+            json.loads(line)
+            for line in (out / f"{name}.jsonl").read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        ]
+        modes: dict[str, int] = defaultdict(int)
+        tasks: set[str] = set()
+        for it in items:
+            src = it.get("source") or {}
+            modes[str(src.get("induction"))] += 1
+            tasks.add(str(src.get("task_id")))
+        meta[name] = {"items": len(items), "tasks": sorted(tasks), "induction": dict(modes)}
+    (run_dir / "banks_released.json").write_text(json.dumps(meta, indent=1), encoding="utf-8")
+    print(json.dumps({"stage": "banks_released", **{k: v["items"] for k, v in meta.items()}}))
+
+
+def stage_regime(run_id: str) -> None:
+    """Per-task baseline success of the corpus (5 rollouts per task in the released config) and
+    what the released designer did on each task; no LLM call."""
+    run_dir = run_dir_for(run_id)
+    traces = [
+        json.loads(line)
+        for line in (run_dir / "traces.jsonl").read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    per: dict[str, dict[str, Any]] = {}
+    for t in traces:
+        tid = str(t.get("rollout_seed"))
+        row = per.setdefault(
+            tid,
+            {
+                "base_s": 0,
+                "base_n": 0,
+                "acc_s": 0,
+                "acc_n": 0,
+                "accepted": set(),
+                "rejected": set(),
+            },
+        )
+        kind, cid, ok = t.get("kind"), str(t.get("candidate_id")), bool(t.get("success"))
+        if kind == "baseline":
+            row["base_n"] += 1
+            row["base_s"] += int(ok)
+        elif kind == "accepted":
+            row["acc_n"] += 1
+            row["acc_s"] += int(ok)
+            row["accepted"].add(cid)
+        elif kind == "exploration":
+            row["rejected"].add(cid)
+
+    def cls(s: int, n: int) -> str:
+        if s == 0:
+            return "zero"
+        if s == 1:
+            return "marginal-low"
+        if s == n:
+            return "saturated"
+        return "mid" if s <= n // 2 + (n % 2) else "high"
+
+    lines = [
+        f"# Corpus regime map ({run_id}; released EnvRigger corpus, baseline rollouts per task)",
+        "",
+        "| task | baseline s/n | class | accepted candidates | rejected | accepted-env s/n |",
+        "|---|---|---|---|---|---|",
+    ]
+    counts: dict[str, int] = defaultdict(int)
+    for tid in sorted(per, key=int):
+        r = per[tid]
+        c = cls(r["base_s"], r["base_n"])
+        counts[c] += 1
+        lines.append(
+            f"| {tid} | {r['base_s']}/{r['base_n']} | {c} | {len(r['accepted'])} | "
+            f"{len(r['rejected'])} | {r['acc_s']}/{r['acc_n']} |"
+        )
+    n_tasks = len(per)
+    thin = counts["zero"] + counts["marginal-low"]
+    lines += [
+        "",
+        "Classes on the baseline rollouts: zero = 0/n; marginal-low = 1/n; mid = 2-3/5; "
+        "high = 4/5; "
+        "saturated = n/n.",
+        "Counts: "
+        + ", ".join(
+            f"{k} {counts[k]}" for k in ("zero", "marginal-low", "mid", "high", "saturated")
+        )
+        + f" (of {n_tasks}).",
+        f"Zero + marginal-low: {thin}/{n_tasks} = {100 * thin / n_tasks:.0f}% "
+        f"({'below' if thin < 0.1 * n_tasks else 'at or above'} the owner's 10% "
+        "thin-evidence line).",
+        f"Designer: {sum(1 for r in per.values() if r['accepted'])}/{n_tasks} tasks with an "
+        "accepted "
+        f"candidate ({sum(len(r['accepted']) for r in per.values())} accepted, "
+        f"{sum(len(r['rejected']) for r in per.values())} rejected).",
+    ]
+    (run_dir / "regime.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    print("\n".join(lines))
+
+
+def stage_eval(
+    run_id: str,
+    fallback: bool,
+    seeds: tuple[int, ...],
+    concurrency: int,
+    tag: str = "",
+    conditions_arg: str = "",
+) -> None:
     run_dir = run_dir_for(run_id)
     ctx, _ = load_run_context(run_dir)
     policy, _ = backbone(fallback)
@@ -235,12 +407,22 @@ def stage_eval(run_id: str, fallback: bool, seeds: tuple[int, ...], concurrency:
     resolved = run_dir / "reasoning_bank_eval_e0.yaml"
     resolved.write_text(yaml.safe_dump(cfg, sort_keys=False), encoding="utf-8")
     banks_dir = run_dir / "banks"
-    conditions = {"nobank": None, "orig": banks_dir / "orig.jsonl", "R": banks_dir / "R.jsonl"}
-    conditions = {k: v for k, v in conditions.items() if v is None or v.exists()}
+    conditions: dict[str, Path | None]
+    if conditions_arg:  # name=path[,name=path]; paths relative to the run dir
+        conditions = {}
+        for kv in conditions_arg.split(","):
+            name, _, path = kv.partition("=")
+            conditions[name.strip()] = run_dir / path.strip() if path.strip() else None
+    else:
+        conditions = {"nobank": None, "orig": banks_dir / "orig.jsonl", "R": banks_dir / "R.jsonl"}
+    missing = [k for k, v in conditions.items() if v is not None and not v.exists()]
+    if missing:
+        raise ConfigError(f"bank file missing for {missing}")
     os.environ.setdefault("ALFWORLD_DATA", str(Path.home() / "eh_alfworld_data"))
     # one directory per invocation: the released eval names rounds round1.. per call, so seeds
     # run in separate invocations (Phase-0 cap pacing) must not overwrite each other
-    out_dir = run_dir / "eval" / ("seeds-" + "-".join(str(s) for s in seeds))
+    prefix = f"{tag}-" if tag else ""
+    out_dir = run_dir / "eval" / (prefix + "seeds-" + "-".join(str(s) for s in seeds))
     rc = run_eval(
         arm="R",
         conditions=conditions,
@@ -262,13 +444,105 @@ def stage_eval(run_id: str, fallback: bool, seeds: tuple[int, ...], concurrency:
     )
 
 
+type Cells = dict[str, dict[str, dict[str, tuple[int, int]]]]
+
+
+def _cells(eval_root: Path, dir_glob: str) -> Cells:
+    """{condition: {split: {seed_dir: (won, n)}}} from
+    <dir_glob>/round*/<cond>_eval_<split>.jsonl."""
+    results: Cells = {}
+    for p in (
+        sorted(eval_root.glob(f"{dir_glob}/round*/*_eval_*.jsonl")) if eval_root.exists() else []
+    ):
+        cond, split = p.stem.rsplit("_eval_", 1)
+        recs = [
+            json.loads(line) for line in p.read_text(encoding="utf-8").splitlines() if line.strip()
+        ]
+        won = sum(1 for r in recs if r.get("success"))
+        results.setdefault(cond, {}).setdefault(split, {})[p.parents[1].name] = (won, len(recs))
+    return results
+
+
+def _rate(cells: Cells, cond: str, split: str) -> tuple[float, int]:
+    c = cells.get(cond, {}).get(split, {})
+    won, n = sum(w for w, _ in c.values()), sum(k for _, k in c.values())
+    return (100 * won / n if n else float("nan")), n
+
+
+def _per_seed(cells: Cells, cond: str, split: str, seed_dirs: list[str]) -> str:
+    c = cells.get(cond, {}).get(split, {})
+    return " / ".join(
+        f"{100 * c[sd][0] / c[sd][1]:.1f}" if sd in c and c[sd][1] else "-" for sd in seed_dirs
+    )
+
+
+def _gap_se(cells: Cells, a: str, b: str, split: str) -> str:
+    """Difference of pooled success rates with a normal-approximation SE (points)."""
+    (pa, na), (pb, nb) = _rate(cells, a, split), _rate(cells, b, split)
+    if not na or not nb:
+        return "n/a"
+    return f"{pa - pb:+.1f} ± {(pa * (100 - pa) / na + pb * (100 - pb) / nb) ** 0.5:.1f}"
+
+
+def _table(cells: Cells, rows: list[tuple[str, str]]) -> list[str]:
+    seed_dirs = sorted({sd for c in cells.values() for sp in c.values() for sd in sp})
+    lines = [
+        f"Seeds: {', '.join(seed_dirs) or 'none'}; success % pooled (per-seed values in brackets).",
+        "",
+        "| condition | ID (ours) | OOD (ours) | ID (Table 2) | OOD (Table 2) |",
+        "|---|---|---|---|---|",
+    ]
+    for cond, label in rows:
+        (i, idn), (o, oodn) = (
+            _rate(cells, cond, "in_distribution"),
+            _rate(cells, cond, "out_of_distribution"),
+        )
+        t2 = TABLE2[label]
+        lines.append(
+            f"| {cond} ({label}) | {i:.1f} (n={idn}) "
+            f"[{_per_seed(cells, cond, 'in_distribution', seed_dirs)}] "
+            f"| {o:.1f} (n={oodn}) [{_per_seed(cells, cond, 'out_of_distribution', seed_dirs)}] "
+            f"| {t2[0]} | {t2[1]} |"
+        )
+    return lines
+
+
+def _signs(cells: Cells, n: str, orig: str, r: str) -> list[str]:
+    t2n, t2o, t2r = TABLE2["N"], TABLE2["orig"], TABLE2["EnvHarness"]
+    n_id, o_id, r_id = (_rate(cells, c, "in_distribution")[0] for c in (n, orig, r))
+    n_ood, o_ood, r_ood = (_rate(cells, c, "out_of_distribution")[0] for c in (n, orig, r))
+
+    def verdict(ok: bool) -> str:
+        return "REPRODUCED" if ok else "NOT reproduced"
+
+    return [
+        "Sign check (PREREG7 reproduction sanity):",
+        f"- orig > N on ID: ours {o_id - n_id:+.1f} pts (Table 2 {t2o[0] - t2n[0]:+.1f}) "
+        f"-> {verdict(o_id > n_id)}",
+        f"- EnvRigger > orig on OOD: ours {r_ood - o_ood:+.1f} pts "
+        f"(Table 2 {t2r[1] - t2o[1]:+.1f}) "
+        f"-> {verdict(r_ood > o_ood)}",
+        f"- (reported, not a gate) EnvRigger vs N: ID {r_id - n_id:+.1f}, OOD {r_ood - n_ood:+.1f} "
+        f"(Table 2 {t2r[0] - t2n[0]:+.1f} / {t2r[1] - t2n[1]:+.1f})",
+        "",
+        "Pooled gaps with normal-approximation SE (points):",
+        f"- {orig} minus {n}: ID {_gap_se(cells, orig, n, 'in_distribution')}, "
+        f"OOD {_gap_se(cells, orig, n, 'out_of_distribution')}",
+        f"- {r} minus {orig}: ID {_gap_se(cells, r, orig, 'in_distribution')}, "
+        f"OOD {_gap_se(cells, r, orig, 'out_of_distribution')}",
+        f"- {r} minus {n}: ID {_gap_se(cells, r, n, 'in_distribution')}, "
+        f"OOD {_gap_se(cells, r, n, 'out_of_distribution')}",
+    ]
+
+
 def stage_report(run_id: str) -> None:
     run_dir = run_dir_for(run_id)
     rows = read_ledger(run_dir / "ledger.jsonl") if (run_dir / "ledger.jsonl").exists() else []
+    eval_root = run_dir / "eval"
     erows = [
         r
-        for p in sorted((run_dir / "eval").glob("seeds-*/ledger.jsonl"))
-        if (run_dir / "eval").exists()
+        for p in sorted(eval_root.glob("*seeds-*/ledger.jsonl"))
+        if eval_root.exists()
         for r in read_ledger(p)
     ]
     traces = (
@@ -278,100 +552,55 @@ def stage_report(run_id: str) -> None:
     designer_usd = sum(r.usd for r in rows if r.event == "call" and r.budget == "designer")
     # every `eval`-budget row in the run ledger is induction (the eval ledgers live under eval/);
     # the first banks run labelled its completions phase=eval (thread pool, see LOG), so the
-    # budget, not the phase, selects them
-    induce_usd = sum(r.usd for r in rows if r.event == "call" and r.budget == "eval")
+    # budget, not the phase, selects them; the released-pipeline banks carry phase=induce_released
+    induce_usd = sum(
+        r.usd
+        for r in rows
+        if r.event == "call" and r.budget == "eval" and r.phase != "induce_released"
+    )
+    induce_rel_usd = sum(r.usd for r in rows if r.event == "call" and r.phase == "induce_released")
     eval_usd = sum(r.usd for r in erows if r.event == "call" and r.budget == "eval")
     episodes = len(traces)
-    # {condition: {split: {seed_dir: (won, n)}}} from eval/seeds-*/round*/<cond>_eval_<split>.jsonl
-    results: dict[str, dict[str, dict[str, tuple[int, int]]]] = {}
-    eval_root = run_dir / "eval"
-    for p in sorted(eval_root.glob("seeds-*/round*/*_eval_*.jsonl")) if eval_root.exists() else []:
-        cond, split = p.stem.rsplit("_eval_", 1)
-        recs = [
-            json.loads(line) for line in p.read_text(encoding="utf-8").splitlines() if line.strip()
-        ]
-        won = sum(1 for r in recs if r.get("success"))
-        results.setdefault(cond, {}).setdefault(split, {})[p.parents[1].name] = (won, len(recs))
-    seed_dirs = sorted({sd for c in results.values() for sp in c.values() for sd in sp})
-    eval_episodes = sum(n for c in results.values() for sp in c.values() for _, n in sp.values())
 
-    def rate(cond: str, split: str) -> tuple[float, int]:
-        cells = results.get(cond, {}).get(split, {})
-        won, n = sum(w for w, _ in cells.values()), sum(k for _, k in cells.values())
-        return (100 * won / n if n else float("nan")), n
-
-    def per_seed(cond: str, split: str) -> str:
-        cells = results.get(cond, {}).get(split, {})
-        return " / ".join(
-            f"{100 * cells[sd][0] / cells[sd][1]:.1f}" if sd in cells and cells[sd][1] else "-"
-            for sd in seed_dirs
-        )
-
+    e0 = _cells(eval_root, "seeds-*")  # E0: single-success banks, transformed environments only
+    rel = _cells(eval_root, "released-seeds-*")  # diagnosis: released Stage 2 full banks
+    for cond in ("nobank",):  # N is shared by both protocols
+        if cond in e0:
+            rel[cond] = e0[cond]
+    e0_episodes = sum(n for c in e0.values() for sp in c.values() for _, n in sp.values())
+    rel_episodes = sum(
+        n for k, c in rel.items() if k != "nobank" for sp in c.values() for _, n in sp.values()
+    )
+    eval_episodes = e0_episodes + rel_episodes
     lines = [
         f"# E0 reproduction ({run_id})",
         "",
-        f"Seeds (released eval rounds): {', '.join(seed_dirs) or 'none'}; splits ID n=140, "
-        "OOD n=134 per seed; success % pooled over seeds (per-seed values in brackets).",
+        "## E0 protocol (PREREG7): single-success banks, ID n=140 / OOD n=134 per seed",
         "",
-        "| condition | ID (ours) | OOD (ours) | ID (Table 2) | OOD (Table 2) |",
-        "|---|---|---|---|---|",
-    ]
-    for cond, label in (("nobank", "N"), ("orig", "orig"), ("R", "EnvHarness")):
-        (ours_id, idn), (ours_ood, oodn) = (
-            rate(cond, "in_distribution"),
-            rate(cond, "out_of_distribution"),
-        )
-        t2 = TABLE2[label]
-        lines.append(
-            f"| {label} | {ours_id:.1f} (n={idn}) [{per_seed(cond, 'in_distribution')}] "
-            f"| {ours_ood:.1f} (n={oodn}) [{per_seed(cond, 'out_of_distribution')}] "
-            f"| {t2[0]} | {t2[1]} |"
-        )
-    n_id, o_id, r_id = (rate(c, "in_distribution")[0] for c in ("nobank", "orig", "R"))
-    n_ood, o_ood, r_ood = (rate(c, "out_of_distribution")[0] for c in ("nobank", "orig", "R"))
-    t2n, t2o, t2r = TABLE2["N"], TABLE2["orig"], TABLE2["EnvHarness"]
-
-    def verdict(ok: bool) -> str:
-        return "REPRODUCED" if ok else "NOT reproduced"
-
-    lines += [
+        *_table(e0, [("nobank", "N"), ("orig", "orig"), ("R", "EnvHarness")]),
         "",
-        "Sign check (PREREG7 reproduction sanity):",
-        f"- orig > N on ID: ours {o_id - n_id:+.1f} pts (Table 2 {t2o[0] - t2n[0]:+.1f}) "
-        f"-> {verdict(o_id > n_id)}",
-        f"- EnvRigger > orig on OOD: ours {r_ood - o_ood:+.1f} pts "
-        f"(Table 2 {t2r[1] - t2o[1]:+.1f}) "
-        f"-> {verdict(r_ood > o_ood)}",
-        f"- (reported, not a gate) EnvRigger vs N: ID {r_id - n_id:+.1f}, OOD {r_ood - n_ood:+.1f} "
-        f"(Table 2 {t2r[0] - t2n[0]:+.1f} / {t2r[1] - t2n[1]:+.1f})",
+        *_signs(e0, "nobank", "orig", "R"),
     ]
-
-    def gap_se(a: str, b: str, split: str) -> str:
-        """Difference of pooled success rates with a normal-approximation SE (points)."""
-        (pa, na), (pb, nb) = rate(a, split), rate(b, split)
-        if not na or not nb:
-            return "n/a"
-        va = pa * (100 - pa) / na
-        vb = pb * (100 - pb) / nb
-        return f"{pa - pb:+.1f} ± {(va + vb) ** 0.5:.1f}"
-
-    lines += [
-        "",
-        "Pooled gaps with normal-approximation SE (points; per-seed sign in the table above):",
-        f"- orig minus N: ID {gap_se('orig', 'nobank', 'in_distribution')}, "
-        f"OOD {gap_se('orig', 'nobank', 'out_of_distribution')}",
-        f"- EnvRigger minus orig: ID {gap_se('R', 'orig', 'in_distribution')}, "
-        f"OOD {gap_se('R', 'orig', 'out_of_distribution')}",
-        f"- EnvRigger minus N: ID {gap_se('R', 'nobank', 'in_distribution')}, "
-        f"OOD {gap_se('R', 'nobank', 'out_of_distribution')}",
-    ]
+    if any(k != "nobank" for k in rel):
+        lines += [
+            "",
+            "## Diagnosis (owner decision 1): released Stage 2 banks (per-task cascade, "
+            "paired-diff "
+            "where a failure exists), full banks as in reproduce.py's headline eval",
+            "",
+            *_table(rel, [("nobank", "N"), ("orig_rel", "orig"), ("R_rel", "EnvHarness")]),
+            "",
+            *_signs(rel, "nobank", "orig_rel", "R_rel"),
+        ]
     per_corpus = corpus_usd / episodes if episodes else float("nan")
     per_eval = eval_usd / eval_episodes if eval_episodes else float("nan")
     lines += [
         "",
         f"Corpus: {episodes} policy episodes, USD {corpus_usd:.2f} (USD {per_corpus:.4f} per "
-        f"episode); designer USD {designer_usd:.2f}; induction USD {induce_usd:.2f}.",
-        f"Eval: {eval_episodes} episodes, USD {eval_usd:.2f} (USD {per_eval:.4f} per episode).",
+        f"episode); designer USD {designer_usd:.2f}; induction USD {induce_usd:.2f} "
+        f"(released-pipeline induction USD {induce_rel_usd:.2f}).",
+        f"Eval: {eval_episodes} episodes (E0 {e0_episodes}, diagnosis {rel_episodes}), "
+        f"USD {eval_usd:.2f} (USD {per_eval:.4f} per episode).",
         "",
     ]
     n_tasks = len({t.rollout_seed for t in traces})
@@ -396,20 +625,37 @@ def stage_report(run_id: str) -> None:
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--stage", choices=["corpus", "banks", "eval", "report"], required=True)
+    ap.add_argument(
+        "--stage",
+        choices=["corpus", "banks", "banks_released", "eval", "regime", "report"],
+        required=True,
+    )
     ap.add_argument("--run-id", required=True)
     ap.add_argument("--n-tasks", type=int, default=20)
     ap.add_argument("--fallback", action="store_true")
     ap.add_argument("--seeds", type=int, nargs="+", default=[0, 1000, 2000])
     ap.add_argument("--concurrency", type=int, default=6)
+    ap.add_argument("--tag", default="", help="eval: output dir prefix (eval/<tag>-seeds-<s>)")
+    ap.add_argument("--conditions", default="", help="eval: name=path,... relative to the run dir")
     args = ap.parse_args(argv)
     try:
         if args.stage == "corpus":
             stage_corpus(args.run_id, args.n_tasks, args.fallback)
         elif args.stage == "banks":
             stage_banks(args.run_id, args.fallback)
+        elif args.stage == "banks_released":
+            stage_banks_released(args.run_id, args.fallback)
         elif args.stage == "eval":
-            stage_eval(args.run_id, args.fallback, tuple(args.seeds), args.concurrency)
+            stage_eval(
+                args.run_id,
+                args.fallback,
+                tuple(args.seeds),
+                args.concurrency,
+                args.tag,
+                args.conditions,
+            )
+        elif args.stage == "regime":
+            stage_regime(args.run_id)
         else:
             stage_report(args.run_id)
     except ConfigError as exc:
