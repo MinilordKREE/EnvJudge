@@ -107,8 +107,10 @@ def arm_dir(arm: str) -> Path:
     return RUNS / f"r1-{arm}"
 
 
-def dir_spend(d: Path) -> float:
-    """USD of call rows under ``d`` (merged ledger if present, else the per-process files)."""
+def dir_spend(d: Path, *, round1_only: bool = True) -> float:
+    """USD of call rows under ``d`` (merged ledger if present, else the per-process files);
+    ``round1_only`` keeps rows whose run id starts with ``r1-`` (R's reused rows carry the Phase-0
+    run ids and are counted there)."""
     files = (
         [d / "ledger.jsonl"] if (d / "ledger.jsonl").exists() else sorted(d.glob("ledger.*.jsonl"))
     )
@@ -122,23 +124,41 @@ def dir_spend(d: Path) -> float:
                 r = json.loads(line)
             except ValueError:
                 continue
-            if r.get("event") == "call":
+            if r.get("event") == "call" and (
+                not round1_only or str(r.get("run_id", "")).startswith("r1-")
+            ):
                 usd += float(r.get("usd") or 0.0)
     return usd
 
 
-def _reused(d: Path) -> bool:
-    m = d / "arm_manifest.json"
-    return m.exists() and "reused_from" in json.loads(m.read_text(encoding="utf-8"))
+def merge_all(d: Path) -> Path:
+    """Fold every per-process ledger part in ``d`` (any run id: corpus and confirmation stages
+    share an arm directory) plus ``ledger_reuse.jsonl`` (R) into ``ledger.jsonl``."""
+    rows: list[dict[str, Any]] = []
+    parts = sorted(d.glob("ledger.*.jsonl"))
+    if (d / "ledger_reuse.jsonl").exists():
+        parts.insert(0, d / "ledger_reuse.jsonl")
+    for part in parts:
+        for line in part.read_text(encoding="utf-8", errors="replace").splitlines():
+            line = line.strip().strip("\0")
+            if not line:
+                continue
+            try:
+                rows.append(json.loads(line))
+            except ValueError:
+                continue
+    rows.sort(key=lambda r: str(r.get("ts", "")))
+    target = d / "ledger.jsonl"
+    target.write_text("".join(json.dumps(r, sort_keys=True) + "\n" for r in rows), encoding="utf-8")
+    return target
 
 
 def round1_spend() -> float:
-    """Round-1 USD: every r1-* run and its eval dirs; arms reused from Phase 0 (R) excluded."""
+    """Round-1 USD: every r1-* run and its eval dirs (rows with an r1- run id)."""
     total = 0.0
     for d in RUNS.glob("r1-*"):
         if d.is_dir():
-            if not _reused(d):
-                total += dir_spend(d)
+            total += dir_spend(d)
             for sub in d.glob("eval/*"):
                 if sub.is_dir():
                     total += dir_spend(sub)
@@ -227,9 +247,10 @@ def stage_r_reuse() -> None:
                 if datetime.fromisoformat(ts).timestamp() <= cutoff:
                     rows.append(r)
     rows.sort(key=lambda r: str(r["ts"]))
-    with (out / "ledger.jsonl").open("w", encoding="utf-8") as fh:
+    with (out / "ledger_reuse.jsonl").open("w", encoding="utf-8") as fh:
         for r in rows:
             fh.write(json.dumps(r, sort_keys=True) + "\n")
+    merge_all(out)
     shas = {
         run: sha256_digest((RUNS / run / "corpus_e0.yaml").read_text(encoding="utf-8"))
         for run in sources
@@ -331,7 +352,7 @@ def stage_corpus_released(arm: str, task_ids: tuple[int, int] | None) -> None:
     )
     with attributed(label, seed=0):
         orch.run()
-    merge_ledgers(ctx.out_dir, ctx.run_id)
+    merge_all(ctx.out_dir)
     write_arm_manifest(arm, {"run_id": ctx.run_id, "config_changes_vs_released": changed})
     print(json.dumps({"stage": f"corpus-{arm}", "traces": len(orch.trace_store.all())}))
 
@@ -411,7 +432,7 @@ def stage_corpus_aea(arm: str, task_concurrency: int) -> None:
     for start in range(0, len(refs), 10):
         chunk = refs[start : start + 10]
         outcomes = controller.run(chunk, concurrency=task_concurrency)
-        merge_ledgers(ctx.out_dir, ctx.run_id)
+        merge_all(ctx.out_dir)
         for o in outcomes:
             print(
                 json.dumps(
@@ -461,9 +482,8 @@ def stage_aplush() -> None:
         "traces.jsonl",
         "events.jsonl",
         "accounting.csv",
-        "ledger.jsonl",
         "designer_calls.jsonl",
-    ):
+    ):  # A's ledger is not copied: its USD is A's (run id r1-A), not spent twice
         if (src / name).exists():
             shutil.copy(src / name, out / name)
     statuses = task_statuses(src)
@@ -540,9 +560,9 @@ def stage_corpus_o() -> None:
             flush=True,
         )
         if (i + 1) % 10 == 0:
-            merge_ledgers(out, "r1-O")
+            merge_all(out)
             spend_guard(f"corpus-O after {i + 1} tasks")
-    merge_ledgers(out, "r1-O")
+    merge_all(out)
     write_arm_manifest("O", {"run_id": "r1-O", "rollouts_per_task": cap, "budget": "search"})
     print(json.dumps({"stage": "corpus-O", "done": True}))
 
@@ -664,9 +684,9 @@ def stage_confirm(arm: str, concurrency: int) -> None:
         summary_path.write_text(json.dumps(summary, indent=1), encoding="utf-8")
         print(json.dumps({"confirm": arm, "env": env["id"], "successes": ok, "n": n}), flush=True)
         if (i + 1) % 10 == 0:
-            merge_ledgers(out, f"r1-{arm}-confirm")
+            merge_all(out)
             spend_guard(f"confirm-{arm} after {i + 1} envs")
-    merge_ledgers(out, f"r1-{arm}-confirm")
+    merge_all(out)
     print(json.dumps({"stage": f"confirm-{arm}", "envs": len(envs)}))
 
 
@@ -1049,6 +1069,7 @@ def main(argv: list[str] | None = None) -> int:
             "evals",
             "eval-job",
             "spend",
+            "remerge",
         ],
     )
     ap.add_argument("--arm", default="")
@@ -1079,6 +1100,11 @@ def main(argv: list[str] | None = None) -> int:
             stage_evals(args.workers, args.concurrency)
         elif args.stage == "eval-job":
             stage_eval_job(args.cond, args.seed, args.concurrency)
+        elif args.stage == "remerge":
+            for d in sorted(RUNS.glob("r1-*")):
+                if d.is_dir() and list(d.glob("ledger.*.jsonl")):
+                    merge_all(d)
+                    print(json.dumps({"remerged": d.name, "usd_r1": round(dir_spend(d), 3)}))
         else:
             print(
                 json.dumps(
