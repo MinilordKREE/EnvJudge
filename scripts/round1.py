@@ -159,7 +159,7 @@ def round1_spend() -> float:
     for d in RUNS.glob("r1-*"):
         if d.is_dir():
             total += dir_spend(d)
-            for sub in d.glob("eval/*"):
+            for sub in d.glob("*-seeds-*"):  # eval job dirs under runs/r1-eval/
                 if sub.is_dir():
                     total += dir_spend(sub)
     return total
