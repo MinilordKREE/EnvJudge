@@ -401,7 +401,11 @@ def test_zero_path_with_prefix_then_random_policy(tmp_path: Path) -> None:
         with_handoff=True,
     )
     out = ctrl.run([TaskRef(str(traj["task_id"]), traj["task_id"])])[0]
-    assert out.regime == "zero" and out.status in ("unresolved", "accepted_stage")
+    assert out.regime == "zero" and out.status in (
+        "unresolved",
+        "unresolved_budget_limited",  # 6 candidates x 4 > the 20 rollouts left after estimation
+        "accepted_stage",
+    )
     events = read_trace(tmp_path / "run" / "events.jsonl")
     stage_ev = next(e for e in events if e.kind == "stage_candidates")
     assert stage_ev.payload["certified"], "compiled Setups must certify on the 100-config"
@@ -411,8 +415,10 @@ def test_zero_path_with_prefix_then_random_policy(tmp_path: Path) -> None:
         entry = read_corpus(tmp_path / "run" / "corpus.jsonl")[0]
         assert entry.aea.kind == "stage" and entry.stage_budget == 100 and entry.in_env_actions
         assert entry.to_candidate().in_env_actions[-1].kwargs["text"] == "look"
-    else:
+    elif out.status == "unresolved":
         assert (tmp_path / "run" / "handoff.jsonl").exists()
+    else:  # budget-limited: no exhaustive verdict, so no hand-off
+        assert not (tmp_path / "run" / "handoff.jsonl").exists()
     _induce_reads(tmp_path / "run")
 
 
