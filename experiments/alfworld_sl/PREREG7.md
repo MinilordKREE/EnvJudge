@@ -28,3 +28,23 @@ Reproduction sanity (Phase 0b): our EnvRigger-released reproduction must reprodu
 gains (orig > N on ID; EnvRigger > orig on OOD) or the gap is explained before round 1.
 Backbone rule (Phase 0b): Flash-Lite corpus episode > USD 0.10 → fallback backbone for all arms; N = 50 if the projection ≤ USD 450 else 30.
 Budget: E1-SL hard cap USD 500, soft gate 400; Phase 0 ≤ 60.
+
+---
+## Amendment 1 — 2026-09-08 (owner decision at the Phase 0b gate; committed before any round-1 rollout; text above unchanged)
+
+Bank protocols (the text above ties "train = the search trajectories of accepted environments" to "learnable = accepted environment
+or band task" without saying whether band tasks enter the bank; E0's R used the Table 2 protocol, transformed environments only):
+
+```
+Protocol T2 (primary for C2): bank = single-success over the arm's TRANSFORMED environments only
+  (R/G: accepted candidates; A: knob + stage envs). Unchanged tasks enter no arm's bank; O = all tasks unchanged.
+Protocol U (reported): bank = T2 ∪ unchanged tasks with ≥ 1 success during the arm's own search
+  (R/G: skipped and all-rejected tasks; A: band, frozen, exhausted tasks).
+C1 primary counts learnable TRANSFORMED environments per 1,000 search rollouts; secondary adds unchanged band tasks.
+Both induction modes reported for every arm in round 1; single-success primary, released paired-diff + subset as the baseline-protocol row.
+```
+
+T2 is the published comparison and isolates the transformation itself; U answers "what the learner gets with the whole environment set".
+
+Budget: E1-SL hard cap USD 560, soft gate USD 500 (covers the Phase 0b diagnosis and the second-induction-mode evaluations of round 1).
+N = 30 and the Flash-Lite backbone are confirmed by the Phase 0b rules above.
