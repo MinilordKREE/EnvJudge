@@ -119,3 +119,128 @@ def test_install_wraps_litellm_completion(
 def test_parse_requires_usage() -> None:
     with pytest.raises(InfraError):
         parse_litellm_response(SimpleNamespace(usage=None, choices=[]))
+
+
+def test_guard_error_is_never_retried_by_the_released_client() -> None:
+    """The released retry sets (envharness/infra/llm.py: completion_with_retry and LiteLLMClient)
+    are litellm's transient classes; GuardError must not be one of them."""
+    from aea.evalhook import GuardError
+
+    transient = tuple(
+        cls
+        for name in (
+            "APIConnectionError",
+            "RateLimitError",
+            "ServiceUnavailableError",
+            "InternalServerError",
+            "Timeout",
+        )
+        if isinstance(cls := getattr(litellm, name, None), type)
+    )
+    assert transient and not issubclass(GuardError, transient)
+    assert (
+        isinstance(GuardError("x"), InfraError)
+        and GuardError("x").kind == "guard"
+        and not GuardError("x").retryable
+    )
+
+
+def test_wire_request_is_byte_identical_except_routing(
+    tmp_path: Path, pricing: PricingTable, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The released path's kwargs (messages, temperature, max_tokens, ...) reach litellm unchanged;
+    the hook only adds/replaces the routing keys."""
+    import json
+
+    from aea.evalhook import ROUTING_KEYS
+
+    released_kwargs = {
+        "model": "openai/qwen/qwen3-8b",
+        "messages": [
+            {"role": "user", "content": "Step 3 of 50\n\nObservation: x\n\nHistory: a, b"}
+        ],
+        "temperature": 0.4,
+        "max_tokens": 2048,
+        "api_key": "released-key",
+        "drop_params": True,
+    }
+    seen: list[dict[str, Any]] = []
+
+    def fake_completion(**kwargs: Any) -> Any:
+        seen.append(kwargs)
+        return _response(cost=(100 * 0.117 + 10 * 0.455) / 1e6)
+
+    monkeypatch.setattr(litellm, "completion", fake_completion)
+    original = install(_hook(tmp_path, pricing))
+    try:
+        litellm.completion(**released_kwargs)
+    finally:
+        litellm.completion = original
+    plain = {k: v for k, v in released_kwargs.items() if k not in ROUTING_KEYS}
+    routed = {k: v for k, v in seen[0].items() if k not in ROUTING_KEYS}
+    assert json.dumps(routed, sort_keys=True) == json.dumps(plain, sort_keys=True)
+    assert set(seen[0]) - set(released_kwargs) <= ROUTING_KEYS
+
+
+def test_driver_installs_the_hook_for_every_arm(
+    tmp_path: Path, pricing: PricingTable, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from aea.core.config import LLMConfig
+    from aea.evaldriver import run_eval
+    from aea.llm.attribution import current_attribution
+
+    calls: list[tuple[str, list[str], bool, str]] = []
+
+    def fake_main(argv: list[str]) -> int:
+        wrapped = (
+            litellm.completion.__name__ == "completion"
+            and litellm.completion.__module__ == "aea.evalhook"
+        )
+        calls.append((current_attribution()[0].arm, argv, wrapped, current_attribution()[0].budget))
+        return 0
+
+    monkeypatch.setattr(litellm, "completion", lambda **kw: _response())
+    for arm, banks in (
+        ("N", {"nobank": None}),
+        ("R", {"rigger": tmp_path / "r.jsonl"}),
+        ("A", {"aea": tmp_path / "a.jsonl"}),
+    ):
+        hook = _hook(tmp_path / arm, pricing)
+        rc = run_eval(
+            arm=arm,
+            conditions=banks,
+            config_yaml=tmp_path / "eval.yaml",
+            out_dir=tmp_path / arm,
+            start_seeds=(0, 1000, 2000),
+            concurrency=6,
+            llm=LLMConfig(),
+            pricing=pricing,
+            run_id="r",
+            eval_main=fake_main,
+            hook=hook,
+        )
+        assert rc == 0
+    assert (
+        [c[0] for c in calls] == ["N", "R", "A"]
+        and all(c[2] for c in calls)
+        and {c[3] for c in calls} == {"eval"}
+    )
+    assert "--bank-overrides" not in calls[0][1] and f"rigger={tmp_path / 'r.jsonl'}" in calls[1][1]
+    assert litellm.completion.__module__ != "aea.evalhook"  # restored after the run
+    (tmp_path / "A" / "guard_failure.json").write_text(
+        '{"problem": "pricing guard: x"}', encoding="utf-8"
+    )
+    with pytest.raises(InfraError, match="aborted by a guard"):
+        run_eval(
+            arm="A",
+            conditions={"aea": None},
+            config_yaml=tmp_path / "e.yaml",
+            out_dir=tmp_path / "A",
+            start_seeds=(0,),
+            concurrency=1,
+            llm=LLMConfig(),
+            pricing=pricing,
+            run_id="r",
+            eval_main=fake_main,
+            hook=_hook(tmp_path / "A", pricing),
+        )

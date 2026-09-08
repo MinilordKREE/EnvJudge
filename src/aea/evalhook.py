@@ -38,6 +38,19 @@ from aea.llm.types import Attribution, ChatMessage, ChatRequest, ChatResponse, U
 from aea.settings import load_settings
 
 GUARD_MARKER = "guard_failure.json"
+ROUTING_KEYS = frozenset(
+    {"api_base", "api_key", "extra_body", "reasoning_effort", "model", "drop_params"}
+)
+"""The only kwargs the hook may add or change; everything else reaches litellm byte-identical."""
+
+
+class GuardError(InfraError):
+    """A provider or price guard failed. Deliberately NOT one of litellm's transient exception
+    classes (APIConnectionError, RateLimitError, ServiceUnavailableError, InternalServerError,
+    Timeout), so the released ``completion_with_retry`` / ``LiteLLMClient`` never retries it."""
+
+    def __init__(self, message: str) -> None:
+        super().__init__(message, kind="guard", retryable=False)
 
 
 def _int(obj: Any, name: str) -> int:
@@ -131,6 +144,7 @@ class EvalHook:
         if "reasoning_effort" in wire:
             out["reasoning_effort"] = wire["reasoning_effort"]
         out.pop("drop_params", None)
+        assert {k for k in out if k not in kwargs or out[k] != kwargs.get(k)} <= ROUTING_KEYS
         return out
 
     def account(self, response: Any, latency_ms: int) -> ChatResponse:
@@ -168,7 +182,7 @@ class EvalHook:
             problem = f"pricing guard: upstream cost {parsed.upstream_cost:.8f} != table {usd:.8f}"
         if problem is None:
             return
-        exc = InfraError(problem, kind="guard")
+        exc = GuardError(problem)
         self.ledger.record_infra_failure(request, exc, request_sha256="eval")
         atomic_write_json(
             self.run_dir / GUARD_MARKER, {"problem": problem, "ts": time.time(), "pid": os.getpid()}
