@@ -80,6 +80,36 @@ def derive_corpus_config(
     return cfg
 
 
+ALLOWED_ARM_CHANGES = ALLOWED_CHANGES | {"agent.extra_instructions", "objective.target_band"}
+
+
+def derive_arm_config(
+    released_yaml: Path,
+    *,
+    run_dir: Path,
+    policy: LLMConfig,
+    designer: LLMConfig,
+    pricing_path: Path,
+    extra_instructions: str,
+    target_band: tuple[float, float],
+) -> tuple[dict[str, Any], list[str]]:
+    """Arms G / G+ (PREREG7 arms table): the released orchestrator with the generic designer prompt
+    (``_DEFAULT_SYSTEM`` alone when ``extra_instructions`` is empty; G+ appends the exemplar text)
+    and ``objective.target_band`` set to the band. Everything else as :func:`derive_corpus_config`.
+    Returns the config and the list of changed keys (recorded in the manifest)."""
+    cfg = derive_corpus_config(
+        released_yaml, run_dir=run_dir, policy=policy, designer=designer, pricing_path=pricing_path
+    )
+    cfg["agent"]["extra_instructions"] = extra_instructions
+    cfg["objective"]["target_band"] = [float(target_band[0]), float(target_band[1])]
+    released = yaml.safe_load(released_yaml.read_text(encoding="utf-8"))
+    changed = config_diff(released, cfg)
+    if not set(changed) <= ALLOWED_ARM_CHANGES:
+        extra = sorted(set(changed) - ALLOWED_ARM_CHANGES)
+        raise ValueError(f"arm config changes outside the allowed set: {extra}")
+    return cfg, changed
+
+
 def write_corpus_config(cfg: dict[str, Any], path: Path) -> Path:
     atomic_write_text(path, yaml.safe_dump(cfg, sort_keys=False, allow_unicode=True))
     return path

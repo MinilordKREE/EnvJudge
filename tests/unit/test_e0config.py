@@ -50,3 +50,27 @@ def test_e0_config_changes_only_clients_and_paths(tmp_path: Path) -> None:
     )  # provider default, as released
     path = write_corpus_config(cfg, tmp_path / "run" / "corpus_e0.yaml")
     assert yaml.safe_load(path.read_text(encoding="utf-8")) == cfg
+
+
+def test_derive_arm_config_changes_only_prompt_and_band(tmp_path: Path) -> None:
+    from aea.e0config import ALLOWED_ARM_CHANGES, derive_arm_config
+
+    released = (
+        Path(__file__).resolve().parents[2]
+        / "third_party/envharness/experiments/alfworld/corpus.yaml"
+    )
+    cfg, changed = derive_arm_config(
+        released,
+        run_dir=tmp_path,
+        policy=LLMConfig(),
+        designer=LLMConfig(),
+        pricing_path=tmp_path / "p.yaml",
+        extra_instructions="",
+        target_band=(0.4, 0.6),
+    )
+    assert cfg["agent"]["extra_instructions"] == "" and cfg["objective"]["target_band"] == [
+        0.4,
+        0.6,
+    ]
+    assert set(changed) <= ALLOWED_ARM_CHANGES and "agent.extra_instructions" in changed
+    assert cfg["orchestrator"]["skip_passthrough_candidates"] is True  # released behaviour kept
