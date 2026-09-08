@@ -54,7 +54,7 @@ from aea.core.trace import read_trace
 from aea.e0config import derive_arm_config, write_corpus_config
 from aea.errors import ConfigError
 from aea.evaldriver import run_eval
-from aea.evalhook import install, make_hook
+from aea.evalhook import GUARD_MARKER, install, make_hook
 from aea.exemplars import prompt_text
 from aea.handoff import handoff
 from aea.io import AeaMeta, CorpusEntry, TraceWriter, read_corpus
@@ -1084,9 +1084,36 @@ def stage_evals(workers: int, per_job: int) -> None:
                 cwd=str(ROOT),
             )
 
+    def guard_incidents(job: tuple[str, int]) -> list[dict[str, Any]]:
+        """Guard markers of the job's dir and resume dirs (each = one aborted episode)."""
+        base = eval_dir(*job)
+        found = []
+        for d in [base, *base.parent.glob(f"{base.name}-resume-*")]:
+            m = d / GUARD_MARKER
+            if m.exists():
+                found.append({"job": list(job), "dir": d.name, **json.loads(m.read_text())})
+                m.rename(d / "guard_failure.handled.json")
+        return found
+
+    def run_with_resume(job: tuple[str, int]) -> int:
+        """The abort-and-resume rule: a guard abort ends the affected episode (recorded with an
+        error); the job is resumed for its missing episodes, at most 3 times."""
+        rc = 0
+        for attempt in range(4):
+            rc = run_job(job)
+            incidents = guard_incidents(job)
+            for inc in incidents:
+                append_jsonl(
+                    RUNS / "r1-eval" / "guard_incidents.jsonl", {**inc, "attempt": attempt}
+                )
+                print(json.dumps({"guard_incident": inc}), flush=True)
+            if rc == 0 or not incidents:
+                return rc
+        return rc
+
     done = 0
     with cf.ThreadPoolExecutor(max_workers=workers) as pool:
-        for job, rc in zip(pending, pool.map(run_job, pending), strict=True):
+        for job, rc in zip(pending, pool.map(run_with_resume, pending), strict=True):
             done += 1
             print(
                 json.dumps(
