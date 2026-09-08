@@ -282,36 +282,69 @@ def stage_report(run_id: str) -> None:
     induce_usd = sum(r.usd for r in rows if r.event == "call" and r.budget == "eval")
     eval_usd = sum(r.usd for r in erows if r.event == "call" and r.budget == "eval")
     episodes = len(traces)
-    results: dict[str, dict[str, float]] = {}
-    for p in sorted((run_dir / "eval").rglob("*.jsonl")) if (run_dir / "eval").exists() else []:
-        if p.name.startswith("ledger"):
-            continue
+    # {condition: {split: {seed_dir: (won, n)}}} from eval/seeds-*/round*/<cond>_eval_<split>.jsonl
+    results: dict[str, dict[str, dict[str, tuple[int, int]]]] = {}
+    eval_root = run_dir / "eval"
+    for p in sorted(eval_root.glob("seeds-*/round*/*_eval_*.jsonl")) if eval_root.exists() else []:
         cond, split = p.stem.rsplit("_eval_", 1)
         recs = [
             json.loads(line) for line in p.read_text(encoding="utf-8").splitlines() if line.strip()
         ]
-        results.setdefault(cond, {}).setdefault(split, 0.0)
-        results[cond][split + "_n"] = results[cond].get(split + "_n", 0.0) + len(recs)
-        results[cond][split] = results[cond].get(split, 0.0) + sum(
-            1 for r in recs if r.get("success")
+        won = sum(1 for r in recs if r.get("success"))
+        results.setdefault(cond, {}).setdefault(split, {})[p.parents[1].name] = (won, len(recs))
+    seed_dirs = sorted({sd for c in results.values() for sp in c.values() for sd in sp})
+    eval_episodes = sum(n for c in results.values() for sp in c.values() for _, n in sp.values())
+
+    def rate(cond: str, split: str) -> tuple[float, int]:
+        cells = results.get(cond, {}).get(split, {})
+        won, n = sum(w for w, _ in cells.values()), sum(k for _, k in cells.values())
+        return (100 * won / n if n else float("nan")), n
+
+    def per_seed(cond: str, split: str) -> str:
+        cells = results.get(cond, {}).get(split, {})
+        return " / ".join(
+            f"{100 * cells[sd][0] / cells[sd][1]:.1f}" if sd in cells and cells[sd][1] else "-"
+            for sd in seed_dirs
         )
-    eval_episodes = int(sum(v for c in results.values() for k, v in c.items() if k.endswith("_n")))
+
     lines = [
         f"# E0 reproduction ({run_id})",
+        "",
+        f"Seeds (released eval rounds): {', '.join(seed_dirs) or 'none'}; splits ID n=140, "
+        "OOD n=134 per seed; success % pooled over seeds (per-seed values in brackets).",
         "",
         "| condition | ID (ours) | OOD (ours) | ID (Table 2) | OOD (Table 2) |",
         "|---|---|---|---|---|",
     ]
     for cond, label in (("nobank", "N"), ("orig", "orig"), ("R", "EnvHarness")):
-        r = results.get(cond, {})
-        idn, oodn = r.get("in_distribution_n", 0.0), r.get("out_of_distribution_n", 0.0)
-        ours_id = 100 * r.get("in_distribution", 0.0) / idn if idn else float("nan")
-        ours_ood = 100 * r.get("out_of_distribution", 0.0) / oodn if oodn else float("nan")
+        (ours_id, idn), (ours_ood, oodn) = (
+            rate(cond, "in_distribution"),
+            rate(cond, "out_of_distribution"),
+        )
         t2 = TABLE2[label]
         lines.append(
-            f"| {label} | {ours_id:.1f} (n={int(idn)}) | {ours_ood:.1f} (n={int(oodn)}) "
+            f"| {label} | {ours_id:.1f} (n={idn}) [{per_seed(cond, 'in_distribution')}] "
+            f"| {ours_ood:.1f} (n={oodn}) [{per_seed(cond, 'out_of_distribution')}] "
             f"| {t2[0]} | {t2[1]} |"
         )
+    n_id, o_id, r_id = (rate(c, "in_distribution")[0] for c in ("nobank", "orig", "R"))
+    n_ood, o_ood, r_ood = (rate(c, "out_of_distribution")[0] for c in ("nobank", "orig", "R"))
+    t2n, t2o, t2r = TABLE2["N"], TABLE2["orig"], TABLE2["EnvHarness"]
+
+    def verdict(ok: bool) -> str:
+        return "REPRODUCED" if ok else "NOT reproduced"
+
+    lines += [
+        "",
+        "Sign check (PREREG7 reproduction sanity):",
+        f"- orig > N on ID: ours {o_id - n_id:+.1f} pts (Table 2 {t2o[0] - t2n[0]:+.1f}) "
+        f"-> {verdict(o_id > n_id)}",
+        f"- EnvRigger > orig on OOD: ours {r_ood - o_ood:+.1f} pts "
+        f"(Table 2 {t2r[1] - t2o[1]:+.1f}) "
+        f"-> {verdict(r_ood > o_ood)}",
+        f"- (reported, not a gate) EnvRigger vs N: ID {r_id - n_id:+.1f}, OOD {r_ood - n_ood:+.1f} "
+        f"(Table 2 {t2r[0] - t2n[0]:+.1f} / {t2r[1] - t2n[1]:+.1f})",
+    ]
     per_corpus = corpus_usd / episodes if episodes else float("nan")
     per_eval = eval_usd / eval_episodes if eval_episodes else float("nan")
     lines += [
