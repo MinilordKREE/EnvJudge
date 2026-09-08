@@ -162,7 +162,12 @@ def stage_banks(run_id: str, fallback: bool) -> None:
     ctx, _manifest = load_run_context(run_dir)
     policy, _ = backbone(fallback)
     pricing = load_pricing(ROOT / "configs" / "pricing.yaml")
-    hook = make_hook(policy, run_dir=run_dir, run_id=ctx.run_id, pricing=pricing)
+    induce = Attribution(phase="induce", budget="eval", arm="R", task_id="e0")
+    # the released induction fans out over a ThreadPoolExecutor (induce_pair.py:153), which does
+    # not inherit the contextvar binding: the hook's default labels those rows
+    hook = make_hook(
+        policy, run_dir=run_dir, run_id=ctx.run_id, pricing=pricing, default=(induce, 0)
+    )
     install(hook)
     sys.path.insert(0, str(ENVHARNESS))
     os.environ["OPENAI_API_KEY"] = "routed-by-aea"
@@ -188,7 +193,7 @@ def stage_banks(run_id: str, fallback: bool) -> None:
     meta: dict[str, Any] = {}
     banks_dir = run_dir / "banks"
     banks_dir.mkdir(exist_ok=True)
-    with attributed(Attribution(phase="induce", budget="eval", arm="R", task_id="e0"), seed=0):
+    with attributed(induce, seed=0):
         for cond, by_task in by_kind.items():
             out = banks_dir / f"{cond}.jsonl"
             n = (
@@ -233,11 +238,14 @@ def stage_eval(run_id: str, fallback: bool, seeds: tuple[int, ...], concurrency:
     conditions = {"nobank": None, "orig": banks_dir / "orig.jsonl", "R": banks_dir / "R.jsonl"}
     conditions = {k: v for k, v in conditions.items() if v is None or v.exists()}
     os.environ.setdefault("ALFWORLD_DATA", str(Path.home() / "eh_alfworld_data"))
+    # one directory per invocation: the released eval names rounds round1.. per call, so seeds
+    # run in separate invocations (Phase-0 cap pacing) must not overwrite each other
+    out_dir = run_dir / "eval" / ("seeds-" + "-".join(str(s) for s in seeds))
     rc = run_eval(
         arm="R",
         conditions=conditions,
         config_yaml=resolved,
-        out_dir=run_dir / "eval",
+        out_dir=out_dir,
         start_seeds=seeds,
         concurrency=concurrency,
         llm=policy,
@@ -245,24 +253,33 @@ def stage_eval(run_id: str, fallback: bool, seeds: tuple[int, ...], concurrency:
         run_id=ctx.run_id,
         envharness_root=ENVHARNESS,
     )
-    merge_ledgers(run_dir / "eval", ctx.run_id)
-    print(json.dumps({"stage": "eval", "rc": rc, "conditions": list(conditions)}), flush=True)
+    merge_ledgers(out_dir, ctx.run_id)
+    print(
+        json.dumps(
+            {"stage": "eval", "rc": rc, "conditions": list(conditions), "out_dir": str(out_dir)}
+        ),
+        flush=True,
+    )
 
 
 def stage_report(run_id: str) -> None:
     run_dir = run_dir_for(run_id)
     rows = read_ledger(run_dir / "ledger.jsonl") if (run_dir / "ledger.jsonl").exists() else []
-    erows = (
-        read_ledger(run_dir / "eval" / "ledger.jsonl")
-        if (run_dir / "eval" / "ledger.jsonl").exists()
-        else []
-    )
+    erows = [
+        r
+        for p in sorted((run_dir / "eval").glob("seeds-*/ledger.jsonl"))
+        if (run_dir / "eval").exists()
+        for r in read_ledger(p)
+    ]
     traces = (
         training_traces(run_dir / "traces.jsonl") if (run_dir / "traces.jsonl").exists() else []
     )
     corpus_usd = sum(r.usd for r in rows if r.event == "call" and r.budget == "search")
     designer_usd = sum(r.usd for r in rows if r.event == "call" and r.budget == "designer")
-    induce_usd = sum(r.usd for r in rows if r.event == "call" and r.phase == "induce")
+    # every `eval`-budget row in the run ledger is induction (the eval ledgers live under eval/);
+    # the first banks run labelled its completions phase=eval (thread pool, see LOG), so the
+    # budget, not the phase, selects them
+    induce_usd = sum(r.usd for r in rows if r.event == "call" and r.budget == "eval")
     eval_usd = sum(r.usd for r in erows if r.event == "call" and r.budget == "eval")
     episodes = len(traces)
     results: dict[str, dict[str, float]] = {}

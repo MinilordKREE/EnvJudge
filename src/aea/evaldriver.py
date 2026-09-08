@@ -54,7 +54,10 @@ def run_eval(
     Every arm calls this with its own bank; ``arm`` only labels the ledger rows. Raises
     ``InfraError(kind="guard")`` if any guard fired during the run."""
     out_dir.mkdir(parents=True, exist_ok=True)
-    active = hook or make_hook(llm, run_dir=out_dir, run_id=run_id, pricing=pricing)
+    label = Attribution(phase="eval", budget="eval", arm=arm, task_id="heldout")
+    active = hook or make_hook(
+        llm, run_dir=out_dir, run_id=run_id, pricing=pricing, default=(label, start_seeds[0])
+    )
     main = eval_main or released_eval_main(envharness_root or Path("third_party/envharness"))
     argv = [
         "--config",
@@ -74,10 +77,7 @@ def run_eval(
     os.environ.setdefault("OPENAI_API_KEY", "routed-by-aea-evalhook")  # the released key check only
     original = install(active)
     try:
-        with attributed(
-            Attribution(phase="eval", budget="eval", arm=arm, task_id="heldout"),
-            seed=start_seeds[0],
-        ):
+        with attributed(label, seed=start_seeds[0]):
             rc = int(main(argv))
     finally:
         import litellm

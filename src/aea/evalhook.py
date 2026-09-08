@@ -30,7 +30,7 @@ from typing import Any, cast
 from aea.core.config import LLMConfig
 from aea.core.io import atomic_write_json
 from aea.errors import InfraError
-from aea.llm.attribution import current_attribution
+from aea.llm.attribution import bound_attribution, current_attribution
 from aea.llm.client import build_wire_request, check_routing
 from aea.llm.ledger import Ledger
 from aea.llm.pricing import PricingTable
@@ -110,6 +110,7 @@ class EvalHook:
         pricing: PricingTable,
         run_dir: Path,
         api_key: str | None,
+        default: tuple[Attribution, int] | None = None,
     ) -> None:
         check_routing(config)
         self.config = config
@@ -117,6 +118,7 @@ class EvalHook:
         self.pricing = pricing
         self.run_dir = run_dir
         self.api_key = api_key
+        self.default = default
         self.calls = 0
         self.original_embedding: Callable[..., Any] | None = None
 
@@ -148,9 +150,20 @@ class EvalHook:
         assert {k for k in out if k not in kwargs or out[k] != kwargs.get(k)} <= ROUTING_KEYS
         return out
 
+    def _attribution(self) -> tuple[Attribution, int]:
+        """The bound attribution, else the hook's default (the released induction and eval run
+        their calls from thread/process pools that do not inherit the contextvar), else the
+        process environment."""
+        bound = bound_attribution()
+        if bound is not None:
+            return bound
+        if self.default is not None:
+            return self.default
+        return current_attribution()
+
     def account(self, response: Any, latency_ms: int) -> ChatResponse:
         parsed = parse_litellm_response(response).model_copy(update={"latency_ms": latency_ms})
-        attribution, seed = current_attribution()
+        attribution, seed = self._attribution()
         if attribution.budget == "none":
             attribution = Attribution(
                 phase="eval", budget="eval", arm=attribution.arm, task_id=attribution.task_id
@@ -171,7 +184,7 @@ class EvalHook:
         """One ``call`` row per embedding request (input tokens only, priced from the table)."""
         usage = getattr(response, "usage", None)
         tokens = _int(usage, "prompt_tokens") if usage is not None else 0
-        attribution, seed = current_attribution()
+        attribution, seed = self._attribution()
         if attribution.budget == "none":
             attribution = Attribution(
                 phase="embed", budget="eval", arm=attribution.arm, task_id=attribution.task_id
@@ -258,7 +271,14 @@ def install(hook: EvalHook) -> Callable[..., Any]:
     return original
 
 
-def make_hook(config: LLMConfig, *, run_dir: Path, run_id: str, pricing: PricingTable) -> EvalHook:
+def make_hook(
+    config: LLMConfig,
+    *,
+    run_dir: Path,
+    run_id: str,
+    pricing: PricingTable,
+    default: tuple[Attribution, int] | None = None,
+) -> EvalHook:
     key = None
     if config.provider != "fake":
         key = load_settings().require(config.api_key_env.lower()).get_secret_value()
@@ -268,6 +288,7 @@ def make_hook(config: LLMConfig, *, run_dir: Path, run_id: str, pricing: Pricing
         pricing=pricing,
         run_dir=run_dir,
         api_key=key,
+        default=default,
     )
 
 

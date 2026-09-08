@@ -287,3 +287,27 @@ def test_embedding_is_routed_and_accounted(
         and row.prompt_tokens == 40
         and abs(row.usd - 40 * 0.15 / 1e6) < 1e-15
     )
+
+
+def test_hook_default_labels_pool_threads(tmp_path: Path, pricing: PricingTable) -> None:
+    """The released induction/eval fan out over pools that do not inherit the contextvar: rows
+    from such threads carry the hook's default attribution, bound calls keep their own."""
+    from concurrent.futures import ThreadPoolExecutor
+
+    default = Attribution(phase="induce", budget="eval", arm="R", task_id="e0")
+    hook = EvalHook(
+        config=LLMConfig(),
+        ledger=Ledger(tmp_path / "ledger.jsonl", "r"),
+        pricing=pricing,
+        run_dir=tmp_path,
+        api_key="sk-test",
+        default=(default, 7),
+    )
+    usd = (20 * 0.117 + 80 * 0.117 + 10 * 0.455) / 1e6
+    with attributed(Attribution(phase="eval", budget="eval", arm="A", task_id="3"), seed=1):
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            pool.submit(hook.account, _response(cost=usd), 1).result()
+        hook.account(_response(cost=usd), latency_ms=1)
+    rows = read_ledger(tmp_path / "ledger.jsonl")
+    assert (rows[0].phase, rows[0].arm, rows[0].task_id, rows[0].seed) == ("induce", "R", "e0", 7)
+    assert (rows[1].phase, rows[1].arm, rows[1].task_id) == ("eval", "A", "3")
