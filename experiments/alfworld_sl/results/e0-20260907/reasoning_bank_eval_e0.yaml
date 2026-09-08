@@ -1,0 +1,31 @@
+model:
+  name: openai/google/gemini-3.1-flash-lite
+  temperature: 0.4
+  max_response_tokens: 2048
+policy:
+  max_steps: 50
+  history_length: 4
+  prompt_style: skillos
+  inject_style: soft
+retrieval:
+  top_k: 5
+  mode: mmr
+  mmr_lambda: 0.5
+  query_field: task
+eval:
+  splits:
+    eval_in_distribution: 140
+    eval_out_of_distribution: 134
+  start_seed: 0
+  concurrency: 8
+env:
+  import_path: envharness.bridges.alfworld:AlfworldEnv
+  reset_options:
+    repetition_threshold: 0
+conditions:
+  nobank:
+    bank: null
+  orig:
+    bank: null
+  ours:
+    bank: null

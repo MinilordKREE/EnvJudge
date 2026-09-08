@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "run_id": "e0-20260907",
+  "created_at": "2026-09-08T00:50:02.897216Z",
+  "seed": 0,
+  "config_sha256": "56a2a727c414d1c40daf51b3fec3680043f241c1146c0b5b15c2b87545e0b948",
+  "config_schema_version": 1,
+  "aea_config_sha256": "16c131049bfc306ed209d2f0426846c282f22dd5a7c26023313da62b180b4727",
+  "config_path": null,
+  "git_sha": "ecd60063895737404f49d21a6d97f16ace174ed0",
+  "git_dirty": true,
+  "envharness_sha": "fab7d57441f06b75c73a900e04561d4d7600f361",
+  "aea_version": "0.1.0",
+  "python_version": "3.12.9",
+  "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+  "out_dir": "/home/kree/work/EnvJudge/runs/e0-20260907",
+  "extra": {
+    "phase": "0b-E0",
+    "stage": "corpus",
+    "arm": "R",
+    "n_tasks": 20,
+    "policy_endpoint_pin": "google-ai-studio",
+    "designer_endpoint_pin": "google-ai-studio",
+    "thinking": null,
+    "prereg": "experiments/alfworld_sl/PREREG7.md"
+  }
+}

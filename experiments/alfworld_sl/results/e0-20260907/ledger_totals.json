@@ -1,0 +1,121 @@
+{
+ "run_ledger_by_budget_model": {
+  "search/google/gemini-3.1-flash-lite": {
+   "calls": 3932,
+   "usd": 4.300347350000001,
+   "prompt_tokens": 33482351,
+   "cached_tokens": 19718684,
+   "completion_tokens": 244309,
+   "reasoning_tokens": 0
+  },
+  "designer/google/gemini-3.1-flash-lite": {
+   "calls": 37,
+   "usd": 0.05714662500000001,
+   "prompt_tokens": 334632,
+   "cached_tokens": 146815,
+   "completion_tokens": 4348,
+   "reasoning_tokens": 0
+  },
+  "eval/google/gemini-3.1-flash-lite": {
+   "calls": 33,
+   "usd": 0.034665,
+   "prompt_tokens": 95646,
+   "cached_tokens": 0,
+   "completion_tokens": 7169,
+   "reasoning_tokens": 0
+  },
+  "eval/google/gemini-embedding-001": {
+   "calls": 10,
+   "usd": 0.0009148499999999999,
+   "prompt_tokens": 6099,
+   "cached_tokens": 0,
+   "completion_tokens": 0,
+   "reasoning_tokens": 0
+  }
+ },
+ "providers_run_ledger": [
+  "Google AI Studio",
+  "None"
+ ],
+ "seeds-0": {
+  "by_model": {
+   "google/gemini-3.1-flash-lite": {
+    "calls": 20371,
+    "usd": 9.107401000000038,
+    "prompt_tokens": 17775958,
+    "cached_tokens": 0,
+    "completion_tokens": 3108941,
+    "reasoning_tokens": 0
+   },
+   "google/gemini-embedding-001": {
+    "calls": 548,
+    "usd": 0.0010665000000000021,
+    "prompt_tokens": 7110,
+    "cached_tokens": 0,
+    "completion_tokens": 0,
+    "reasoning_tokens": 0
+   }
+  },
+  "providers": [
+   "Google AI Studio",
+   "None"
+  ]
+ },
+ "seeds-1000": {
+  "by_model": {
+   "google/gemini-3.1-flash-lite": {
+    "calls": 22277,
+    "usd": 9.933070250000004,
+    "prompt_tokens": 19434737,
+    "cached_tokens": 0,
+    "completion_tokens": 3382924,
+    "reasoning_tokens": 0
+   },
+   "google/gemini-embedding-001": {
+    "calls": 548,
+    "usd": 0.0010575000000000016,
+    "prompt_tokens": 7050,
+    "cached_tokens": 0,
+    "completion_tokens": 0,
+    "reasoning_tokens": 0
+   }
+  },
+  "providers": [
+   "Google AI Studio",
+   "None"
+  ]
+ },
+ "seeds-2000": {
+  "by_model": {
+   "google/gemini-3.1-flash-lite": {
+    "calls": 22122,
+    "usd": 10.086136499999983,
+    "prompt_tokens": 19420710,
+    "cached_tokens": 0,
+    "completion_tokens": 3487306,
+    "reasoning_tokens": 0
+   },
+   "google/gemini-embedding-001": {
+    "calls": 548,
+    "usd": 0.001066500000000001,
+    "prompt_tokens": 7110,
+    "cached_tokens": 0,
+    "completion_tokens": 0,
+    "reasoning_tokens": 0
+   }
+  },
+  "providers": [
+   "Google AI Studio",
+   "None"
+  ]
+ },
+ "aborted_first_launch": {
+  "calls": 276,
+  "usd": 0.29402175
+ },
+ "backbone_probe": {
+  "calls": 5,
+  "usd": 0.0062313
+ },
+ "phase0_total_usd": 33.823125125000026
+}

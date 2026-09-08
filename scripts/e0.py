@@ -345,6 +345,26 @@ def stage_report(run_id: str) -> None:
         f"- (reported, not a gate) EnvRigger vs N: ID {r_id - n_id:+.1f}, OOD {r_ood - n_ood:+.1f} "
         f"(Table 2 {t2r[0] - t2n[0]:+.1f} / {t2r[1] - t2n[1]:+.1f})",
     ]
+
+    def gap_se(a: str, b: str, split: str) -> str:
+        """Difference of pooled success rates with a normal-approximation SE (points)."""
+        (pa, na), (pb, nb) = rate(a, split), rate(b, split)
+        if not na or not nb:
+            return "n/a"
+        va = pa * (100 - pa) / na
+        vb = pb * (100 - pb) / nb
+        return f"{pa - pb:+.1f} ± {(va + vb) ** 0.5:.1f}"
+
+    lines += [
+        "",
+        "Pooled gaps with normal-approximation SE (points; per-seed sign in the table above):",
+        f"- orig minus N: ID {gap_se('orig', 'nobank', 'in_distribution')}, "
+        f"OOD {gap_se('orig', 'nobank', 'out_of_distribution')}",
+        f"- EnvRigger minus orig: ID {gap_se('R', 'orig', 'in_distribution')}, "
+        f"OOD {gap_se('R', 'orig', 'out_of_distribution')}",
+        f"- EnvRigger minus N: ID {gap_se('R', 'nobank', 'in_distribution')}, "
+        f"OOD {gap_se('R', 'nobank', 'out_of_distribution')}",
+    ]
     per_corpus = corpus_usd / episodes if episodes else float("nan")
     per_eval = eval_usd / eval_episodes if eval_episodes else float("nan")
     lines += [
