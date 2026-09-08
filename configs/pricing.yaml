@@ -17,6 +17,13 @@ models:
     as_of: 2026-09-07
     source: https://openrouter.ai/api/v1/models/google/gemini-3.1-flash-lite/endpoints
     flat: {input_cache_hit: 0.025, input_cache_miss: 0.25, output: 1.50}
+  # Embeddings for the released ReasoningBank (gemini-embedding-001) via OpenRouter, Google AI Studio (endpoint list
+  # 2026-09-07): USD 0.15 per M input tokens, no output.
+  google/gemini-embedding-001:
+    pricing_version: "openrouter-gemini-embedding-001-2026-09-07"
+    as_of: 2026-09-07
+    source: https://openrouter.ai/api/v1/models/google/gemini-embedding-001/endpoints
+    flat: {input_cache_hit: 0.15, input_cache_miss: 0.15, output: 0.0}
   # DeepSeek direct API (peak = Beijing Mon-Fri 09:00-12:00 and 14:00-18:00, i.e. the UTC windows below).
   deepseek-v4-pro:
     pricing_version: "deepseek-pricing-2026-09-03"

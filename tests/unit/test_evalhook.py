@@ -244,3 +244,46 @@ def test_driver_installs_the_hook_for_every_arm(
             eval_main=fake_main,
             hook=_hook(tmp_path / "A", pricing),
         )
+
+
+def test_embedding_is_routed_and_accounted(
+    tmp_path: Path, pricing: PricingTable, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import os
+
+    from aea.evalhook import EMBED_MODEL
+    from aea.llm.pricing import load_pricing
+
+    seen: list[dict[str, Any]] = []
+
+    def fake_embedding(**kwargs: Any) -> Any:
+        seen.append(kwargs)
+        return SimpleNamespace(usage=SimpleNamespace(prompt_tokens=40), data=[{"embedding": [0.0]}])
+
+    monkeypatch.setattr(litellm, "embedding", fake_embedding)
+    monkeypatch.setattr(litellm, "completion", lambda **kw: _response())
+    root = Path(__file__).resolve().parents[2]
+    hook = EvalHook(
+        config=LLMConfig(),
+        ledger=Ledger(tmp_path / "ledger.jsonl", "r"),
+        pricing=load_pricing(root / "configs" / "pricing.yaml"),
+        run_dir=tmp_path,
+        api_key="sk-test",
+    )
+    original = install(hook)
+    try:
+        litellm.embedding(model="gemini/gemini-embedding-001", input=["a", "b"])
+    finally:
+        litellm.completion = original
+        monkeypatch.setattr(litellm, "embedding", fake_embedding)
+    assert (
+        seen[0]["model"] == f"openai/{EMBED_MODEL}"
+        and seen[0]["api_base"] == "https://openrouter.ai/api/v1"
+    )
+    assert os.environ["EH_EMBED_MODEL"] == f"openai/{EMBED_MODEL}"
+    row = read_ledger(tmp_path / "ledger.jsonl")[0]
+    assert (
+        row.model == EMBED_MODEL
+        and row.prompt_tokens == 40
+        and abs(row.usd - 40 * 0.15 / 1e6) < 1e-15
+    )

@@ -118,6 +118,7 @@ class EvalHook:
         self.run_dir = run_dir
         self.api_key = api_key
         self.calls = 0
+        self.original_embedding: Callable[..., Any] | None = None
 
     def route(self, kwargs: dict[str, Any]) -> dict[str, Any]:
         """The released kwargs plus endpoint, key, provider pin and reasoning setting."""
@@ -166,6 +167,37 @@ class EvalHook:
         self._guard(request, parsed, cost.usd)
         return parsed
 
+    def account_embedding(self, response: Any) -> None:
+        """One ``call`` row per embedding request (input tokens only, priced from the table)."""
+        usage = getattr(response, "usage", None)
+        tokens = _int(usage, "prompt_tokens") if usage is not None else 0
+        attribution, seed = current_attribution()
+        if attribution.budget == "none":
+            attribution = Attribution(
+                phase="embed", budget="eval", arm=attribution.arm, task_id=attribution.task_id
+            )
+        request = ChatRequest(
+            model=EMBED_MODEL,
+            messages=(ChatMessage(role="user", content="embed"),),
+            seed=seed,
+            attribution=attribution,
+        )
+        parsed = ChatResponse(
+            content="",
+            reasoning=None,
+            finish_reason="stop",
+            usage=Usage(prompt_tokens=tokens, completion_tokens=0),
+            model=EMBED_MODEL,
+            provider=None,
+            upstream_cost=_cost(usage) if usage is not None else None,
+            response_id=None,
+            request_sha256="embed",
+            latency_ms=0,
+            created_at=datetime.now(UTC),
+        )
+        cost = self.pricing.cost(EMBED_MODEL, parsed.usage, parsed.created_at)
+        self.ledger.record_call(request, parsed, cost=cost, attempt=1)
+
     def _guard(self, request: ChatRequest, parsed: ChatResponse, usd: float) -> None:
         pin = self.config.provider_pin
         problem: str | None = None
@@ -190,11 +222,17 @@ class EvalHook:
         raise exc
 
 
+EMBED_MODEL = "google/gemini-embedding-001"
+
+
 def install(hook: EvalHook) -> Callable[..., Any]:
-    """Wrap ``litellm.completion`` for this process; returns the original for tests."""
+    """Wrap ``litellm.completion`` (and ``litellm.embedding``, same endpoint and key) for this
+    process; returns the original completion for tests. ``EH_EMBED_MODEL`` is set so the released
+    bank code asks for the OpenRouter embedding model."""
     import litellm
 
     original = cast(Callable[..., Any], litellm.completion)
+    original_embedding = cast(Callable[..., Any], litellm.embedding)
 
     def completion(*args: Any, **kwargs: Any) -> Any:
         routed = hook.route(kwargs)
@@ -203,7 +241,20 @@ def install(hook: EvalHook) -> Callable[..., Any]:
         hook.account(response, int((time.perf_counter() - t0) * 1000))
         return response
 
+    def embedding(*args: Any, **kwargs: Any) -> Any:
+        routed = dict(kwargs)
+        routed["model"] = f"openai/{EMBED_MODEL}"
+        routed["api_base"] = hook.config.base_url
+        if hook.api_key:
+            routed["api_key"] = hook.api_key
+        response = original_embedding(*args, **routed)
+        hook.account_embedding(response)
+        return response
+
     litellm.completion = completion
+    litellm.embedding = embedding
+    hook.original_embedding = original_embedding
+    os.environ["EH_EMBED_MODEL"] = f"openai/{EMBED_MODEL}"
     return original
 
 

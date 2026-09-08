@@ -37,8 +37,19 @@ class AeaLLMClient(LLMClient):  # type: ignore[misc]  # envharness ships no type
     """Drop-in ``client_factory`` for envharness configs; every call becomes a ledger row."""
 
     def __init__(
-        self, *, llm: dict[str, Any], ledger_dir: str, pricing_path: str = "configs/pricing.yaml"
+        self,
+        *,
+        llm: dict[str, Any],
+        ledger_dir: str,
+        pricing_path: str = "configs/pricing.yaml",
+        budget: str | None = None,
+        phase: str | None = None,
     ) -> None:
+        """``budget`` / ``phase`` override the bound attribution for this client (the released
+        orchestrator runs designer and policy clients in one process: the designer block sets
+        ``budget: designer``)."""
+        self._budget = budget
+        self._phase = phase
         self.config = LLMConfig.model_validate(llm)
         self.model_id = self.config.model
         settings = load_settings()
@@ -65,6 +76,13 @@ class AeaLLMClient(LLMClient):  # type: ignore[misc]  # envharness ships no type
         **kwargs: Any,
     ) -> EHChatResponse:
         attribution, seed = current_attribution()
+        if self._budget is not None or self._phase is not None:
+            attribution = attribution.model_copy(
+                update={
+                    "budget": self._budget or attribution.budget,
+                    "phase": self._phase or attribution.phase,
+                }
+            )
         request = ChatRequest(
             model=self.config.model,
             messages=tuple(
