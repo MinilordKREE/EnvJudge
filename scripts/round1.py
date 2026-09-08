@@ -377,7 +377,7 @@ def stage_corpus_aea(arm: str, task_concurrency: int) -> None:
         kind="exploratory",
         require_clean_tree=False,
         policy=policy,
-        designer=designer if use_designer else None,
+        designer=designer,  # provenance only; the substrate gets none when use_designer is off
         runs_root=RUNS,
     )
     ctx = create_run_context(
