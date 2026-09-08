@@ -17,24 +17,49 @@ import concurrent.futures as cf
 import os
 from collections.abc import Callable, Sequence
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from envharness.core.types import Candidate, Trace
 from envharness.orchestration.runner import EnvSpec, EpisodeSpec, PolicySpec, SubprocessRunner
 
 from aea.core.io import append_jsonl, read_jsonl
-from aea.llm.attribution import attributed, child_environment
+from aea.llm.attribution import attributed, bound_attribution, child_environment
 from aea.llm.types import Attribution
 
 LEDGER_GLOB = "ledger.*.jsonl"
 
 
 class AeaSubprocessRunner(SubprocessRunner):  # type: ignore[misc]  # envharness ships no type information
-    """The released subprocess runner; the child's environment carries the bound attribution."""
+    """The released subprocess runner; the child's environment carries the bound attribution.
 
-    def __init__(self, run_id: str, **kwargs: Any) -> None:
+    The released orchestrator dispatches episodes from ``ThreadPoolExecutor`` threads, which do
+    not inherit the caller's contextvars, so a ``default`` attribution (arm, phase, budget) may be
+    given at construction; ``run`` binds it with the episode's task id (``spec.env.reset_seed``)
+    before the child environment is built."""
+
+    def __init__(
+        self,
+        run_id: str,
+        *,
+        default: tuple[Attribution, int] | None = None,
+        **kwargs: Any,
+    ) -> None:
         super().__init__(**kwargs)
         self.run_id = run_id
+        self.default = default
+
+    def run(self, spec: EpisodeSpec) -> Trace:
+        bound = bound_attribution() or self.default
+        if bound is None:
+            return cast(Trace, super().run(spec))
+        base, seed = bound
+        reset_seed = spec.env.reset_seed
+        task_id = str(reset_seed) if reset_seed is not None else base.task_id
+        with attributed(
+            base.model_copy(update={"task_id": task_id}),
+            int(reset_seed if reset_seed is not None else seed),
+        ):
+            return cast(Trace, super().run(spec))
 
     def _child_env(self) -> dict[str, str]:  # released method is static; instance override is fine
         env: dict[str, str] = dict(SubprocessRunner._child_env())

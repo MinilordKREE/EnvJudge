@@ -36,6 +36,11 @@ def attributed(attribution: Attribution, seed: int) -> Iterator[None]:
         _ATTRIBUTION.reset(token)
 
 
+def bound_attribution() -> tuple[Attribution, int] | None:
+    """The contextvar binding only (None when unbound), without the environment fallback."""
+    return _ATTRIBUTION.get()
+
+
 def current_attribution() -> tuple[Attribution, int]:
     """The bound attribution, else the ``AEA_*`` variables of this process (a subprocess worker)."""
     bound = _ATTRIBUTION.get()

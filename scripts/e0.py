@@ -142,6 +142,7 @@ def stage_corpus(run_id: str, n_tasks: int, fallback: bool) -> None:
     )
     orch.runner = AeaSubprocessRunner(
         ctx.run_id,
+        default=(Attribution(phase="corpus", budget="search", arm="R", task_id="e0"), 0),
         timeout=float(cfg["runner"].get("timeout_seconds", 600)),
         subprocess_log_dir=ctx.out_dir / "subprocess_logs",
     )

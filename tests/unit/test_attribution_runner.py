@@ -124,3 +124,51 @@ def test_merge_ledgers(tmp_path: Path) -> None:
     from aea.core.io import read_jsonl
 
     assert [r["v"] for r in read_jsonl(merged)] == [2, 1]
+
+
+def test_runner_default_attribution_reaches_threads_and_tasks(monkeypatch: Any) -> None:
+    """The released orchestrator runs episodes from ThreadPoolExecutor threads (no contextvars):
+    the runner's default attribution, with the spec's task seed, must be what the child sees."""
+    import threading
+
+    from envharness.orchestration.runner import SubprocessRunner
+
+    seen: dict[str, dict[str, str]] = {}
+    runner = AeaSubprocessRunner("r9", default=(_attr("default"), 0))
+
+    def fake_run(self: Any, spec: Any) -> Trace:
+        seen[str(spec.env.reset_seed)] = self._child_env()
+        return Trace(episode_id="e", iteration_id="i", task_id="t", candidate=spec.candidate)
+
+    monkeypatch.setattr(SubprocessRunner, "run", fake_run)
+    policy = PolicySpec(
+        client_factory="f",
+        client_kwargs={},
+        action_format="think_action",
+        task_prompt="p",
+        max_history=200,
+        temperature=0.5,
+    )
+    specs = [
+        episode_spec(
+            import_path="x",
+            reset_options={},
+            task_seed=s,
+            candidate=Candidate(),
+            policy=policy,
+            iteration_id="e",
+            task_label="lbl",
+        )
+        for s in (3, 4)
+    ]
+    threads = [threading.Thread(target=runner.run, args=(sp,)) for sp in specs]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+    assert seen["3"]["AEA_TASK_ID"] == "3" and seen["4"]["AEA_TASK_ID"] == "4"
+    assert (
+        seen["3"]["AEA_BUDGET"] == "search"
+        and seen["3"]["AEA_ARM"] == "A"
+        and seen["3"]["AEA_SEED"] == "3"
+    )
