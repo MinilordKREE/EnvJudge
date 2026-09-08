@@ -595,7 +595,7 @@ def stage_report(run_id: str, n_from: str = "") -> None:
     episodes = len(traces)
 
     e0 = _cells(eval_root, "seeds-*")  # E0: single-success banks, transformed environments only
-    rel = _cells(eval_root, "released-*")  # diagnosis: released Stage 2 full banks
+    rel = _cells(eval_root, "released*")  # diagnosis: released Stage 2 full banks
     if n_from:  # D1 run: the N cells live in the E0 run
         e0["nobank"] = _cells(run_dir_for(n_from) / "eval", "seeds-*").get("nobank", {})
     for cond in ("nobank",):  # N is shared by both protocols

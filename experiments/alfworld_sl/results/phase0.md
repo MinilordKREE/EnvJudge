@@ -216,9 +216,73 @@ Reading:
 
 Cost of the diagnosis: banks USD 0.045; evals USD 20.14 for 1,644 recorded episodes (USD 9.30 of it
 in the run interrupted by the machine reboot, whose in-flight episodes were re-run; see LOG).
-Phase 0 spend to date: USD 54.0.
+Phase 0 spend to date after D2+D3: USD 54.0 (see §9 for the final total).
+
+## 9. D1: released pipeline on a 100-task corpus (run `e0d1-20260908` + E0's tasks)
+
+Corpus: task ids 20–99 through the orchestrator's `explicit_task_ids` override (corpus.yaml
+unchanged; stride 1 / offset 0, so the ids equal a 100-task sweep's), 80 tasks, 840 traces (400
+baseline, 325 accepted, 115 exploration = 23 rejected candidates), 0 failed tasks. Banks: released
+Stage 2 on the merged 100-task traces — orig_full 208 items / 87 tasks (183 single_succ, 18
+single_fail, 7 paired_diff); ours_full 215 items / 90 tasks by cascade (80 accepted + 20 baseline
+fallback; 199 single_succ, 7 paired_diff, 9 single_fail); subsets 82 + 82 built, not evaluated.
+Paired-diff fires on 7/100 tasks: the backbone is saturated on 72/100 (regime map
+`results/e0d1-20260908/regime.md`: the 80 new tasks are 55 saturated, 5 high, 10 mid, 3 marginal-low,
+7 zero; pooled over 100 tasks zero + marginal-low = 11/100, at the 10% line).
+
+Result (`scripts/e0.py --stage report --run-id e0d1-20260908 --n-from e0-20260907`, verbatim; N
+cells from E0):
+
+Seeds: seeds-0, seeds-1000, seeds-2000; success % pooled (per-seed values in brackets).
+
+| condition | ID (ours) | OOD (ours) | ID (Table 2) | OOD (Table 2) |
+|---|---|---|---|---|
+| nobank (N) | 61.7 (n=420) [63.6 / 57.1 / 64.3] | 63.9 (n=402) [66.4 / 67.2 / 58.2] | 62.6 | 60.7 |
+| orig_100 (orig) | 72.4 (n=420) [75.7 / 67.9 / 73.6] | 65.4 (n=402) [64.2 / 67.9 / 64.2] | 63.3 | 61.4 |
+| R_100 (EnvHarness) | 69.5 (n=420) [75.7 / 67.9 / 65.0] | 63.2 (n=402) [68.7 / 61.2 / 59.7] | 66.2 | 70.4 |
+
+Sign check (PREREG7 reproduction sanity):
+- orig > N on ID: ours +10.7 pts (Table 2 +0.7) -> REPRODUCED
+- EnvRigger > orig on OOD: ours -2.2 pts (Table 2 +9.0) -> NOT reproduced
+- (reported, not a gate) EnvRigger vs N: ID +7.9, OOD -0.7 (Table 2 +3.6 / +9.7)
+
+Pooled gaps with normal-approximation SE (points):
+- orig_100 minus nobank: ID +10.7 ± 3.2, OOD +1.5 ± 3.4
+- R_100 minus orig_100: ID -2.9 ± 3.1, OOD -2.2 ± 3.4
+- R_100 minus nobank: ID +7.9 ± 3.3, OOD -0.7 ± 3.4
+
+Reading:
+- At 100 tasks the Table 2 sign still does not return: R_100 is below orig_100 on both splits by
+  2–3 points (within one SE). Corpus size was not the cause of E0's mismatch.
+- The banks' OOD gain over N shrinks as the corpus grows (orig: +5.2 at 20 tasks, +1.5 at 100;
+  R: −0.7 / +5.0 / −0.7 across E0, D2+D3, D1), while the ID gain holds or grows (orig +6.9 → +10.7).
+  With Flash-Lite and top-5 MMR over a larger bank, OOD transfer from any ALFWorld bank is small.
+- **Decision per the owner's tree:** the sign did not return after D2+D3 and D1, so the backbone
+  (Gemini 3.1 Flash-Lite vs the released eval's default) and N are recorded as standing differences
+  and round 1 proceeds; C1–C3 are same-pipeline comparisons and do not depend on the Table 2 sign.
+  The three reproductions (E0 T2-strict, released 20-task, released 100-task) all reproduce
+  orig > N on ID and none reproduces EnvRigger > orig on OOD.
+
+Costs (merged ledgers only; `results/e0-20260907/phase0_spend.json`):
+
+| item | USD |
+|---|---|
+| D1 corpus (policy 24.70 + designer 0.31 + released induction 0.22) | 25.23 |
+| D1 evals (1,644 episodes, USD 0.0121 per episode) | 19.84 |
+| D1 total (owner estimate ~37) | 45.07 |
+| **Phase 0 total** (probe, aborted launch, E0, D2+D3 incl. the crashed run, D1) | **99.08** |
+
+The D1 corpus cost USD 0.31 per task against 0.22 in E0 (harder tasks draw more designer rounds).
+With that per-task cost the N = 30 projection is USD 396 (E0-based: 371); adding Phase 0 gives
+~USD 495 against the soft gate 500, and the round-1 second-induction-mode evaluations (~USD 68 per
+decision 4) take the E1-SL total to ~USD 563 against the hard cap 560. **Budget flag for the owner:**
+either the second-induction-mode row is limited (e.g. A and R only, ~USD 20), or the hard cap moves,
+before round 1 launches. Operational note: 24 concurrent eval episodes (three seeds × 8) drew
+transient 429s from OpenRouter on two seeds (retried by the released client, no episode lost);
+round 1 keeps total eval concurrency at 16.
 
 ## STOP
 
-Phase 0b: diagnosis D2+D3 done (§8, sign not returned); D1 (R on 100 tasks) is the next pre-authorised
-step. N = 30, Flash-Lite, Amendment 1 and the caps are settled (§7).
+Phase 0b complete. Settled: N = 30, Flash-Lite, Amendment 1 (T2/U, both induction modes in round 1),
+caps 560/500, standing differences (backbone, N) recorded. Owner input needed before round 1: the
+budget flag above.

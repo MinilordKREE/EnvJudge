@@ -1,0 +1,46 @@
+{
+  "rows": [
+    {
+      "condition": "orig_100",
+      "split": "eval_in_distribution",
+      "n_won": 106,
+      "n": 140,
+      "sr": 0.7571428571428571,
+      "start_seed": 0,
+      "round": 1
+    },
+    {
+      "condition": "orig_100",
+      "split": "eval_out_of_distribution",
+      "n_won": 86,
+      "n": 134,
+      "sr": 0.6417910447761194,
+      "start_seed": 0,
+      "round": 1
+    },
+    {
+      "condition": "R_100",
+      "split": "eval_in_distribution",
+      "n_won": 106,
+      "n": 140,
+      "sr": 0.7571428571428571,
+      "start_seed": 0,
+      "round": 1
+    },
+    {
+      "condition": "R_100",
+      "split": "eval_out_of_distribution",
+      "n_won": 92,
+      "n": 134,
+      "sr": 0.6865671641791045,
+      "start_seed": 0,
+      "round": 1
+    }
+  ],
+  "config_path": "/home/kree/work/EnvJudge/runs/e0d1-20260908/reasoning_bank_eval_e0.yaml",
+  "start_seeds": [
+    0
+  ],
+  "concurrency": 8,
+  "n_api_keys": 1
+}

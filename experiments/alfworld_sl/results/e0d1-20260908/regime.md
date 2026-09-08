@@ -1,0 +1,89 @@
+# Corpus regime map (e0d1-20260908; released EnvRigger corpus, baseline rollouts per task)
+
+| task | baseline s/n | class | accepted candidates | rejected | accepted-env s/n |
+|---|---|---|---|---|---|
+| 20 | 5/5 | saturated | 1 | 3 | 5/5 |
+| 21 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 22 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 23 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 24 | 4/5 | high | 1 | 0 | 5/5 |
+| 25 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 26 | 3/5 | mid | 1 | 0 | 5/5 |
+| 27 | 3/5 | mid | 0 | 0 | 0/0 |
+| 28 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 29 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 30 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 31 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 32 | 5/5 | saturated | 0 | 0 | 0/0 |
+| 33 | 3/5 | mid | 1 | 0 | 5/5 |
+| 34 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 35 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 36 | 5/5 | saturated | 1 | 0 | 3/5 |
+| 37 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 38 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 39 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 40 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 41 | 5/5 | saturated | 0 | 0 | 0/0 |
+| 42 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 43 | 2/5 | mid | 0 | 5 | 0/0 |
+| 44 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 45 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 46 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 47 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 48 | 5/5 | saturated | 0 | 0 | 0/0 |
+| 49 | 5/5 | saturated | 1 | 1 | 5/5 |
+| 50 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 51 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 52 | 0/5 | zero | 1 | 3 | 1/5 |
+| 53 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 54 | 2/5 | mid | 1 | 0 | 3/5 |
+| 55 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 56 | 4/5 | high | 1 | 0 | 5/5 |
+| 57 | 5/5 | saturated | 0 | 0 | 0/0 |
+| 58 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 59 | 5/5 | saturated | 0 | 0 | 0/0 |
+| 60 | 1/5 | marginal-low | 0 | 0 | 0/0 |
+| 61 | 5/5 | saturated | 0 | 0 | 0/0 |
+| 62 | 2/5 | mid | 1 | 0 | 2/5 |
+| 63 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 64 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 65 | 5/5 | saturated | 1 | 0 | 4/5 |
+| 66 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 67 | 1/5 | marginal-low | 1 | 0 | 2/5 |
+| 68 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 69 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 70 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 71 | 0/5 | zero | 1 | 2 | 0/5 |
+| 72 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 73 | 5/5 | saturated | 1 | 0 | 4/5 |
+| 74 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 75 | 4/5 | high | 1 | 0 | 5/5 |
+| 76 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 77 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 78 | 0/5 | zero | 0 | 0 | 0/0 |
+| 79 | 1/5 | marginal-low | 1 | 0 | 4/5 |
+| 80 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 81 | 3/5 | mid | 1 | 0 | 5/5 |
+| 82 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 83 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 84 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 85 | 0/5 | zero | 0 | 0 | 0/0 |
+| 86 | 0/5 | zero | 1 | 1 | 2/5 |
+| 87 | 3/5 | mid | 1 | 1 | 4/5 |
+| 88 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 89 | 4/5 | high | 1 | 0 | 4/5 |
+| 90 | 5/5 | saturated | 0 | 0 | 0/0 |
+| 91 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 92 | 3/5 | mid | 1 | 0 | 5/5 |
+| 93 | 5/5 | saturated | 1 | 0 | 5/5 |
+| 94 | 0/5 | zero | 1 | 2 | 2/5 |
+| 95 | 0/5 | zero | 0 | 5 | 0/0 |
+| 96 | 5/5 | saturated | 0 | 0 | 0/0 |
+| 97 | 5/5 | saturated | 0 | 0 | 0/0 |
+| 98 | 3/5 | mid | 1 | 0 | 5/5 |
+| 99 | 4/5 | high | 1 | 0 | 5/5 |
+
+Classes on the baseline rollouts: zero = 0/n; marginal-low = 1/n; mid = 2-3/5; high = 4/5; saturated = n/n.
+Counts: zero 7, marginal-low 3, mid 10, high 5, saturated 55 (of 80).
+Zero + marginal-low: 10/80 = 12% (at or above the owner's 10% thin-evidence line).
+Designer: 65/80 tasks with an accepted candidate (65 accepted, 23 rejected).

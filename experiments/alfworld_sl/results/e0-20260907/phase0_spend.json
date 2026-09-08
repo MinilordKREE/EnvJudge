@@ -1,0 +1,35 @@
+{
+ "probe": {
+  "usd": 0.006,
+  "calls": 5
+ },
+ "aborted first launch": {
+  "usd": 0.294,
+  "calls": 276
+ },
+ "E0 run ledger (corpus+designer+induction+released induction)": {
+  "usd": 4.438,
+  "calls": 4062
+ },
+ "E0 eval (seeds-*)": {
+  "usd": 29.13,
+  "calls": 66414
+ },
+ "diag crashed run (released-seeds-*)": {
+  "usd": 9.303,
+  "calls": 20163
+ },
+ "diag resume + R_rel": {
+  "usd": 10.838,
+  "calls": 23393
+ },
+ "D1 run ledger (corpus+designer+induction)": {
+  "usd": 25.231,
+  "calls": 21213
+ },
+ "D1 eval (released100-seeds-*)": {
+  "usd": 19.843,
+  "calls": 42734
+ },
+ "phase0_total_usd": 99.083
+}
