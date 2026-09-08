@@ -311,3 +311,34 @@ def test_hook_default_labels_pool_threads(tmp_path: Path, pricing: PricingTable)
     rows = read_ledger(tmp_path / "ledger.jsonl")
     assert (rows[0].phase, rows[0].arm, rows[0].task_id, rows[0].seed) == ("induce", "R", "e0", 7)
     assert (rows[1].phase, rows[1].arm, rows[1].task_id) == ("eval", "A", "3")
+
+
+def test_driver_passes_extra_argv(
+    tmp_path: Path, pricing: PricingTable, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from aea.core.config import LLMConfig
+    from aea.evaldriver import run_eval
+
+    seen: list[list[str]] = []
+
+    def record(argv: list[str]) -> int:
+        seen.append(argv)
+        return 0
+
+    monkeypatch.setattr(litellm, "completion", lambda **kw: _response())
+    run_eval(
+        arm="R",
+        conditions={"orig_rel": tmp_path / "o.jsonl"},
+        config_yaml=tmp_path / "e.yaml",
+        out_dir=tmp_path,
+        start_seeds=(112,),
+        concurrency=2,
+        llm=LLMConfig(),
+        pricing=pricing,
+        run_id="r",
+        eval_main=record,
+        hook=_hook(tmp_path, pricing),
+        extra_argv=("--n-ood", "22"),
+    )
+    assert seen[0][-2:] == ["--n-ood", "22"] and "--start-seeds" in seen[0]
+    assert seen[0][seen[0].index("--start-seeds") + 1] == "112"

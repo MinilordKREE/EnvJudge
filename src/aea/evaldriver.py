@@ -12,7 +12,7 @@ from __future__ import annotations
 import importlib
 import os
 import sys
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
@@ -48,11 +48,13 @@ def run_eval(
     eval_main: EvalMain | None = None,
     envharness_root: Path | None = None,
     hook: EvalHook | None = None,
+    extra_argv: Sequence[str] = (),
 ) -> int:
     """Run the released eval for ``conditions`` ({name: bank path or None}) under the hook.
 
-    Every arm calls this with its own bank; ``arm`` only labels the ledger rows. Raises
-    ``InfraError(kind="guard")`` if any guard fired during the run."""
+    Every arm calls this with its own bank; ``arm`` only labels the ledger rows. ``extra_argv`` is
+    appended to the released CLI (e.g. ``--n-ood 22`` to resume a crashed cell from a later start
+    seed). Raises ``InfraError(kind="guard")`` if any guard fired during the run."""
     out_dir.mkdir(parents=True, exist_ok=True)
     label = Attribution(phase="eval", budget="eval", arm=arm, task_id="heldout")
     active = hook or make_hook(
@@ -74,6 +76,7 @@ def run_eval(
     overrides = [f"{name}={path}" for name, path in conditions.items() if path is not None]
     if overrides:
         argv += ["--bank-overrides", ",".join(overrides)]
+    argv += list(extra_argv)
     os.environ.setdefault("OPENAI_API_KEY", "routed-by-aea-evalhook")  # the released key check only
     original = install(active)
     try:

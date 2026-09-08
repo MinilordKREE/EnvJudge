@@ -23,6 +23,7 @@ import argparse
 import importlib.util
 import json
 import os
+import re
 import subprocess
 import sys
 from collections import defaultdict
@@ -395,6 +396,8 @@ def stage_eval(
     concurrency: int,
     tag: str = "",
     conditions_arg: str = "",
+    only_split: str = "",
+    extra_argv: tuple[str, ...] = (),
 ) -> None:
     run_dir = run_dir_for(run_id)
     ctx, _ = load_run_context(run_dir)
@@ -404,7 +407,11 @@ def stage_eval(
     cfg = yaml.safe_load(eval_yaml.read_text(encoding="utf-8"))
     cfg["model"]["name"] = f"openai/{policy.model}"
     cfg["eval"]["concurrency"] = concurrency
-    resolved = run_dir / "reasoning_bank_eval_e0.yaml"
+    if only_split:  # resume of one crashed cell: the released loop runs every split in the config
+        cfg["eval"]["splits"] = {f"eval_{only_split}": cfg["eval"]["splits"][f"eval_{only_split}"]}
+    resolved = run_dir / (
+        f"reasoning_bank_eval_e0_{only_split}.yaml" if only_split else "reasoning_bank_eval_e0.yaml"
+    )
     resolved.write_text(yaml.safe_dump(cfg, sort_keys=False), encoding="utf-8")
     banks_dir = run_dir / "banks"
     conditions: dict[str, Path | None]
@@ -434,6 +441,7 @@ def stage_eval(
         pricing=pricing,
         run_id=ctx.run_id,
         envharness_root=ENVHARNESS,
+        extra_argv=extra_argv,
     )
     merge_ledgers(out_dir, ctx.run_id)
     print(
@@ -448,18 +456,24 @@ type Cells = dict[str, dict[str, dict[str, tuple[int, int]]]]
 
 
 def _cells(eval_root: Path, dir_glob: str) -> Cells:
-    """{condition: {split: {seed_dir: (won, n)}}} from
-    <dir_glob>/round*/<cond>_eval_<split>.jsonl."""
+    """{condition: {split: {seed_block: (won, n)}}} from
+    <dir_glob>/round*/<cond>_eval_<split>.jsonl. A cell resumed after a crash lives in a second
+    directory whose start seed is inside the same 1,000-seed block (released rounds start at
+    0 / 1000 / 2000); its records are added to that block's cell."""
     results: Cells = {}
     for p in (
         sorted(eval_root.glob(f"{dir_glob}/round*/*_eval_*.jsonl")) if eval_root.exists() else []
     ):
         cond, split = p.stem.rsplit("_eval_", 1)
+        m = re.search(r"seeds-(\d+)", p.parents[1].name)
+        block = f"seeds-{(int(m.group(1)) // 1000) * 1000}" if m else p.parents[1].name
         recs = [
             json.loads(line) for line in p.read_text(encoding="utf-8").splitlines() if line.strip()
         ]
         won = sum(1 for r in recs if r.get("success"))
-        results.setdefault(cond, {}).setdefault(split, {})[p.parents[1].name] = (won, len(recs))
+        cell = results.setdefault(cond, {}).setdefault(split, {})
+        prev = cell.get(block, (0, 0))
+        cell[block] = (prev[0] + won, prev[1] + len(recs))
     return results
 
 
@@ -563,7 +577,7 @@ def stage_report(run_id: str) -> None:
     episodes = len(traces)
 
     e0 = _cells(eval_root, "seeds-*")  # E0: single-success banks, transformed environments only
-    rel = _cells(eval_root, "released-seeds-*")  # diagnosis: released Stage 2 full banks
+    rel = _cells(eval_root, "released-*")  # diagnosis: released Stage 2 full banks
     for cond in ("nobank",):  # N is shared by both protocols
         if cond in e0:
             rel[cond] = e0[cond]
@@ -637,6 +651,11 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--concurrency", type=int, default=6)
     ap.add_argument("--tag", default="", help="eval: output dir prefix (eval/<tag>-seeds-<s>)")
     ap.add_argument("--conditions", default="", help="eval: name=path,... relative to the run dir")
+    ap.add_argument(
+        "--only-split", default="", choices=["", "in_distribution", "out_of_distribution"]
+    )
+    ap.add_argument("--n-indist", type=int, default=None, help="eval: released --n-indist")
+    ap.add_argument("--n-ood", type=int, default=None, help="eval: released --n-ood")
     args = ap.parse_args(argv)
     try:
         if args.stage == "corpus":
@@ -653,6 +672,13 @@ def main(argv: list[str] | None = None) -> int:
                 args.concurrency,
                 args.tag,
                 args.conditions,
+                args.only_split,
+                tuple(
+                    x
+                    for flag, val in (("--n-indist", args.n_indist), ("--n-ood", args.n_ood))
+                    if val is not None
+                    for x in (flag, str(val))
+                ),
             )
         elif args.stage == "regime":
             stage_regime(args.run_id)
