@@ -884,6 +884,10 @@ def conditions() -> dict[str, tuple[str, Path | None]]:
             out[f"{arm}_{proto}"] = (arm, b / f"{arm}_{proto}.jsonl")
     out["A_rel"] = ("A", b / "A_rel.jsonl")
     out["R_rel"] = ("R", b / "R_rel.jsonl")
+    extra = b / "extra_conditions.json"  # Round 1b: corrected U, placebo, matched, A'
+    if extra.exists():
+        for name, (arm, path) in json.loads(extra.read_text(encoding="utf-8")).items():
+            out[name] = (arm, Path(path) if path else None)
     return out
 
 
@@ -1049,10 +1053,10 @@ def stage_eval_job(cond: str, seed: int, concurrency: int) -> None:
         )
 
 
-def stage_evals(workers: int, per_job: int) -> None:
+def stage_evals(workers: int, per_job: int, jobs: list[tuple[str, int]] | None = None) -> None:
     spend_guard("evals")
     reuse_n_from_e0()
-    jobs = eval_jobs()
+    jobs = jobs if jobs is not None else eval_jobs()
     pending = [
         (c, s)
         for c, s in jobs
@@ -1162,6 +1166,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--workers", type=int, default=2)
     ap.add_argument("--cond", default="")
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--jobs-file", default="", help="evals: JSON list of [condition, seed]")
     args = ap.parse_args(argv)
     try:
         if args.stage == "r-reuse":
@@ -1181,7 +1186,12 @@ def main(argv: list[str] | None = None) -> int:
         elif args.stage == "banks":
             stage_banks()
         elif args.stage == "evals":
-            stage_evals(args.workers, args.concurrency)
+            jobs = (
+                [(str(c), int(s)) for c, s in json.loads(Path(args.jobs_file).read_text())]
+                if args.jobs_file
+                else None
+            )
+            stage_evals(args.workers, args.concurrency, jobs)
         elif args.stage == "eval-job":
             stage_eval_job(args.cond, args.seed, args.concurrency)
         elif args.stage == "remerge":
