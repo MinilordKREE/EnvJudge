@@ -1,0 +1,74 @@
+{
+ "A_U_v1": [
+  "A",
+  "/home/kree/work/EnvJudge/runs/r1-banks/A_U_v1.jsonl"
+ ],
+ "Aex_U_v1": [
+  "Aex",
+  "/home/kree/work/EnvJudge/runs/r1-banks/Aex_U_v1.jsonl"
+ ],
+ "AplusH_U_v1": [
+  "AplusH",
+  "/home/kree/work/EnvJudge/runs/r1-banks/AplusH_U_v1.jsonl"
+ ],
+ "placebo": [
+  "placebo",
+  "/home/kree/work/EnvJudge/runs/r1-banks/placebo.jsonl"
+ ],
+ "O_U@8": [
+  "O",
+  "/home/kree/work/EnvJudge/runs/r1-banks/matched/O_U@8.jsonl"
+ ],
+ "O_U@20": [
+  "O",
+  "/home/kree/work/EnvJudge/runs/r1-banks/matched/O_U@20.jsonl"
+ ],
+ "R_T2@8": [
+  "R",
+  "/home/kree/work/EnvJudge/runs/r1-banks/matched/R_T2@8.jsonl"
+ ],
+ "R_T2@20": [
+  "R",
+  "/home/kree/work/EnvJudge/runs/r1-banks/matched/R_T2@20.jsonl"
+ ],
+ "R_U@8": [
+  "R",
+  "/home/kree/work/EnvJudge/runs/r1-banks/matched/R_U@8.jsonl"
+ ],
+ "R_U@20": [
+  "R",
+  "/home/kree/work/EnvJudge/runs/r1-banks/matched/R_U@20.jsonl"
+ ],
+ "G_T2@8": [
+  "G",
+  "/home/kree/work/EnvJudge/runs/r1-banks/matched/G_T2@8.jsonl"
+ ],
+ "G_T2@20": [
+  "G",
+  "/home/kree/work/EnvJudge/runs/r1-banks/matched/G_T2@20.jsonl"
+ ],
+ "G_U@8": [
+  "G",
+  "/home/kree/work/EnvJudge/runs/r1-banks/matched/G_U@8.jsonl"
+ ],
+ "G_U@20": [
+  "G",
+  "/home/kree/work/EnvJudge/runs/r1-banks/matched/G_U@20.jsonl"
+ ],
+ "A_U@8": [
+  "A",
+  "/home/kree/work/EnvJudge/runs/r1-banks/matched/A_U@8.jsonl"
+ ],
+ "A_U@20": [
+  "A",
+  "/home/kree/work/EnvJudge/runs/r1-banks/matched/A_U@20.jsonl"
+ ],
+ "Aex_U@8": [
+  "Aex",
+  "/home/kree/work/EnvJudge/runs/r1-banks/matched/Aex_U@8.jsonl"
+ ],
+ "Aex_U@20": [
+  "Aex",
+  "/home/kree/work/EnvJudge/runs/r1-banks/matched/Aex_U@20.jsonl"
+ ]
+}

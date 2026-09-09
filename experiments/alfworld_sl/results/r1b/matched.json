@@ -1,0 +1,82 @@
+{
+ "O_U@8": {
+  "items": 8,
+  "of": 78
+ },
+ "O_U@20": {
+  "items": 20,
+  "of": 78
+ },
+ "R_T2@8": {
+  "items": 8,
+  "of": 62
+ },
+ "R_T2@20": {
+  "items": 20,
+  "of": 62
+ },
+ "R_U@8": {
+  "items": 8,
+  "of": 77
+ },
+ "R_U@20": {
+  "items": 20,
+  "of": 77
+ },
+ "G_T2@8": {
+  "items": 8,
+  "of": 23
+ },
+ "G_T2@20": {
+  "items": 20,
+  "of": 23
+ },
+ "G_U@8": {
+  "items": 8,
+  "of": 80
+ },
+ "G_U@20": {
+  "items": 20,
+  "of": 80
+ },
+ "A_T2@8": {
+  "items": 2,
+  "flag": "full size (bank smaller than or equal to the target); evaluated as the full bank"
+ },
+ "A_T2@20": {
+  "items": 2,
+  "flag": "full size (bank smaller than or equal to the target); evaluated as the full bank"
+ },
+ "A_U@8": {
+  "items": 8,
+  "of": 81
+ },
+ "A_U@20": {
+  "items": 20,
+  "of": 81
+ },
+ "Aex_U@8": {
+  "items": 8,
+  "of": 80
+ },
+ "Aex_U@20": {
+  "items": 20,
+  "of": 80
+ },
+ "AplusH_T2@8": {
+  "items": 5,
+  "flag": "full size (bank smaller than or equal to the target); evaluated as the full bank"
+ },
+ "AplusH_T2@20": {
+  "items": 5,
+  "flag": "full size (bank smaller than or equal to the target); evaluated as the full bank"
+ },
+ "N@8": {
+  "items": 0,
+  "flag": "no bank; the N row is the reference"
+ },
+ "N@20": {
+  "items": 0,
+  "flag": "no bank; the N row is the reference"
+ }
+}
