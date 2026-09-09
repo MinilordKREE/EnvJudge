@@ -35,7 +35,7 @@ import round1 as r1
 from aea import probe as probe_mod
 from aea.config import AEAConfig, aea_config_sha256
 from aea.controller import Controller, TaskRef
-from aea.core.config import LLMConfig, RunConfig
+from aea.core.config import LLMConfig, RetryConfig, RunConfig
 from aea.core.context import create_run_context
 from aea.core.hashing import sha256_digest
 from aea.core.manifest import load_run_context, write_manifest
@@ -65,6 +65,11 @@ def backbone_e2() -> tuple[LLMConfig, LLMConfig]:
         thinking=False,
         temperature=0.5,
         max_tokens=2048,
+        # the Alibaba endpoint rate-limits bursts (429 "Provider returned error"): a longer
+        # backoff schedule than the default 5 x 30 s; infrastructure only, no protocol change
+        retry=RetryConfig(
+            max_attempts=10, initial_delay_s=2.0, max_delay_s=90.0, total_timeout_s=900.0
+        ),
     )
     designer = LLMConfig(
         provider="deepseek",

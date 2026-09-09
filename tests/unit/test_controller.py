@@ -174,3 +174,19 @@ def test_budget_limited_probes_get_their_own_status_and_no_handoff(tmp_path: Pat
     assert any(e.kind == "probe_skipped_budget" for e in events) and not any(
         e.kind == "handoff" for e in events
     )
+
+
+def test_resume_reruns_infra_error_tasks(tmp_path: Path) -> None:
+    """A task_done with status infra_error is not an outcome: the task is re-run on resume."""
+    from aea.core.trace import TraceWriter as EventWriter
+
+    run = tmp_path / "run"
+    run.mkdir()
+    ev = EventWriter(run / "events.jsonl", "r9")
+    ev.write("task_done", {"task_id": "1", "status": "band"})
+    ev.write("task_done", {"task_id": "2", "status": "infra_error", "error": "429"})
+    ev.write("task_done", {"task_id": "3", "status": "infra_error"})
+    ev.write("task_done", {"task_id": "3", "status": "accepted_knob"})  # re-run succeeded
+    sub = FakeSubstrate({"1": "coin", "2": "coin", "3": "coin"}, seed=3)
+    ctrl = Controller(AEAConfig(), sub, run, "r9", arm="A", use_designer=False)
+    assert ctrl.completed_tasks() == {"1", "3"}

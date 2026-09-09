@@ -199,10 +199,16 @@ class Controller:
         )
 
     def completed_tasks(self) -> set[str]:
+        """Tasks with a ``task_done`` outcome; an ``infra_error`` outcome is not a result and the
+        task is re-run on resume (its earlier rollouts stay in the traces and the ledger)."""
         path = self.run_dir / "events.jsonl"
         if not path.exists():
             return set()
-        return {str(e.payload["task_id"]) for e in read_trace(path) if e.kind == "task_done"}
+        done: dict[str, str] = {}
+        for e in read_trace(path):
+            if e.kind == "task_done":
+                done[str(e.payload["task_id"])] = str(e.payload.get("status"))
+        return {t for t, status in done.items() if status != "infra_error"}
 
     # ------------------------------------------------------------------ the loop
     def run(self, tasks: Sequence[TaskRef], *, concurrency: int = 1) -> list[TaskOutcome]:
