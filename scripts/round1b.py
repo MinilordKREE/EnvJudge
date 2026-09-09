@@ -50,21 +50,21 @@ EXTRA = BANKS / "extra_conditions.json"
 MATCHED_SEED = 20260916
 MATCHED_SIZES = (8, 20)
 MATCHED_BANKS = ("O_U", "R_T2", "R_U", "G_T2", "G_U", "A_T2", "A_U", "Aex_U", "AplusH_T2")
-ALFWORLD_VOCAB = {
-    "go to",
-    "take",
-    "put",
-    "open",
-    "close",
-    "toggle",
-    "heat",
-    "cool",
-    "clean",
-    "examine",
-    "inventory",
-    "look",
-    "use",
-    "slice",
+ALFWORLD_VERBS = (  # the released command forms (envharness/bridges/alfworld); everyday senses excluded  # noqa: E501
+    r"\bgo to\b",
+    r"\btake \w+ \d* ?from\b",
+    r"\bput \w+ \d* ?(in|on)\b",
+    r"\bopen (the )?(cabinet|drawer|fridge|microwave|safe|box|door)\b",
+    r"\bclose (the )?(cabinet|drawer|fridge|microwave|safe|box|door)\b",
+    r"\btoggle\b",
+    r"\b(heat|cool|clean) \w+ with\b",
+    r"\bexamine\b",
+    r"\binventory\b",
+    r"\blook\b",
+    r"\buse (the )?\w*(lamp|light)\b",
+    r"\bslice\b",
+)
+ALFWORLD_NOUNS = {
     "cabinet",
     "drawer",
     "fridge",
@@ -163,6 +163,14 @@ ALFWORLD_VOCAB = {
 }
 
 
+def alfworld_hits(text: str) -> list[str]:
+    """ALFWorld objects / receptacles as words and verbs in their command form."""
+    text = text.lower()
+    hits = sorted(w for w in ALFWORLD_NOUNS if re.search(rf"\b{re.escape(w)}\b", text))
+    hits += [m.group(0) for pat in ALFWORLD_VERBS for m in re.finditer(pat, text)]
+    return hits
+
+
 def extra_conditions() -> dict[str, list[Any]]:
     return json.loads(EXTRA.read_text(encoding="utf-8")) if EXTRA.exists() else {}
 
@@ -240,6 +248,12 @@ def stage_banks_u2() -> None:
                     f.rename(f.parent / f.name.replace(f"{name}_", f"{v1}_", 1))
             add_condition(v1, arm, BANKS / f"{v1}.jsonl")
             save_meta(meta)
+        if (
+            meta.get(name, {}).get("definition") == "Amendment 3 A3.1"
+            and (BANKS / f"{name}.jsonl").exists()
+        ):
+            print(json.dumps({"bank": name, "skipped": "already induced under A3.1"}), flush=True)
+            continue
         by_task = corrected_u_inputs(arm)
         path, n = induce(name, by_task, arm)
         meta[name] = {
@@ -279,17 +293,42 @@ PLACEBO_DIALOGUE: list[tuple[str, str]] = [
 ]
 
 
+PLACEBO_DIALOGUE_2: list[tuple[str, str]] = [
+    (
+        "ask the organiser how the bracket works",
+        "Task: set up a 16-player chess knockout that finishes in one afternoon. The organiser says each round halves the field.",  # noqa: E501
+    ),
+    ("count the rounds needed", "Sixteen players need four rounds: 8, 4, 2 and 1 winner."),
+    (
+        "allot time per round",
+        "With 25-minute games and 5-minute breaks, four rounds take about two hours.",
+    ),
+    (
+        "seed the players by rating",
+        "Players are seeded 1 to 16 so the top seeds meet only in the final.",
+    ),
+    (
+        "print the pairing sheet",
+        "The pairing sheet for round one is printed: seed 1 vs seed 16 and so on.",
+    ),
+    ("announce the start time", "Round one starts at 14:00; the schedule is posted on the board."),
+    ("confirm the tournament plan", "The knockout is fully planned. The task is complete."),
+]
+
+
 def stage_placebo() -> None:
-    trace = render_witness_trace(
-        "placebo", 0, [a for a, _ in PLACEBO_DIALOGUE], [o for _, o in PLACEBO_DIALOGUE]
-    )
-    rec = trace.model_dump(mode="json")
-    path, n = induce("placebo_raw", {"placebo": [rec]}, "placebo")
+    recs = {}
+    for label, dialogue in (("placebo", PLACEBO_DIALOGUE), ("placebo2", PLACEBO_DIALOGUE_2)):
+        trace = render_witness_trace(label, 0, [a for a, _ in dialogue], [o for _, o in dialogue])
+        recs[label] = [trace.model_dump(mode="json")]
+        if alfworld_hits(" ".join(f"{a} {o}" for a, o in dialogue)):
+            raise ConfigError(f"transcript {label} contains ALFWorld vocabulary")
+    path, n = induce("placebo_raw", recs, "placebo")
     items = read_jsonl(path)
     bad = []
     for it in items:
-        text = " ".join(str(it.get(k, "")) for k in ("title", "description", "content")).lower()
-        hits = sorted(w for w in ALFWORLD_VOCAB if re.search(rf"\b{re.escape(w)}\b", text))
+        text = " ".join(str(it.get(k, "")) for k in ("title", "description", "content"))
+        hits = alfworld_hits(text)
         if hits:
             bad.append((it.get("title"), hits))
     if bad:
