@@ -1,0 +1,69 @@
+{
+ "A": {
+  "band": 6,
+  "accepted_knob": 1,
+  "accepted_stage": 0,
+  "frozen_no_leverage": 0,
+  "exhausted": 0,
+  "unresolved": 1,
+  "unresolved_budget_limited": 0,
+  "budget_cap_hit": 22,
+  "infra_error": 0,
+  "no_failed_trajectory": 0
+ },
+ "Aex": {
+  "band": 8,
+  "accepted_knob": 3,
+  "accepted_stage": 0,
+  "frozen_no_leverage": 0,
+  "exhausted": 0,
+  "unresolved": 1,
+  "unresolved_budget_limited": 0,
+  "budget_cap_hit": 18,
+  "infra_error": 0,
+  "no_failed_trajectory": 0
+ },
+ "AplusH": {
+  "band": 6,
+  "accepted_knob": 1,
+  "accepted_stage": 0,
+  "frozen_no_leverage": 0,
+  "exhausted": 0,
+  "unresolved": 1,
+  "unresolved_budget_limited": 0,
+  "budget_cap_hit": 22,
+  "infra_error": 0,
+  "no_failed_trajectory": 0
+ },
+ "R": {
+  "accepted": 24,
+  "all_rejected": 0,
+  "skipped": 6
+ },
+ "G": {
+  "accepted": 8,
+  "all_rejected": 22,
+  "skipped": 0
+ },
+ "Gplus": {
+  "accepted": 7,
+  "all_rejected": 23,
+  "skipped": 0
+ },
+ "zero_tasks_shared_K16": [
+  "11"
+ ],
+ "unlocked": {
+  "A": [],
+  "Aex": [],
+  "AplusH": []
+ },
+ "family_of_origin": {
+  "A": {
+   "exemplar:footer_mask": 1
+  },
+  "Aex": {
+   "exemplar:footer_mask": 3
+  }
+ }
+}

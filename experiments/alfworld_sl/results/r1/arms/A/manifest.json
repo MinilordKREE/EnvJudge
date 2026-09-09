@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "run_id": "r1-A",
+  "created_at": "2026-09-08T10:16:23.949371Z",
+  "seed": 0,
+  "config_sha256": "23ce938437c20094b0a2d97ebed4b52decc8682cacc350bb0bb9c8241b9ead24",
+  "config_schema_version": 1,
+  "aea_config_sha256": "16c131049bfc306ed209d2f0426846c282f22dd5a7c26023313da62b180b4727",
+  "config_path": null,
+  "git_sha": "076c7b414f6cb0834e2b4e87197ba217dc110bd2",
+  "git_dirty": true,
+  "envharness_sha": "fab7d57441f06b75c73a900e04561d4d7600f361",
+  "aea_version": "0.1.0",
+  "python_version": "3.12.9",
+  "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+  "out_dir": "/home/kree/work/EnvJudge/runs/r1-A",
+  "extra": {
+    "phase": "round1",
+    "arm": "A",
+    "use_designer": true,
+    "task_ids": [
+      0,
+      29
+    ],
+    "amendment2_sha": "81f64c7",
+    "policy_endpoint_pin": "google-ai-studio",
+    "designer_endpoint_pin": "google-ai-studio",
+    "thinking": null
+  }
+}

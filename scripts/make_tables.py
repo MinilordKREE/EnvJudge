@@ -222,6 +222,8 @@ def cells_by_seed_common(
 
 # ---------------------------------------------------------------------------- spend
 def spend() -> dict[str, dict[str, float]]:
+    """USD by run dir and budget for Round-1 run ids (``r1-*``); rows with a Phase-0 run id (R's
+    reused corpus) are reported under ``<dir>/reused-phase0``."""
     out: dict[str, dict[str, float]] = defaultdict(lambda: defaultdict(float))
     for d in sorted(RUNS.glob("r1-*")):
         if not d.is_dir():
@@ -236,8 +238,14 @@ def spend() -> dict[str, dict[str, float]]:
                 files.append(sub / "ledger.jsonl")
         for f in files:
             for r in jsonl(f):
-                if r.get("event") == "call":
-                    out[d.name][str(r.get("budget"))] += float(r.get("usd") or 0.0)
+                if r.get("event") != "call":
+                    continue
+                key = (
+                    d.name
+                    if str(r.get("run_id", "")).startswith("r1-")
+                    else f"{d.name}/reused-phase0"
+                )
+                out[key][str(r.get("budget"))] += float(r.get("usd") or 0.0)
     return {k: dict(v) for k, v in out.items()}
 
 
@@ -500,15 +508,17 @@ def main(argv: list[str] | None = None) -> int:
         usd = sp.get(name, {})
         if usd:
             lines.append(
-                f"| {d} | - | - | - | "
+                f"| {name} | - | - | - | "
                 + ", ".join(f"{k} {v:.2f}" for k, v in sorted(usd.items()))
                 + " |"
             )
-    total = sum(v for arm in sp.values() for v in arm.values())
-    r_usd = sum(sp.get("r1-R", {}).values())
+    total = sum(v for k, arm in sp.items() if "/reused" not in k for v in arm.values())
+    reused = sum(v for k, arm in sp.items() if "/reused" in k for v in arm.values())
     lines += [
         "",
-        f"Round 1 spend USD {total:.2f} (R reused from Phase 0, its USD counted there); E1-SL total USD {99.08 + total - r_usd:.2f}.",  # noqa: E501
+        f"Round 1 spend USD {total:.2f} (Round-1 run ids; R's reused corpus USD {reused:.2f} was "
+        f"counted in Phase 0); E1-SL total USD {99.08 + total:.2f} against the soft gate 500 and "
+        "hard cap 560.",
         "",
     ]
     with (out_dir / "accounting.csv").open("w", newline="", encoding="utf-8") as fh:

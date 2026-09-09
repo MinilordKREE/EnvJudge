@@ -1,0 +1,2 @@
+{"attempt": 0, "dir": "Gplus_U-seeds-0", "job": ["Gplus_U", 0], "pid": 850721, "problem": "pricing guard: upstream cost 0.00000000 != table 0.00037650", "ts": 1788892552.928279}
+{"attempt": 0, "dir": "Gplus_U-seeds-1000", "job": ["Gplus_U", 1000], "pid": 861785, "problem": "pricing guard: upstream cost 0.00000000 != table 0.00040775", "ts": 1788892828.131876}

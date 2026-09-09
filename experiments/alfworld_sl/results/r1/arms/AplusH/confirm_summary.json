@@ -1,0 +1,15 @@
+{
+ "25:footer_mask:1.0": {
+  "task": "25",
+  "kind": "knob",
+  "family": "footer_mask",
+  "source": "exemplar",
+  "successes": 7,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.4375,
+  "learnable": true,
+  "in_band_t": true,
+  "shared": false
+ }
+}

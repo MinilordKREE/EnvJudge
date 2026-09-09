@@ -1,0 +1,41 @@
+{
+ "4:footer_mask:0.75": {
+  "task": "4",
+  "kind": "knob",
+  "family": "footer_mask",
+  "source": "exemplar",
+  "successes": 12,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.75,
+  "learnable": true,
+  "in_band_t": false,
+  "shared": false
+ },
+ "18:footer_mask:0.5": {
+  "task": "18",
+  "kind": "knob",
+  "family": "footer_mask",
+  "source": "exemplar",
+  "successes": 11,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.6875,
+  "learnable": true,
+  "in_band_t": false,
+  "shared": false
+ },
+ "25:footer_mask:1.0": {
+  "task": "25",
+  "kind": "knob",
+  "family": "footer_mask",
+  "source": "exemplar",
+  "successes": 7,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.4375,
+  "learnable": true,
+  "in_band_t": true,
+  "shared": false
+ }
+}

@@ -1,0 +1,68 @@
+{
+ "R": {
+  "learnable_transformed": 0,
+  "transformed_envs": 23,
+  "search_rollouts": 290,
+  "per_1000": 0.0,
+  "ci95": [
+   0.0,
+   0.0
+  ],
+  "band_tasks_learnable": 0
+ },
+ "G": {
+  "learnable_transformed": 6,
+  "transformed_envs": 8,
+  "search_rollouts": 850,
+  "per_1000": 7.0588235294117645,
+  "ci95": [
+   2.272727272727273,
+   12.865497076023392
+  ],
+  "band_tasks_learnable": 0
+ },
+ "Gplus": {
+  "learnable_transformed": 5,
+  "transformed_envs": 7,
+  "search_rollouts": 835,
+  "per_1000": 5.9880239520958085,
+  "ci95": [
+   1.1560693641618498,
+   11.612903225806452
+  ],
+  "band_tasks_learnable": 0
+ },
+ "A": {
+  "learnable_transformed": 1,
+  "transformed_envs": 1,
+  "search_rollouts": 745,
+  "per_1000": 1.342281879194631,
+  "ci95": [
+   0.0,
+   4.366812227074236
+  ],
+  "band_tasks_learnable": 4
+ },
+ "Aex": {
+  "learnable_transformed": 3,
+  "transformed_envs": 3,
+  "search_rollouts": 696,
+  "per_1000": 4.310344827586207,
+  "ci95": [
+   0.0,
+   9.523809523809524
+  ],
+  "band_tasks_learnable": 4
+ },
+ "AplusH": {
+  "learnable_transformed": 1,
+  "transformed_envs": 1,
+  "search_rollouts": 745,
+  "per_1000": 1.342281879194631,
+  "ci95": [
+   0.0,
+   4.316546762589928
+  ],
+  "band_tasks_learnable": 4
+ }
+}

@@ -1,0 +1,93 @@
+{
+ "0:acc0:0e9c8d5b64f067b4": {
+  "task": "0",
+  "kind": "accepted",
+  "family": null,
+  "source": "released",
+  "successes": 14,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.875,
+  "learnable": false,
+  "in_band_t": false,
+  "shared": false
+ },
+ "4:acc0:47c9834d4538670f": {
+  "task": "4",
+  "kind": "accepted",
+  "family": null,
+  "source": "released",
+  "successes": 10,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.625,
+  "learnable": true,
+  "in_band_t": false,
+  "shared": false
+ },
+ "5:acc0:c9de7d9ea493f92d": {
+  "task": "5",
+  "kind": "accepted",
+  "family": null,
+  "source": "released",
+  "successes": 7,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.4375,
+  "learnable": true,
+  "in_band_t": true,
+  "shared": false
+ },
+ "8:acc0:f3598d1e3ce8112c": {
+  "task": "8",
+  "kind": "accepted",
+  "family": null,
+  "source": "released",
+  "successes": 9,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.5625,
+  "learnable": true,
+  "in_band_t": true,
+  "shared": false
+ },
+ "10:acc0:d08079d2294b2d6a": {
+  "task": "10",
+  "kind": "accepted",
+  "family": null,
+  "source": "released",
+  "successes": 7,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.4375,
+  "learnable": true,
+  "in_band_t": true,
+  "shared": false
+ },
+ "14:acc0:279054304abda271": {
+  "task": "14",
+  "kind": "accepted",
+  "family": null,
+  "source": "released",
+  "successes": 14,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.875,
+  "learnable": false,
+  "in_band_t": false,
+  "shared": false
+ },
+ "27:acc0:8c4553f7c27055e3": {
+  "task": "27",
+  "kind": "accepted",
+  "family": null,
+  "source": "released",
+  "successes": 10,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.625,
+  "learnable": true,
+  "in_band_t": false,
+  "shared": false
+ }
+}

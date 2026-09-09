@@ -1,0 +1,18 @@
+{
+ "arm": "Gplus",
+ "round": 1,
+ "amendment2_sha": "81f64c7",
+ "aea_config_sha256": "16c131049bfc306ed209d2f0426846c282f22dd5a7c26023313da62b180b4727",
+ "created_at": "2026-09-08T10:55:00Z",
+ "run_id": "r1-Gplus",
+ "config_changes_vs_released": [
+  "agent.client_factory",
+  "agent.client_kwargs",
+  "agent.extra_instructions",
+  "logging.log_dir",
+  "objective.target_band",
+  "policy.client_factory",
+  "policy.client_kwargs",
+  "storage.trace_path"
+ ]
+}

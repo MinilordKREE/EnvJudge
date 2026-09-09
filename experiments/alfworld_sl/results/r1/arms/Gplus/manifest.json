@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "run_id": "r1-Gplus",
+  "created_at": "2026-09-08T09:20:38.805754Z",
+  "seed": 0,
+  "config_sha256": "b1e1ad53a93c03aa5dd143937f7c413f0dbb7c6c66f48fa8bc4124b45345503c",
+  "config_schema_version": 1,
+  "aea_config_sha256": "16c131049bfc306ed209d2f0426846c282f22dd5a7c26023313da62b180b4727",
+  "config_path": null,
+  "git_sha": "7cbeda3d080a86d91e3b1a20665900a4f3b2179e",
+  "git_dirty": true,
+  "envharness_sha": "fab7d57441f06b75c73a900e04561d4d7600f361",
+  "aea_version": "0.1.0",
+  "python_version": "3.12.9",
+  "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+  "out_dir": "/home/kree/work/EnvJudge/runs/r1-Gplus",
+  "extra": {
+    "phase": "round1",
+    "arm": "Gplus",
+    "config_changes_vs_released": [
+      "agent.client_factory",
+      "agent.client_kwargs",
+      "agent.extra_instructions",
+      "logging.log_dir",
+      "objective.target_band",
+      "policy.client_factory",
+      "policy.client_kwargs",
+      "storage.trace_path"
+    ],
+    "config_sha256": "02c79ede7591f59663ff9a1af7340680c802127209ead19022ec7ce8241e38c0",
+    "task_ids": [
+      0,
+      29
+    ],
+    "amendment2_sha": "81f64c7",
+    "policy_endpoint_pin": "google-ai-studio",
+    "designer_endpoint_pin": "google-ai-studio",
+    "thinking": null
+  }
+}
