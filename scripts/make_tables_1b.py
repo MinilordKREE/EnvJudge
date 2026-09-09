@@ -301,11 +301,11 @@ def main(argv: list[str] | None = None) -> int:
             "| task | status | estimate | leverage | dose | hint | probe | doses visited (family: d list, status) | accepted d | skipped by prior | demoted |",  # noqa: E501
             "|---|---|---|---|---|---|---|---|---|---|---|",
         ]
-        for b in budget:
-            visited = "; ".join(f"{fam}: {ds} {status}" for fam, ds, status in b["doses"]) or "-"
+        for row in budget:
+            visited = "; ".join(f"{fam}: {ds} {status}" for fam, ds, status in row["doses"]) or "-"
             lines.append(
-                f"| {b['task']} | {b['status']} | {b['estimate']} | {b['leverage']} | {b['dose']} | {b['hint']} | {b['probe']} | {visited} | "  # noqa: E501
-                f"{b['accepted'] if b['accepted'] is not None else '-'} | {b['skipped'] or '-'} | {b['demoted'] or '-'} |"  # noqa: E501
+                f"| {row['task']} | {row['status']} | {row['estimate']} | {row['leverage']} | {row['dose']} | {row['hint']} | {row['probe']} | {visited} | "  # noqa: E501
+                f"{row['accepted'] if row['accepted'] is not None else '-'} | {row['skipped'] or '-'} | {row['demoted'] or '-'} |"  # noqa: E501
             )
         with (out_dir / "aprime_budget.csv").open("w", newline="", encoding="utf-8") as fh:
             w = csv.DictWriter(
@@ -326,9 +326,12 @@ def main(argv: list[str] | None = None) -> int:
                 ],
             )
             w.writeheader()
-            for b in budget:
+            for row in budget:
                 w.writerow(
-                    {k: (json.dumps(v) if isinstance(v, (list, dict)) else v) for k, v in b.items()}
+                    {
+                        k: (json.dumps(v) if isinstance(v, (list, dict)) else v)
+                        for k, v in row.items()
+                    }
                 )
     else:
         lines += ["A' has not run (pending the owner's budget decision).", ""]
