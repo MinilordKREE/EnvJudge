@@ -11,7 +11,6 @@ G/R attempts and decisions; shared p16; spend by arm and budget; incidents; kill
 from __future__ import annotations
 
 import argparse
-import csv
 import json
 import random
 import sys
@@ -43,14 +42,11 @@ def events(arm: str) -> list[dict[str, Any]]:
 
 
 def search_rollouts(arm: str) -> dict[str, int]:
+    """Charged search rollouts per task from the arm's traces (every policy episode without an
+    error, hint episodes excluded). For Z this includes the episodes of tasks re-run after the
+    staging crash (the controller's in-memory budget restarted for them), so Z1's denominator is
+    the full spend, not the accounting file of the resumed process."""
     per: dict[str, int] = defaultdict(int)
-    acc = d(arm) / "accounting.csv"
-    if arm in ("Z",) and acc.exists():
-        with acc.open(encoding="utf-8") as fh:
-            for row in csv.DictReader(fh):
-                if row.get("budget") == "search":
-                    per[str(row["task_id"])] += int(float(row.get("n") or row.get("rollouts") or 0))
-        return dict(per)
     for r in mt.jsonl(d(arm) / "traces.jsonl"):
         if r.get("error") or str(r.get("candidate_id")) == "hint":
             continue
