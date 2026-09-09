@@ -44,6 +44,7 @@ from aea.io import (
 )
 from aea.knobs import EXEMPLARS, Knob, KnobContext, order_families, propose_knobs
 from aea.llm.types import Attribution, BudgetName, ChatRequest, ChatResponse
+from aea.priors import FamilyPriors
 from aea.stage import StagedCandidate, build_stage_candidates, seeded_failures, trace_actions
 
 logger = logging.getLogger(__name__)
@@ -120,6 +121,7 @@ class Controller:
         round_index: int = 0,
         with_handoff: bool = False,
         use_designer: bool = True,
+        priors: FamilyPriors | None = None,
     ) -> None:
         self.config = config
         self.substrate = substrate
@@ -129,6 +131,7 @@ class Controller:
         self.round_index = round_index
         self.with_handoff = with_handoff
         self.use_designer = use_designer
+        self.priors = priors  # A' (Amendment 3): cross-task family priors; None = the A rule
         run_dir.mkdir(parents=True, exist_ok=True)
         self.budget = Budget(config.search_cap)
         self.events = EventWriter(run_dir / "events.jsonl", run_id)
@@ -319,6 +322,21 @@ class Controller:
         )
 
     def _families(self, task: TaskRef, lengths: tuple[int, ...]) -> list[Knob]:
+        return self._demote(task, self._families_ordered(task, lengths))
+
+    def _demote(self, task: TaskRef, families: list[Knob]) -> list[Knob]:
+        """A3.3: families with no leverage on >= demote_after tasks go to the end of the order."""
+        if self.priors is None:
+            return families
+        kept = [k for k in families if not self.priors.demoted(k.name)]
+        moved = [k for k in families if self.priors.demoted(k.name)]
+        if moved:
+            self.events.write(
+                "families_demoted", {"task_id": task.task_id, "demoted": [k.name for k in moved]}
+            )
+        return [*kept, *moved]
+
+    def _families_ordered(self, task: TaskRef, lengths: tuple[int, ...]) -> list[Knob]:
         designer = self.substrate.designer() if self.use_designer else None
         if designer is None or self.config.max_designer_families == 0:
             return list(EXEMPLARS)
@@ -379,8 +397,14 @@ class Controller:
                     raise _InfeasibleError(f"{knob.name} uncertified at d={d}")
             return self._charged_rollouts(task, cand, n, f"dose:{knob.name}")
 
+        start: float | None = None
+        if self.priors is not None and self.priors.skip_leverage(knob.name):
+            start = self.priors.start_dose(knob.name)
+            self.events.write(
+                "leverage_skipped", {"task_id": task.task_id, "family": knob.name, "start": start}
+            )
         try:
-            result = dose_mod.dose_search(run, self.config)
+            result = dose_mod.dose_search(run, self.config, start=start)
         except _InfeasibleError as why:
             self.events.write(
                 "family_skipped", {"task_id": task.task_id, "family": knob.name, "reason": str(why)}
@@ -396,8 +420,15 @@ class Controller:
                     {"d": h.d, "s": h.successes, "n": h.n, "cls": h.cls} for h in result.history
                 ],
                 "non_monotone": result.non_monotone,
+                "leverage_tested": start is None,
+                "start": start,
             },
         )
+        if self.priors is not None:
+            self.priors.record(knob.name, result, leverage_tested=start is None)
+            self.events.write(
+                "priors", {"task_id": task.task_id, "family": knob.name, **self.priors.snapshot()}
+            )
         if result.status == "accepted" and result.accepted is not None:
             ev = result.accepted
             cand = cache[ev.d]

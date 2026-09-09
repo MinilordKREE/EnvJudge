@@ -74,7 +74,9 @@ def evaluate_dose(d: float, run: BatchFn, config: AEAConfig) -> DoseEval:
     return DoseEval(d, s, config.dose_k_full, classify(s, config.dose_k_full, config), traces)
 
 
-def next_dose(history: list[DoseEval], config: AEAConfig) -> float | None:
+def next_dose(
+    history: list[DoseEval], config: AEAConfig, *, leverage_tested: bool = True
+) -> float | None:
     """The next dose after ``history`` (leverage test at d = 1 first, then the search).
 
     Direction: NOEFFECT / HIGH (too easy) -> raise; ZERO / LOW (too hard) -> lower. After the
@@ -84,12 +86,13 @@ def next_dose(history: list[DoseEval], config: AEAConfig) -> float | None:
     0.5 -> 0.75 -> 0.875 -> 0.9375. At most ``max_dose_evals`` search evaluations; ``None`` ends the
     search."""
     if not history:
-        return 1.0
+        return 1.0 if leverage_tested else None  # a skipped leverage test starts at the prior
     last = history[-1]
     if last.cls == "IN_BAND":
         return None
-    searched = len(history) - 1  # evaluations after the leverage test
-    if searched == 0:  # the leverage test at d = 1 decides where the search starts
+    # evaluations after the leverage test; with the test skipped (A3.3) every evaluation is search
+    searched = len(history) - 1 if leverage_tested else len(history)
+    if leverage_tested and searched == 0:  # the leverage test at d = 1 decides the start
         if last.cls == "ZERO":
             return 0.5
         if last.cls == "LOW":
@@ -123,20 +126,23 @@ class DoseSearchResult:
     non_monotone: int = 0
 
 
-def dose_search(run: BatchFn, config: AEAConfig) -> DoseSearchResult:
+def dose_search(run: BatchFn, config: AEAConfig, *, start: float | None = None) -> DoseSearchResult:
     """Leverage test at d = 1, then the sequential search. The caller's ``run`` charges the budget
-    and raises ``BudgetExhausted`` when the per-task cap would be exceeded."""
+    and raises ``BudgetExhausted`` when the per-task cap would be exceeded. ``start`` (A3.3 prior)
+    skips the leverage test: leverage is assumed and the search begins at ``start`` with the same
+    halving schedule."""
     history: list[DoseEval] = []
-    d: float | None = 1.0
+    leverage_tested = start is None
+    d: float | None = 1.0 if start is None else start
     try:
         while d is not None:
             ev = evaluate_dose(d, run, config)
             history.append(ev)
             if ev.cls == "IN_BAND":
                 return DoseSearchResult("accepted", history, ev, non_monotone_pairs(history))
-            if len(history) == 1 and ev.cls in ("NOEFFECT", "HIGH"):
+            if leverage_tested and len(history) == 1 and ev.cls in ("NOEFFECT", "HIGH"):
                 return DoseSearchResult("no_leverage", history, None, 0)
-            d = next_dose(history, config)
+            d = next_dose(history, config, leverage_tested=leverage_tested)
     except BudgetExhausted:
         return DoseSearchResult("budget_cap_hit", history, None, non_monotone_pairs(history))
     return DoseSearchResult("exhausted", history, None, non_monotone_pairs(history))
