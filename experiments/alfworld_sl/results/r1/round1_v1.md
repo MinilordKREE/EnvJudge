@@ -27,7 +27,7 @@
 | G | 8 | 22 | 0 |
 | G+ | 7 | 23 | 0 |
 
-Zero tasks at the shared K=16 (0/16 on the original environment): 1 (task 11). Unlocked zero tasks (learnable accepted stage): A none; A-ex none.
+Zero tasks at the shared K=16 (0/16 on the original environment): 11. Unlocked zero tasks (learnable accepted stage): A none; A-ex none.
 Family of origin of accepted environments — A: {'exemplar:footer_mask': 1}; A-ex: {'exemplar:footer_mask': 3}.
 
 ## C2 — held-out success (released eval, %; pooled over seeds, per-seed in brackets)

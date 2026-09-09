@@ -347,8 +347,13 @@ def main(argv: list[str] | None = None) -> int:
     (out_dir / "statuses.json").write_text(json.dumps(st, indent=1), encoding="utf-8")
     lines += [
         "",
-        f"Zero tasks at the shared K=16 (0/16 on the original environment): {', '.join(st['zero_tasks_shared_K16']) or 'none'}. "  # noqa: E501
-        f"Unlocked zero tasks (learnable accepted stage): A {unlocked['A'] or 'none'}; A-ex {unlocked['Aex'] or 'none'}.",  # noqa: E501
+        f"Zero tasks at the shared K=16 (0/16 on the original environment): {len(st['zero_tasks_shared_K16'])}"  # noqa: E501
+        + (
+            f" (task {', '.join(st['zero_tasks_shared_K16'])}). "
+            if st["zero_tasks_shared_K16"]
+            else ". "
+        )
+        + f"Unlocked zero tasks (learnable accepted stage): A {unlocked['A'] or 'none'}; A-ex {unlocked['Aex'] or 'none'}.",  # noqa: E501
         f"Family of origin of accepted environments — A: {fam.get('A')}; A-ex: {fam.get('Aex')}.",
         "",
     ]
