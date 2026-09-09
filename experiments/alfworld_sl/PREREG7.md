@@ -80,3 +80,26 @@ A2.5 Budget: E1-SL hard cap USD 560, soft gate USD 500 (Phase 0 spent USD 99.08 
 Standing differences recorded for the paper: backbone (Gemini 3.1 Flash-Lite via OpenRouter, Google AI Studio pin,
 no thinking parameter) and N = 30 train tasks; EnvHarness Table 2's OOD sign was not reproduced in three attempts.
 ```
+
+---
+```
+# PREREG7 Amendment 3 (2026-09-09; corrections after Round-1 review; no Round-2 rollout has run)
+A3.1 Protocol U, corrected definition: U = T2 ∪ single-success induction over EVERY task with ≥ 1 success during the
+  arm's own search, regardless of the task's final status (band, frozen_no_leverage, exhausted, budget_cap_hit,
+  unresolved_budget_limited, skipped, all_rejected). Amendment 1's status enumeration omitted budget_cap_hit and
+  excluded 22 of A's tasks; R_U and O_U were built under the corrected definition already. A_U, Aex_U, AplusH_U are
+  re-induced and re-evaluated; the Round-1 versions are archived as *_U_v1.
+A3.2 Bank-size controls (added): (a) placebo bank — 5 syntactically valid, task-irrelevant items in the released item
+  format, evaluated on 6 seeds; (b) item-matched evaluation — every Round-1 bank subsampled (seed 20260916) to 8 items
+  and to 20 items (banks with fewer items are evaluated at their full size and flagged), 3 seeds each.
+  C2 differences are reported at matched item counts alongside the full-bank numbers; a bank whose gain is not
+  distinguishable from the placebo at matched size is reported as "no content effect".
+A3.3 Method revision A′ (cross-task priors), pre-registered:
+  - Start dose per family = median of that family's accepted doses so far in this round (initial 0.5).
+  - The d=1 leverage test of a family is skipped once the family has returned ZERO at d=1 on ≥ 5 tasks in this round
+    (its leverage is then assumed and the search starts at the family's start dose).
+  - A family that has shown no leverage on ≥ 5 tasks is moved to the end of the order; designer proposals count as
+    families. Everything else identical to A (dose contract, acceptance rule, cap 30, certificates).
+  - A′ runs as a separate arm on the same 30 tasks; A (Round 1) is not re-run. C1 and C2 are reported for both.
+A3.4 Budget: hard cap USD 650, soft gate 600.
+```
