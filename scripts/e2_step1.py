@@ -38,7 +38,7 @@ from aea.controller import Controller, TaskRef
 from aea.core.config import LLMConfig, RunConfig
 from aea.core.context import create_run_context
 from aea.core.hashing import sha256_digest
-from aea.core.manifest import write_manifest
+from aea.core.manifest import load_run_context, write_manifest
 from aea.core.trace import read_trace
 from aea.e0config import derive_arm_config, derive_corpus_config, write_corpus_config
 from aea.errors import ConfigError
@@ -262,13 +262,16 @@ def stage_corpus_z(task_concurrency: int) -> None:
         designer=designer,
         runs_root=RUNS,
     )
-    ctx = create_run_context(
-        run_config,
-        runs_root=RUNS,
-        run_id=run_id,
-        repo_dir=ROOT,
-        aea_config_sha256=aea_config_sha256(AEAConfig()),
-    )
+    if (arm_dir("Z") / "manifest.json").exists():  # resume: the controller skips finished tasks
+        ctx, _ = load_run_context(arm_dir("Z"))
+    else:
+        ctx = create_run_context(
+            run_config,
+            runs_root=RUNS,
+            run_id=run_id,
+            repo_dir=ROOT,
+            aea_config_sha256=aea_config_sha256(AEAConfig()),
+        )
     write_manifest(
         ctx,
         run_config,
