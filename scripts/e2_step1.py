@@ -54,7 +54,7 @@ ENVHARNESS = r1.ENVHARNESS
 RUNS = r1.RUNS
 TASKS_E2: tuple[int, ...] = (0, 8, 9, 10, 11, 14, 17, 18, 20, 27)
 PREREG_SHA = "db1dcc7"
-E2_CAP_USD = 90.0
+E2_CAP_USD = 130.0  # owner, 2026-09-09: "raise the cap" (was 90; projection incl. Z-full ~120)
 
 
 def backbone_e2() -> tuple[LLMConfig, LLMConfig]:

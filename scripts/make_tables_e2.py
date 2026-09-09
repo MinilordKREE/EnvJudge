@@ -349,7 +349,11 @@ def main(argv: list[str] | None = None) -> int:
         lines.append(
             f"| {run} | " + ", ".join(f"{k} {v:.2f}" for k, v in sorted(budgets.items())) + " |"
         )
-    lines += ["", f"E2 step-1 total USD {total:.2f} (cap 90).", ""]
+    lines += [
+        "",
+        f"E2 step-1 total USD {total:.2f} (cap 130; PREREG8-Z said 90, raised by the owner on 2026-09-09).",  # noqa: E501
+        "",
+    ]
     inc = (
         mt.jsonl(RUNS / "e2-eval" / "guard_incidents.jsonl") if (RUNS / "e2-eval").exists() else []
     )
