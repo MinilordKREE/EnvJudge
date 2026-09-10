@@ -21,7 +21,7 @@ Evals: the released ``reasoning_bank_eval.py`` through ``aea.evaldriver.run_eval
 consumer, alibaba pin, reasoning off; the released SkillOS prompt, history 4, temperature 0.4,
 top-5 MMR), full ID 140 + OOD 134, seeds 0 / 1000 / 2000, per-episode resume after a guard abort.
 One job at a time; the job's concurrency is 16 minus the E3 chain's episodes in flight, clamped to
-[6, 12], read from runs/r1-logs/e3_chain.log at job start.
+[6, 16], read from runs/r1-logs/e3_chain.log at job start.
 """
 
 from __future__ import annotations
@@ -73,7 +73,7 @@ MATCHED_SEED = 20260922
 LF_ARMS: tuple[str, ...] = ("A", "G", "R", "O")
 CAS_ARMS: tuple[str, ...] = ("A", "G", "R")
 E3_INFLIGHT = {"shared": 8, "A": 16, "G": 5, "R": 5, "h100": 8, "confirm": 8}
-MIN_JOB_CONCURRENCY, MAX_JOB_CONCURRENCY = 6, 12
+MIN_JOB_CONCURRENCY, MAX_JOB_CONCURRENCY = 6, 16  # the addendum guard: eval concurrency <= 16
 
 
 # ---------------------------------------------------------------------------- spend
