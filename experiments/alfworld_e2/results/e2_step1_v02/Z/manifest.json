@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "run_id": "e2v02-Z",
+  "created_at": "2026-09-10T06:29:58.539033Z",
+  "seed": 0,
+  "config_sha256": "f8223c2997e864d96b3e2e5f5a0ad5625c6b2943f0b6289114fe42de1c2bc359",
+  "config_schema_version": 1,
+  "aea_config_sha256": "837b94e14656d9d61cf944fc59b29957e1559bb5c3b6ddc8216d61c98af42fe6",
+  "config_path": null,
+  "git_sha": "ce2bebff229f1c338b54c8bcdc841e3b934d93d5",
+  "git_dirty": true,
+  "envharness_sha": null,
+  "aea_version": "0.1.0",
+  "python_version": "3.12.9",
+  "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+  "out_dir": "/home/kree/work/EnvJudge/runs/e2v02-Z",
+  "extra": {
+    "experiment": "E2 step 1 under aea v0.2 (Phase D)",
+    "arm": "Z",
+    "tasks": [
+      0,
+      8,
+      9,
+      10,
+      11,
+      14,
+      17,
+      18,
+      20,
+      27
+    ],
+    "shared_k16_reused_from": "runs/e2-shared",
+    "policy_endpoint_pin": "alibaba",
+    "proposer": "off",
+    "aea_config": {
+      "schema_version": 2,
+      "band_t": [
+        0.4,
+        0.6
+      ],
+      "band_l": [
+        0.2,
+        0.8
+      ],
+      "k": 16,
+      "accept": [
+        3,
+        5
+      ],
+      "probe": [
+        4,
+        8
+      ],
+      "cap": 30,
+      "impl": {
+        "batch_first": 4,
+        "batch_next": 2,
+        "confidence": 0.9,
+        "max_bisections": 4,
+        "order_tolerance": 0.375,
+        "prior_min_tasks": 5,
+        "prior_min_rate": 0.9,
+        "proposer_cap": 2,
+        "n_failed_rollouts": 3,
+        "max_candidates": 6,
+        "stage_budget": 100,
+        "oracle_attempts": 3,
+        "oracle_max_steps": 50,
+        "policy_max_steps": 50
+      }
+    }
+  }
+}

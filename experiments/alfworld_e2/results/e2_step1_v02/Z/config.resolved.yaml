@@ -1,0 +1,55 @@
+designer:
+  api_key_env: OPENROUTER_API_KEY
+  base_url: https://openrouter.ai/api/v1
+  cost_tolerance: 1.0e-06
+  max_tokens: 2048
+  model: qwen/qwen3-8b
+  provider: openrouter
+  provider_pin: alibaba
+  reasoning_effort: null
+  retry:
+    initial_delay_s: 2.0
+    jitter_s: 1.0
+    max_attempts: 10
+    max_delay_s: 90.0
+    multiplier: 2.0
+    retry_status_codes:
+    - 408
+    - 409
+    - 425
+    - 429
+    total_timeout_s: 900.0
+  temperature: 0.5
+  thinking: false
+  timeout_s: 120.0
+kind: exploratory
+name: e2v02-Z
+policy:
+  api_key_env: OPENROUTER_API_KEY
+  base_url: https://openrouter.ai/api/v1
+  cost_tolerance: 1.0e-06
+  max_tokens: 2048
+  model: qwen/qwen3-8b
+  provider: openrouter
+  provider_pin: alibaba
+  reasoning_effort: null
+  retry:
+    initial_delay_s: 2.0
+    jitter_s: 1.0
+    max_attempts: 10
+    max_delay_s: 90.0
+    multiplier: 2.0
+    retry_status_codes:
+    - 408
+    - 409
+    - 425
+    - 429
+    total_timeout_s: 900.0
+  temperature: 0.5
+  thinking: false
+  timeout_s: 120.0
+pricing_path: configs/pricing.yaml
+require_clean_tree: false
+runs_root: /home/kree/work/EnvJudge/runs
+schema_version: 1
+seed: 0

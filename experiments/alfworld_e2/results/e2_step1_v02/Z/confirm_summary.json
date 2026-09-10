@@ -1,0 +1,22 @@
+{
+ "9:1dfb72010036fa22": {
+  "task": "9",
+  "kind": "stage",
+  "t": 50,
+  "successes": 10,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.625,
+  "learnable": true
+ },
+ "27:5b87a603b0231541": {
+  "task": "27",
+  "kind": "stage",
+  "t": 50,
+  "successes": 8,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.5,
+  "learnable": true
+ }
+}
