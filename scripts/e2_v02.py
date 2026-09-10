@@ -24,9 +24,13 @@ from aea.controller import Controller, TaskRef
 from aea.core.config import LLMConfig, RetryConfig, RunConfig
 from aea.core.context import create_run_context
 from aea.core.manifest import load_run_context, write_manifest
-from aea.errors import ConfigError
+from aea.errors import ConfigError, InfraError
 from aea.io import TraceWriter, read_corpus
-from aea.llm.types import Attribution
+from aea.llm.client import OpenAICompatibleClient, make_openai_transport
+from aea.llm.ledger import Ledger
+from aea.llm.pricing import load_pricing
+from aea.llm.types import Attribution, ChatMessage, ChatRequest
+from aea.settings import load_settings
 from aea.substrate import AeaSubstrate
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -382,12 +386,45 @@ def stage_tables() -> None:
     print("\n".join(lines))
 
 
+def stage_probe() -> int:
+    """One cheap ledgered call to the policy endpoint: 0 if it answers, 1 on a throttle."""
+    policy = policy_qwen().model_copy(
+        update={"retry": RetryConfig(max_attempts=1), "max_tokens": 8}
+    )
+    out = RUNS / "e2-probe"
+    out.mkdir(parents=True, exist_ok=True)
+    key = load_settings().require(policy.api_key_env.lower())
+    client = OpenAICompatibleClient(
+        config=policy,
+        transport=make_openai_transport(api_key=key, base_url=policy.base_url, timeout_s=60.0),
+        ledger=Ledger(out / "ledger.jsonl", "e2-probe"),
+        pricing=load_pricing(PRICING),
+    )
+    req = ChatRequest(
+        model=policy.model,
+        messages=(ChatMessage(role="user", content="Reply with the single word OK."),),
+        max_tokens=8,
+        attribution=Attribution(phase="endpoint_probe", budget="none", arm="infra", task_id="e2"),
+    )
+    try:
+        resp = client.complete(req)
+    except InfraError as exc:
+        print(f"PROBE_FAIL {exc.kind}")
+        return 1
+    print(f"PROBE_OK provider={resp.provider}")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--stage", required=True, choices=["corpus", "confirm", "tables", "spend"])
+    ap.add_argument(
+        "--stage", required=True, choices=["probe", "corpus", "confirm", "tables", "spend"]
+    )
     ap.add_argument("--concurrency", type=int, default=1)
     args = ap.parse_args(argv)
     try:
+        if args.stage == "probe":
+            return stage_probe()
         if args.stage == "corpus":
             stage_corpus(args.concurrency)
         elif args.stage == "confirm":
