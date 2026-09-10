@@ -72,3 +72,15 @@ the rest folded into `families.py`), `certs.py` (ladder gone; sessions in `sessi
 `witness.py`), `handoff.py` (to `scripts/handoff_demos.py`, tested through the script). The v0.1
 integration suite is archived at `docs/legacy/test_alfworld_v01.py`; Phase C rewrites it against v0.2.
 The v0.1 protocol scripts are frozen under `scripts/v0_1/` (run against tag `aea-v0.1`).
+
+## Phase C status (2026-09-11)
+
+Integration suite `tests/integration/test_alfworld.py` on the real ALFWorld bridge, LLM-free: 9 passed,
+1 skipped (the RL corpus loader round-trip needs `ray`, not installed here), 0 failed — the 100-step route
+(12 vs 62 policy steps), compiled-prefix fidelity on three archived failures, the footer-mask prompt snapshot
+and cross-process nesting, the horizon-squeeze boundary, the expert-as-policy harden path (d = 1 test runs,
+outcome dropped/accepted with a reason), the prefix-then-random stage path (guarded, deduplicated candidates
+≤ 6; probe profile; corpus entry with state hash), the budget invariant (traces = charged = accounting), and
+the eval hook on one released episode. Unit suite 88 green; ruff and mypy --strict clean. Review packet:
+`docs/reuse/review_packet_v0_2.md`. Tag `aea-v0.2`. Phase D (the zero-side re-run on the E2 step-1 tasks,
+≈ USD 25, driver `scripts/e2_v02.py`) waits for the owner's go.
