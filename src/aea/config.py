@@ -32,10 +32,12 @@ class ImplConfig(StrictModel):
     confidence: float = Field(default=0.9, gt=0.5, lt=1.0)
     """Estimator: first batch, then batches of ``batch_next`` until P(regime) >= confidence or K."""
     max_bisections: int = Field(default=4, ge=1)
-    order_tolerance: float = Field(default=0.2, ge=0.0, le=1.0)
-    """Bracket: a higher dose whose success rate exceeds a lower dose's by more than this stops the
-    family for the task (order violation); 0.2 is below one rollout in four, so a 2/8 at d = 1
-    against a 0/4 at a lower dose already counts."""
+    order_tolerance: float = Field(default=0.375, ge=0.0, le=1.0)
+    """Bracket diagnostic: a higher dose whose success rate exceeds a lower dose's by more than this
+    is recorded as an order violation (never stops the search: the bracket invariant already keeps
+    verdicts consistent, and a non-monotone family ends as ``exhausted``). 0.375 = more than three
+    of eight, above the sampling noise of one 4-rollout batch (6/8 vs 8/8, 0/4 vs 2/8 do not
+    count)."""
     prior_min_tasks: int = Field(default=5, ge=1)
     prior_min_rate: float = Field(default=0.9, ge=0.0, le=1.0)
     """A family with leverage rate >= prior_min_rate over >= prior_min_tasks starts its bracket at

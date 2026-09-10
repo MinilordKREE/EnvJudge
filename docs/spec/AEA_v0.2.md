@@ -23,7 +23,7 @@ for each task:
             if r == no_effect: record leverage 0; continue
             bracket [lo=0, hi=1]; up to 4 bisections with the 4 → 8 rule:
                 too_easy → lo = d; too_hard → hi = d; in_band → accept w(d); break
-                order violated → stop this family
+                (a non-monotone family ends as exhausted; an order violation is recorded as a diagnostic)
         else: drop                                                          # reason: no_leverage | exhausted
     else:                      # stage — discover an existing contrast
         for s in candidate states, latest first (≤ 6: end and midpoint of 3 failed rollouts):
@@ -73,8 +73,11 @@ Every policy rollout counts against the cap; wrapper replays and oracle sessions
   leverage 0 and move on; otherwise bisect on [lo = 0, hi = 1] starting at the midpoint, or, when the family's
   leverage rate is ≥ 0.9 over ≥ 5 tasks, at the family's last accepted dose; at most 4 bisections
   (10 + 4 + 8 + 8 = 30). The bracket keeps `lo` = the largest dose known too easy and `hi` = the smallest known
-  too hard; a result that contradicts the order (a harder dose measurably easier than an easier one) stops the
-  family for that task.
+  too hard. The bracket invariant already keeps verdicts consistent (every new dose lies strictly between a known
+  too-easy and a known too-hard dose), so a non-monotone family shows up as a bracket that does not converge
+  and ends as `exhausted`; an order violation (a higher dose with a success rate more than 0.375 above a lower
+  dose's, i.e. more than three of eight) is recorded as a diagnostic and never stops the search (owner, 2026-09-11:
+  a smaller tolerance would stop converging families on one batch's sampling noise).
 - **Candidate states.** For each of three failed rollouts of the estimate (seeded sample), the end state and the
   midpoint state; duplicates by state hash removed; at most six; walked latest-first.
 

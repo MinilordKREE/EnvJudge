@@ -97,23 +97,6 @@ def test_bracket_prior_start_and_clipping() -> None:
     assert seen == [0.5]
 
 
-def test_order_violation_stops_the_family() -> None:
-    hist = [
-        DoseEval(1.0, Eval(2, 8, "too_hard")),  # d = 1: 2 of 8
-        DoseEval(0.5, Eval(0, 4, "too_hard")),  # a lower dose, harder: violated
-    ]
-    assert order_violated(hist, CFG.impl.order_tolerance)
-    assert not order_violated(hist[:1], CFG.impl.order_tolerance)
-    table = {0.5: [0, 0, 0, 0]}
-
-    def at(d: float) -> Eval:
-        _, run = scripted(table[d])
-        return evaluate(run, CFG)
-
-    r = bracket(at, CFG, leverage=DoseEval(1.0, Eval(2, 8, "too_hard")))
-    assert r.status == "order_violation" and [h.d for h in r.history] == [1.0, 0.5]
-
-
 def test_cap_arithmetic_10_4_8_8() -> None:
     """After a 10-rollout estimate and a 4-rollout leverage test, the cap of 30 admits two full
     bisections (8 + 8); the third raises BudgetExhausted -> status budget."""
@@ -139,3 +122,29 @@ def test_cap_arithmetic_10_4_8_8() -> None:
     r = bracket(at2, CFG, leverage=DoseEval(1.0, Eval(0, 4, "too_hard")))
     assert r.status == "budget" and calls == [4, 4, 4, 4] and spent["n"] == 30
     assert [h.d for h in r.history] == [1.0, 0.5, 0.25]
+
+
+def test_same_verdict_noise_is_not_an_order_violation() -> None:
+    """6/8 vs 8/8 (both too easy) and 0/4 vs 2/8 (both too hard) are one batch's sampling noise."""
+    tol = CFG.impl.order_tolerance
+    assert tol == 0.375
+    easy = [DoseEval(0.25, Eval(6, 8, "too_easy")), DoseEval(0.5, Eval(8, 8, "too_easy"))]
+    hard = [DoseEval(1.0, Eval(2, 8, "too_hard")), DoseEval(0.5, Eval(0, 4, "too_hard"))]
+    assert not order_violated(easy, tol) and not order_violated(hard, tol)
+    assert order_violated(
+        [DoseEval(0.25, Eval(0, 4, "too_hard")), DoseEval(0.5, Eval(7, 8, "too_easy"))], tol
+    )
+
+
+def test_order_violation_is_diagnostic_only() -> None:
+    """A recorded violation never stops the bracket: the search runs to acceptance or exhaustion."""
+    table = {0.5: [0, 0, 0, 0], 0.25: [1, 1, 1, 1], 0.375: [1, 0, 1, 0, 1, 1, 0, 0]}
+
+    def at(d: float) -> Eval:
+        _, run = scripted(table[d])
+        return evaluate(run, CFG)
+
+    r = bracket(at, CFG, leverage=DoseEval(1.0, Eval(2, 8, "too_hard")))
+    assert r.status == "accepted" and r.accepted is not None and r.accepted.d == 0.375
+    assert [h.d for h in r.history] == [1.0, 0.5, 0.25, 0.375]
+    assert not r.order_violated  # a lower dose easier than a higher one is the expected order
