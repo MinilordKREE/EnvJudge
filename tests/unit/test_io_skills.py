@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import importlib.util
 import json
 from pathlib import Path
 
@@ -9,8 +8,6 @@ from envharness.core.types import Action, Candidate
 from envharness.reasoning_bank import bank as bank_module
 from envharness.reasoning_bank.bank import Bank, MemoryItem
 
-from aea.config import AEAConfig
-from aea.handoff import HANDOFF_POLICY_ID, handoff, render_witness_trace
 from aea.io import (
     AeaMeta,
     CorpusEntry,
@@ -22,7 +19,6 @@ from aea.io import (
     write_corpus_entry,
 )
 from aea.policy_skills import inject, make_retriever, skills_block, task_line_from_observation
-from tests.fixtures.fake_world import make_open
 
 PLAN = ["go to a", "take x from a", "go to b", "move x to b"]
 ENVHARNESS = Path(__file__).resolve().parents[2] / "third_party" / "envharness"
@@ -68,42 +64,15 @@ def test_skills_block_and_inject(tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     assert skills_block(make_retriever(tmp_path / "bank.jsonl", top_k=0), "x") == ""
 
 
-def test_handoff_renders_released_trace_format() -> None:
-    cfg = AEAConfig()
-    trace = handoff(make_open(PLAN), cfg, task_label="lbl", task_seed=7)
-    assert trace is not None and trace.success and trace.policy_model_id == HANDOFF_POLICY_ID
-    assert [s.filtered_action.kwargs["text"] for s in trace.steps if s.filtered_action] == PLAN
-    assert trace.steps[0].policy_raw_response == "<action>go to a</action>" and "<think>" not in (
-        trace.steps[0].policy_raw_response or ""
-    )
-    assert (
-        trace.rollout_seed == 7 and trace.candidate_id == "handoff" and trace.kind == "exploration"
-    )
-    spec = importlib.util.spec_from_file_location(
-        "induce_mod", ENVHARNESS / "envharness" / "reasoning_bank" / "induce.py"
-    )
-    assert spec and spec.loader
-    induce = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(induce)
-    text = induce.format_trajectory([s.model_dump() for s in trace.steps])
-    assert "<action>go to a</action>" in text and "Observation:" in text
-    assert (
-        handoff(make_open(PLAN, cap=2), cfg, task_label="lbl", task_seed=7) is None
-    )  # engine ends at 2
-    with pytest.raises(ValueError):
-        render_witness_trace("l", 1, ["a"], [])
-
-
 def test_corpus_roundtrip_and_loader_contract(tmp_path: Path) -> None:
     meta = AeaMeta(
         kind="stage",
         task_id="7",
         seed=7,
         t=12,
-        prefix_sha="abc",
+        state_hash="abc",
         stage_budget=100,
         candidate_id="7:abc",
-        certificate="R_exp",
         profile=[{"t": 12, "p4": 0.5}],
     )
     cand = Candidate(
@@ -125,9 +94,9 @@ def test_corpus_roundtrip_and_loader_contract(tmp_path: Path) -> None:
                 task_id="8",
                 seed=8,
                 family="footer_mask",
-                source="exemplar",
+                source="library",
                 d=0.5,
-                p8=0.5,
+                p_hat=0.5,
             ),
         ),
     )
@@ -170,8 +139,8 @@ def test_trace_writer_and_accounting(tmp_path: Path) -> None:
     write_accounting(tmp_path / "empty.csv", [])
     assert (tmp_path / "empty.csv").read_text(encoding="utf-8") == ""
     assert CorpusEntry.model_validate(
-        {"game_file": "g", "aea": {"kind": "band", "task_id": "1", "seed": 1}}
-    ).to_candidate() == Candidate(rationale="aea:band")
+        {"game_file": "g", "aea": {"kind": "kept", "task_id": "1", "seed": 1}}
+    ).to_candidate() == Candidate(rationale="aea:kept")
 
 
 def test_corpus_entry_rejects_unknown_kind() -> None:

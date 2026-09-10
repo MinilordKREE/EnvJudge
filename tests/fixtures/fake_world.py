@@ -25,7 +25,7 @@ from envharness.core.types import (
 )
 from envharness.harnesses.setup import Setup
 
-from aea.certs import RecordingProxy, Session
+from aea.session import RecordingProxy, Session
 
 ENGINE_CAP = 50
 

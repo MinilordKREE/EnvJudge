@@ -1,19 +1,15 @@
-"""Prefix staging with the re-based stage budget (spec section 5).
-
-Compile order: take the prefix of a failed rollout -> drop ineffective actions (the bridge's
-``effective`` flag, ``bridge.py:284``) -> append ``look`` -> build a ``Setup`` over the 100-step
-config (``reset_options.config_path``, ``bridge.py:149``) -> actually replay -> certify THAT
-environment with the expert x3 (``aea.certs``) -> only then probe. Candidate id =
-``task_id + sha256(compiled prefix)``. One fidelity check per task: the observation after replay
+"""The stage operator's candidates (docs/spec/AEA_v0.2.md, "Candidate states"): for each of
+``impl.n_failed_rollouts`` seeded failed rollouts of the estimate, the end state and the midpoint
+state; each prefix is compiled (ineffective actions dropped, ``look`` appended), replayed under the
+100-step config (``reset_options.config_path``, ``bridge.py:149``) so the prefix does not consume
+the policy's horizon, deduplicated by the hash of the compiled prefix, capped at
+``impl.max_candidates``, walked latest-first. Each candidate is guarded by ``solvable()`` with the
+oracle as the only source (a reset-origin success cannot witness a mid-trajectory state); without
+an oracle the probe self-certifies. One fidelity check per task: the observation after replay
 equals the archived observation at the cut.
 
-Candidates (spec section 5): for each of ``n_failed_trajectories`` seeded failed rollouts of length
-T, the prefixes t in {T, 3T/4, T/2, T/4}; union, latest-first, capped at ``max_candidates`` by
-dropping the candidate nearest in t to another kept one. Each candidate is compiled, replayed and
-certified individually (no prefix sweep).
-
-Pilot oracle: docs/pilots/e1pilot/p5/p5/chs100.py (``staged_actions``, ``select_candidates``),
-docs/pilots/eobs/eobs/recover.py (``c_at``), docs/pilots/e1pilot/p4/docs/stage_budget_audit.md.
+Pilot oracle: docs/pilots/e1pilot/p5/p5/chs100.py (``staged_actions``), docs/pilots/eobs/eobs/
+recover.py (``c_at``), docs/pilots/e1pilot/p4/docs/stage_budget_audit.md.
 """
 
 from __future__ import annotations
@@ -26,9 +22,10 @@ from typing import Any
 
 from envharness.core.types import Action, Candidate, Trace
 
-from aea.certs import Certificate, Session, certify
 from aea.config import AEAConfig
 from aea.core.hashing import sha256_of
+from aea.session import Session
+from aea.witness import Solvable, solvable
 
 type OpenFn = Callable[[Candidate | None, dict[str, Any] | None], Session]
 """Open a session on a candidate with explicit reset options (the staged config)."""
@@ -63,8 +60,12 @@ def compile_prefix(
     return kept
 
 
+def state_hash(compiled: Sequence[str]) -> str:
+    return sha256_of(list(compiled))[:16]
+
+
 def candidate_id(task_id: str, compiled: Sequence[str]) -> str:
-    return f"{task_id}:{sha256_of(list(compiled))[:16]}"
+    return f"{task_id}:{state_hash(compiled)}"
 
 
 def stage_candidate(compiled: Sequence[str]) -> Candidate:
@@ -74,22 +75,21 @@ def stage_candidate(compiled: Sequence[str]) -> Candidate:
     )
 
 
-def select_candidates(
-    certified_by_traj: dict[str, list[int]], fractions: Sequence[float], cap: int
-) -> list[tuple[str, int, str]]:
-    """Per trajectory: L and the certified states nearest each fraction of L; union latest-first;
-    cap by dropping the candidate nearest in t to a kept one (the latest overall never drops)."""
+def seeded_failures(traces: Sequence[Trace], n: int, seed: int) -> list[Trace]:
+    fails = [t for t in traces if not t.success and not t.error and t.steps]
+    rnd = random.Random(seed)
+    return rnd.sample(fails, min(n, len(fails)))
+
+
+def candidate_states(lengths: dict[str, int], cap: int) -> list[tuple[str, int, str]]:
+    """(episode, t, kind) for the end (``end``) and midpoint (``mid``) of each rollout, latest
+    first, capped by dropping the candidate nearest in t to another kept one."""
     cands: dict[tuple[str, int], str] = {}
-    for eid, ts in certified_by_traj.items():
-        certified = sorted({t for t in ts if t > 0})
-        if not certified:
+    for eid, total in lengths.items():
+        if total <= 0:
             continue
-        latest = certified[-1]
-        for frac in fractions:
-            target = frac * latest
-            t = min(certified, key=lambda x: (abs(x - target), -x))
-            kind = "L" if frac == 1.0 else f"{frac:g}L"
-            cands.setdefault((eid, t), kind)
+        cands.setdefault((eid, total), "end")
+        cands.setdefault((eid, max(1, total // 2)), "mid")
     items = sorted(cands.items(), key=lambda kv: (-kv[0][1], kv[0][0]))
     while len(items) > cap:
         head = items[0]
@@ -101,12 +101,6 @@ def select_candidates(
         drop = min((it for it in items if it is not head), key=gap)
         items.remove(drop)
     return [(eid, t, kind) for (eid, t), kind in items]
-
-
-def seeded_failures(traces: Sequence[Trace], n: int, seed: int) -> list[Trace]:
-    fails = [t for t in traces if not t.success and not t.error and t.steps]
-    rnd = random.Random(seed)
-    return rnd.sample(fails, min(n, len(fails)))
 
 
 @dataclass
@@ -117,12 +111,12 @@ class StagedCandidate:
     kind: str
     compiled: list[str]
     candidate: Candidate
-    certificate: Certificate
+    guard: Solvable
     fidelity_ok: bool | None = None
 
     @property
-    def certified(self) -> bool:
-        return self.certificate.certified
+    def state_hash(self) -> str:
+        return self.id.split(":", 1)[1]
 
 
 @dataclass
@@ -132,36 +126,6 @@ class StageResult:
     fidelity_checked: bool = False
 
 
-def candidate_states(
-    lengths: dict[str, int], fractions: Sequence[float], cap: int
-) -> list[tuple[str, int, str]]:
-    """Prefix lengths at the fractions of each trajectory's length T; union latest-first; capped."""
-    valid = {eid: total for eid, total in lengths.items() if total > 0}
-    return _fraction_candidates(valid, fractions, cap)
-
-
-def _fraction_candidates(
-    lengths: dict[str, int], fractions: Sequence[float], cap: int
-) -> list[tuple[str, int, str]]:
-    cands: dict[tuple[str, int], str] = {}
-    for eid, total in lengths.items():
-        for frac in fractions:
-            t = max(1, round(frac * total))
-            kind = "T" if frac == 1.0 else f"{frac:g}T"
-            cands.setdefault((eid, t), kind)
-    items = sorted(cands.items(), key=lambda kv: (-kv[0][1], kv[0][0]))
-    while len(items) > cap:
-        head = items[0]
-
-        def gap(it: tuple[tuple[str, int], str]) -> tuple[int, int]:
-            others = [o for o in items if o is not it]
-            return (min(abs(it[0][1] - o[0][1]) for o in others), it[0][1])
-
-        drop = min((it for it in items if it is not head), key=gap)
-        items.remove(drop)
-    return [(eid, t, kind) for (eid, t), kind in items]
-
-
 def build_stage_candidates(
     open_fn: OpenFn,
     task_id: str,
@@ -169,23 +133,14 @@ def build_stage_candidates(
     reset_options: dict[str, Any],
     config: AEAConfig,
     *,
-    certified_states: dict[str, list[int]] | None = None,
+    oracle: bool = True,
 ) -> StageResult:
-    """Select candidate states, compile each prefix, replay it, certify that environment.
-
-    ``certified_states`` (tests / pilot fixtures) overrides the T-fraction rule with explicit
-    prefix lengths per trajectory."""
+    """Select the states, compile and replay each prefix, guard it with ``solvable()``."""
     result = StageResult()
     by_traj = {t.episode_id: t for t in failures}
-    if certified_states is not None:
-        selected = select_candidates(
-            certified_states, config.candidate_fractions, config.max_candidates
-        )
-    else:
-        lengths = {eid: min(len(tr.steps), config.policy_max_steps) for eid, tr in by_traj.items()}
-        selected = candidate_states(lengths, config.candidate_fractions, config.max_candidates)
+    lengths = {eid: min(len(tr.steps), config.impl.policy_max_steps) for eid, tr in by_traj.items()}
     seen: set[str] = set()
-    for eid, t, kind in selected:
+    for eid, t, kind in candidate_states(lengths, config.impl.max_candidates):
         actions = trace_actions(by_traj[eid])[:t]
         compiled = compile_prefix(open_fn, actions, reset_options)
         cid = candidate_id(task_id, compiled)
@@ -193,15 +148,15 @@ def build_stage_candidates(
             continue
         seen.add(cid)
         cand = stage_candidate(compiled)
-        cert = certify(cand, lambda c: open_fn(c, reset_options), config)
-        staged = StagedCandidate(cid, eid, t, kind, compiled, cand, cert)
+        guard = solvable(cand, lambda c: open_fn(c, reset_options), config, oracle=oracle)
+        staged = StagedCandidate(cid, eid, t, kind, compiled, cand, guard)
         if not result.fidelity_checked:
             staged.fidelity_ok = fidelity_check(open_fn, by_traj[eid], t, compiled, reset_options)
             result.fidelity_checked = True
-        if cert.certified:
+        if guard.ok:
             result.candidates.append(staged)
         else:
-            result.rejected.append({"id": staged.id, "t": t, "reason": cert.detail})
+            result.rejected.append({"id": staged.id, "t": t, "reason": guard.detail})
     return result
 
 

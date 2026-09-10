@@ -1,7 +1,6 @@
-"""Exemplar knobs: the single source of truth for the few-shot prompt text and the runnable classes.
-
-Spec: docs/spec/AEA_v2.md section 3 (FooterMask, HorizonSqueeze, Displacement). The templates are
-stored
+"""The library families as text: the single source of truth for the few-shot prompt and the
+runnable classes (docs/spec/AEA_v0.2.md, "Families"). FooterMask and HorizonSqueeze; the templates
+are stored
 verbatim (``*.py.txt``) with ``__DOSE__`` / ``__TASK_ID__`` / ``__M__`` placeholders; ``render``
 substitutes them for a runnable ``rules_code`` and ``prompt_text`` returns the same text unfilled
 for the proposer. They use only the names the released ``code_loader`` provides
@@ -20,9 +19,7 @@ def _read(name: str) -> str:
 
 
 def prompt_text(name: str) -> str:
-    """The exemplar exactly as shown to the proposer (placeholders left in place)."""
-    if name == "displacement":
-        return _read("displacement.md")
+    """The library family exactly as shown to the proposer (placeholders left in place)."""
     return _read(_FILES[name])
 
 

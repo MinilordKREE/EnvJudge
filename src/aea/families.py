@@ -1,17 +1,17 @@
-"""Dose contract, exemplar knobs and the few-shot proposer (spec section 3).
+"""Families for the harden operator (docs/spec/AEA_v0.2.md, "Families and leverage").
 
-A knob is ``make(d) -> Candidate`` (rules code or a Setup action list) with an ``axis``,
-``direction = harder_with_d`` and a ``nested`` declaration (d1 < d2 => M(d1) subset of M(d2)). The
-three
-exemplars are runnable knobs AND the few-shot text (``aea.exemplars``). Designer proposals are
-validated before any rollout: the code loads through the released ``code_loader``
-(``envharness/core/code_loader.py:68-107``), references ``DOSE``, passes an LLM-free smoke at d=1
-on a fake inner env, and (unless O-axis) is certified at d=1 by the expert x3. The designer never
-decides acceptance — the dose rule does (section 4).
+A family is a parameterized wrapper ``w(d)``, d in [0, 1], harder with d: ``make(d, ctx)`` returns
+the ``Candidate`` (rules code) or None when infeasible. The library holds the two exemplars
+(FooterMask, O axis; HorizonSqueeze, T axis); the LLM proposer returns up to ``impl.proposer_cap``
+new families per task under the dose contract, validated before any rollout (loads through the
+released ``code_loader``, references DOSE, passes an LLM-free smoke at d = 1). The proposer never
+decides acceptance. ``LeverageTable`` keeps one counter per family — the rate, over the tasks where
+it was evaluated at d = 1, of not returning ``no_effect`` — orders families by it (proposer order
+until a family has been seen) and yields the bracket start dose of a family with rate >=
+``impl.prior_min_rate`` over >= ``impl.prior_min_tasks`` tasks (its last accepted dose).
 
 References: ``harness_agent.py:124-198`` (the released ``propose_candidate`` tool schema; ours
-mirrors its field names), ``rules.py:93-104`` (hook signatures). Pilot oracles:
-docs/pilots/e1pilot/e1/operators/{o_footer,h_horizon,s0_displace}.py. Chain / Link are out of v1.
+mirrors its field names), ``rules.py:93-104`` (hook signatures), ``code_loader.py:68-107``.
 """
 
 from __future__ import annotations
@@ -19,6 +19,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import threading
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from typing import Any, Literal, Protocol
@@ -29,33 +30,28 @@ from envharness.core.types import Action, Candidate, EnvResponse, Observation
 from aea import exemplars
 from aea.llm.types import ChatMessage, ChatRequest
 
-type Axis = Literal["O", "T", "S0", "A"]
-type Source = Literal["exemplar", "llm"]
+type Axis = Literal["O", "T", "A"]
+type Source = Literal["library", "llm"]
 
 
 @dataclass(frozen=True)
-class KnobContext:
-    """Per-task facts a knob may need: id, successful episode lengths, a Setup builder for S0."""
-
+class FamilyContext:
     task_id: str
     success_lengths: tuple[int, ...] = ()
-    setup_builder: Callable[[float], list[str] | None] | None = None
-    """S0 knobs: returns the validated action list for dose d (None = infeasible)."""
 
 
-class Knob(Protocol):
+class Family(Protocol):
     @property
     def name(self) -> str: ...
     @property
     def axis(self) -> Axis: ...
     @property
     def source(self) -> Source: ...
-    @property
-    def nested(self) -> bool: ...
 
-    def make(self, d: float, ctx: KnobContext) -> Candidate | None: ...
+    def make(self, d: float, ctx: FamilyContext) -> Candidate | None: ...
 
 
+# ---------------------------------------------------------------------------- library
 def footer_bucket(task_id: str, step: int) -> int:
     return int(hashlib.sha256(f"{task_id}:{step}".encode()).hexdigest()[:8], 16) % 10000
 
@@ -69,8 +65,7 @@ def horizon_m(success_lengths: Sequence[int], d: float) -> int | None:
     if not success_lengths:
         return None
     lengths = sorted(success_lengths)
-    q = 1.0 - d
-    rank = max(1, math.ceil(q * len(lengths)))
+    rank = max(1, math.ceil((1.0 - d) * len(lengths)))
     return lengths[min(rank, len(lengths)) - 1]
 
 
@@ -78,10 +73,9 @@ def horizon_m(success_lengths: Sequence[int], d: float) -> int | None:
 class FooterMask:
     name: str = "footer_mask"
     axis: Axis = "O"
-    source: Source = "exemplar"
-    nested: bool = True
+    source: Source = "library"
 
-    def make(self, d: float, ctx: KnobContext) -> Candidate | None:
+    def make(self, d: float, ctx: FamilyContext) -> Candidate | None:
         code = exemplars.render("footer_mask", dose=float(d), task_id=str(ctx.task_id))
         return Candidate(rules_code=code, rationale=f"footer_mask d={d}")
 
@@ -90,10 +84,9 @@ class FooterMask:
 class HorizonSqueeze:
     name: str = "horizon_squeeze"
     axis: Axis = "T"
-    source: Source = "exemplar"
-    nested: bool = True
+    source: Source = "library"
 
-    def make(self, d: float, ctx: KnobContext) -> Candidate | None:
+    def make(self, d: float, ctx: FamilyContext) -> Candidate | None:
         m = horizon_m(ctx.success_lengths, d)
         if m is None:
             return None
@@ -101,46 +94,21 @@ class HorizonSqueeze:
         return Candidate(rules_code=code, rationale=f"horizon_squeeze d={d} m={m}")
 
 
+LIBRARY: tuple[Family, ...] = (FooterMask(), HorizonSqueeze())
+LIBRARY_NAMES = ("footer_mask", "horizon_squeeze")
+
+
+# ---------------------------------------------------------------------------- proposer
 @dataclass(frozen=True)
-class Displacement:
-    name: str = "displacement"
-    axis: Axis = "S0"
-    source: Source = "exemplar"
-    nested: bool = True
-
-    def make(self, d: float, ctx: KnobContext) -> Candidate | None:
-        if ctx.setup_builder is None:
-            return None
-        actions = ctx.setup_builder(d)
-        if not actions:
-            return None
-        return Candidate(
-            in_env_actions=[Action(name="do", kwargs={"text": a}) for a in actions],
-            rationale=f"displacement d={d} k={displacement_k(d)}",
-        )
-
-
-def displacement_k(d: float) -> int:
-    """d ∈ (0, 1] -> k ∈ {1, 2, 3} (thirds)."""
-    return max(1, min(3, math.ceil(d * 3 - 1e-9)))
-
-
-EXEMPLARS: tuple[Knob, ...] = (FooterMask(), HorizonSqueeze(), Displacement())
-
-
-@dataclass(frozen=True)
-class ProposedKnob:
-    """A designer-proposed Rules subclass with a ``DOSE`` class attribute (``__DOSE__``
-    placeholder)."""
+class ProposedFamily:
+    """A proposer-written Rules subclass with a ``DOSE`` class attribute (``__DOSE__``)."""
 
     name: str
     axis: Axis
     template: str
-    nested: bool
-    direction: str = "harder_with_d"
     source: Source = "llm"
 
-    def make(self, d: float, ctx: KnobContext) -> Candidate | None:
+    def make(self, d: float, ctx: FamilyContext) -> Candidate | None:
         code = self.template.replace("__DOSE__", repr(float(d))).replace(
             "__TASK_ID__", repr(str(ctx.task_id))
         )
@@ -213,15 +181,15 @@ def validate_rules_template(template: str, *, task_id: str = "0") -> ValidationR
     return ValidationReport(not reasons, reasons)
 
 
-PROPOSE_KNOBS_TOOL: dict[str, Any] = {
+PROPOSE_TOOL: dict[str, Any] = {
     "type": "function",
     "function": {
-        "name": "propose_knobs",
+        "name": "propose_families",
         "description": "Propose up to two dose-parameterised Rules subclasses for this task.",
         "parameters": {
             "type": "object",
             "properties": {
-                "knobs": {
+                "families": {
                     "type": "array",
                     "maxItems": 2,
                     "items": {
@@ -236,40 +204,33 @@ PROPOSE_KNOBS_TOOL: dict[str, Any] = {
                                     "set to __DOSE__"
                                 ),
                             },
-                            "nested": {"type": "boolean"},
-                            "direction": {"type": "string", "enum": ["harder_with_d"]},
                         },
-                        "required": ["name", "axis", "rules_code", "nested"],
+                        "required": ["name", "axis", "rules_code"],
                     },
                 },
                 "ranking": {
                     "type": "array",
                     "items": {"type": "string"},
-                    "description": "family names, most promising first (exemplars may be included)",
+                    "description": "family names, most promising first (library names allowed)",
                 },
             },
-            "required": ["knobs"],
+            "required": ["families"],
         },
     },
 }
 
 CONTRACT_TEXT = (
     "Dose contract: emit `class _Rules(Rules)` with a class attribute `DOSE = __DOSE__` "
-    "(d in [0, 1]); "
-    "difficulty must increase with DOSE (direction harder_with_d); prefer nested perturbations "
-    "(d1 < d2 => the perturbed step set at d1 is a subset of the set at d2); the task must stay "
-    "solvable at DOSE = 1; only the names Rules, Action, Blocked, Observation, EnvResponse and the "
-    "standard library are available; no Chain/Link. Acceptance is decided by rollouts, not by you. "
-    "The three exemplars are ALWAYS tried by the controller: do not re-propose them or trivial "
-    "variants; propose NEW perturbation families for this task (or none)."
+    "(d in [0, 1]); difficulty must increase with DOSE; the task must stay solvable at DOSE = 1; "
+    "only the names Rules, Action, Blocked, Observation, EnvResponse and the standard library are "
+    "available; no Chain/Link. Acceptance is decided by rollouts, not by you. The library families "
+    "are ALWAYS tried by the controller: do not re-propose them or trivial variants; propose NEW "
+    "perturbation families for this task (or none)."
 )
 
 
 def proposer_messages(task_description: str, success_summary: str) -> tuple[ChatMessage, ...]:
-    shots = "\n\n".join(
-        f"### {n}\n{exemplars.prompt_text(n)}"
-        for n in ("footer_mask", "horizon_squeeze", "displacement")
-    )
+    shots = "\n\n".join(f"### {n}\n{exemplars.prompt_text(n)}" for n in LIBRARY_NAMES)
     return (
         ChatMessage(
             role="system",
@@ -280,37 +241,33 @@ def proposer_messages(task_description: str, success_summary: str) -> tuple[Chat
             role="user",
             content=(
                 f"Task: {task_description}\n\nPolicy successes (summary):\n{success_summary}"
-                f"\n\nExemplars:\n{shots}\n\nCall propose_knobs."
+                f"\n\nLibrary (few-shot):\n{shots}\n\nCall propose_families."
             ),
         ),
     )
 
 
-def _is_exemplar_copy(name: str, template: str) -> bool:
-    """A proposal that re-emits an exemplar (by name or by body) adds nothing."""
-    if name in {k.name for k in EXEMPLARS}:
+def _is_library_copy(name: str, template: str) -> bool:
+    if name in LIBRARY_NAMES:
         return True
     body = "".join(template.split())
-    return any(
-        "".join(exemplars.prompt_text(n).split())[:400] in body
-        for n in ("footer_mask", "horizon_squeeze")
-    )
+    return any("".join(exemplars.prompt_text(n).split())[:400] in body for n in LIBRARY_NAMES)
 
 
 def parse_proposals(
-    arguments: dict[str, Any], *, max_families: int
-) -> tuple[list[ProposedKnob], list[str]]:
-    """Validate a `propose_knobs` tool call; returns (accepted knobs, rejection reasons)."""
-    accepted: list[ProposedKnob] = []
+    arguments: dict[str, Any], *, cap: int
+) -> tuple[list[ProposedFamily], list[str]]:
+    """Validate a ``propose_families`` tool call; returns (accepted, rejection reasons)."""
+    accepted: list[ProposedFamily] = []
     rejected: list[str] = []
-    for raw in list(arguments.get("knobs") or [])[:max_families]:
+    for raw in list(arguments.get("families") or arguments.get("knobs") or [])[:cap]:
         if not isinstance(raw, dict):
-            rejected.append("knob entry is not an object")
+            rejected.append("family entry is not an object")
             continue
         template = str(raw.get("rules_code") or "")
-        name = str(raw.get("name") or "llm_knob")
-        if _is_exemplar_copy(name, template):
-            rejected.append(f"{name}: duplicate of an exemplar (always tried anyway)")
+        name = str(raw.get("name") or "llm_family")
+        if _is_library_copy(name, template):
+            rejected.append(f"{name}: duplicate of a library family (always tried anyway)")
             continue
         report = validate_rules_template(template)
         if not report.ok:
@@ -320,33 +277,26 @@ def parse_proposals(
         if axis not in ("O", "T", "A"):
             rejected.append(f"{name}: axis must be O, T or A")
             continue
-        accepted.append(
-            ProposedKnob(
-                name=name, axis=axis, template=template, nested=bool(raw.get("nested", False))
-            )
-        )
+        accepted.append(ProposedFamily(name=name, axis=axis, template=template))
     ranking = [str(x) for x in (arguments.get("ranking") or [])]
-    ordered = sorted(
-        accepted, key=lambda k: ranking.index(k.name) if k.name in ranking else len(ranking)
+    return (
+        sorted(accepted, key=lambda k: ranking.index(k.name) if k.name in ranking else 99),
+        rejected,
     )
-    return ordered, rejected
 
 
-def propose_knobs(
+def propose_families(
     complete: Callable[[ChatRequest], Any],
     *,
     model: str,
     task_description: str,
     success_summary: str,
-    max_families: int,
+    cap: int,
     attribution: Any,
     seed: int = 0,
     record: Callable[[dict[str, Any]], None] | None = None,
-) -> tuple[list[ProposedKnob], list[str], list[str]]:
-    """One designer call (free of the rollout budget, ledgered as budget=designer).
-
-    ``record`` receives the raw tool-call arguments and the parse outcome (the run's
-    ``designer_calls.jsonl``)."""
+) -> tuple[list[ProposedFamily], list[str], list[str]]:
+    """One proposer call (ledgered as budget=designer, not charged to the cap)."""
     request = ChatRequest(
         model=model,
         messages=proposer_messages(task_description, success_summary),
@@ -354,36 +304,96 @@ def propose_knobs(
         seed=seed,
         max_tokens=4096,
         attribution=attribution,
-        tools=(PROPOSE_KNOBS_TOOL,),
-        tool_choice={"type": "function", "function": {"name": "propose_knobs"}},
+        tools=(PROPOSE_TOOL,),
+        tool_choice={"type": "function", "function": {"name": "propose_families"}},
     )
     response = complete(request)
     if not response.tool_calls:
         if record is not None:
-            record(
-                {"content": response.content[:2000], "tool_calls": [], "rejected": ["no tool call"]}
-            )
-        return [], ["designer returned no tool call"], []
+            record({"content": response.content[:2000], "tool_calls": [], "rejected": ["no call"]})
+        return [], ["proposer returned no tool call"], []
     args = response.tool_calls[0].arguments
     if isinstance(args, str):
         args = json.loads(args)
-    knobs, rejected = parse_proposals(dict(args), max_families=max_families)
+    families, rejected = parse_proposals(dict(args), cap=cap)
     ranking = [str(x) for x in (dict(args).get("ranking") or [])]
     if record is not None:
         record(
             {
                 "arguments": dict(args),
-                "accepted": [k.name for k in knobs],
+                "accepted": [k.name for k in families],
                 "rejected": rejected,
                 "ranking": ranking,
             }
         )
-    return knobs, rejected, ranking
+    return families, rejected, ranking
 
 
-def order_families(proposed: Sequence[Knob], ranking: Sequence[str]) -> list[Knob]:
-    """Designer-proposed U exemplars in the designer's ranking; exemplars first if it is silent."""
-    pool: list[Knob] = [*proposed, *EXEMPLARS]
-    if not ranking:
-        return [*EXEMPLARS, *proposed]
-    return sorted(pool, key=lambda k: ranking.index(k.name) if k.name in ranking else len(ranking))
+# ---------------------------------------------------------------------------- leverage
+@dataclass
+class FamilyStats:
+    tested: int = 0
+    with_leverage: int = 0
+    last_accepted_dose: float | None = None
+
+    @property
+    def rate(self) -> float | None:
+        return self.with_leverage / self.tested if self.tested else None
+
+
+class LeverageTable:
+    """One counter per family, shared across the tasks of a run (thread-safe)."""
+
+    def __init__(self, *, min_tasks: int = 5, min_rate: float = 0.9) -> None:
+        self.min_tasks = min_tasks
+        self.min_rate = min_rate
+        self._stats: dict[str, FamilyStats] = {}
+        self._lock = threading.Lock()
+
+    def stats(self, family: str) -> FamilyStats:
+        with self._lock:
+            return self._stats.setdefault(family, FamilyStats())
+
+    def record_leverage(self, family: str, has_leverage: bool) -> None:
+        s = self.stats(family)
+        with self._lock:
+            s.tested += 1
+            s.with_leverage += int(has_leverage)
+
+    def record_accepted(self, family: str, dose: float) -> None:
+        s = self.stats(family)
+        with self._lock:
+            s.last_accepted_dose = dose
+
+    def order(self, families: Sequence[Family]) -> list[Family]:
+        """By leverage rate, descending; unseen families keep their given (proposer) order."""
+        with self._lock:
+            rates = {k: v.rate for k, v in self._stats.items()}
+
+        def key(p: tuple[int, Family]) -> tuple[float, int]:
+            rate = rates.get(p[1].name)
+            return (-(rate if rate is not None else 1.0), p[0])
+
+        return [f for _, f in sorted(enumerate(families), key=key)]
+
+    def start_dose(self, family: str) -> float | None:
+        """The family's last accepted dose when its leverage rate qualifies, else None
+        (midpoint)."""
+        s = self.stats(family)
+        with self._lock:
+            rate = s.rate
+            if s.tested >= self.min_tasks and rate is not None and rate >= self.min_rate:
+                return s.last_accepted_dose
+            return None
+
+    def snapshot(self) -> dict[str, dict[str, object]]:
+        with self._lock:
+            return {
+                k: {
+                    "tested": v.tested,
+                    "with_leverage": v.with_leverage,
+                    "rate": v.rate,
+                    "last_accepted_dose": v.last_accepted_dose,
+                }
+                for k, v in self._stats.items()
+            }

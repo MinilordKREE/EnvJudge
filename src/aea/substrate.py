@@ -4,14 +4,14 @@ Wraps (never edits) third_party/envharness: ``EnvSpec`` / ``PolicySpec`` built t
 ``scripts/run_harness.py:173-236`` builds them from a corpus-style YAML (``env``, ``policy``
 blocks), episodes run through :class:`aea.runner.AeaSubprocessRunner` (the released
 ``SubprocessRunner`` with attribution in the child's environment), sessions through
-:func:`aea.certs.open_session` (bridge reused per ``config_path``). Policy calls are ledgered per
+:func:`aea.session.open_session` (bridge reused per ``config_path``). Policy calls are ledgered per
 call by :class:`aea.llm.envharness_client.AeaLLMClient` in the worker; one ``rollout`` row per
 episode is written here so the search budget can be audited against the ledger (spec section 0).
 """
 
 from __future__ import annotations
 
-from collections.abc import Callable, Sequence
+from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -20,7 +20,6 @@ import yaml
 from envharness.core.types import Candidate, Trace
 from envharness.orchestration.runner import PolicySpec
 
-from aea.certs import Session, open_session
 from aea.config import AEAConfig
 from aea.controller import TaskRef
 from aea.core.config import LLMConfig
@@ -32,9 +31,8 @@ from aea.llm.pricing import CostBreakdown, PricingTable, load_pricing
 from aea.llm.types import Attribution, ChatRequest, ChatResponse, Usage
 from aea.policy_skills import inject
 from aea.runner import AeaSubprocessRunner, dispatch, episode_spec, ledger_path_for_process
+from aea.session import Session, open_session
 from aea.settings import load_settings
-
-HINT_PREAMBLE = "A reference solution for THIS task exists; its action sequence is: {plan}. Use it."
 
 
 class AeaSubstrate:
@@ -73,7 +71,7 @@ class AeaSubstrate:
             "temperature": float(policy.get("temperature", 0.5)),
         }
         self.max_steps = int(
-            cfg["orchestrator"].get("max_episode_steps", aea_config.policy_max_steps)
+            cfg["orchestrator"].get("max_episode_steps", aea_config.impl.policy_max_steps)
         )
         self.run_dir = run_dir
         self.run_id = run_id
@@ -107,12 +105,8 @@ class AeaSubstrate:
         *,
         attribution: Attribution,
         reset_options: dict[str, Any] | None = None,
-        hint: Sequence[str] | None = None,
     ) -> list[Trace]:
-        prompt = self.task_prompt
-        if hint:
-            prompt = f"{prompt.rstrip()}\n\n{HINT_PREAMBLE.format(plan=', '.join(hint))}\n"
-        policy = PolicySpec(task_prompt=prompt, **self.policy_spec_kwargs)
+        policy = PolicySpec(task_prompt=self.task_prompt, **self.policy_spec_kwargs)
         opts = {**self.reset_options, **(reset_options or {})}
         specs = [
             episode_spec(
@@ -180,10 +174,8 @@ class AeaSubstrate:
     def designer_model(self) -> str:
         return self._designer_model
 
-    def setup_builder(self, task: TaskRef) -> Callable[[float], list[str] | None] | None:
-        from aea.displacement import setup_builder
-
-        return setup_builder(lambda c: self.open_session(task, c, None))
+    def has_oracle(self) -> bool:
+        return True  # ALFWorld ships a handcoded expert (read through the session's proxy)
 
 
 def now_utc() -> datetime:

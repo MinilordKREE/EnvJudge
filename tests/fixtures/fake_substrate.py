@@ -4,14 +4,14 @@ from __future__ import annotations
 
 import random
 import uuid
-from collections.abc import Callable, Sequence
+from collections.abc import Callable
 from typing import Any
 
 from envharness.core.types import Action, Candidate, Observation, Step, Trace
 
-from aea.certs import Session
 from aea.controller import TaskRef
 from aea.llm.types import Attribution, ChatRequest, ChatResponse
+from aea.session import Session
 from tests.fixtures.fake_world import make_open
 
 PLAN = ["go to a", "take x from a", "go to b", "move x to b"]
@@ -56,8 +56,8 @@ class FakeSubstrate:
     def designer_model(self) -> str:
         return "fake-designer"
 
-    def setup_builder(self, task: TaskRef) -> Callable[[float], list[str] | None] | None:
-        return None
+    def has_oracle(self) -> bool:
+        return True  # the fake world exposes an expert plan
 
     # -- policy -----------------------------------------------------------------
     def rollouts(
@@ -68,11 +68,10 @@ class FakeSubstrate:
         *,
         attribution: Attribution,
         reset_options: dict[str, Any] | None = None,
-        hint: Sequence[str] | None = None,
     ) -> list[Trace]:
         kind = self.policies[task.task_id]
         self.calls.append((task.task_id, attribution.phase, n))
-        return [self._episode(task, candidate, kind, reset_options, hint) for _ in range(n)]
+        return [self._episode(task, candidate, kind, reset_options) for _ in range(n)]
 
     def _episode(
         self,
@@ -80,18 +79,17 @@ class FakeSubstrate:
         candidate: Candidate,
         kind: PolicyKind,
         reset_options: dict[str, Any] | None,
-        hint: Sequence[str] | None,
     ) -> Trace:
         sess = self._open(candidate, reset_options)
         steps: list[Step] = []
-        plan = list(hint) if hint else list(PLAN)
+        plan = list(PLAN)
         for _ in range(50):
             if sess.done or sess.won:
                 break
             adm = sess.admissible()
             obs_now = sess.stack.observe()
             footer_visible = "Admissible commands" in obs_now.text
-            if kind == "expert" or (kind == "footer" and footer_visible) or hint:
+            if kind == "expert" or (kind == "footer" and footer_visible):
                 nxt = next((a for a in plan if a in adm), None)
                 if nxt is None:
                     nxt = "look"

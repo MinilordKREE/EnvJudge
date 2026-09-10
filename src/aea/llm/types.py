@@ -22,9 +22,10 @@ from aea.core.config import ReasoningEffort, StrictModel
 type Role = Literal["system", "user", "assistant", "tool"]
 
 type BudgetName = Literal["search", "confirm", "train", "probe_cert", "designer", "eval", "none"]
-"""Named budgets. ``search`` is capped per task per round; ``confirm`` (K16 post-hoc) and
-``train`` are separate ledgers; ``probe_cert`` is the hint certificate; ``designer`` calls are
-free of the rollout budget but logged; ``eval`` is the released downstream evaluation."""
+"""Named budgets (docs/spec/AEA_v0.2.md): the method emits ``search`` (every policy rollout, the
+cap) and ``eval`` (K = 16 confirmations, never written back); ``designer`` calls are ledgered for
+cost reporting only. ``confirm``, ``train`` and ``probe_cert`` are v0.1 names kept so that v0.1
+ledgers still validate."""
 
 
 class ToolCall(StrictModel):

@@ -1,120 +1,80 @@
-"""Named rollout budgets and the per-task hard cap (spec section 0).
-
-``search`` is capped at ``search_cap`` policy rollouts per task per round and is the only budget
-the controller spends; ``confirm`` (K16, never changes controller output) and ``train`` are
-separate ledgers that never touch it. No cross-task reallocation: a task that hits the cap stops
-with status ``budget_cap_hit`` (``BudgetExhausted``). Designer calls, expert sessions and verbatim
-replays are recorded but not charged. No reference source: written fresh for aea.
+"""The one budget (docs/spec/AEA_v0.2.md, "One budget"): every policy rollout of a task is charged
+to ``search`` before it runs; the cap is a hard stop. Errored rollouts are refunded and counted as
+infra errors. Confirmations (``eval``) are outside the method and never touch this object.
 """
 
 from __future__ import annotations
 
 import threading
-from collections import defaultdict
 from dataclasses import dataclass, field
 
 from aea.errors import BudgetExhausted
-from aea.llm.types import BudgetName
-
-type Phase = str
 
 
 @dataclass
 class TaskAccount:
     task_id: str
-    round_index: int
     cap: int
-    charged: dict[BudgetName, int] = field(default_factory=lambda: defaultdict(int))
-    by_phase: dict[tuple[BudgetName, Phase], int] = field(default_factory=lambda: defaultdict(int))
+    charged: dict[str, int] = field(default_factory=dict)
+    refunded: dict[str, int] = field(default_factory=dict)
     infra_errors: int = 0
-    """Rollouts that ended in an environment/infrastructure error: refunded, never counted."""
-    status: str = "open"
 
     @property
-    def search_spent(self) -> int:
-        return self.charged["search"]
+    def spent(self) -> int:
+        return sum(self.charged.values()) - sum(self.refunded.values())
 
     def remaining(self) -> int:
-        return max(self.cap - self.search_spent, 0)
+        return max(self.cap - self.spent, 0)
 
 
 class Budget:
-    """Thread-safe accounting for one run: charge rollouts by (task, round, budget, phase)."""
-
-    def __init__(self, search_cap: int) -> None:
-        self.search_cap = search_cap
-        self._accounts: dict[tuple[str, int], TaskAccount] = {}
+    def __init__(self, cap: int) -> None:
+        self.cap = cap
+        self._accounts: dict[str, TaskAccount] = {}
         self._lock = threading.Lock()
 
-    def account(self, task_id: str, round_index: int = 0) -> TaskAccount:
-        key = (task_id, round_index)
+    def account(self, task_id: str) -> TaskAccount:
         with self._lock:
-            if key not in self._accounts:
-                self._accounts[key] = TaskAccount(task_id, round_index, self.search_cap)
-            return self._accounts[key]
+            return self._accounts.setdefault(task_id, TaskAccount(task_id, self.cap))
 
-    def can_afford(self, task_id: str, n: int, *, round_index: int = 0) -> bool:
-        return self.account(task_id, round_index).remaining() >= n
+    def can_afford(self, task_id: str, n: int) -> bool:
+        return self.account(task_id).spent + n <= self.cap
 
-    def charge(
-        self, task_id: str, n: int, *, budget: BudgetName, phase: Phase, round_index: int = 0
-    ) -> TaskAccount:
-        """Charge ``n`` rollouts; on ``search`` the cap is a hard stop (nothing charged past it)."""
-        if n < 0:
-            raise ValueError("cannot charge a negative number of rollouts")
-        acct = self.account(task_id, round_index)
+    def charge(self, task_id: str, n: int, *, phase: str) -> None:
+        acc = self.account(task_id)
         with self._lock:
-            if budget == "search" and acct.search_spent + n > acct.cap:
-                acct.status = "budget_cap_hit"
+            if acc.spent + n > self.cap:
                 raise BudgetExhausted(
-                    f"task {task_id}: search cap {acct.cap} would be exceeded "
-                    f"({acct.search_spent} spent, {n} requested)",
+                    f"cap {self.cap} would be exceeded by {n} rollouts",
                     budget="search",
-                    cap=acct.cap,
-                    spent=acct.search_spent,
+                    cap=self.cap,
+                    spent=acc.spent,
                     task_id=task_id,
                 )
-            acct.charged[budget] += n
-            acct.by_phase[(budget, phase)] += n
-        return acct
+            acc.charged[phase] = acc.charged.get(phase, 0) + n
 
-    def refund(
-        self, task_id: str, n: int, *, budget: BudgetName, phase: Phase, round_index: int = 0
-    ) -> TaskAccount:
-        """Give back ``n`` rollouts that errored (spec section 2: errors are never counted) and
-        count them as infrastructure errors in the accounting."""
-        acct = self.account(task_id, round_index)
+    def refund(self, task_id: str, n: int, *, phase: str) -> None:
+        acc = self.account(task_id)
         with self._lock:
-            acct.charged[budget] = max(acct.charged[budget] - n, 0)
-            acct.by_phase[(budget, phase)] = max(acct.by_phase[(budget, phase)] - n, 0)
-            acct.infra_errors += n
-        return acct
+            acc.refunded[phase] = acc.refunded.get(phase, 0) + n
+            acc.infra_errors += n
 
     def accounting_rows(self) -> list[dict[str, object]]:
-        """One row per (task, round, budget, phase) for ``accounting.csv``."""
         rows: list[dict[str, object]] = []
         with self._lock:
-            for (task_id, round_index), acct in sorted(self._accounts.items()):
-                for (budget, phase), n in sorted(acct.by_phase.items()):
+            for acc in self._accounts.values():
+                for phase, n in sorted(acc.charged.items()):
                     rows.append(
                         {
-                            "task_id": task_id,
-                            "round": round_index,
-                            "budget": budget,
+                            "task_id": acc.task_id,
+                            "budget": "search",
                             "phase": phase,
-                            "rollouts": n,
-                            "search_total": acct.search_spent,
-                            "cap": acct.cap,
-                            "infra_errors": acct.infra_errors,
-                            "status": acct.status,
+                            "n": n - acc.refunded.get(phase, 0),
+                            "refunded": acc.refunded.get(phase, 0),
                         }
                     )
         return rows
 
     def totals(self) -> dict[str, int]:
-        out: dict[str, int] = defaultdict(int)
         with self._lock:
-            for acct in self._accounts.values():
-                for budget, n in acct.charged.items():
-                    out[budget] += n
-        return dict(out)
+            return {t: a.spent for t, a in self._accounts.items()}

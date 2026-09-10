@@ -1,4 +1,5 @@
-"""Sequential Beta regime estimation (spec section 2).
+"""Sequential Beta regime estimation (docs/spec/AEA_v0.2.md: "K = 16 with early stop when the
+regime is decided"; the batch schedule and the stopping confidence are implementation constants).
 
 Posterior Beta(1+s, 1+f); first batch 4, then batches of 2; stop when the posterior mass of any
 regime interval — zero ``p < lo``, band ``lo <= p <= hi``, saturated ``p > hi`` with (lo, hi) = B_L
@@ -100,7 +101,7 @@ def estimate(rollout: RolloutFn, config: AEAConfig) -> EstimateResult:
     successes = 0
     retried = 0
     band = config.band_l
-    n_next = config.batch_first
+    n_next = config.impl.batch_first
     index = 0
     while True:
         for _ in range(n_next):
@@ -119,12 +120,12 @@ def estimate(rollout: RolloutFn, config: AEAConfig) -> EstimateResult:
         n = len(traces)
         probs = regime_probabilities(successes, n - successes, band)
         best = max(probs, key=lambda r: probs[r])
-        if probs[best] >= config.confidence:
+        if probs[best] >= config.impl.confidence:
             return EstimateResult(
                 best, successes / n, n, successes, probs, "confidence", traces, retried
             )
-        if n >= config.k_max:
+        if n >= config.k:
             return EstimateResult(
                 best, successes / n, n, successes, probs, "k_max", traces, retried
             )
-        n_next = min(config.batch_next, config.k_max - n)
+        n_next = min(config.impl.batch_next, config.k - n)

@@ -1,4 +1,6 @@
-"""Hand-off for unresolved zero tasks (spec section 7) - the AEA+Handoff arm only.
+"""Hand-off demonstrations (an EXTENSION arm outside the v0.2 method; changelog_v0.2 item 8):
+for the dropped zero tasks of a finished corpus, the oracle's shortest success rendered as a
+demonstration in the released trace format.
 
 The main method leaves an unresolved zero task in accounting. The second arm renders the expert's
 shortest success as a demonstration in the released trace format so the released induction
@@ -16,8 +18,8 @@ from typing import Any
 
 from envharness.core.types import Action, Candidate, Observation, Step, Trace
 
-from aea.certs import Session, run_expert
 from aea.config import AEAConfig
+from aea.session import Session, run_expert
 
 HANDOFF_CANDIDATE_ID = "handoff"
 HANDOFF_POLICY_ID = "expert:handcoded"
@@ -84,8 +86,8 @@ def handoff(
 ) -> Trace | None:
     """Shortest expert success over ``expert_attempts`` runs, rendered as a demonstration."""
     best: tuple[list[str], list[str]] | None = None
-    for _ in range(config.expert_attempts):
-        r, observations = _run_recording(open_fn(None), config.expert_max_steps)
+    for _ in range(config.impl.oracle_attempts):
+        r, observations = _run_recording(open_fn(None), config.impl.oracle_max_steps)
         if r.ok and (best is None or len(r.actions) < len(best[0])):
             best = (list(r.actions), list(observations[: len(r.actions)]))
     if best is None:

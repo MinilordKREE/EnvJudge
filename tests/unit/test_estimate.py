@@ -69,7 +69,7 @@ def test_simulated_stopping_and_misclassification(p: float) -> None:
         result = estimate(lambda i: _trace(rng.random() < p), cfg)
         stops[result.n] += 1
         regimes[result.regime] += 1
-        assert result.n <= cfg.k_max and result.n >= cfg.batch_first and (result.n - 4) % 2 == 0
+        assert result.n <= cfg.k and result.n >= cfg.impl.batch_first and (result.n - 4) % 2 == 0
     if p in (0.0, 1.0):
         assert stops == {10: 200}
     if p == 0.5:

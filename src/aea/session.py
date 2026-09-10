@@ -1,17 +1,17 @@
-"""Witness certificates on a candidate environment (spec section 6): R_pol -> R_exp x3 -> R_hint
-<=3.
+"""Sessions on a candidate environment: reset-and-drive, replay of an action list, and the
+benchmark oracle (docs/spec/AEA_v0.2.md, "One guard": the sources ``solvable()`` replays are run
+through these sessions; sessions are never policy rollouts and are never charged).
 
 A :class:`Session` drives the SAME harness stack the released runner builds
 (``runner.py:129-142``: base -> Setup -> Rules) over a per-process bridge that is reused per
 ``config_path`` (the ALFWorld config, including the step cap, is read once per bridge instance —
 ``bridge.py:177-178``). ``Session.done`` reads the stack-level ``terminated`` / ``truncated`` so a
-T-axis termination is not missed (the P4 fix). The handcoded expert's next action is read from
+T-axis termination is not missed. The handcoded expert's next action is read from
 ``infos["extra.expert_plan"]`` beneath the bridge through an observe-only proxy on its ``_env``
 (``RecordingProxy``; permitted by the do-not list, documented in docs/reuse/certs.md).
 
 Ported behaviour (oracle): docs/pilots/eobs/eobs/replay.py (``Session``, ``replay_actions``,
-``run_expert``, ``_base_bridge``), docs/pilots/e1pilot/e1/p2_run.py ``certificate``,
-docs/pilots/e1pilot/p4/p4/omega.py. No runtime import from the pilots.
+``run_expert``, ``_base_bridge``). No runtime import from the pilots.
 """
 
 from __future__ import annotations
@@ -20,17 +20,13 @@ import os
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Literal, Protocol
+from typing import Any, Protocol
 
 from envharness.core.types import Action, Candidate
-
-from aea.config import AEAConfig
 
 TASK_LABEL = "alfworld-corpus-ours-release"
 DEFAULT_RESET_OPTIONS: dict[str, Any] = {"split": "train", "repetition_threshold": 0}
 EXPERT_STUCK_N = 4
-
-type CertSource = Literal["by_construction", "R_pol", "R_exp", "R_hint", "uncertified"]
 
 
 class RecordingProxy:
@@ -241,94 +237,3 @@ def run_expert(sess: Session, max_steps: int, retry_blocked: int = 3) -> ReplayR
         len(sess.actions) - start,
         sess.actions[start:],
     )
-
-
-type SessionFactory = Callable[[Candidate | None], Session]
-type HintRollout = Callable[[list[str]], bool]
-"""Run one policy rollout with the expert plan offered as a hint; returns success. Charged to
-search."""
-
-
-@dataclass
-class Certificate:
-    source: CertSource
-    detail: dict[str, Any] = field(default_factory=dict)
-    witness: list[str] | None = None
-
-    @property
-    def certified(self) -> bool:
-        return self.source != "uncertified"
-
-
-def certify(
-    candidate: Candidate,
-    open_fn: SessionFactory,
-    config: AEAConfig,
-    *,
-    policy_witness: list[str] | None = None,
-    by_construction: bool = False,
-    hint_rollout: HintRollout | None = None,
-) -> Certificate:
-    """The ladder. ``by_construction`` short-circuits (O-axis; HorizonSqueeze with m >= shortest
-    success)."""
-    if by_construction:
-        return Certificate("by_construction")
-    detail: dict[str, Any] = {}
-    if policy_witness:
-        sess = open_fn(candidate)
-        try:
-            r = replay_actions(sess, policy_witness)
-        finally:
-            sess.close()
-        if r.ok:
-            return Certificate("R_pol", {"n_steps": r.n_steps}, list(policy_witness))
-        detail["R_pol"] = r.reason
-    expert_plan: list[str] | None = None
-    for attempt in range(1, config.expert_attempts + 1):
-        sess = open_fn(candidate)
-        try:
-            r = run_expert(sess, max_steps=config.expert_max_steps)
-        finally:
-            sess.close()
-        if r.ok:
-            detail["R_exp_attempt"] = attempt
-            return Certificate("R_exp", detail, list(r.actions))
-        detail[f"R_exp_{attempt}"] = r.reason
-        expert_plan = expert_plan or (r.actions or None)
-    if hint_rollout is not None and expert_plan:
-        for attempt in range(1, config.hint_attempts + 1):
-            if hint_rollout(expert_plan):
-                detail["R_hint_attempt"] = attempt
-                return Certificate("R_hint", detail, expert_plan)
-        detail["R_hint"] = f"failed x{config.hint_attempts}"
-    return Certificate("uncertified", detail)
-
-
-def expert_shortest_success(open_fn: SessionFactory, config: AEAConfig) -> list[str] | None:
-    """Shortest successful expert trajectory over ``expert_attempts`` runs (None if none win)."""
-    best: list[str] | None = None
-    for _ in range(config.expert_attempts):
-        sess = open_fn(None)
-        try:
-            r = run_expert(sess, max_steps=config.expert_max_steps)
-        finally:
-            sess.close()
-        if r.ok and (best is None or len(r.actions) < len(best)):
-            best = list(r.actions)
-    return best
-
-
-def witness_survival(
-    candidate: Candidate, open_fn: SessionFactory, witnesses: list[list[str]]
-) -> tuple[float | None, int, int]:
-    """omega(E'): share of the policy's own successes that replay to success in the candidate."""
-    if not witnesses:
-        return None, 0, 0
-    ok = 0
-    for w in witnesses:
-        sess = open_fn(candidate)
-        try:
-            ok += int(replay_actions(sess, w).ok)
-        finally:
-            sess.close()
-    return ok / len(witnesses), ok, len(witnesses)

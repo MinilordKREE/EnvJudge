@@ -1,4 +1,5 @@
-"""Corpus and trace writers in the released formats (spec section 9).
+"""Corpus and trace writers in the released formats (docs/spec/AEA_v0.2.md: the corpus keeps the RL
+loader shape; the ``aea`` block carries kind, family, dose, state hash, p_hat).
 
 Corpus entries are the RL loader's shape ``{game_file, rules_code, in_env_actions}``
 (``rl/envharness_rl/alfworld/envs.py:119-146``; unknown keys ignored, verified) plus an ``aea``
@@ -22,26 +23,27 @@ from aea.core.config import StrictModel
 from aea.core.hashing import JsonValue
 from aea.core.io import append_jsonl, read_jsonl
 
-type EntryKind = Literal["band", "knob", "stage"]
+type EntryKind = Literal["kept", "knob", "stage"]
 
 
 class AeaMeta(StrictModel):
+    """The ``aea`` block (docs/spec/AEA_v0.2.md): kind, family, dose, state hash, p_hat, outcome."""
+
     kind: EntryKind
     task_id: str
     seed: int
     round: int = 0
     regime: str | None = None
     family: str | None = None
-    source: Literal["exemplar", "llm"] | None = None
+    source: Literal["library", "llm"] | None = None
     axis: str | None = None
     d: float | None = None
-    p8: float | None = None
+    p_hat: float | None = None
     t: int | None = None
-    prefix_sha: str | None = None
+    state_hash: str | None = None
     profile: list[dict[str, JsonValue]] | None = None
     stage_budget: int | None = None
     candidate_id: str | None = None
-    certificate: str | None = None
     n_search: int | None = None
 
 
@@ -91,13 +93,7 @@ def read_corpus(path: Path) -> list[CorpusEntry]:
     return [CorpusEntry.model_validate(r) for r in read_jsonl(path)]
 
 
-HINT_CANDIDATE_ID = "hint"
-
-
-def mark_hint(trace: Trace) -> Trace:
-    """R_hint rollouts (expert plan in the prompt) are witness searches, never training data."""
-    trace.candidate_id = HINT_CANDIDATE_ID
-    return trace
+HINT_CANDIDATE_ID = "hint"  # v0.1 hint rollouts (no longer produced); still excluded when read
 
 
 def is_hint_trace(trace: Trace) -> bool:
@@ -105,7 +101,7 @@ def is_hint_trace(trace: Trace) -> bool:
 
 
 def training_traces(path: Path) -> list[Trace]:
-    """The traces induction and bank building may use: every rollout except hint rollouts."""
+    """The traces induction and bank building may use: every rollout except v0.1 hint rollouts."""
     return [t for t in TraceStore(path).all() if not is_hint_trace(t)]
 
 
