@@ -20,6 +20,12 @@ the state the sequential loop would see. (3) ``corpus.jsonl`` and ``accounting.c
 written in the run's task order, so the pooled run's files equal the sequential run's byte for
 byte. The pool size is recorded in ``events.jsonl`` (``run_start``) and by the driver in the
 manifest.
+
+The leverage prior is persistent: every ``record_leverage`` / ``record_accepted`` is written as a
+``leverage`` event, and a new controller on an existing run directory rebuilds the table from the
+events of the tasks that completed (a task's events count once its ``task_done`` is not
+``infra_error``; an interrupted attempt's events are discarded with the attempt), so a resumed run
+and a later extension of the task set continue the same prior the uninterrupted run would have.
 """
 
 from __future__ import annotations
@@ -135,6 +141,7 @@ class Controller:
         self._io_lock = threading.Lock()
         self._order: dict[str, int] = {}
         self._finished: dict[str, threading.Event] = {}
+        self._restore_leverage()
 
     # ------------------------------------------------------------------ plumbing
     def _attr(self, task: TaskRef, phase: str, budget: BudgetName = "search") -> Attribution:
@@ -188,6 +195,38 @@ class Controller:
             if e.kind == "task_done":
                 done[str(e.payload["task_id"])] = str(e.payload.get("outcome"))
         return {t for t, o in done.items() if o != "infra_error"}
+
+    def _record_leverage(self, task: TaskRef, family: str, has_leverage: bool) -> None:
+        self.leverage.record_leverage(family, has_leverage)
+        self._ev("leverage", task, family=family, tested=True, has_leverage=has_leverage)
+
+    def _record_accepted(self, task: TaskRef, family: str, dose: float) -> None:
+        self.leverage.record_accepted(family, dose)
+        self._ev("leverage", task, family=family, accepted_dose=dose)
+
+    def _restore_leverage(self) -> None:
+        """Replay the ``leverage`` events of every completed task, in order, into the table."""
+        path = self.run_dir / "events.jsonl"
+        if not path.exists():
+            return
+        pending: dict[str, list[dict[str, Any]]] = {}
+        committed: list[dict[str, Any]] = []
+        for e in read_trace(path):
+            t = str(e.payload.get("task_id"))
+            if e.kind == "task_start":
+                pending[t] = []
+            elif e.kind == "leverage":
+                pending.setdefault(t, []).append(dict(e.payload))
+            elif e.kind == "task_done" and e.payload.get("outcome") != "infra_error":
+                committed.extend(pending.pop(t, []))
+        for p in committed:
+            family = str(p["family"])
+            if "accepted_dose" in p:
+                self.leverage.record_accepted(family, float(p["accepted_dose"]))
+            else:
+                self.leverage.record_leverage(family, bool(p.get("has_leverage")))
+        if committed:
+            self.events.write("leverage_restored", {"events": len(committed)})
 
     # ------------------------------------------------------------------ the loop
     def run(self, tasks: Sequence[TaskRef], *, concurrency: int = 1) -> list[TaskOutcome]:
@@ -419,9 +458,9 @@ class Controller:
         except _InfeasibleError:
             return None
         has_leverage = lev.verdict != "too_easy"
-        self.leverage.record_leverage(fam.name, has_leverage)
+        self._record_leverage(task, fam.name, has_leverage)
         if lev.verdict == "in_band":
-            self.leverage.record_accepted(fam.name, 1.0)
+            self._record_accepted(task, fam.name, 1.0)
             return self._accept_knob(task, fam, cache[1.0], 1.0, lev, est, [DoseEval(1.0, lev)])
         if not has_leverage:
             self._ev("no_leverage", task, family=fam.name, successes=lev.successes, n=lev.n)
@@ -447,7 +486,7 @@ class Controller:
         )
         if result.status == "accepted" and result.accepted is not None:
             ev = result.accepted
-            self.leverage.record_accepted(fam.name, ev.d)
+            self._record_accepted(task, fam.name, ev.d)
             return self._accept_knob(task, fam, cache[ev.d], ev.d, ev.eval, est, result.history)
         if result.status == "budget":
             raise BudgetExhausted(

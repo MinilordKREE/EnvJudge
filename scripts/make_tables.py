@@ -315,8 +315,8 @@ def main(argv: list[str] | None = None) -> int:
             f"| {ARM_LABEL[arm]} | {counts['accepted']} | {counts['all_rejected']} | {counts['skipped']} |"  # noqa: E501
         )
     shared = shared_confirm()
-    zero_tasks = sorted(
-        {t for t, e in shared.items() if e.get("successes") == 0},
+    zero_tasks = sorted(  # 0 of n >= 1 confirmed rollouts; an all-error task is not zero
+        {t for t, e in shared.items() if e.get("successes") == 0 and (e.get("n") or 0) > 0},
     )
     unlocked: dict[str, list[str]] = {}
     for arm in ("A", "Aex", "AplusH"):

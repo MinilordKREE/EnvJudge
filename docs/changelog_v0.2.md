@@ -83,6 +83,17 @@ one 4 -> 8 rule the two v0.1 acceptances that were not learnable (18, 20) are dr
 acceptance is learnable. Report `experiments/alfworld_e2/results/e2_step1_v02.md`, LOG entry in
 `experiments/alfworld_e2/LOG.md`. Round 1 (Flash-Lite) stays labelled v0.1.
 
+## Persistent leverage prior (2026-09-10, E3 pre-flight 1; owner request)
+
+Every `record_leverage` / `record_accepted` is written as a `leverage` event; a controller on an existing run
+directory replays the events of the completed tasks (an attempt that ended `infra_error` or was killed is
+discarded with the attempt) before running, and logs `leverage_restored`. A resumed run therefore behaves
+exactly like an uninterrupted one, and a later extension of the task set (seeds 30–49) continues the same
+prior. Tests (`tests/unit/test_leverage_persist.py`): four fake tasks, killed in the third, resumed by a new
+controller — the table equals the two-task table at restore and the four-task table at the end, and the
+corpus bytes equal the uninterrupted run's; interrupted attempts do not count. The "Known limit" of the task
+pool section above is closed.
+
 ## Task pool (2026-09-10, added after Phase D; owner request)
 
 `Controller.run(tasks, concurrency=n)` runs `n` tasks at once. Concurrency changes wall clock only, never a

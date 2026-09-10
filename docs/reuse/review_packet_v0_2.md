@@ -38,9 +38,10 @@ accounting), eval hook on one released episode. Results (2026-09-11): 9 passed, 
 | attribution survives pool threads | `runner.dispatch` (`attributed()` per episode thread), `AeaSubprocessRunner.run` | `::test_dispatch_from_pool_threads_keeps_each_task_attribution` (two task threads × rollout pools) |
 | pool size traceable | `events.jsonl` `run_start` (every invocation), `manifest.json` `extra.concurrency` (driver) | `::test_pool_orders_harden_after_its_predecessors` (`run_start`), `scripts/e2_v02.py` (`inflight_episodes <= 16` guard) |
 
-Known limit: the leverage table is in-memory, so a resumed run (sequential or pooled) starts it empty; the
-pool does not change that. Longer-term (owner): move staging and the guards into subprocesses like the
-rollouts, which removes the global-state problem instead of serializing it.
+| the leverage prior persists across resume and extension | `controller._record_leverage` / `_record_accepted` → `leverage` events; `_restore_leverage` replays completed tasks' events | `test_leverage_persist.py` (kill in task 3, resume: table and corpus bytes equal the uninterrupted run; interrupted attempts discarded) |
+
+Longer-term (owner): move staging and the guards into subprocesses like the rollouts, which removes the
+global-state problem instead of serializing it.
 
 ## Do-not list (unchanged)
 

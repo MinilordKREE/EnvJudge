@@ -184,7 +184,9 @@ def main(argv: list[str] | None = None) -> int:
     rng = random.Random(args.seed)
     RESULTS.mkdir(parents=True, exist_ok=True)
     shared = confirm("shared")
-    zero_tasks = {str(e["task"]) for e in shared.values() if e.get("successes") == 0}
+    zero_tasks = {  # 0 of n >= 1 confirmed rollouts; an all-error task is not zero
+        str(e["task"]) for e in shared.values() if e.get("successes") == 0 and (e.get("n") or 0) > 0
+    }
     lines = ["# E2 step 1 — zero side on Qwen3-8B (PREREG8-Z)", ""]
     lines += [
         "## Shared original-environment K=16 (defines zero for this run)",

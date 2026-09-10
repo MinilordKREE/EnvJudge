@@ -291,7 +291,9 @@ def v02_profile() -> dict[str, dict[str, Any]]:
 def stage_tables() -> None:
     rng = random.Random(20260910)
     shared = mte.confirm("shared")
-    zero_tasks = {str(e["task"]) for e in shared.values() if e.get("successes") == 0}
+    zero_tasks = {
+        str(e["task"]) for e in shared.values() if e.get("successes") == 0 and (e.get("n") or 0) > 0
+    }
     conf = (
         json.loads((run_dir() / "confirm_summary.json").read_text())
         if (run_dir() / "confirm_summary.json").exists()
