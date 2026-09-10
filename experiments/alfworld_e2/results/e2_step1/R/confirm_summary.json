@@ -1,0 +1,35 @@
+{
+ "18:acc0:685e7333309a4eb0": {
+  "task": "18",
+  "kind": "accepted",
+  "t": null,
+  "successes": 2,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.125,
+  "learnable": false,
+  "shared": false
+ },
+ "20:acc0:9112afb5a4d09586": {
+  "task": "20",
+  "kind": "accepted",
+  "t": null,
+  "successes": 0,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.0,
+  "learnable": false,
+  "shared": false
+ },
+ "27:acc0:61422989dec3c073": {
+  "task": "27",
+  "kind": "accepted",
+  "t": null,
+  "successes": 9,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.5625,
+  "learnable": true,
+  "shared": false
+ }
+}

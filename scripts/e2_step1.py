@@ -152,6 +152,8 @@ def transformed_envs(arm: str) -> list[dict[str, Any]]:
     d = arm_dir(arm)
     envs: list[dict[str, Any]] = []
     if arm in ("Z", "Zfull"):
+        if not (d / "corpus.jsonl").exists():  # nothing accepted (Z-full may accept nothing)
+            return envs
         for e in read_corpus(d / "corpus.jsonl"):
             if e.aea.kind == "band":
                 continue

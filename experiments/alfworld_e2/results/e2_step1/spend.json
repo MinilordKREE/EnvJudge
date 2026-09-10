@@ -1,0 +1,29 @@
+{
+ "e2-G": {
+  "search": 18.152,
+  "designer": 0.171,
+  "confirm": 1.753
+ },
+ "e2-G-aborted-429": {
+  "search": 0.075
+ },
+ "e2-R": {
+  "search": 15.559,
+  "designer": 0.165,
+  "confirm": 3.556
+ },
+ "e2-Z": {
+  "search": 19.404,
+  "confirm": 4.616
+ },
+ "e2-Zfull": {
+  "search": 0.757
+ },
+ "e2-probe": {
+  "none": 0.0
+ },
+ "e2-shared": {
+  "confirm": 12.708
+ },
+ "total_usd": 76.92
+}

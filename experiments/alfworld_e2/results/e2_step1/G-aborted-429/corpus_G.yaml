@@ -1,0 +1,119 @@
+env:
+  import_path: envharness.bridges.alfworld:AlfworldEnv
+  reset_options:
+    split: train
+    repetition_threshold: 0
+agent:
+  type: llm
+  client_factory: aea.llm.envharness_client:AeaLLMClient
+  client_kwargs:
+    llm:
+      provider: deepseek
+      model: deepseek-v4-pro
+      base_url: https://api.deepseek.com
+      api_key_env: DEEPSEEK_API_KEY
+      provider_pin: null
+      temperature: 0.7
+      max_tokens: 4096
+      thinking: false
+      reasoning_effort: null
+      timeout_s: 120.0
+      cost_tolerance: 1.0e-06
+      retry:
+        max_attempts: 5
+        initial_delay_s: 1.0
+        max_delay_s: 30.0
+        multiplier: 2.0
+        jitter_s: 1.0
+        total_timeout_s: 300.0
+        retry_status_codes:
+        - 408
+        - 409
+        - 425
+        - 429
+    budget: designer
+    phase: designer
+    ledger_dir: /home/kree/work/EnvJudge/runs/e2-G
+    pricing_path: /home/kree/work/EnvJudge/configs/pricing.yaml
+  extra_instructions: ''
+policy:
+  client_factory: aea.llm.envharness_client:AeaLLMClient
+  client_kwargs:
+    llm:
+      provider: openrouter
+      model: qwen/qwen3-8b
+      base_url: https://openrouter.ai/api/v1
+      api_key_env: OPENROUTER_API_KEY
+      provider_pin: alibaba
+      temperature: 0.5
+      max_tokens: 2048
+      thinking: false
+      reasoning_effort: null
+      timeout_s: 120.0
+      cost_tolerance: 1.0e-06
+      retry:
+        max_attempts: 5
+        initial_delay_s: 1.0
+        max_delay_s: 30.0
+        multiplier: 2.0
+        jitter_s: 1.0
+        total_timeout_s: 300.0
+        retry_status_codes:
+        - 408
+        - 409
+        - 425
+        - 429
+    ledger_dir: /home/kree/work/EnvJudge/runs/e2-G
+    pricing_path: /home/kree/work/EnvJudge/configs/pricing.yaml
+  action_format: think_action
+  max_history: 200
+  temperature: 0.5
+  task_description: 'You are an agent in a text-based household environment (ALFWorld).
+
+    Each turn you receive an observation and a list of admissible
+
+    commands. First reason step-by-step about the current situation
+
+    inside <think>...</think> tags. Then pick ONE admissible command
+
+    and output it inside <action>...</action> tags.
+
+    '
+objective:
+  type: difficulty_zone
+  target_band:
+  - 0.4
+  - 0.6
+  window: 20
+budget:
+  type: capped_adaptive
+  max_k: 5
+orchestrator:
+  task_id: alfworld-corpus-ours-release
+  task_description: 'Mutate train tasks where the Policy is currently weak; only emit
+
+    harnesses that exercise failure-recovery skills WITHOUT shifting
+
+    the env''s surface presentation.
+
+    '
+  n_iterations: 100
+  max_episode_steps: 50
+  k_per_candidate: 5
+  rollout_concurrency: 5
+  base_seed: 0
+  baseline_cache_dir: null
+  task_id_stride: 1
+  task_id_base_offset: 0
+  discard_rollout_steps_after_decide: false
+  mutator_baseline_mode: full
+  skip_passthrough_candidates: true
+runner:
+  type: subprocess
+  timeout_seconds: 500
+storage:
+  trace_path: /home/kree/work/EnvJudge/runs/e2-G/traces.jsonl
+logging:
+  log_dir: /home/kree/work/EnvJudge/runs/e2-G
+  log_policy_calls: true
+  log_agent_calls: true

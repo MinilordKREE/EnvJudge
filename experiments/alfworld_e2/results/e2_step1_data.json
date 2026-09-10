@@ -1,0 +1,426 @@
+{
+ "z1": {
+  "Z": {
+   "envs": 5,
+   "learnable": 3,
+   "rollouts": 248,
+   "per_1000": 12.096774193548388,
+   "ci95": [
+    0.0,
+    27.272727272727273
+   ]
+  },
+  "G": {
+   "envs": 2,
+   "learnable": 2,
+   "rollouts": 240,
+   "per_1000": 8.333333333333334,
+   "ci95": [
+    0.0,
+    21.27659574468085
+   ]
+  },
+  "R": {
+   "envs": 3,
+   "learnable": 1,
+   "rollouts": 225,
+   "per_1000": 4.444444444444445,
+   "ci95": [
+    0.0,
+    16.666666666666668
+   ]
+  }
+ },
+ "unlocked": {
+  "Z": [
+   "8",
+   "9",
+   "27"
+  ],
+  "G": [
+   "9",
+   "27"
+  ],
+  "R": [
+   "27"
+  ],
+  "Zfull": []
+ },
+ "zero_tasks": [
+  "8",
+  "9",
+  "10",
+  "11",
+  "14",
+  "17",
+  "20",
+  "27"
+ ],
+ "profile": {
+  "0": {
+   "status": "unresolved_budget_limited",
+   "regime": "zero",
+   "p_hat": 0.0625,
+   "n_est": 16,
+   "certified": 6,
+   "rejected": 0,
+   "probes": [
+    {
+     "t": 50,
+     "successes": 0,
+     "n": 4,
+     "cls": "dead"
+    },
+    {
+     "t": 50,
+     "successes": 4,
+     "n": 4,
+     "cls": "too_easy_stage"
+    },
+    {
+     "t": 50,
+     "successes": 0,
+     "n": 4,
+     "cls": "dead"
+    }
+   ],
+   "skipped": [
+    "0:5609976d9cc45797",
+    "0:45895cf1809f7570",
+    "0:d29362c6b7a8a1da"
+   ],
+   "too_easy": [
+    50
+   ],
+   "n_search": 28,
+   "certificates": 6,
+   "profile": "unresolved (budget)",
+   "rollouts": {
+    "estimate": 32,
+    "probe": 12
+   }
+  },
+  "8": {
+   "status": "accepted_stage",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "certified": 6,
+   "rejected": 0,
+   "probes": [
+    {
+     "t": 50,
+     "successes": 0,
+     "n": 4,
+     "cls": "dead"
+    },
+    {
+     "t": 50,
+     "successes": 2,
+     "n": 4,
+     "cls": "learnable"
+    }
+   ],
+   "skipped": [
+    "8:4a4626b61c571cc4"
+   ],
+   "too_easy": [],
+   "n_search": 18,
+   "certificates": 6,
+   "profile": "late-learnable",
+   "rollouts": {
+    "estimate": 10,
+    "probe": 8
+   }
+  },
+  "9": {
+   "status": "accepted_stage",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "certified": 6,
+   "rejected": 0,
+   "probes": [
+    {
+     "t": 50,
+     "successes": 2,
+     "n": 4,
+     "cls": "learnable"
+    }
+   ],
+   "skipped": [
+    "9:5c038d682c9e3470"
+   ],
+   "too_easy": [],
+   "n_search": 14,
+   "certificates": 6,
+   "profile": "late-learnable",
+   "rollouts": {
+    "estimate": 30,
+    "probe": 4
+   }
+  },
+  "10": {
+   "status": "unresolved",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "certified": 1,
+   "rejected": 5,
+   "probes": [
+    {
+     "t": 50,
+     "successes": 0,
+     "n": 4,
+     "cls": "dead"
+    }
+   ],
+   "skipped": [],
+   "too_easy": [],
+   "n_search": 14,
+   "certificates": 6,
+   "profile": "dead",
+   "rollouts": {
+    "estimate": 30,
+    "probe": 4
+   }
+  },
+  "11": {
+   "status": "unresolved",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "certified": 0,
+   "rejected": 6,
+   "probes": [],
+   "skipped": [],
+   "too_easy": [],
+   "n_search": 10,
+   "certificates": 6,
+   "profile": "unresolved",
+   "rollouts": {
+    "estimate": 10
+   }
+  },
+  "14": {
+   "status": "unresolved_budget_limited",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "certified": 6,
+   "rejected": 0,
+   "probes": [
+    {
+     "t": 50,
+     "successes": 0,
+     "n": 4,
+     "cls": "dead"
+    },
+    {
+     "t": 50,
+     "successes": 0,
+     "n": 4,
+     "cls": "dead"
+    },
+    {
+     "t": 50,
+     "successes": 0,
+     "n": 4,
+     "cls": "dead"
+    },
+    {
+     "t": 38,
+     "successes": 0,
+     "n": 4,
+     "cls": "dead"
+    },
+    {
+     "t": 25,
+     "successes": 0,
+     "n": 4,
+     "cls": "dead"
+    }
+   ],
+   "skipped": [
+    "14:1ea498326f86dda0"
+   ],
+   "too_easy": [],
+   "n_search": 30,
+   "certificates": 6,
+   "profile": "unresolved (budget)",
+   "rollouts": {
+    "estimate": 14,
+    "probe": 20
+   }
+  },
+  "17": {
+   "status": "unresolved_budget_limited",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "certified": 6,
+   "rejected": 0,
+   "probes": [
+    {
+     "t": 50,
+     "successes": 0,
+     "n": 4,
+     "cls": "dead"
+    },
+    {
+     "t": 50,
+     "successes": 0,
+     "n": 4,
+     "cls": "dead"
+    },
+    {
+     "t": 50,
+     "successes": 0,
+     "n": 4,
+     "cls": "dead"
+    },
+    {
+     "t": 38,
+     "successes": 0,
+     "n": 4,
+     "cls": "dead"
+    },
+    {
+     "t": 25,
+     "successes": 0,
+     "n": 4,
+     "cls": "dead"
+    }
+   ],
+   "skipped": [
+    "17:ce3d9fc1094304f5"
+   ],
+   "too_easy": [],
+   "n_search": 30,
+   "certificates": 6,
+   "profile": "unresolved (budget)",
+   "rollouts": {
+    "estimate": 14,
+    "probe": 20
+   }
+  },
+  "18": {
+   "status": "accepted_stage",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "certified": 4,
+   "rejected": 2,
+   "probes": [
+    {
+     "t": 50,
+     "successes": 0,
+     "n": 4,
+     "cls": "dead"
+    },
+    {
+     "t": 38,
+     "successes": 0,
+     "n": 4,
+     "cls": "dead"
+    },
+    {
+     "t": 25,
+     "successes": 0,
+     "n": 4,
+     "cls": "dead"
+    },
+    {
+     "t": 12,
+     "successes": 1,
+     "n": 4,
+     "cls": "learnable"
+    }
+   ],
+   "skipped": [],
+   "too_easy": [],
+   "n_search": 26,
+   "certificates": 6,
+   "profile": "late-learnable",
+   "rollouts": {
+    "estimate": 14,
+    "probe": 16
+   }
+  },
+  "20": {
+   "status": "accepted_stage",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "certified": 5,
+   "rejected": 1,
+   "probes": [
+    {
+     "t": 50,
+     "successes": 1,
+     "n": 4,
+     "cls": "learnable"
+    }
+   ],
+   "skipped": [],
+   "too_easy": [],
+   "n_search": 14,
+   "certificates": 6,
+   "profile": "late-learnable",
+   "rollouts": {
+    "estimate": 14,
+    "probe": 4
+   }
+  },
+  "27": {
+   "status": "accepted_stage",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "certified": 4,
+   "rejected": 0,
+   "probes": [
+    {
+     "t": 50,
+     "successes": 2,
+     "n": 4,
+     "cls": "learnable"
+    }
+   ],
+   "skipped": [],
+   "too_easy": [],
+   "n_search": 14,
+   "certificates": 4,
+   "profile": "late-learnable",
+   "rollouts": {
+    "estimate": 14,
+    "probe": 4
+   }
+  }
+ },
+ "spend": {
+  "e2-G": {
+   "search": 18.151785431000057,
+   "designer": 0.170931904,
+   "confirm": 1.7532449609999992
+  },
+  "e2-R": {
+   "search": 15.558695827999978,
+   "designer": 0.16451599999999997,
+   "confirm": 3.5564687600000013
+  },
+  "e2-Z": {
+   "search": 19.40357459299989,
+   "confirm": 4.616139761999997
+  },
+  "e2-Zfull": {
+   "search": 0.7571292169999998
+  },
+  "e2-probe": {
+   "none": 3.446299999999999e-05
+  },
+  "e2-shared": {
+   "confirm": 12.70831005600015
+  }
+ }
+}

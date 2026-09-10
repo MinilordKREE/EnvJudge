@@ -358,9 +358,23 @@ def main(argv: list[str] | None = None) -> int:
         mt.jsonl(RUNS / "e2-eval" / "guard_incidents.jsonl") if (RUNS / "e2-eval").exists() else []
     )
     lines += [
-        "## Incidents",
+        "## Incidents and deviations (UTC timestamps in experiments/alfworld_e2/LOG.md)",
         "",
-        f"Guard incidents: {len(inc)}. See experiments/alfworld_e2/LOG.md for launches, crashes and resumes.",  # noqa: E501
+        "- Per-episode cost ~USD 0.09 (zero tasks run to the 50-step cap), ~4x the PREREG8-Z "
+        "projection; the run order was changed so the claim-bearing stages (Z, G, R, confirmations) "  # noqa: E501
+        "ran before the Z-full reference; the owner raised the step-1 cap from USD 90 to 130.",
+        "- Z crashed once in in-process staging (TextWorld grammar parser under task concurrency 2) "  # noqa: E501
+        "and was resumed at concurrency 1; seven Z tasks then failed on an upstream 429 throttle of "  # noqa: E501
+        "the Alibaba Qwen endpoint and were re-run after a ledgered endpoint probe cleared; one "
+        "machine reboot interrupted the re-run (resumed). Re-run tasks 0, 9, 10 carry their "
+        "pre-crash estimate rollouts in the traces, so their estimate counts exceed 16 and Z1's "
+        "denominator includes them (conservative for Z).",
+        "- G's candidates marked accepted on tasks 10 and 18 are empty (no rules, no setup actions) "  # noqa: E501
+        "and are not transformed environments; they are excluded from Z1/Z2.",
+        "- Z-full could not rebuild the skipped states of tasks 0 and 9 (the failure sample changed "  # noqa: E501
+        "once the re-run's estimate rollouts joined the pool); the skipped state of tasks 8, 14, 17 "  # noqa: E501
+        "(t = 12) was probed and is dead.",
+        f"- Guard incidents: {len(inc)}.",
         "",
     ]
     Path(args.out).write_text("\n".join(lines) + "\n", encoding="utf-8")

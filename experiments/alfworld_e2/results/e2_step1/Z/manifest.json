@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "run_id": "e2-Z",
+  "created_at": "2026-09-09T12:38:01.394288Z",
+  "seed": 0,
+  "config_sha256": "0ef3167f7776595e15a281fc191135b8c1bfed7e63870c5a71208e78ae8aa9d8",
+  "config_schema_version": 1,
+  "aea_config_sha256": "16c131049bfc306ed209d2f0426846c282f22dd5a7c26023313da62b180b4727",
+  "config_path": null,
+  "git_sha": "9a5a47fa2eaf95c0f875c995187f7701bd4ee9da",
+  "git_dirty": true,
+  "envharness_sha": "fab7d57441f06b75c73a900e04561d4d7600f361",
+  "aea_version": "0.1.0",
+  "python_version": "3.12.9",
+  "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+  "out_dir": "/home/kree/work/EnvJudge/runs/e2-Z",
+  "extra": {
+    "experiment": "E2 step 1",
+    "arm": "Z",
+    "prereg_sha": "db1dcc7",
+    "tasks": [
+      0,
+      8,
+      9,
+      10,
+      11,
+      14,
+      17,
+      18,
+      20,
+      27
+    ],
+    "policy_endpoint_pin": "alibaba",
+    "designer": "deepseek-v4-pro",
+    "thinking": {
+      "policy": false,
+      "designer": false
+    }
+  }
+}

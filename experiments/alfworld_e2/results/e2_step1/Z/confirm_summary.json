@@ -1,0 +1,57 @@
+{
+ "8:dbb86058d7a21b34": {
+  "task": "8",
+  "kind": "stage",
+  "t": 50,
+  "successes": 7,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.4375,
+  "learnable": true,
+  "shared": false
+ },
+ "9:e4bbeceed777586e": {
+  "task": "9",
+  "kind": "stage",
+  "t": 50,
+  "successes": 11,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.6875,
+  "learnable": true,
+  "shared": false
+ },
+ "18:8684abc8ff5471d3": {
+  "task": "18",
+  "kind": "stage",
+  "t": 12,
+  "successes": 1,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.0625,
+  "learnable": false,
+  "shared": false
+ },
+ "20:cf0e7fd92373aff0": {
+  "task": "20",
+  "kind": "stage",
+  "t": 50,
+  "successes": 3,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.1875,
+  "learnable": false,
+  "shared": false
+ },
+ "27:792b4af6d1661d9e": {
+  "task": "27",
+  "kind": "stage",
+  "t": 50,
+  "successes": 9,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.5625,
+  "learnable": true,
+  "shared": false
+ }
+}

@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "run_id": "e2-G",
+  "created_at": "2026-09-09T18:57:59.490426Z",
+  "seed": 0,
+  "config_sha256": "a5d2cc179f26a45e0a7dcd49d5c083e1e014cfdf914ab554631975e3dddb76ee",
+  "config_schema_version": 1,
+  "aea_config_sha256": "16c131049bfc306ed209d2f0426846c282f22dd5a7c26023313da62b180b4727",
+  "config_path": null,
+  "git_sha": "e5356513fab37ca02c81e428d178a37abb35f824",
+  "git_dirty": true,
+  "envharness_sha": "fab7d57441f06b75c73a900e04561d4d7600f361",
+  "aea_version": "0.1.0",
+  "python_version": "3.12.9",
+  "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+  "out_dir": "/home/kree/work/EnvJudge/runs/e2-G",
+  "extra": {
+    "experiment": "E2 step 1",
+    "arm": "G",
+    "prereg_sha": "db1dcc7",
+    "tasks": [
+      0,
+      8,
+      9,
+      10,
+      11,
+      14,
+      17,
+      18,
+      20,
+      27
+    ],
+    "config_changes_vs_released": [
+      "agent.client_factory",
+      "agent.client_kwargs",
+      "agent.extra_instructions",
+      "logging.log_dir",
+      "objective.target_band",
+      "policy.client_factory",
+      "policy.client_kwargs",
+      "storage.trace_path"
+    ],
+    "config_sha256": "e898b4e5a0089edf1d130ea9f1d94e1629f7fbfee441ba09ccb5df5e5e0dd6a4",
+    "policy_endpoint_pin": "alibaba",
+    "designer": "deepseek-v4-pro",
+    "thinking": {
+      "policy": false,
+      "designer": false
+    }
+  }
+}

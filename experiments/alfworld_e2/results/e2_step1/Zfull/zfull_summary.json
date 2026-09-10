@@ -1,0 +1,128 @@
+{
+ "0": {
+  "task": "0",
+  "skipped_by_cap": [
+   "0:5609976d9cc45797",
+   "0:45895cf1809f7570",
+   "0:d29362c6b7a8a1da"
+  ],
+  "rebuilt": [
+   "0:1597c5fb1909931c",
+   "0:5dc801df309cd710",
+   "0:8856f837bc59906b",
+   "0:8c34c6216d6df7ec",
+   "0:c1685fe7e0a76220"
+  ],
+  "missing_after_rebuild": [
+   "0:5609976d9cc45797",
+   "0:45895cf1809f7570",
+   "0:d29362c6b7a8a1da"
+  ],
+  "profile": [],
+  "status": "no_candidate",
+  "accepted": null,
+  "reference": true
+ },
+ "8": {
+  "task": "8",
+  "skipped_by_cap": [
+   "8:4a4626b61c571cc4"
+  ],
+  "rebuilt": [
+   "8:4a4626b61c571cc4",
+   "8:8bf0c066b0d72def",
+   "8:963ea4810256dd67",
+   "8:dbb86058d7a21b34",
+   "8:e75cad3776630bfe",
+   "8:f78537cb5adfa25d"
+  ],
+  "missing_after_rebuild": [],
+  "profile": [
+   {
+    "id": "8:4a4626b61c571cc4",
+    "t": 12,
+    "successes": 0,
+    "n": 4,
+    "cls": "dead"
+   }
+  ],
+  "status": "unresolved",
+  "accepted": null,
+  "reference": true
+ },
+ "9": {
+  "task": "9",
+  "skipped_by_cap": [
+   "9:5c038d682c9e3470"
+  ],
+  "rebuilt": [
+   "9:256f6869118b5f47",
+   "9:4f0da42ab908e867",
+   "9:7ccc496e0e8c0d03",
+   "9:a47902b81f2cc43b",
+   "9:bb3c4c4e25e4982b",
+   "9:bc27c499c30a06a6"
+  ],
+  "missing_after_rebuild": [
+   "9:5c038d682c9e3470"
+  ],
+  "profile": [],
+  "status": "no_candidate",
+  "accepted": null,
+  "reference": true
+ },
+ "14": {
+  "task": "14",
+  "skipped_by_cap": [
+   "14:1ea498326f86dda0"
+  ],
+  "rebuilt": [
+   "14:1ea498326f86dda0",
+   "14:44ceb30d0869c01e",
+   "14:4abfc56656cd27c1",
+   "14:97d58a6c5ea3bc35",
+   "14:bb31fdc0efced691",
+   "14:cc28059cd752ebaf"
+  ],
+  "missing_after_rebuild": [],
+  "profile": [
+   {
+    "id": "14:1ea498326f86dda0",
+    "t": 12,
+    "successes": 0,
+    "n": 4,
+    "cls": "dead"
+   }
+  ],
+  "status": "unresolved",
+  "accepted": null,
+  "reference": true
+ },
+ "17": {
+  "task": "17",
+  "skipped_by_cap": [
+   "17:ce3d9fc1094304f5"
+  ],
+  "rebuilt": [
+   "17:15ed4f877293b84d",
+   "17:189904bf230a56b4",
+   "17:272246c57ad5c3ce",
+   "17:404496793b20656e",
+   "17:ce3d9fc1094304f5",
+   "17:f5ebf8de1dd8ff0a"
+  ],
+  "missing_after_rebuild": [],
+  "profile": [
+   {
+    "id": "17:ce3d9fc1094304f5",
+    "t": 12,
+    "successes": 0,
+    "n": 4,
+    "cls": "dead"
+   }
+  ],
+  "status": "unresolved",
+  "accepted": null,
+  "reference": true
+ }
+}
