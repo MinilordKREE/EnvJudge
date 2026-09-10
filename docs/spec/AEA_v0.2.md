@@ -46,13 +46,21 @@ Every policy rollout counts against the cap; wrapper replays and oracle sessions
 - **One acceptance rule.** `evaluate(env)`: 4 policy rollouts; 0/4 → `too_hard`, 4/4 → `no_effect`
   (`too_easy` inside a bracket), otherwise 4 more; `in_band` iff 3–5 successes of 8; 1–2/8 → `too_hard`;
   6–7/8 → `too_easy`. Both operators use it; an accepted environment is one that returned `in_band`.
-- **One guard.** `solvable(env, witness_sources)`: replay a known success through the wrapped / staged
-  environment and check that it still reaches the goal. Sources, in order: the policy's own shortest success on
-  this task (from the estimate), then the benchmark oracle (ALFWorld's expert). Without any source the probe
-  self-certifies (the evaluation itself is the evidence). Replays and oracle sessions are not policy rollouts.
+- **One guard, asymmetric.** `solvable(env, sources)` replays a known success through the wrapped / staged
+  environment and checks that it still reaches the goal. The sources differ by operator:
+  - harden: (1) the policy's own shortest success on this task (from the estimate), then (2) the benchmark
+    oracle when one exists;
+  - stage: the oracle only (a success that starts from reset cannot witness a mid-trajectory state).
+  Rule: any source passing → solvable. A failed replay is NOT evidence of unsolvability (A/T-axis changes close
+  old paths by design; in O5H 31.8% of the candidates later shown solvable failed the old replay): replay fails →
+  try the oracle; oracle fails → `dropped: uncertified`; replay fails and no oracle exists (or stage without an
+  oracle) → continue, the probe self-certifies (an `in_band` evaluation is the evidence). Observation-axis
+  families are solvable by construction and skip the guard. Replays and oracle sessions are not policy rollouts.
 - **One budget.** Every policy rollout of a task (estimate, evaluations, brackets, stage probes) is charged to
   `search`, hard cap 30; the confirmation rollouts that define learnability (`eval`, K = 16, B_L) are never
-  written back and are not part of the method's decisions.
+  written back and are not part of the method's decisions. Designer (proposer) calls are ledgered under
+  `designer` for cost reporting only and are not charged to the cap, in every arm: EnvRigger's designer calls
+  are not charged either, so the arms are symmetric.
 - **Six method constants.** B_T, B_L, K, the 3–5-of-8 acceptance, the 4 → 8 probe, the cap of 30. The batch
   schedule of the estimator, its stopping confidence, the bisection limit (4) and the proposer cap (2) are
   implementation constants in `AEAConfig.impl` and do not appear in the method section.
@@ -60,10 +68,13 @@ Every policy rollout counts against the cap; wrapper replays and oracle sessions
   reason: `no_leverage`, `exhausted`, `dead`, `uncertified`, `budget`, `too_easy`). Reports may group by reason.
 - **Families and leverage.** A family's measured leverage is the rate, over the tasks where it was evaluated at
   d = 1, of not returning `no_effect`. Families are ordered by that rate (proposer order until a family has been
-  seen); a family with leverage rate ≥ 0.9 over ≥ 5 tasks starts its bracket at its last accepted dose instead
-  of the midpoint. The bracket keeps `lo` = the largest dose known too easy and `hi` = the smallest known too
-  hard; a result that contradicts the order (harder dose easier than an easier one) stops the family for that
-  task.
+  seen). The d = 1 leverage test is ALWAYS run on every task: the prior changes only the first bisection point.
+  Per task and family the sequence is: evaluate w(1) (4 → 8); if `in_band` accept, if `no_effect` record
+  leverage 0 and move on; otherwise bisect on [lo = 0, hi = 1] starting at the midpoint, or, when the family's
+  leverage rate is ≥ 0.9 over ≥ 5 tasks, at the family's last accepted dose; at most 4 bisections
+  (10 + 4 + 8 + 8 = 30). The bracket keeps `lo` = the largest dose known too easy and `hi` = the smallest known
+  too hard; a result that contradicts the order (a harder dose measurably easier than an easier one) stops the
+  family for that task.
 - **Candidate states.** For each of three failed rollouts of the estimate (seeded sample), the end state and the
   midpoint state; duplicates by state hash removed; at most six; walked latest-first.
 
