@@ -13,7 +13,6 @@ Outputs in the run directory: ``corpus.jsonl`` (released loader shape + ``aea`` 
 from __future__ import annotations
 
 import concurrent.futures as cf
-import logging
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -37,12 +36,7 @@ from aea.session import Session
 from aea.stage import StagedCandidate, build_stage_candidates, seeded_failures
 from aea.witness import policy_shortest_success, solvable
 
-logger = logging.getLogger(__name__)
-
 type Outcome = Literal["accepted", "kept", "dropped", "infra_error"]
-type Reason = Literal[
-    "no_leverage", "exhausted", "dead", "uncertified", "budget", "too_easy", "no_failed_rollout", ""
-]
 
 
 @dataclass(frozen=True)
@@ -123,6 +117,9 @@ class Controller:
     def _attr(self, task: TaskRef, phase: str, budget: BudgetName = "search") -> Attribution:
         return Attribution(phase=phase, budget=budget, arm=self.arm, task_id=task.task_id)
 
+    def _ev(self, event: str, task: TaskRef, **payload: Any) -> None:
+        self.events.write(event, {"task_id": task.task_id, **payload})
+
     def _rollouts(
         self,
         task: TaskRef,
@@ -140,19 +137,15 @@ class Controller:
         errored = sum(1 for t in traces if t.error)
         if errored:  # environment / infrastructure errors are refunded and never counted
             self.budget.refund(task.task_id, errored, phase=phase)
-            self.events.write(
-                "rollout_errors", {"task_id": task.task_id, "phase": phase, "n": errored}
-            )
+            self._ev("rollout_errors", task, phase=phase, n=errored)
         for t in traces:
             self.traces.add(t)
-        self.events.write(
+        self._ev(
             "rollouts",
-            {
-                "task_id": task.task_id,
-                "phase": phase,
-                "n": len(traces),
-                "successes": sum(int(bool(t.success)) for t in traces),
-            },
+            task,
+            phase=phase,
+            n=len(traces),
+            successes=sum(int(bool(t.success)) for t in traces),
         )
         return traces
 
@@ -160,10 +153,7 @@ class Controller:
         write_corpus_entry(
             self.corpus_path, entry_from_candidate(self.substrate.game_file(task), candidate, meta)
         )
-        self.events.write(
-            "corpus_entry",
-            {"task_id": task.task_id, "kind": meta.kind, "candidate_id": meta.candidate_id},
-        )
+        self._ev("corpus_entry", task, kind=meta.kind, candidate_id=meta.candidate_id)
 
     def completed_tasks(self) -> set[str]:
         """Tasks with a ``task_done`` outcome; ``infra_error`` is not an outcome (re-run)."""
@@ -191,9 +181,7 @@ class Controller:
         return outcomes
 
     def run_task(self, task: TaskRef) -> TaskOutcome:
-        self.events.write(
-            "task_start", {"task_id": task.task_id, "seed": task.seed, "arm": self.arm}
-        )
+        self._ev("task_start", task, seed=task.seed, arm=self.arm)
         try:
             outcome = self._run_task(task)
         except BudgetExhausted as exc:
@@ -228,16 +216,14 @@ class Controller:
     def _run_task(self, task: TaskRef) -> TaskOutcome:
         est = self._estimate(task)
         self._estimates[task.task_id] = est
-        self.events.write(
+        self._ev(
             "estimate",
-            {
-                "task_id": task.task_id,
-                "regime": est.regime,
-                "p_hat": est.p_hat,
-                "n": est.n,
-                "probabilities": est.probabilities,
-                "stop": est.stop_reason,
-            },
+            task,
+            regime=est.regime,
+            p_hat=est.p_hat,
+            n=est.n,
+            probabilities=est.probabilities,
+            stop=est.stop_reason,
         )
         if est.regime == "band":
             meta = AeaMeta(
@@ -287,17 +273,15 @@ class Controller:
                     ),
                 )
                 proposed = list(got)
-                self.events.write(
+                self._ev(
                     "proposer",
-                    {
-                        "task_id": task.task_id,
-                        "proposed": [k.name for k in got],
-                        "rejected": rejected,
-                        "ranking": ranking,
-                    },
+                    task,
+                    proposed=[k.name for k in got],
+                    rejected=rejected,
+                    ranking=ranking,
                 )
             except InfraError as exc:
-                self.events.write("proposer_failed", {"task_id": task.task_id, "error": str(exc)})
+                self._ev("proposer_failed", task, error=str(exc))
         return self.leverage.order([*proposed, *LIBRARY])
 
     def _harden(self, task: TaskRef, est: EstimateResult) -> TaskOutcome:
@@ -306,9 +290,7 @@ class Controller:
         ctx = FamilyContext(task_id=task.task_id, success_lengths=lengths)
         witness = policy_shortest_success(est.traces)
         families = self._families(task, lengths)
-        self.events.write(
-            "families", {"task_id": task.task_id, "order": [f.name for f in families]}
-        )
+        self._ev("families", task, order=[f.name for f in families])
         tried = 0
         for fam in families:
             result = self._try_family(task, fam, ctx, witness, est)
@@ -348,10 +330,7 @@ class Controller:
 
         top = make(1.0)
         if top is None:
-            self.events.write(
-                "family_skipped",
-                {"task_id": task.task_id, "family": fam.name, "reason": "infeasible"},
-            )
+            self._ev("family_skipped", task, family=fam.name, reason="infeasible")
             return None
         guard = solvable(
             top,
@@ -361,22 +340,17 @@ class Controller:
             oracle=self.substrate.has_oracle(),
             by_construction=fam.axis == "O",
         )
-        self.events.write(
+        self._ev(
             "solvable",
-            {
-                "task_id": task.task_id,
-                "family": fam.name,
-                "d": 1.0,
-                "ok": guard.ok,
-                "source": guard.source,
-                "detail": guard.detail,
-            },
+            task,
+            family=fam.name,
+            d=1.0,
+            ok=guard.ok,
+            source=guard.source,
+            detail=guard.detail,
         )
         if not guard.ok:
-            self.events.write(
-                "family_skipped",
-                {"task_id": task.task_id, "family": fam.name, "reason": "uncertified"},
-            )
+            self._ev("family_skipped", task, family=fam.name, reason="uncertified")
             return None
 
         def evaluate_at(d: float) -> Eval:
@@ -397,15 +371,7 @@ class Controller:
             self.leverage.record_accepted(fam.name, 1.0)
             return self._accept_knob(task, fam, cache[1.0], 1.0, lev, est, [DoseEval(1.0, lev)])
         if not has_leverage:
-            self.events.write(
-                "no_leverage",
-                {
-                    "task_id": task.task_id,
-                    "family": fam.name,
-                    "successes": lev.successes,
-                    "n": lev.n,
-                },
-            )
+            self._ev("no_leverage", task, family=fam.name, successes=lev.successes, n=lev.n)
             return None
         start = self.leverage.start_dose(fam.name)
         try:
@@ -413,22 +379,18 @@ class Controller:
                 evaluate_at, self.config, leverage=DoseEval(1.0, lev), start=start
             )
         except _InfeasibleError as why:
-            self.events.write(
-                "family_skipped", {"task_id": task.task_id, "family": fam.name, "reason": str(why)}
-            )
+            self._ev("family_skipped", task, family=fam.name, reason=str(why))
             return None
-        self.events.write(
+        self._ev(
             "bracket",
-            {
-                "task_id": task.task_id,
-                "family": fam.name,
-                "start": start,
-                "status": result.status,
-                "history": [
-                    {"d": h.d, "s": h.eval.successes, "n": h.eval.n, "verdict": h.eval.verdict}
-                    for h in result.history
-                ],
-            },
+            task,
+            family=fam.name,
+            start=start,
+            status=result.status,
+            history=[
+                {"d": h.d, "s": h.eval.successes, "n": h.eval.n, "verdict": h.eval.verdict}
+                for h in result.history
+            ],
         )
         if result.status == "accepted" and result.accepted is not None:
             ev = result.accepted
@@ -497,16 +459,12 @@ class Controller:
             self.config,
             oracle=self.substrate.has_oracle(),
         )
-        self.events.write(
+        self._ev(
             "stage_candidates",
-            {
-                "task_id": task.task_id,
-                "certified": [c.id for c in staged.candidates],
-                "rejected": staged.rejected,
-                "fidelity_ok": [
-                    c.fidelity_ok for c in staged.candidates if c.fidelity_ok is not None
-                ],
-            },
+            task,
+            certified=[c.id for c in staged.candidates],
+            rejected=staged.rejected,
+            fidelity_ok=[c.fidelity_ok for c in staged.candidates if c.fidelity_ok is not None],
         )
         if not staged.candidates:
             return TaskOutcome(
@@ -550,9 +508,7 @@ class Controller:
                         p_hat=ev.p_hat,
                     )
                     self._write_corpus(task, c.candidate, meta)
-                    self.events.write(
-                        "probe", {"task_id": task.task_id, "profile": profile, "accepted": c.id}
-                    )
+                    self._ev("probe", task, profile=profile, accepted=c.id)
                     return TaskOutcome(
                         task,
                         "accepted",
@@ -562,14 +518,12 @@ class Controller:
                         detail={"t": c.t, "profile": profile},
                     )
         except BudgetExhausted:
-            self.events.write(
+            self._ev(
                 "probe",
-                {
-                    "task_id": task.task_id,
-                    "profile": profile,
-                    "accepted": None,
-                    "skipped": [c.id for c in staged.candidates if c not in walked],
-                },
+                task,
+                profile=profile,
+                accepted=None,
+                skipped=[c.id for c in staged.candidates if c not in walked],
             )
             return TaskOutcome(
                 task,
@@ -582,7 +536,7 @@ class Controller:
                     "skipped": [c.id for c in staged.candidates if c not in walked],
                 },
             )
-        self.events.write("probe", {"task_id": task.task_id, "profile": profile, "accepted": None})
+        self._ev("probe", task, profile=profile, accepted=None)
         reason = "too_easy" if any(p["verdict"] == "too_easy" for p in profile) else "dead"
         return TaskOutcome(task, "dropped", reason, "zero", est.p_hat, detail={"profile": profile})
 

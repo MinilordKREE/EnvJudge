@@ -51,3 +51,24 @@ v0.2 targets ≤ ~1,500 for the method code excluding llm/, ledger and io.
   packet; tag `aea-v0.2`. STOP.
 - **D (owner go):** re-run the zero side on the E2 step-1 tasks under v0.2 (10 tasks, cap 30, Qwen3-8B; the
   shared K = 16 on disk is reused), ≈ USD 25, reported next to v0.1 as `e2_step1_v02.md`. Round 1 stays v0.1.
+
+## Phase B status (2026-09-10)
+
+Implemented as planned; module map in `docs/reuse/v0_2.md`. Method code (config, estimate, evaluate, bracket,
+families, witness, stage, budget, controller, exemplars): 1,697 lines (from 3,033 in v0.1); `session.py`
+(239) and `substrate.py` are counted as substrate glue with io/runner. Unit suite: 88 tests green, ruff and
+mypy --strict clean.
+
+Two details settled during implementation, both in `impl`, neither a method constant:
+- `order_tolerance` = 0.2, not 0.25: under the bracket invariant every later dose lies between a known
+  too-easy and a known too-hard dose, so a violation can only show as a LOWER dose harder than a higher one
+  by more than the tolerance; with 4 first-batch rollouts the smallest such gap is 0.25 (2/8 at d = 1 vs 0/4
+  lower), so 0.25 could never fire. 0.2 is below one rollout in four.
+- The prior seeds the first bisection point only (owner clarification 3); the d = 1 test always runs and is
+  the first entry of every bracket history.
+
+Removed with their tests: `dose.py`, `probe.py`, `priors.py`, `knobs.py` (Displacement to `docs/legacy/`,
+the rest folded into `families.py`), `certs.py` (ladder gone; sessions in `session.py`, the guard in
+`witness.py`), `handoff.py` (to `scripts/handoff_demos.py`, tested through the script). The v0.1
+integration suite is archived at `docs/legacy/test_alfworld_v01.py`; Phase C rewrites it against v0.2.
+The v0.1 protocol scripts are frozen under `scripts/v0_1/` (run against tag `aea-v0.1`).
