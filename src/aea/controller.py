@@ -7,12 +7,25 @@ are not charged. Confirmations (K = 16, B_L) are a separate script and never cha
 Outputs in the run directory: ``corpus.jsonl`` (released loader shape + ``aea`` block; kinds
 ``kept`` / ``knob`` / ``stage``), ``traces.jsonl`` (released ``TraceStore``), ``accounting.csv``,
 ``events.jsonl`` (M0 envelope; the resume log: a task whose ``task_done`` outcome is not
-``infra_error`` is skipped on resume). Task-level concurrency through a thread pool.
+``infra_error`` is skipped on resume).
+
+Task pool (``run(concurrency > 1)``): concurrency changes wall clock only, never a charged
+number. Three rules make that true. (1) Every in-process ALFWorld session — the harden guard's
+replay and oracle, the stage guard, prefix compilation, the fidelity check — runs under the one
+:data:`aea.session.SESSION_LOCK` (taken here around the guard and staging sections, and again
+inside :func:`aea.session.open_session`); policy rollouts, which run in subprocesses, overlap
+freely. (2) The leverage prior is a sequential dependency: task *i* orders its families and
+seeds its bracket only after every task before it in the run's task list has finished, exactly
+the state the sequential loop would see. (3) ``corpus.jsonl`` and ``accounting.csv`` are
+written in the run's task order, so the pooled run's files equal the sequential run's byte for
+byte. The pool size is recorded in ``events.jsonl`` (``run_start``) and by the driver in the
+manifest.
 """
 
 from __future__ import annotations
 
 import concurrent.futures as cf
+import threading
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -30,9 +43,16 @@ from aea.errors import BudgetExhausted, InfraError
 from aea.estimate import EstimateResult, estimate
 from aea.evaluate import Eval, evaluate
 from aea.families import LIBRARY, Family, FamilyContext, LeverageTable, propose_families
-from aea.io import AeaMeta, TraceWriter, entry_from_candidate, write_corpus_entry
+from aea.io import (
+    AeaMeta,
+    TraceWriter,
+    canonicalize_corpus,
+    entry_from_candidate,
+    write_accounting,
+    write_corpus_entry,
+)
 from aea.llm.types import Attribution, BudgetName, ChatRequest, ChatResponse
-from aea.session import Session
+from aea.session import SESSION_LOCK, Session
 from aea.stage import StagedCandidate, build_stage_candidates, seeded_failures
 from aea.witness import policy_shortest_success, solvable
 
@@ -112,6 +132,9 @@ class Controller:
         self.traces = TraceWriter(run_dir / "traces.jsonl")
         self.corpus_path = run_dir / "corpus.jsonl"
         self._estimates: dict[str, EstimateResult] = {}
+        self._io_lock = threading.Lock()
+        self._order: dict[str, int] = {}
+        self._finished: dict[str, threading.Event] = {}
 
     # ------------------------------------------------------------------ plumbing
     def _attr(self, task: TaskRef, phase: str, budget: BudgetName = "search") -> Attribution:
@@ -168,49 +191,73 @@ class Controller:
 
     # ------------------------------------------------------------------ the loop
     def run(self, tasks: Sequence[TaskRef], *, concurrency: int = 1) -> list[TaskOutcome]:
+        """Run ``tasks`` (in this order; ``concurrency`` of them at a time) and write the run
+        files in task order. Tasks already done in ``run_dir`` are skipped."""
         done = self.completed_tasks()
         todo = [t for t in tasks if t.task_id not in done]
+        order = [t.task_id for t in tasks]
+        self._order = {t: i for i, t in enumerate(order)}
+        for t in tasks:
+            ev = self._finished.setdefault(t.task_id, threading.Event())
+            if t.task_id in done:
+                ev.set()
+        self.events.write(
+            "run_start",
+            {"tasks": order, "todo": [t.task_id for t in todo], "concurrency": concurrency},
+        )
         if concurrency <= 1:
             outcomes = [self.run_task(t) for t in todo]
-        else:
+        else:  # FIFO submission: a task only ever waits on tasks submitted before it
             with cf.ThreadPoolExecutor(max_workers=concurrency) as pool:
                 outcomes = list(pool.map(self.run_task, todo))
-        from aea.io import write_accounting
-
-        write_accounting(self.run_dir / "accounting.csv", self.budget.accounting_rows())
+        canonicalize_corpus(self.corpus_path, order)
+        write_accounting(self.run_dir / "accounting.csv", self.budget.accounting_rows(order))
         return outcomes
+
+    def _await_predecessors(self, task: TaskRef) -> None:
+        """Block until every task before ``task`` in the run's task list has finished (the
+        leverage prior then holds exactly what the sequential loop would have recorded)."""
+        rank = self._order.get(task.task_id)
+        if rank is None:
+            return
+        for t, i in self._order.items():
+            if i < rank:
+                self._finished[t].wait()
 
     def run_task(self, task: TaskRef) -> TaskOutcome:
         self._ev("task_start", task, seed=task.seed, arm=self.arm)
         try:
-            outcome = self._run_task(task)
-        except BudgetExhausted as exc:
-            est = self._estimates.get(task.task_id)
-            outcome = TaskOutcome(
-                task,
-                "dropped",
-                "budget",
-                est.regime if est else None,
-                est.p_hat if est else None,
-                detail={"spent": exc.spent},
+            try:
+                outcome = self._run_task(task)
+            except BudgetExhausted as exc:
+                est = self._estimates.get(task.task_id)
+                outcome = TaskOutcome(
+                    task,
+                    "dropped",
+                    "budget",
+                    est.regime if est else None,
+                    est.p_hat if est else None,
+                    detail={"spent": exc.spent},
+                )
+            except InfraError as exc:
+                outcome = TaskOutcome(
+                    task, "infra_error", "", detail={"error": str(exc), "kind": exc.kind}
+                )
+            outcome.n_search = self.budget.account(task.task_id).spent
+            self.events.write(
+                "task_done",
+                {
+                    "task_id": task.task_id,
+                    "outcome": outcome.outcome,
+                    "reason": outcome.reason,
+                    "regime": outcome.regime,
+                    "p_hat": outcome.p_hat,
+                    "n_search": outcome.n_search,
+                    **outcome.detail,
+                },
             )
-        except InfraError as exc:
-            outcome = TaskOutcome(
-                task, "infra_error", "", detail={"error": str(exc), "kind": exc.kind}
-            )
-        outcome.n_search = self.budget.account(task.task_id).spent
-        self.events.write(
-            "task_done",
-            {
-                "task_id": task.task_id,
-                "outcome": outcome.outcome,
-                "reason": outcome.reason,
-                "regime": outcome.regime,
-                "p_hat": outcome.p_hat,
-                "n_search": outcome.n_search,
-                **outcome.detail,
-            },
-        )
+        finally:  # never leave a successor waiting, whatever happened
+            self._finished.setdefault(task.task_id, threading.Event()).set()
         return outcome
 
     def _run_task(self, task: TaskRef) -> TaskOutcome:
@@ -268,7 +315,7 @@ class Controller:
                     cap=self.config.impl.proposer_cap,
                     attribution=self._attr(task, "propose", "designer"),
                     seed=task.seed,
-                    record=lambda payload: append_jsonl(
+                    record=lambda payload: self._append(
                         calls_path, {"task_id": task.task_id, **payload}
                     ),
                 )
@@ -284,7 +331,12 @@ class Controller:
                 self._ev("proposer_failed", task, error=str(exc))
         return self.leverage.order([*proposed, *LIBRARY])
 
+    def _append(self, path: Path, record: dict[str, Any]) -> None:
+        with self._io_lock:
+            append_jsonl(path, record)
+
     def _harden(self, task: TaskRef, est: EstimateResult) -> TaskOutcome:
+        self._await_predecessors(task)  # the leverage prior is a sequential dependency
         successes = [t for t in est.traces if t.success]
         lengths = tuple(t.duration_steps or len(t.steps) for t in successes)
         ctx = FamilyContext(task_id=task.task_id, success_lengths=lengths)
@@ -332,14 +384,15 @@ class Controller:
         if top is None:
             self._ev("family_skipped", task, family=fam.name, reason="infeasible")
             return None
-        guard = solvable(
-            top,
-            lambda c: self.substrate.open_session(task, c, None),
-            self.config,
-            policy_success=witness,
-            oracle=self.substrate.has_oracle(),
-            by_construction=fam.axis == "O",
-        )
+        with SESSION_LOCK:  # in-process replay / oracle sessions: one at a time per process
+            guard = solvable(
+                top,
+                lambda c: self.substrate.open_session(task, c, None),
+                self.config,
+                policy_success=witness,
+                oracle=self.substrate.has_oracle(),
+                by_construction=fam.axis == "O",
+            )
         self._ev(
             "solvable",
             task,
@@ -451,14 +504,15 @@ class Controller:
         if not failures:
             return TaskOutcome(task, "dropped", "no_failed_rollout", "zero", est.p_hat)
         opts = self.substrate.stage_reset_options(task)
-        staged = build_stage_candidates(
-            lambda c, ro: self.substrate.open_session(task, c, ro),
-            task.task_id,
-            failures,
-            opts,
-            self.config,
-            oracle=self.substrate.has_oracle(),
-        )
+        with SESSION_LOCK:  # prefix compilation, oracle guard and fidelity check: in-process
+            staged = build_stage_candidates(
+                lambda c, ro: self.substrate.open_session(task, c, ro),
+                task.task_id,
+                failures,
+                opts,
+                self.config,
+                oracle=self.substrate.has_oracle(),
+            )
         self._ev(
             "stage_candidates",
             task,

@@ -29,6 +29,19 @@ processes, horizon-squeeze boundary (truncated exactly past m), expert-as-policy
 stage path (guarded candidates, ≤ 6, unique), RL corpus loader round-trip, budget invariant (traces = charged =
 accounting), eval hook on one released episode. Results (2026-09-11): 9 passed, 1 skipped (RL loader needs `ray`), 0 failed; unit suite 88 green.
 
+## Task pool (added after Phase D, 2026-09-10)
+
+| rule | code | test |
+|---|---|---|
+| every in-process ALFWorld session under one lock, open → close (harden replay + oracle, stage oracle, prefix compilation, fidelity check, game-file lookup) | `session.SESSION_LOCK` (RLock; `open_session` holds it until `Session.close`), `controller._try_family` / `_stage` take it around the guard and staging sections | `test_task_pool.py::test_controller_sections_take_the_session_lock`, `::test_pool_reproduces_the_sequential_run_byte_for_byte` (`max_active_sessions == 1`, rollouts overlap) |
+| concurrency changes wall clock only | ordered outputs (`io.canonicalize_corpus`, `Budget.accounting_rows(order)`), harden waits for predecessors (`controller._await_predecessors`), per-task RNG in the fake | `::test_pool_reproduces_the_sequential_run_byte_for_byte` (corpus, accounting, per-task charges, leverage table, every family order and bracket identical), `::test_pool_orders_harden_after_its_predecessors` |
+| attribution survives pool threads | `runner.dispatch` (`attributed()` per episode thread), `AeaSubprocessRunner.run` | `::test_dispatch_from_pool_threads_keeps_each_task_attribution` (two task threads × rollout pools) |
+| pool size traceable | `events.jsonl` `run_start` (every invocation), `manifest.json` `extra.concurrency` (driver) | `::test_pool_orders_harden_after_its_predecessors` (`run_start`), `scripts/e2_v02.py` (`inflight_episodes <= 16` guard) |
+
+Known limit: the leverage table is in-memory, so a resumed run (sequential or pooled) starts it empty; the
+pool does not change that. Longer-term (owner): move staging and the guards into subprocesses like the
+rollouts, which removes the global-state problem instead of serializing it.
+
 ## Do-not list (unchanged)
 
 No edits under `third_party/`; released APIs only; every LLM call ledgered with provider pin and price guard;

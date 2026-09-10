@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import random
+import threading
+import time
 import uuid
 from collections.abc import Callable
 from typing import Any
@@ -30,19 +32,52 @@ class FakeSubstrate:
         seed: int = 1,
         with_designer: bool = False,
         designer_fn: Callable[[ChatRequest], ChatResponse] | None = None,
+        rollout_delay_s: float = 0.0,
+        session_delay_s: float = 0.0,
     ) -> None:
         self.policies = policies
         self.p = p
-        self.rng = random.Random(seed)
+        self.seed = seed
+        # one generator per task, so a task's episodes do not depend on which other tasks ran
+        # before or alongside it (the task pool must reproduce the sequential run)
+        self._rngs: dict[str, random.Random] = {}
         self.calls: list[tuple[str, str, int]] = []
         self._open: Callable[..., Session] = make_open(PLAN)
         self._designer = designer_fn if with_designer else None
+        # concurrency probes (docs/changelog_v0.2.md, task pool): guard / staging sessions opened
+        # through ``open_session`` and rollout batches in flight, with their maxima
+        self.rollout_delay_s = rollout_delay_s
+        self.session_delay_s = session_delay_s
+        self._probe_lock = threading.Lock()
+        self.active_sessions = 0
+        self.max_active_sessions = 0
+        self.active_rollouts = 0
+        self.max_active_rollouts = 0
+        self.rollouts_during_session = 0
+
+    def rng(self, task: TaskRef) -> random.Random:
+        with self._probe_lock:
+            if task.task_id not in self._rngs:
+                self._rngs[task.task_id] = random.Random(f"{self.seed}:{task.task_id}")
+            return self._rngs[task.task_id]
 
     # -- world -----------------------------------------------------------------
     def open_session(
         self, task: TaskRef, candidate: Candidate | None, reset_options: dict[str, Any] | None
     ) -> Session:
-        return self._open(candidate, reset_options)
+        with self._probe_lock:
+            self.active_sessions += 1
+            self.max_active_sessions = max(self.max_active_sessions, self.active_sessions)
+        if self.session_delay_s:
+            time.sleep(self.session_delay_s)
+        sess = self._open(candidate, reset_options)
+
+        def release() -> None:
+            with self._probe_lock:
+                self.active_sessions -= 1
+
+        sess.close_fn = release
+        return sess
 
     def game_file(self, task: TaskRef) -> str:
         return f"json_2.1.1/train/fake-{task.task_id}/game.tw-pddl"
@@ -70,8 +105,18 @@ class FakeSubstrate:
         reset_options: dict[str, Any] | None = None,
     ) -> list[Trace]:
         kind = self.policies[task.task_id]
-        self.calls.append((task.task_id, attribution.phase, n))
-        return [self._episode(task, candidate, kind, reset_options) for _ in range(n)]
+        with self._probe_lock:
+            self.calls.append((task.task_id, attribution.phase, n))
+            self.active_rollouts += 1
+            self.max_active_rollouts = max(self.max_active_rollouts, self.active_rollouts)
+            self.rollouts_during_session += int(self.active_sessions > 0)
+        try:
+            if self.rollout_delay_s:
+                time.sleep(self.rollout_delay_s)
+            return [self._episode(task, candidate, kind, reset_options) for _ in range(n)]
+        finally:
+            with self._probe_lock:
+                self.active_rollouts -= 1
 
     def _episode(
         self,
@@ -81,6 +126,7 @@ class FakeSubstrate:
         reset_options: dict[str, Any] | None,
     ) -> Trace:
         sess = self._open(candidate, reset_options)
+        rng = self.rng(task)
         steps: list[Step] = []
         plan = list(PLAN)
         for _ in range(50):
@@ -100,7 +146,7 @@ class FakeSubstrate:
             elif kind == "coin":
                 nxt = (
                     next((a for a in plan if a in adm), "look")
-                    if self.rng.random() < self.p**0.25
+                    if rng.random() < self.p**0.25
                     else "look"
                 )
                 if nxt in plan:
@@ -108,7 +154,7 @@ class FakeSubstrate:
             elif kind == "footer":
                 nxt = "look"
             else:  # 'random': a zero policy that never picks a plan action
-                nxt = self.rng.choice([a for a in adm if a not in PLAN] or ["look"])
+                nxt = rng.choice([a for a in adm if a not in PLAN] or ["look"])
             r = sess.step_text(nxt)
             act = Action(name="do", kwargs={"text": nxt})
             obs = Observation(text=str(r["obs"]))

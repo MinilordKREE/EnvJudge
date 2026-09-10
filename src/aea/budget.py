@@ -59,10 +59,18 @@ class Budget:
             acc.refunded[phase] = acc.refunded.get(phase, 0) + n
             acc.infra_errors += n
 
-    def accounting_rows(self) -> list[dict[str, object]]:
+    def accounting_rows(self, order: list[str] | None = None) -> list[dict[str, object]]:
+        """One row per (task, phase). ``order`` (the run's task list) fixes the task order so a
+        task pool writes the same file as the sequential run; unlisted tasks follow in
+        first-charge order."""
         rows: list[dict[str, object]] = []
+        rank = {t: i for i, t in enumerate(order or [])}
         with self._lock:
-            for acc in self._accounts.values():
+            accounts = sorted(
+                enumerate(self._accounts.values()),
+                key=lambda p: (rank.get(p[1].task_id, len(rank)), p[0]),
+            )
+            for _, acc in accounts:
                 for phase, n in sorted(acc.charged.items()):
                     rows.append(
                         {

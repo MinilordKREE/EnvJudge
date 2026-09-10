@@ -3,8 +3,11 @@ task set with the v0.2 controller; the shared original-environment K=16 of v0.1 
 is reused; the proposer is off on this side (PREREG8-Z, arm Z). Writes runs/e2v02-Z/ and
 experiments/alfworld_e2/results/e2_step1_v02.md (v0.2 next to the v0.1 numbers).
 
-Stages: corpus (the controller on the 10 tasks, cap 30, task concurrency 1) -> confirm (K=16 on
-every accepted environment, staged sessions under the 100-step config) -> tables.
+Stages: corpus (the controller on the 10 tasks, cap 30; ``--concurrency`` = task pool size, the
+Phase-D run used 1) -> confirm (K=16 on every accepted environment, staged sessions under the
+100-step config) -> tables. The manifest records the task pool size, the rollout concurrency and
+their product (episodes in flight, kept <= 16 per PREREG7 A2.4); every invocation also logs it in
+``events.jsonl`` (``run_start``), so a resumed run keeps the history of pool sizes.
 """
 
 from __future__ import annotations
@@ -42,6 +45,8 @@ RUNS = ROOT / "runs"
 RESULTS = ROOT / "experiments" / "alfworld_e2" / "results"
 TASKS: tuple[int, ...] = (0, 8, 9, 10, 11, 14, 17, 18, 20, 27)
 RUN_ID = "e2v02-Z"
+ROLLOUT_CONCURRENCY = 4  # subprocess episodes per rollout batch (corpus stage)
+MAX_INFLIGHT_EPISODES = 16  # PREREG7 A2.4: total eval concurrency
 CAP_USD = 30.0
 PRICING = ROOT / "configs" / "pricing.yaml"
 STAGE_CONFIG = ROOT / "configs" / "alfworld_config_100.yaml"
@@ -121,6 +126,12 @@ def substrate(d: Path, run_id: str, concurrency: int) -> AeaSubstrate:
 
 def stage_corpus(task_concurrency: int) -> None:
     guard("corpus")
+    inflight = task_concurrency * ROLLOUT_CONCURRENCY
+    if task_concurrency < 1 or inflight > MAX_INFLIGHT_EPISODES:
+        raise ConfigError(
+            f"task concurrency {task_concurrency} x {ROLLOUT_CONCURRENCY} rollouts = {inflight} "
+            f"episodes in flight; the cap is {MAX_INFLIGHT_EPISODES}"
+        )
     policy = policy_qwen()
     run_config = RunConfig(
         schema_version=1,
@@ -154,12 +165,17 @@ def stage_corpus(task_concurrency: int) -> None:
             "policy_endpoint_pin": policy.provider_pin,
             "proposer": "off",
             "aea_config": AEAConfig().model_dump(mode="json"),
+            "concurrency": {
+                "tasks": task_concurrency,
+                "rollouts": ROLLOUT_CONCURRENCY,
+                "inflight_episodes": inflight,
+            },
         },
     )
     os.environ.setdefault("ALFWORLD_DATA", str(Path.home() / "eh_alfworld_data"))
     ctrl = Controller(
         AEAConfig(),
-        substrate(ctx.out_dir, ctx.run_id, 4),
+        substrate(ctx.out_dir, ctx.run_id, ROLLOUT_CONCURRENCY),
         ctx.out_dir,
         ctx.run_id,
         arm="Z",

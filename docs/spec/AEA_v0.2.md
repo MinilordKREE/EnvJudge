@@ -87,5 +87,7 @@ Every policy rollout counts against the cap; wrapper replays and oracle sessions
   the hand-off extension, all in `scripts/` and `experiments/`.
 - Engineering rigor, unchanged from v0.1: the ledger (one row per LLM call, provider pin, price guard), the run
   manifest, `AeaSubprocessRunner` attribution, resumability, and the corpus / trace formats consumed by
-  envharness.
+  envharness. The task pool (`Controller.run(concurrency)`) changes wall clock only: in-process sessions
+  are serialized under one lock, the leverage prior is a sequential dependency, and corpus / accounting /
+  per-task charges equal the sequential run's byte for byte; the pool size is recorded in the manifest.
 - The paper shows the box; anything else it claims is shown necessary by an ablation or omitted.

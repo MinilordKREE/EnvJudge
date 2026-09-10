@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import csv
 import os
+import threading
 from pathlib import Path
 from typing import Any, Literal
 
@@ -21,7 +22,9 @@ from pydantic import Field
 
 from aea.core.config import StrictModel
 from aea.core.hashing import JsonValue
-from aea.core.io import append_jsonl, read_jsonl
+from aea.core.io import append_jsonl, atomic_write_text, read_jsonl, read_text
+
+_WRITE_LOCK = threading.Lock()
 
 type EntryKind = Literal["kept", "knob", "stage"]
 
@@ -86,7 +89,27 @@ def entry_from_candidate(game_file: str, candidate: Candidate, meta: AeaMeta) ->
 
 
 def write_corpus_entry(path: Path, entry: CorpusEntry) -> None:
-    append_jsonl(path, entry.model_dump(mode="json", exclude_none=True))
+    with _WRITE_LOCK:
+        append_jsonl(path, entry.model_dump(mode="json", exclude_none=True))
+
+
+def canonicalize_corpus(path: Path, task_order: list[str]) -> None:
+    """Rewrite ``corpus.jsonl`` with its lines ordered by ``task_order`` (stable within a task;
+    tasks not listed keep their position after the listed ones). Lines are moved, never
+    re-serialized, so a file written in task order is unchanged byte for byte: a task pool
+    (``Controller.run(concurrency > 1)``) produces the same corpus as the sequential run."""
+    if not path.exists():
+        return
+    lines = [ln for ln in read_text(path).splitlines() if ln.strip()]
+    rank = {t: i for i, t in enumerate(task_order)}
+
+    def key(item: tuple[int, str]) -> tuple[int, int]:
+        entry = CorpusEntry.model_validate_json(item[1])
+        return (rank.get(entry.aea.task_id, len(rank)), item[0])
+
+    ordered = [ln for _, ln in sorted(enumerate(lines), key=key)]
+    if ordered != lines:
+        atomic_write_text(path, "".join(ln + "\n" for ln in ordered))
 
 
 def read_corpus(path: Path) -> list[CorpusEntry]:
@@ -110,9 +133,11 @@ class TraceWriter:
 
     def __init__(self, path: Path) -> None:
         self._store = TraceStore(path)
+        self._lock = threading.Lock()
 
     def add(self, trace: Trace) -> None:
-        self._store.add(trace)
+        with self._lock:  # task-pool threads append to one file
+            self._store.add(trace)
 
     def __len__(self) -> int:
         return len(self._store)

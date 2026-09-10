@@ -12,11 +12,21 @@ T-axis termination is not missed. The handcoded expert's next action is read fro
 
 Ported behaviour (oracle): docs/pilots/eobs/eobs/replay.py (``Session``, ``replay_actions``,
 ``run_expert``, ``_base_bridge``). No runtime import from the pilots.
+
+Concurrency: the bridge is one stateful object per process and TextWorld's grammar parser
+(tatsu) is a module global, so two in-process sessions in flight at once corrupt each other
+(the ``IndexError`` seen at task concurrency 2 in E2 step 1). Every in-process session — harden
+replay and oracle guard, stage oracle guard, prefix compilation, fidelity check, game-file
+lookup — is opened through :func:`open_session`, which holds :data:`SESSION_LOCK` from open to
+``close``. The controller takes the same lock around its guard and staging sections, so the
+rule holds for any substrate (the offline fake included). Policy rollouts run in subprocesses
+and never take it.
 """
 
 from __future__ import annotations
 
 import os
+import threading
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -25,6 +35,9 @@ from typing import Any, Protocol
 from envharness.core.types import Action, Candidate
 
 TASK_LABEL = "alfworld-corpus-ours-release"
+SESSION_LOCK = threading.RLock()
+"""The one in-process session lock (re-entrant: a thread may nest a session inside its own
+guard section; two threads never hold it together)."""
 DEFAULT_RESET_OPTIONS: dict[str, Any] = {"split": "train", "repetition_threshold": 0}
 EXPERT_STUCK_N = 4
 
@@ -116,8 +129,15 @@ class Session:
         }
 
     def close(self) -> None:
-        if self.close_fn is not None:
-            self.close_fn()
+        fn, self.close_fn = self.close_fn, None
+        if fn is not None:
+            fn()
+
+    def __enter__(self) -> Session:
+        return self
+
+    def __exit__(self, *exc: object) -> None:
+        self.close()
 
 
 _BRIDGES: dict[str, tuple[Any, RecordingProxy]] = {}
@@ -141,27 +161,37 @@ def _base_bridge(reset_options: dict[str, Any], seed: int) -> tuple[Any, Recordi
 def open_session(
     candidate: Candidate | None, seed: int, reset_options: dict[str, Any] | None = None
 ) -> Session:
-    """Build the stack exactly as ``build_env_stack`` does, over the reused bridge, and reset it."""
+    """Build the stack exactly as ``build_env_stack`` does, over the reused bridge, and reset it.
+
+    Holds :data:`SESSION_LOCK` until the returned session is closed."""
     from envharness.core.code_loader import load_rules_instance
     from envharness.harnesses.setup import Setup
 
-    cand = candidate or Candidate()
-    opts = dict(reset_options or DEFAULT_RESET_OPTIONS)
-    bridge, proxy = _base_bridge(opts, seed)
-    stack: Any = bridge
-    if cand.in_env_actions:
-        stack = Setup(inner=stack, actions=list(cand.in_env_actions))
-    if (cand.rules_code or "").strip():
-        stack = load_rules_instance(cand.rules_code, inner=stack)
-    stack.reset(seed=seed, options={**opts, "task_id": TASK_LABEL})
-    gamefile = str(_unwrap(proxy.last_infos).get("extra.gamefile") or "")
+    SESSION_LOCK.acquire()
+    try:
+        cand = candidate or Candidate()
+        opts = dict(reset_options or DEFAULT_RESET_OPTIONS)
+        bridge, proxy = _base_bridge(opts, seed)
+        stack: Any = bridge
+        if cand.in_env_actions:
+            stack = Setup(inner=stack, actions=list(cand.in_env_actions))
+        if (cand.rules_code or "").strip():
+            stack = load_rules_instance(cand.rules_code, inner=stack)
+        stack.reset(seed=seed, options={**opts, "task_id": TASK_LABEL})
+        gamefile = str(_unwrap(proxy.last_infos).get("extra.gamefile") or "")
+    except BaseException:
+        SESSION_LOCK.release()
+        raise
 
     def detach() -> None:  # drop harness layers from the reused bridge without closing it
-        cur = stack
-        while cur is not bridge and hasattr(cur, "_inner"):
-            nxt = cur._inner
-            cur._inner = None
-            cur = nxt
+        try:
+            cur = stack
+            while cur is not bridge and hasattr(cur, "_inner"):
+                nxt = cur._inner
+                cur._inner = None
+                cur = nxt
+        finally:
+            SESSION_LOCK.release()
 
     return Session(
         stack=stack, bridge=bridge, proxy=proxy, seed=seed, gamefile=gamefile, close_fn=detach

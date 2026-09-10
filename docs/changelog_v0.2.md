@@ -74,6 +74,36 @@ the rest folded into `families.py`), `certs.py` (ladder gone; sessions in `sessi
 integration suite is archived at `docs/legacy/test_alfworld_v01.py`; Phase C rewrites it against v0.2.
 The v0.1 protocol scripts are frozen under `scripts/v0_1/` (run against tag `aea-v0.1`).
 
+## Task pool (2026-09-10, added after Phase D; owner request)
+
+`Controller.run(tasks, concurrency=n)` runs `n` tasks at once. Concurrency changes wall clock only, never a
+charged number:
+
+- One lock for every in-process ALFWorld session (`aea.session.SESSION_LOCK`, re-entrant): `open_session` holds
+  it from open to `close`, so the harden guard's policy replay and oracle, the stage oracle guard, prefix
+  compilation, the fidelity check and the game-file lookup all serialize; the controller also takes it
+  around its guard and staging sections, so the rule holds for any substrate. Policy rollouts run in
+  subprocesses and overlap. Motivation: the `IndexError` in TextWorld's module-global tatsu parser at task
+  concurrency 2 in E2 step 1 (v0.1), and the one stateful bridge per process.
+- The leverage prior is a sequential dependency: task *i* orders its families and seeds its bracket only after
+  every task before it in the run's task list has finished (`_await_predecessors`), exactly the sequential
+  state. Zero tasks (stage) and every estimate overlap freely; hardening is serialized in task order.
+- `corpus.jsonl` (lines moved, never re-serialized) and `accounting.csv` are written in the run's task order,
+  so the pooled run's files equal the sequential run's byte for byte; `traces.jsonl` and `events.jsonl` are
+  logs (interleaved, timestamped) and are not compared.
+- Traceability: `events.jsonl` gets a `run_start` event (`tasks`, `todo`, `concurrency`) per invocation, so a
+  resumed run keeps every pool size it ran under; `scripts/e2_v02.py` writes `extra.concurrency` (`tasks`,
+  `rollouts`, `inflight_episodes`) into the manifest and refuses more than 16 episodes in flight (A2.4).
+- Tests (`tests/unit/test_task_pool.py`, 5): pooled vs sequential run on six fake tasks (two saturated with
+  brackets, two zero, one no-leverage, one coin) — outcomes, per-task charges, corpus and accounting bytes,
+  leverage table, every family order and bracket identical, rollout batches overlapped (`max_active_rollouts
+  ≥ 2`), sessions never (`max_active_sessions == 1`); harden ordering after predecessors; both controller
+  sections hold the lock (a foreign holder blocks sessions, not rollouts); `canonicalize_corpus` preserves
+  bytes; the two-thread attribution test extended to two task threads × rollout pools. The fake substrate
+  now draws one RNG per task (the pool must not change which random numbers a task sees).
+- Not run for Phase D: the E2 v0.2 run stays at task concurrency 1 (its manifest says so). Longer-term
+  (owner): move staging and the guards into subprocesses like the rollouts.
+
 ## Phase C status (2026-09-11)
 
 Integration suite `tests/integration/test_alfworld.py` on the real ALFWorld bridge, LLM-free: 9 passed,

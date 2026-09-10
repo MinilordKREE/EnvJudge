@@ -30,7 +30,7 @@ def test_kept_or_accepted_on_a_coin_policy(tmp_path: Path) -> None:
     assert o.outcome in ("kept", "accepted", "dropped")
     assert ctrl.budget.account("1").spent <= AEAConfig().cap
     ev = [e.kind for e in _events(tmp_path)]
-    assert ev[0] == "task_start" and ev[-1] == "task_done"
+    assert ev[:2] == ["run_start", "task_start"] and ev[-1] == "task_done"
     if o.outcome == "kept":
         entry = read_corpus(tmp_path / "run" / "corpus.jsonl")[0]
         assert entry.aea.kind == "kept" and entry.rules_code == "" and not entry.in_env_actions
