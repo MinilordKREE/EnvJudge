@@ -128,7 +128,7 @@ def stage_corpus(task_concurrency: int) -> None:
         kind="exploratory",
         require_clean_tree=False,
         policy=policy,
-        designer=None,
+        designer=policy,  # RunConfig needs one; the proposer is OFF (manifest extra 'proposer')
         runs_root=RUNS,
     )
     d = run_dir()
