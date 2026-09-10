@@ -53,3 +53,9 @@ episode on the real bridge with a scripted litellm beneath the hook, LLM-free).
    one of litellm's transient classes the released `completion_with_retry` / `LiteLLMClient` retry
    (`test_guard_error_is_never_retried_by_the_released_client`); the released eval records the
    episode error, the marker makes the driver abort the whole run.
+4. **Two endpoints for the induction (E3-SL, 2026-09-10).** `EvalHook(embed_config=...)` /
+   `make_hook(..., embed_config=...)` routes `litellm.embedding` to a second OpenAI-compatible
+   endpoint (OpenRouter, the released bank's `gemini-embedding-001`) while the completions go to the
+   hook's own config (the DeepSeek V4 Pro extractor, `openai/` prefix with its `api_base`); both are
+   ledgered on `eval`. Without `embed_config` embeddings share the completion endpoint as before
+   (`test_deepseek_completions_with_openrouter_embeddings`).

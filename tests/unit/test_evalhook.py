@@ -342,3 +342,59 @@ def test_driver_passes_extra_argv(
     )
     assert seen[0][-2:] == ["--n-ood", "22"] and "--start-seeds" in seen[0]
     assert seen[0][seen[0].index("--start-seeds") + 1] == "112"
+
+
+def test_deepseek_completions_with_openrouter_embeddings(
+    tmp_path: Path, pricing: PricingTable, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """E3-SL induction: the extractor is DeepSeek (OpenAI-compatible, ``openai/`` prefix with its
+    api_base) while the released bank code embeds through OpenRouter (``embed_config``)."""
+    from aea.evalhook import EMBED_MODEL
+
+    seen: dict[str, dict[str, Any]] = {}
+
+    def fake_completion(**kwargs: Any) -> Any:
+        seen["completion"] = kwargs
+        return _response(provider="openai", content="- item")
+
+    def fake_embedding(**kwargs: Any) -> Any:
+        seen["embedding"] = kwargs
+        return SimpleNamespace(usage=SimpleNamespace(prompt_tokens=8), data=[{"embedding": [0.0]}])
+
+    monkeypatch.setattr(litellm, "completion", fake_completion)
+    monkeypatch.setattr(litellm, "embedding", fake_embedding)
+    deepseek = LLMConfig(
+        provider="deepseek",
+        model="deepseek-v4-pro",
+        base_url="https://api.deepseek.com",
+        api_key_env="DEEPSEEK_API_KEY",
+        provider_pin=None,
+        thinking=False,
+    )
+    from aea.llm.pricing import load_pricing
+
+    root = Path(__file__).resolve().parents[2]
+    hook = EvalHook(
+        config=deepseek,
+        ledger=Ledger(tmp_path / "ledger.jsonl", "r"),
+        pricing=load_pricing(root / "configs" / "pricing.yaml"),
+        run_dir=tmp_path,
+        api_key="sk-deepseek",
+        embed_config=LLMConfig(),
+        embed_api_key="sk-openrouter",
+    )
+    original = install(hook)
+    try:
+        litellm.completion(model="openai/whatever", messages=[], temperature=0.0)
+        litellm.embedding(model="gemini/gemini-embedding-001", input=["a"])
+    finally:
+        litellm.completion = original
+        monkeypatch.setattr(litellm, "embedding", fake_embedding)
+    c = seen["completion"]
+    assert c["model"] == "openai/deepseek-v4-pro" and c["api_base"] == "https://api.deepseek.com"
+    assert c["api_key"] == "sk-deepseek" and c["extra_body"]["thinking"] == {"type": "disabled"}
+    e = seen["embedding"]
+    assert e["model"] == f"openai/{EMBED_MODEL}" and e["api_base"] == "https://openrouter.ai/api/v1"
+    assert e["api_key"] == "sk-openrouter"
+    rows = read_ledger(tmp_path / "ledger.jsonl")
+    assert [r.model for r in rows] == ["deepseek-v4-pro", EMBED_MODEL]

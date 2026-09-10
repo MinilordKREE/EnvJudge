@@ -111,14 +111,23 @@ class EvalHook:
         run_dir: Path,
         api_key: str | None,
         default: tuple[Attribution, int] | None = None,
+        embed_config: LLMConfig | None = None,
+        embed_api_key: str | None = None,
     ) -> None:
+        """``embed_config`` routes ``litellm.embedding`` to a different OpenAI-compatible endpoint
+        than the completions (the released induction embeds through OpenRouter while a DeepSeek
+        extractor writes the items); by default embeddings share the completion endpoint."""
         check_routing(config)
+        if embed_config is not None:
+            check_routing(embed_config)
         self.config = config
         self.ledger = ledger
         self.pricing = pricing
         self.run_dir = run_dir
         self.api_key = api_key
         self.default = default
+        self.embed_config = embed_config
+        self.embed_api_key = embed_api_key
         self.calls = 0
         self.original_embedding: Callable[..., Any] | None = None
 
@@ -134,9 +143,11 @@ class EvalHook:
         )
         wire = build_wire_request(base, self.config)
         out = dict(kwargs)
+        # OpenRouter and DeepSeek are OpenAI-compatible endpoints: litellm's ``openai/`` prefix
+        # with ``api_base`` sends the released request there unchanged
         out["model"] = (
             f"openai/{self.config.model}"
-            if self.config.provider == "openrouter"
+            if self.config.provider in ("openrouter", "deepseek")
             else self.config.model
         )
         out["api_base"] = self.config.base_url
@@ -257,9 +268,11 @@ def install(hook: EvalHook) -> Callable[..., Any]:
     def embedding(*args: Any, **kwargs: Any) -> Any:
         routed = dict(kwargs)
         routed["model"] = f"openai/{EMBED_MODEL}"
-        routed["api_base"] = hook.config.base_url
-        if hook.api_key:
-            routed["api_key"] = hook.api_key
+        embed_cfg = hook.embed_config or hook.config
+        embed_key = hook.embed_api_key if hook.embed_config is not None else hook.api_key
+        routed["api_base"] = embed_cfg.base_url
+        if embed_key:
+            routed["api_key"] = embed_key
         response = original_embedding(*args, **routed)
         hook.account_embedding(response)
         return response
@@ -278,10 +291,14 @@ def make_hook(
     run_id: str,
     pricing: PricingTable,
     default: tuple[Attribution, int] | None = None,
+    embed_config: LLMConfig | None = None,
 ) -> EvalHook:
     key = None
     if config.provider != "fake":
         key = load_settings().require(config.api_key_env.lower()).get_secret_value()
+    embed_key = None
+    if embed_config is not None and embed_config.provider != "fake":
+        embed_key = load_settings().require(embed_config.api_key_env.lower()).get_secret_value()
     return EvalHook(
         config=config,
         ledger=Ledger(run_dir / f"ledger.{os.getpid()}.jsonl", run_id),
@@ -289,6 +306,8 @@ def make_hook(
         run_dir=run_dir,
         api_key=key,
         default=default,
+        embed_config=embed_config,
+        embed_api_key=embed_key,
     )
 
 
