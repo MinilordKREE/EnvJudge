@@ -74,6 +74,15 @@ the rest folded into `families.py`), `certs.py` (ladder gone; sessions in `sessi
 integration suite is archived at `docs/legacy/test_alfworld_v01.py`; Phase C rewrites it against v0.2.
 The v0.1 protocol scripts are frozen under `scripts/v0_1/` (run against tag `aea-v0.1`).
 
+## Phase D status (2026-09-10)
+
+E2 zero side re-run under v0.2 (`scripts/e2_v02.py`, run `runs/e2v02-Z`, task concurrency 1, USD 18.45 of the
+cap 30): 2 accepted of 10 (tasks 9 and 27, both learnable at K16: 10/16, 8/16), 224 charged search rollouts,
+Z1 8.9 per 1,000 next to v0.1 Z 12.1 / G 8.3 / R 4.4, Z2 unlocked 2 next to v0.1 Z 3 / G 2 / R 1. Under the
+one 4 -> 8 rule the two v0.1 acceptances that were not learnable (18, 20) are dropped and every v0.2
+acceptance is learnable. Report `experiments/alfworld_e2/results/e2_step1_v02.md`, LOG entry in
+`experiments/alfworld_e2/LOG.md`. Round 1 (Flash-Lite) stays labelled v0.1.
+
 ## Task pool (2026-09-10, added after Phase D; owner request)
 
 `Controller.run(tasks, concurrency=n)` runs `n` tasks at once. Concurrency changes wall clock only, never a
