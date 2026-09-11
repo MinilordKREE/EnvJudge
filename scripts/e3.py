@@ -215,6 +215,7 @@ def substrate(
     with_designer: bool,
     concurrency: int,
     max_steps: int | None = None,
+    subprocess_timeout_s: float = 600.0,
 ) -> AeaSubstrate:
     sub = AeaSubstrate(
         corpus_yaml=ROOT / "configs" / "corpus_aea.yaml",
@@ -226,6 +227,7 @@ def substrate(
         stage_config_path=STAGE_CONFIG,
         pricing_path=PRICING,
         rollout_concurrency=concurrency,
+        subprocess_timeout_s=subprocess_timeout_s,
     )
     if max_steps is not None:  # H100: policy horizon 100 (the underlying cap via reset options)
         sub.max_steps = max_steps
@@ -629,7 +631,15 @@ def stage_h100(concurrency: int) -> None:
     d = RUNS / "e3-H100"
     d.mkdir(parents=True, exist_ok=True)
     os.environ.setdefault("ALFWORLD_DATA", str(Path.home() / "eh_alfworld_data"))
-    sub = substrate(d, "e3-H100", with_designer=False, concurrency=concurrency, max_steps=100)
+    # a 100-step episode at ~6 s per call outlives the 600 s default subprocess timeout
+    sub = substrate(
+        d,
+        "e3-H100",
+        with_designer=False,
+        concurrency=concurrency,
+        max_steps=100,
+        subprocess_timeout_s=1800.0,
+    )
     summary_path = d / "h100_summary.json"
     summary: dict[str, Any] = (
         json.loads(summary_path.read_text(encoding="utf-8")) if summary_path.exists() else {}
@@ -655,6 +665,33 @@ def stage_h100(concurrency: int) -> None:
             summary[str(t)] = rec
             summary_path.write_text(json.dumps(summary, indent=1), encoding="utf-8")
             print(json.dumps({"h100": t, **first}), flush=True)
+        if rec["n"] < H100_N and not rec["topped_up"]:  # errored (timed-out) episodes: re-run
+            more = _k16(
+                sub,
+                writer,
+                f"{t}:orig:h100",
+                task,
+                Candidate(),
+                arm="H100",
+                n=H100_N - rec["n"],
+                reset_options=reset,
+                phase="h100",
+            )
+            ok = rec["successes"] + more["successes"]
+            n = rec["n"] + more["n"]
+            rec.update(
+                {
+                    "successes": ok,
+                    "n": n,
+                    "errors": rec["errors"] + more["errors"],
+                    "p16": ok / n if n else None,
+                    "learnable": bool(n and AEAConfig().learnable(ok, n)),
+                    "batches": rec["batches"] + [more["successes"]],
+                    "reran_errored": rec.get("reran_errored", 0) + (H100_N - rec["n"]),
+                }
+            )
+            summary_path.write_text(json.dumps(summary, indent=1), encoding="utf-8")
+            print(json.dumps({"h100_rerun": t, "successes": ok, "n": n}), flush=True)
         if rec["successes"] in H100_TOPUP and not rec["topped_up"] and rec["n"] == H100_N:
             more = _k16(
                 sub,
