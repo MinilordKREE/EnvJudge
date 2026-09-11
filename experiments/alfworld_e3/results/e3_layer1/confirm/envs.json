@@ -1,0 +1,562 @@
+[
+ {
+  "id": "1:b53fdd2c8a38adc1",
+  "task": "1",
+  "key": "b53fdd2c8a38adc1",
+  "candidate": {
+   "rules_code": "import hashlib\n\n\nclass _Rules(Rules):\n    \"\"\"ObservationNoise (O axis, harder with DOSE): corrupt a deterministic fraction DOSE of the\n    observation text by swapping characters in the grid/state rendering, without touching the\n    underlying world. bucket = sha256(f\"{task_id}:{step}\")[:8] % 10000; corrupted iff bucket < DOSE*10000,\n    so the corrupted step set is nested in DOSE. Solvable by construction (world untouched).\"\"\"\n\n    DOSE = 0.75\n    TASK_ID = '1'\n\n    def _corrupted(self, env_state):\n        step = int(getattr(env_state, \"step_count\", 0) or 0)\n        digest = hashlib.sha256(f\"{self.TASK_ID}:{step}\".encode(\"utf-8\")).hexdigest()\n        return (int(digest[:8], 16) % 10000) < int(self.DOSE * 10000)\n\n    def filter_observation(self, obs, env_state):\n        if not self._corrupted(env_state):\n            return obs\n        text = obs.text\n        chars = list(text)\n        for i in range(len(chars)):\n            if chars[i].isdigit():\n                chars[i] = str((int(chars[i]) + 1) % 10)\n        return Observation(text=\"\".join(chars), data=obs.data)\n",
+   "in_env_actions": []
+  },
+  "kind": "knob",
+  "t": null,
+  "arms": [
+   "A"
+  ],
+  "refs": {
+   "A": "1:observation_noise:0.75"
+  }
+ },
+ {
+  "id": "1:f6bfb14d444ca56f",
+  "task": "1",
+  "key": "f6bfb14d444ca56f",
+  "candidate": {
+   "rules_code": "class _Rules(Rules):\n    def filter_action(self, action, env_state):\n        if action.name != \"do\":\n            return action\n        text = action.kwargs.get(\"text\", \"\")\n        # First navigation: force one retry.\n        if text.startswith(\"go to \") and env_state.step_count == 0:\n            if not env_state.extras.get(\"blocked_first_nav\"):\n                env_state.extras[\"blocked_first_nav\"] = True\n                return Blocked(reason=\"first navigation blocked to exercise recovery\")\n        # First open/examine of a closed receptacle: force one retry.\n        if (text.startswith(\"open \") or text.startswith(\"examine \")) and not env_state.extras.get(\"blocked_first_open\"):\n            env_state.extras[\"blocked_first_open\"] = True\n            return Blocked(reason=\"first receptacle interaction blocked to exercise recovery\")\n        return action\n",
+   "in_env_actions": []
+  },
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "G"
+  ],
+  "refs": {
+   "G": "c4838ab5"
+  }
+ },
+ {
+  "id": "4:235a1defc7002a27",
+  "task": "4",
+  "key": "235a1defc7002a27",
+  "candidate": {
+   "rules_code": "class _Rules(Rules):\n    def filter_action(self, action, env_state):\n        # Block the FIRST attempt to open any drawer, forcing a retry.\n        # Keeps task solvable; only injects one extra failure-recovery step.\n        if action.name == \"do\":\n            text = action.kwargs.get(\"text\", \"\")\n            if text.startswith(\"open drawer\") and \"open_blocked\" not in env_state.extras:\n                env_state.extras[\"open_blocked\"] = True\n                return Blocked(reason=\"drawer handle sticks on first try\")\n        return action\n",
+   "in_env_actions": []
+  },
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "G"
+  ],
+  "refs": {
+   "G": "b2b78109"
+  }
+ },
+ {
+  "id": "4:dc0ae181c7f957d8",
+  "task": "4",
+  "key": "dc0ae181c7f957d8",
+  "candidate": {
+   "rules_code": "",
+   "in_env_actions": []
+  },
+  "kind": "kept",
+  "t": null,
+  "arms": [
+   "A"
+  ],
+  "refs": {
+   "A": "4:kept"
+  }
+ },
+ {
+  "id": "5:61659058f271a927",
+  "task": "5",
+  "key": "61659058f271a927",
+  "candidate": {
+   "rules_code": "import random\n\nclass _Rules(Rules):\n    def filter_observation(self, obs, env_state):\n        # Occasionally strip the admissible-commands hint to force the\n        # Policy to rely on its own memory / navigation rather than the\n        # full command menu. Keeps env surface presentation unchanged\n        # (text and other data intact); only the hint list is thinned.\n        cmds = obs.data.get(\"admissible_commands\")\n        if not cmds:\n            return obs\n        # Deterministic per-episode: thin after a few steps to avoid\n        # breaking the very first move.\n        if env_state.step_count < 3:\n            return obs\n        # Thin roughly half the time once underway.\n        if env_state.extras.get(\"thin_seed\") is None:\n            env_state.extras[\"thin_seed\"] = random.random()\n        if env_state.extras[\"thin_seed\"] < 0.5:\n            return obs\n        # Keep only navigation commands, dropping examine/inventory hints\n        # so the Policy must inspect rather than be told.\n        kept = [c for c in cmds if not c.startswith(\"examine \")]\n        if not kept:\n            kept = cmds\n        new_data = {**obs.data, \"admissible_commands\": kept}\n        return Observation(text=obs.text, data=new_data)\n",
+   "in_env_actions": []
+  },
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "G"
+  ],
+  "refs": {
+   "G": "2b4ed665"
+  }
+ },
+ {
+  "id": "5:dc0ae181c7f957d8",
+  "task": "5",
+  "key": "dc0ae181c7f957d8",
+  "candidate": {
+   "rules_code": "",
+   "in_env_actions": []
+  },
+  "kind": "kept",
+  "t": null,
+  "arms": [
+   "A"
+  ],
+  "refs": {
+   "A": "5:kept"
+  }
+ },
+ {
+  "id": "6:0c340222b8d60154",
+  "task": "6",
+  "key": "0c340222b8d60154",
+  "candidate": {
+   "rules_code": "class _Rules(Rules):\n    def filter_observation(self, obs, env_state):\n        # Subtle O-axis nudge: when the policy is looping (repetition_count\n        # high), append a gentle recovery hint to the observation text.\n        # This exercises failure-recovery without changing the env surface.\n        if env_state.repetition_count >= 2:\n            hint = (\"\\n\\nHint: you seem to be repeating yourself. \"\n                    \"Re-check your inventory and the admissible commands.\")\n            return Observation(text=obs.text + hint, data=obs.data)\n        return obs\n",
+   "in_env_actions": []
+  },
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "G"
+  ],
+  "refs": {
+   "G": "10edc8e1"
+  }
+ },
+ {
+  "id": "6:c4bbfb75a9e9050c",
+  "task": "6",
+  "key": "c4bbfb75a9e9050c",
+  "candidate": {
+   "rules_code": "class _Rules(Rules):\n    def modify_transition(self, action, raw_response, env_state):\n        # Only perturb clean-type actions, at sub-10% frequency, using the\n        # exact standard ALFWorld feedback string. This stays in-distribution.\n        text = (action.kwargs.get(\"text\") or \"\").lower()\n        if \"clean\" not in text:\n            return raw_response\n\n        # Deterministic per-step gate using step_count to keep frequency low\n        # and reproducible across rollouts.\n        if env_state.step_count % 11 != 0:\n            return raw_response\n\n        # Replace the observation text with the standard failure string,\n        # keep everything else (reward/terminated/info) unchanged.\n        new_obs = Observation(text=\"Nothing happens.\", data=raw_response.observation.data)\n        return EnvResponse(\n            observation=new_obs,\n            reward=raw_response.reward,\n            terminated=raw_response.terminated,\n            truncated=raw_response.truncated,\n            info=raw_response.info,\n        )\n",
+   "in_env_actions": []
+  },
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "R"
+  ],
+  "refs": {
+   "R": "db2c8622"
+  }
+ },
+ {
+  "id": "6:dc0ae181c7f957d8",
+  "task": "6",
+  "key": "dc0ae181c7f957d8",
+  "candidate": {
+   "rules_code": "",
+   "in_env_actions": []
+  },
+  "kind": "kept",
+  "t": null,
+  "arms": [
+   "A"
+  ],
+  "refs": {
+   "A": "6:kept"
+  }
+ },
+ {
+  "id": "8:f0329533e3beaaa8",
+  "task": "8",
+  "key": "f0329533e3beaaa8",
+  "candidate": {
+   "rules_code": "class _Rules(Rules):\n    def modify_transition(self, action, raw_response, env_state):\n        # Only intervene when the Policy's action had no effect and it\n        # appears stuck in a take/move loop. Inject a compact hint into\n        # the observation text WITHOUT altering admissible commands or\n        # bridge-set keys, keeping the env surface presentation intact.\n        if not env_state.last_action_was_effective:\n            obs = raw_response.observation\n            hint = \" (Hint: a soapbar must be clean before it can be placed; consider the sinkbasin.)\"\n            if \"Hint:\" not in obs.text:\n                new_obs = Observation(text=obs.text + hint, data=obs.data)\n                return EnvResponse(\n                    observation=new_obs,\n                    reward=raw_response.reward,\n                    terminated=raw_response.terminated,\n                    truncated=raw_response.truncated,\n                    info=raw_response.info,\n                )\n        return raw_response\n",
+   "in_env_actions": []
+  },
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "G"
+  ],
+  "refs": {
+   "G": "ae14f0fa"
+  }
+ },
+ {
+  "id": "12:a95f1c9977683e99",
+  "task": "12",
+  "key": "a95f1c9977683e99",
+  "candidate": {
+   "rules_code": "class _Rules(Rules):\n    pass\n",
+   "in_env_actions": []
+  },
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "G"
+  ],
+  "refs": {
+   "G": "8a3706ca"
+  }
+ },
+ {
+  "id": "16:a95f1c9977683e99",
+  "task": "16",
+  "key": "a95f1c9977683e99",
+  "candidate": {
+   "rules_code": "class _Rules(Rules):\n    pass\n",
+   "in_env_actions": []
+  },
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "G"
+  ],
+  "refs": {
+   "G": "c4f7640f"
+  }
+ },
+ {
+  "id": "16:dc0ae181c7f957d8",
+  "task": "16",
+  "key": "dc0ae181c7f957d8",
+  "candidate": {
+   "rules_code": "",
+   "in_env_actions": []
+  },
+  "kind": "kept",
+  "t": null,
+  "arms": [
+   "A"
+  ],
+  "refs": {
+   "A": "16:kept"
+  }
+ },
+ {
+  "id": "16:ffb7557736d75f9a",
+  "task": "16",
+  "key": "ffb7557736d75f9a",
+  "candidate": {
+   "rules_code": "import random\n\nclass _Rules(Rules):\n    def modify_transition(self, action, raw_response, env_state):\n        # Only perturb at low frequency, and never on the final winning step\n        if raw_response.info.get(\"won\"):\n            return raw_response\n        text = action.kwargs.get(\"text\", \"\")\n        # Skip look/inventory/examine (harmless info-gathering) so we don't\n        # starve the Policy of orientation; target movement/manipulation.\n        if text.startswith((\"look\", \"inventory\", \"examine\")):\n            return raw_response\n        if random.random() < 0.08:\n            new_obs = Observation(\n                text=\"Nothing happens.\",\n                data=raw_response.observation.data,\n            )\n            return EnvResponse(\n                observation=new_obs,\n                reward=raw_response.reward,\n                terminated=raw_response.terminated,\n                truncated=raw_response.truncated,\n                info=raw_response.info,\n            )\n        return raw_response\n",
+   "in_env_actions": []
+  },
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "R"
+  ],
+  "refs": {
+   "R": "36263431"
+  }
+ },
+ {
+  "id": "17:449f6f0a4e2e7984",
+  "task": "17",
+  "key": "449f6f0a4e2e7984",
+  "candidate": {
+   "rules_code": "",
+   "in_env_actions": [
+    {
+     "name": "do",
+     "kwargs": {
+      "text": "go to shelf 1"
+     }
+    },
+    {
+     "name": "do",
+     "kwargs": {
+      "text": "take plate 1 from shelf 1"
+     }
+    },
+    {
+     "name": "do",
+     "kwargs": {
+      "text": "go to sinkbasin 1"
+     }
+    },
+    {
+     "name": "do",
+     "kwargs": {
+      "text": "clean plate 1 with sinkbasin 1"
+     }
+    },
+    {
+     "name": "do",
+     "kwargs": {
+      "text": "go to shelf 1"
+     }
+    }
+   ]
+  },
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "R"
+  ],
+  "refs": {
+   "R": "6cf0547d"
+  }
+ },
+ {
+  "id": "18:a670c5de2004910a",
+  "task": "18",
+  "key": "a670c5de2004910a",
+  "candidate": {
+   "rules_code": "",
+   "in_env_actions": [
+    {
+     "name": "do",
+     "kwargs": {
+      "text": "go to microwave 1"
+     }
+    },
+    {
+     "name": "do",
+     "kwargs": {
+      "text": "open microwave 1"
+     }
+    }
+   ]
+  },
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "R"
+  ],
+  "refs": {
+   "R": "c7f78886"
+  }
+ },
+ {
+  "id": "18:dd368f9a71343d3a",
+  "task": "18",
+  "key": "dd368f9a71343d3a",
+  "candidate": {
+   "rules_code": "",
+   "in_env_actions": [
+    {
+     "name": "do",
+     "kwargs": {
+      "text": "take apple 1 from fridge 1"
+     }
+    },
+    {
+     "name": "do",
+     "kwargs": {
+      "text": "go to microwave 1"
+     }
+    },
+    {
+     "name": "do",
+     "kwargs": {
+      "text": "put apple 1 in microwave 1"
+     }
+    },
+    {
+     "name": "do",
+     "kwargs": {
+      "text": "heat apple 1 with microwave 1"
+     }
+    },
+    {
+     "name": "do",
+     "kwargs": {
+      "text": "take apple 1 from microwave 1"
+     }
+    }
+   ]
+  },
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "G"
+  ],
+  "refs": {
+   "G": "4f51b1ec"
+  }
+ },
+ {
+  "id": "19:52b2ad350563aa5a",
+  "task": "19",
+  "key": "52b2ad350563aa5a",
+  "candidate": {
+   "rules_code": "class _Rules(Rules):\n    def filter_observation(self, obs, env_state):\n        # Narrowly perturb admissible commands: on a subset of steps,\n        # drop a few non-essential 'examine <receptacle>' entries so the\n        # policy must re-plan. Keep all 'go to', 'open', 'close', 'take',\n        # 'put', 'heat', 'cool', 'clean', 'use' commands intact so the\n        # task remains solvable.\n        cmds = obs.data.get(\"admissible_commands\")\n        if not isinstance(cmds, list):\n            return obs\n        step = env_state.step_count\n        # Only perturb on a sparse, deterministic subset of steps to avoid\n        # making the task unsolvable.\n        if step % 5 != 2:\n            return obs\n        kept = []\n        for c in cmds:\n            if c.startswith(\"examine \") and \" plate\" not in c and \" sidetable\" not in c:\n                # drop some examine commands; keep plate/sidetable examines\n                # which the goal-relevant objects rely on\n                if len(c) % 2 == 0:\n                    continue\n            kept.append(c)\n        if not kept:\n            return obs\n        return Observation(text=obs.text, data={**obs.data, \"admissible_commands\": kept})\n",
+   "in_env_actions": []
+  },
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "G"
+  ],
+  "refs": {
+   "G": "72bef962"
+  }
+ },
+ {
+  "id": "19:dc0ae181c7f957d8",
+  "task": "19",
+  "key": "dc0ae181c7f957d8",
+  "candidate": {
+   "rules_code": "",
+   "in_env_actions": []
+  },
+  "kind": "kept",
+  "t": null,
+  "arms": [
+   "A"
+  ],
+  "refs": {
+   "A": "19:kept"
+  }
+ },
+ {
+  "id": "21:a166ce1aef7f8444",
+  "task": "21",
+  "key": "a166ce1aef7f8444",
+  "candidate": {
+   "rules_code": "",
+   "in_env_actions": [
+    {
+     "name": "do",
+     "kwargs": {
+      "text": "open drawer 1"
+     }
+    }
+   ]
+  },
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "G"
+  ],
+  "refs": {
+   "G": "39058176"
+  }
+ },
+ {
+  "id": "23:3f1585f0d2b86f3a",
+  "task": "23",
+  "key": "3f1585f0d2b86f3a",
+  "candidate": {
+   "rules_code": "import hashlib\n\n\nclass _Rules(Rules):\n    \"\"\"CommandSwap (O axis, harder with DOSE): corrupt the admissible-commands list by\n    swapping a deterministic fraction DOSE of commands with near-miss strings. The world is\n    untouched and the true command text remains recoverable by position/context, so the task\n    stays solvable.\"\"\"\n\n    DOSE = 0.5\n    TASK_ID = '23'\n\n    def _perturbed(self, env_state):\n        step = int(getattr(env_state, \"step_count\", 0) or 0)\n        digest = hashlib.sha256(f\"{self.TASK_ID}:{step}:swap\".encode(\"utf-8\")).hexdigest()\n        return (int(digest[:8], 16) % 10000) < int(self.DOSE * 10000)\n\n    def _swap(self, cmd):\n        if cmd and cmd[0].islower():\n            return cmd[0].upper() + cmd[1:]\n        if cmd and cmd[0].isupper():\n            return cmd[0].lower() + cmd[1:]\n        return cmd\n\n    def filter_observation(self, obs, env_state):\n        if not self._perturbed(env_state):\n            return obs\n        data = dict(obs.data or {})\n        cmds = data.get(\"admissible_commands\")\n        if isinstance(cmds, list) and cmds:\n            data[\"admissible_commands\"] = [self._swap(c) if isinstance(c, str) else c for c in cmds]\n        return Observation(text=obs.text, data=data)\n",
+   "in_env_actions": []
+  },
+  "kind": "knob",
+  "t": null,
+  "arms": [
+   "A"
+  ],
+  "refs": {
+   "A": "23:command_swap:0.5"
+  }
+ },
+ {
+  "id": "24:cdcda546eeddfe8c",
+  "task": "24",
+  "key": "cdcda546eeddfe8c",
+  "candidate": {
+   "rules_code": "import hashlib\n\n\nclass _Rules(Rules):\n    \"\"\"CommandNoiseSwap (O axis, harder with DOSE): with probability DOSE, swap two random\n    characters within each admissible command string shown in the footer. The world and the\n    actual accepted commands are untouched, so the task stays solvable by construction; the\n    policy must visually decode the scrambled commands. Swaps are deterministic per step via\n    sha256 so the perturbation is reproducible.\"\"\"\n\n    DOSE = 1.0\n    TASK_ID = '24'\n\n    def _swap(self, s, seed):\n        if len(s) < 2:\n            return s\n        digest = hashlib.sha256(f\"{seed}:{s}\".encode(\"utf-8\")).hexdigest()\n        i = int(digest[:8], 16) % len(s)\n        j = int(digest[8:16], 16) % len(s)\n        if i == j:\n            j = (j + 1) % len(s)\n        lst = list(s)\n        lst[i], lst[j] = lst[j], lst[i]\n        return \"\".join(lst)\n\n    def filter_observation(self, obs, env_state):\n        step = int(getattr(env_state, \"step_count\", 0) or 0)\n        bucket = int(hashlib.sha256(f\"{self.TASK_ID}:{step}\".encode(\"utf-8\")).hexdigest()[:8], 16) % 10000\n        if bucket >= int(self.DOSE * 10000):\n            return obs\n        cmds = (obs.data or {}).get(\"admissible_commands\")\n        if not cmds:\n            return obs\n        new_cmds = [self._swap(c, f\"{self.TASK_ID}:{step}:{idx}\") for idx, c in enumerate(cmds)]\n        data = dict(obs.data or {})\n        data[\"admissible_commands\"] = new_cmds\n        text = obs.text\n        for old, new in zip(cmds, new_cmds):\n            text = text.replace(old, new)\n        return Observation(text=text, data=data)\n",
+   "in_env_actions": []
+  },
+  "kind": "knob",
+  "t": null,
+  "arms": [
+   "A"
+  ],
+  "refs": {
+   "A": "24:command_noise_swap:1.0"
+  }
+ },
+ {
+  "id": "25:6f0b9dbcd788564a",
+  "task": "25",
+  "key": "6f0b9dbcd788564a",
+  "candidate": {
+   "rules_code": "class _Rules(Rules):\n    def filter_observation(self, obs, env_state):\n        # After the first step, drop the \"Task: ...\" goal line so the\n        # Policy must remember the goal instead of re-reading it each turn.\n        if env_state.step_count >= 1:\n            lines = obs.text.splitlines()\n            # Remove leading \"Task: ...\" and the blank line that follows it.\n            kept = []\n            skip = True\n            for ln in lines:\n                if skip:\n                    if ln.startswith(\"Task:\"):\n                        continue  # drop the goal line\n                    if ln.strip() == \"\":\n                        continue  # drop the blank separator\n                    skip = False\n                kept.append(ln)\n            new_text = \"\\n\".join(kept)\n            return Observation(text=new_text, data=obs.data)\n        return obs\n",
+   "in_env_actions": []
+  },
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "G"
+  ],
+  "refs": {
+   "G": "66faafd8"
+  }
+ },
+ {
+  "id": "26:a1ef279b09f61ddf",
+  "task": "26",
+  "key": "a1ef279b09f61ddf",
+  "candidate": {
+   "rules_code": "class _Rules(Rules):\n    def modify_transition(self, action, raw_response, env_state):\n        # Exercise failure-recovery: when the Policy issues an ineffective\n        # action (\"Nothing happens\"), trim the repetition budget so it must\n        # notice and recover sooner. We do NOT change observation text or\n        # admissible commands -- surface presentation stays identical.\n        if not env_state.last_action_was_effective:\n            # Lower the repetition truncation threshold by nudging the\n            # repetition counter upward, so the Bridge truncates earlier.\n            env_state.repetition_count += 1\n        return raw_response\n",
+   "in_env_actions": []
+  },
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "G"
+  ],
+  "refs": {
+   "G": "da5c1ee5"
+  }
+ },
+ {
+  "id": "26:dc0ae181c7f957d8",
+  "task": "26",
+  "key": "dc0ae181c7f957d8",
+  "candidate": {
+   "rules_code": "",
+   "in_env_actions": []
+  },
+  "kind": "kept",
+  "t": null,
+  "arms": [
+   "A"
+  ],
+  "refs": {
+   "A": "26:kept"
+  }
+ },
+ {
+  "id": "27:cf3a8bf8ea8a0e40",
+  "task": "27",
+  "key": "cf3a8bf8ea8a0e40",
+  "candidate": {
+   "rules_code": "class _Rules(Rules):\n    def filter_observation(self, obs, env_state):\n        # Keep surface text identical; only prune admissible_commands to\n        # reduce the Policy's wandering. Keep commands that mention\n        # receptacles likely to hold the potato (fridge, microwave,\n        # countertop, stove, sink) plus inventory/look/examine.\n        cmds = obs.data.get(\"admissible_commands\")\n        if not isinstance(cmds, list):\n            return obs\n        keep_keywords = (\n            \"fridge\", \"microwave\", \"countertop\", \"stove\", \"sink\",\n            \"inventory\", \"look\", \"examine\", \"cool\", \"potato\",\n        )\n        pruned = [c for c in cmds if any(k in c for k in keep_keywords)]\n        # Never empty the list entirely; fall back to original if pruned empty.\n        if not pruned:\n            pruned = cmds\n        new_data = {**obs.data, \"admissible_commands\": pruned}\n        return Observation(text=obs.text, data=new_data)\n",
+   "in_env_actions": []
+  },
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "G"
+  ],
+  "refs": {
+   "G": "49acbd09"
+  }
+ },
+ {
+  "id": "28:f2d046a86e624384",
+  "task": "28",
+  "key": "f2d046a86e624384",
+  "candidate": {
+   "rules_code": "",
+   "in_env_actions": [
+    {
+     "name": "do",
+     "kwargs": {
+      "text": "take bread 1 from countertop 2"
+     }
+    },
+    {
+     "name": "do",
+     "kwargs": {
+      "text": "go to cabinet 7"
+     }
+    },
+    {
+     "name": "do",
+     "kwargs": {
+      "text": "put bread 1 in/on cabinet 7"
+     }
+    }
+   ]
+  },
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "G"
+  ],
+  "refs": {
+   "G": "59b9ce8c"
+  }
+ }
+]

@@ -491,7 +491,7 @@ def main(argv: list[str] | None = None) -> int:
         + "; ".join(f"task {t}: {a}" for t, a in h100_attr.items())
         + ". A task whose 100-step original-start success is >= its staged p16 is attributed to horizon, not staging.",  # noqa: E501
         "",
-        f"**Stop rule for downstream:** E3-3 {verdict(e33)} → {'the saturated side proceeds' if e33 else 'the saturated side returns to design before any skill or RL evaluation'}; E3-1 {verdict(e31)} → {'the downstream columns may run' if e31 else 'the downstream columns are not run'}.",  # noqa: E501
+        f"**Stop rule for downstream:** E3-3 {verdict(e33)} → {'the saturated side proceeds' if e33 else 'the saturated side returns to design before any skill or RL evaluation'}; E3-1 {verdict(e31)} → {'the downstream columns may run' if e31 else 'the downstream columns are not run'} under PREREG9 as frozen; PREREG9 Addendum SL (committed before these tables) replaces the E3-1 clause: the SL evaluation runs regardless of E3-1 and E3-3 and is reported as such.",  # noqa: E501
         "",
     ]
     # A per-task profile

@@ -1,0 +1,76 @@
+{
+ "experiment": "E3 layer 1",
+ "arm": "H100",
+ "prereg": "experiments/alfworld_e3/PREREG9.md",
+ "prereg_sha": "08a09b7",
+ "tasks": [
+  8,
+  9,
+  27
+ ],
+ "policy": {
+  "provider": "openrouter",
+  "model": "qwen/qwen3-8b",
+  "base_url": "https://openrouter.ai/api/v1",
+  "api_key_env": "OPENROUTER_API_KEY",
+  "provider_pin": "alibaba",
+  "temperature": 0.5,
+  "max_tokens": 2048,
+  "thinking": false,
+  "reasoning_effort": null,
+  "timeout_s": 120.0,
+  "cost_tolerance": 1e-06,
+  "retry": {
+   "max_attempts": 10,
+   "initial_delay_s": 2.0,
+   "max_delay_s": 90.0,
+   "multiplier": 2.0,
+   "jitter_s": 1.0,
+   "total_timeout_s": 900.0,
+   "retry_status_codes": [
+    408,
+    409,
+    425,
+    429
+   ]
+  }
+ },
+ "designer": {
+  "provider": "deepseek",
+  "model": "deepseek-v4-pro",
+  "base_url": "https://api.deepseek.com",
+  "api_key_env": "DEEPSEEK_API_KEY",
+  "provider_pin": null,
+  "temperature": 0.7,
+  "max_tokens": 4096,
+  "thinking": false,
+  "reasoning_effort": null,
+  "timeout_s": 120.0,
+  "cost_tolerance": 1e-06,
+  "retry": {
+   "max_attempts": 5,
+   "initial_delay_s": 1.0,
+   "max_delay_s": 30.0,
+   "multiplier": 2.0,
+   "jitter_s": 1.0,
+   "total_timeout_s": 300.0,
+   "retry_status_codes": [
+    408,
+    409,
+    425,
+    429
+   ]
+  }
+ },
+ "aea_config_sha256": "837b94e14656d9d61cf944fc59b29957e1559bb5c3b6ddc8216d61c98af42fe6",
+ "envharness_sha": "fab7d57441f06b75c73a900e04561d4d7600f361",
+ "created_at": "2026-09-11T03:27:57Z",
+ "control": true,
+ "policy_horizon": 100,
+ "underlying_config": "/home/kree/work/EnvJudge/configs/alfworld_config_100.yaml",
+ "n_per_task": 8,
+ "topup_on": [
+  2,
+  3
+ ]
+}

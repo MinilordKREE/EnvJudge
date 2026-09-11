@@ -1,0 +1,40 @@
+{
+ "8": {
+  "task": "8",
+  "successes": 0,
+  "n": 8,
+  "errors": 0,
+  "p16": 0.0,
+  "learnable": false,
+  "batches": [
+   0
+  ],
+  "topped_up": false
+ },
+ "9": {
+  "task": "9",
+  "successes": 0,
+  "n": 8,
+  "errors": 0,
+  "p16": 0.0,
+  "learnable": false,
+  "batches": [
+   0
+  ],
+  "topped_up": false
+ },
+ "27": {
+  "task": "27",
+  "successes": 8,
+  "n": 8,
+  "errors": 2,
+  "p16": 1.0,
+  "learnable": false,
+  "batches": [
+   6,
+   2
+  ],
+  "topped_up": false,
+  "reran_errored": 2
+ }
+}

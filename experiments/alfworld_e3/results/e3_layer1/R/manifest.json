@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "run_id": "e3-R",
+  "created_at": "2026-09-10T23:17:53.666793Z",
+  "seed": 0,
+  "config_sha256": "33c66138b47d60bdf372d4a6f4c6983bd5103ab00ef54d930611adb8ac07fb80",
+  "config_schema_version": 1,
+  "aea_config_sha256": "837b94e14656d9d61cf944fc59b29957e1559bb5c3b6ddc8216d61c98af42fe6",
+  "config_path": null,
+  "git_sha": "7e86779d5140f21ceff384a7c7badb1c4e0ab745",
+  "git_dirty": true,
+  "envharness_sha": "fab7d57441f06b75c73a900e04561d4d7600f361",
+  "aea_version": "0.1.0",
+  "python_version": "3.12.9",
+  "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+  "out_dir": "/home/kree/work/EnvJudge/runs/e3-R",
+  "extra": {
+    "experiment": "E3 layer 1",
+    "arm": "R",
+    "prereg_sha": "08a09b7",
+    "tasks": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29
+    ],
+    "config_changes_vs_released": [
+      "client blocks and storage/logging paths only (derive_corpus_config)"
+    ],
+    "config_sha256": "ac09e47acc707435fa3e0c4062a49f106a518450ea9276be37b88dedf1e31773",
+    "policy_endpoint_pin": "alibaba",
+    "designer": "deepseek-v4-pro",
+    "thinking": {
+      "policy": false,
+      "designer": false
+    },
+    "concurrency": {
+      "tasks": 1,
+      "rollouts": 5,
+      "inflight_episodes": 5
+    },
+    "resumed_with_tasks": null
+  }
+}

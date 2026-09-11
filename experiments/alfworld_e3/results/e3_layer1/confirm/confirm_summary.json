@@ -1,0 +1,359 @@
+{
+ "1:b53fdd2c8a38adc1": {
+  "task": "1",
+  "successes": 7,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.4375,
+  "learnable": true,
+  "kind": "knob",
+  "t": null,
+  "arms": [
+   "A"
+  ]
+ },
+ "1:f6bfb14d444ca56f": {
+  "task": "1",
+  "successes": 9,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.5625,
+  "learnable": true,
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "G"
+  ]
+ },
+ "4:235a1defc7002a27": {
+  "task": "4",
+  "successes": 9,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.5625,
+  "learnable": true,
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "G"
+  ]
+ },
+ "4:dc0ae181c7f957d8": {
+  "task": "4",
+  "kind": "kept",
+  "t": null,
+  "arms": [
+   "A"
+  ],
+  "successes": 8,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.5,
+  "learnable": true,
+  "reused": "shared"
+ },
+ "5:61659058f271a927": {
+  "task": "5",
+  "successes": 10,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.625,
+  "learnable": true,
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "G"
+  ]
+ },
+ "5:dc0ae181c7f957d8": {
+  "task": "5",
+  "kind": "kept",
+  "t": null,
+  "arms": [
+   "A"
+  ],
+  "successes": 12,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.75,
+  "learnable": true,
+  "reused": "shared"
+ },
+ "6:0c340222b8d60154": {
+  "task": "6",
+  "successes": 6,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.375,
+  "learnable": true,
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "G"
+  ]
+ },
+ "6:c4bbfb75a9e9050c": {
+  "task": "6",
+  "successes": 7,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.4375,
+  "learnable": true,
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "R"
+  ]
+ },
+ "6:dc0ae181c7f957d8": {
+  "task": "6",
+  "kind": "kept",
+  "t": null,
+  "arms": [
+   "A"
+  ],
+  "successes": 7,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.4375,
+  "learnable": true,
+  "reused": "shared"
+ },
+ "8:f0329533e3beaaa8": {
+  "task": "8",
+  "successes": 6,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.375,
+  "learnable": true,
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "G"
+  ]
+ },
+ "12:a95f1c9977683e99": {
+  "task": "12",
+  "successes": 16,
+  "n": 16,
+  "errors": 0,
+  "p16": 1.0,
+  "learnable": false,
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "G"
+  ]
+ },
+ "16:a95f1c9977683e99": {
+  "task": "16",
+  "successes": 7,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.4375,
+  "learnable": true,
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "G"
+  ]
+ },
+ "16:dc0ae181c7f957d8": {
+  "task": "16",
+  "kind": "kept",
+  "t": null,
+  "arms": [
+   "A"
+  ],
+  "successes": 8,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.5,
+  "learnable": true,
+  "reused": "shared"
+ },
+ "16:ffb7557736d75f9a": {
+  "task": "16",
+  "successes": 8,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.5,
+  "learnable": true,
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "R"
+  ]
+ },
+ "17:449f6f0a4e2e7984": {
+  "task": "17",
+  "successes": 1,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.0625,
+  "learnable": false,
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "R"
+  ]
+ },
+ "18:a670c5de2004910a": {
+  "task": "18",
+  "successes": 12,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.75,
+  "learnable": true,
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "R"
+  ]
+ },
+ "18:dd368f9a71343d3a": {
+  "task": "18",
+  "successes": 10,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.625,
+  "learnable": true,
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "G"
+  ]
+ },
+ "19:52b2ad350563aa5a": {
+  "task": "19",
+  "successes": 13,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.8125,
+  "learnable": false,
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "G"
+  ]
+ },
+ "19:dc0ae181c7f957d8": {
+  "task": "19",
+  "kind": "kept",
+  "t": null,
+  "arms": [
+   "A"
+  ],
+  "successes": 10,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.625,
+  "learnable": true,
+  "reused": "shared"
+ },
+ "21:a166ce1aef7f8444": {
+  "task": "21",
+  "successes": 6,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.375,
+  "learnable": true,
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "G"
+  ]
+ },
+ "23:3f1585f0d2b86f3a": {
+  "task": "23",
+  "successes": 10,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.625,
+  "learnable": true,
+  "kind": "knob",
+  "t": null,
+  "arms": [
+   "A"
+  ]
+ },
+ "24:cdcda546eeddfe8c": {
+  "task": "24",
+  "successes": 5,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.3125,
+  "learnable": true,
+  "kind": "knob",
+  "t": null,
+  "arms": [
+   "A"
+  ]
+ },
+ "25:6f0b9dbcd788564a": {
+  "task": "25",
+  "successes": 3,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.1875,
+  "learnable": false,
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "G"
+  ]
+ },
+ "26:a1ef279b09f61ddf": {
+  "task": "26",
+  "successes": 7,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.4375,
+  "learnable": true,
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "G"
+  ]
+ },
+ "26:dc0ae181c7f957d8": {
+  "task": "26",
+  "kind": "kept",
+  "t": null,
+  "arms": [
+   "A"
+  ],
+  "successes": 10,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.625,
+  "learnable": true,
+  "reused": "shared"
+ },
+ "27:cf3a8bf8ea8a0e40": {
+  "task": "27",
+  "successes": 15,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.9375,
+  "learnable": false,
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "G"
+  ]
+ },
+ "28:f2d046a86e624384": {
+  "task": "28",
+  "successes": 11,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.6875,
+  "learnable": true,
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "G"
+  ]
+ }
+}

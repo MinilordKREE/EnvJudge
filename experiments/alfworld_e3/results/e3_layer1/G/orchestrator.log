@@ -1,0 +1,1200 @@
+2026-09-10T17:41:09Z run_start  task_id=alfworld-corpus-ours-release n_tasks=30 k_per_candidate=5 base_seed=0 explicit_task_ids=yes
+2026-09-10T17:41:09Z task_start  task_idx=0
+2026-09-10T17:41:09Z iteration_start  outer=0
+2026-09-10T17:41:09Z baseline_compute_start  task_idx=0 task_id=0 n=5 key=cb788bb26a57441a
+2026-09-10T17:41:40Z rollout_done  iteration_id=baseline-0000 attempt=0 candidate_id=baseline rollout=1 seed=0 duration_ms=31300 success=True reward=1.0 steps=9 error=None
+2026-09-10T17:41:41Z rollout_done  iteration_id=baseline-0000 attempt=0 candidate_id=baseline rollout=3 seed=0 duration_ms=32653 success=True reward=1.0 steps=9 error=None
+2026-09-10T17:44:34Z rollout_done  iteration_id=baseline-0000 attempt=0 candidate_id=baseline rollout=4 seed=0 duration_ms=205783 success=False reward=0.0 steps=50 error=None
+2026-09-10T17:44:42Z rollout_done  iteration_id=baseline-0000 attempt=0 candidate_id=baseline rollout=2 seed=0 duration_ms=213570 success=False reward=0.0 steps=50 error=None
+2026-09-10T17:45:42Z rollout_done  iteration_id=baseline-0000 attempt=0 candidate_id=baseline rollout=0 seed=0 duration_ms=273666 success=False reward=0.0 steps=50 error=None
+2026-09-10T17:45:42Z baseline_compute_done  task_idx=0 task_id=0 n=5 sr=0.4 avg_success_steps=9.0 sample_action_seq_len=9
+2026-09-10T17:45:48Z candidate_proposed  iteration_id=94c50842 attempt=0 rules_code_len=598 n_in_env_actions=0 rationale=Baseline SR is 0.40 with the failure mode being a loop: the Policy picks up the apple (step 4), examines it, cools it, t
+2026-09-10T17:48:56Z rollout_done  iteration_id=94c50842 attempt=1 candidate_id=7dd25b52 rollout=0 seed=0 duration_ms=187305 success=False reward=0.0 steps=50 error=None
+2026-09-10T17:49:08Z rollout_done  iteration_id=94c50842 attempt=1 candidate_id=7dd25b52 rollout=3 seed=0 duration_ms=199659 success=False reward=0.0 steps=50 error=None
+2026-09-10T17:49:21Z rollout_done  iteration_id=94c50842 attempt=1 candidate_id=7dd25b52 rollout=2 seed=0 duration_ms=212493 success=False reward=0.0 steps=50 error=None
+2026-09-10T17:49:22Z rollout_done  iteration_id=94c50842 attempt=1 candidate_id=7dd25b52 rollout=1 seed=0 duration_ms=213521 success=False reward=0.0 steps=50 error=None
+2026-09-10T17:49:36Z rollout_done  iteration_id=94c50842 attempt=1 candidate_id=7dd25b52 rollout=4 seed=0 duration_ms=227751 success=False reward=0.0 steps=50 error=None
+2026-09-10T17:49:36Z candidate_evaluated  iteration_id=94c50842 attempt=1 candidate_id=7dd25b52 k=5 success_rate=0.0 n_errors=0
+2026-09-10T17:49:42Z mutator_decision  iteration_id=94c50842 attempt=1 decision=reject failure_axis=O failure_label=unsolvable_mutation rationale=The mutation floored SR from baseline 0.40 to 0.00 (0/5), all rollouts hitting the 50-step cap. The O-axis hint injection did not help — it either confused the Policy or the repetition_count trigger n
+2026-09-10T17:49:48Z candidate_reproposed  iteration_id=94c50842 attempt=1 rules_code_len=1016
+2026-09-10T17:53:17Z rollout_done  iteration_id=94c50842 attempt=2 candidate_id=86274ecf rollout=1 seed=0 duration_ms=208772 success=True reward=1.0 steps=44 error=None
+2026-09-10T17:53:18Z rollout_done  iteration_id=94c50842 attempt=2 candidate_id=86274ecf rollout=2 seed=0 duration_ms=210350 success=False reward=0.0 steps=50 error=None
+2026-09-10T17:53:47Z rollout_done  iteration_id=94c50842 attempt=2 candidate_id=86274ecf rollout=0 seed=0 duration_ms=239425 success=False reward=0.0 steps=50 error=None
+2026-09-10T17:53:57Z rollout_done  iteration_id=94c50842 attempt=2 candidate_id=86274ecf rollout=4 seed=0 duration_ms=249622 success=False reward=0.0 steps=50 error=None
+2026-09-10T17:54:13Z rollout_done  iteration_id=94c50842 attempt=2 candidate_id=86274ecf rollout=3 seed=0 duration_ms=265103 success=False reward=0.0 steps=50 error=None
+2026-09-10T17:54:13Z candidate_evaluated  iteration_id=94c50842 attempt=2 candidate_id=86274ecf k=5 success_rate=0.2 n_errors=0
+2026-09-10T17:54:18Z mutator_decision  iteration_id=94c50842 attempt=2 decision=reject failure_axis=T failure_label=ineffective_hint rationale=The T-axis hint mutation moved SR the WRONG way: baseline 0.40 → 0.20, with 4/5 rollouts hitting the 50-step cap (3 of them grinding "Nothing happens" loops). The hint never actually fires helpfully —
+2026-09-10T17:54:24Z candidate_reproposed  iteration_id=94c50842 attempt=2 rules_code_len=829
+2026-09-10T17:57:23Z rollout_done  iteration_id=94c50842 attempt=3 candidate_id=c2104380 rollout=2 seed=0 duration_ms=178941 success=False reward=0.0 steps=50 error=None
+2026-09-10T17:57:24Z rollout_done  iteration_id=94c50842 attempt=3 candidate_id=c2104380 rollout=4 seed=0 duration_ms=180014 success=False reward=0.0 steps=50 error=None
+2026-09-10T17:57:39Z rollout_done  iteration_id=94c50842 attempt=3 candidate_id=c2104380 rollout=1 seed=0 duration_ms=194946 success=False reward=0.0 steps=50 error=None
+2026-09-10T17:57:39Z rollout_done  iteration_id=94c50842 attempt=3 candidate_id=c2104380 rollout=3 seed=0 duration_ms=195014 success=False reward=0.0 steps=50 error=None
+2026-09-10T17:57:46Z rollout_done  iteration_id=94c50842 attempt=3 candidate_id=c2104380 rollout=0 seed=0 duration_ms=202366 success=False reward=0.0 steps=50 error=None
+2026-09-10T17:57:46Z candidate_evaluated  iteration_id=94c50842 attempt=3 candidate_id=c2104380 k=5 success_rate=0.0 n_errors=0
+2026-09-10T17:57:51Z mutator_decision  iteration_id=94c50842 attempt=3 decision=reject failure_axis=O failure_label=unsolvable_mutation rationale=The distractor-line mutation drove SR from baseline 0.40 down to 0.00 across all 5 rollouts — every rollout hit the 50-step cap. This is a textbook unsolvable/over-perturbed mutation: the injected "fa
+2026-09-10T17:57:55Z candidate_reproposed  iteration_id=94c50842 attempt=3 rules_code_len=319
+2026-09-10T18:00:56Z rollout_done  iteration_id=94c50842 attempt=4 candidate_id=616fc6f2 rollout=1 seed=0 duration_ms=181165 success=False reward=0.0 steps=50 error=None
+2026-09-10T18:01:20Z rollout_done  iteration_id=94c50842 attempt=4 candidate_id=616fc6f2 rollout=3 seed=0 duration_ms=205054 success=False reward=0.0 steps=50 error=None
+2026-09-10T18:01:27Z rollout_done  iteration_id=94c50842 attempt=4 candidate_id=616fc6f2 rollout=4 seed=0 duration_ms=212073 success=False reward=0.0 steps=50 error=None
+2026-09-10T18:01:31Z rollout_done  iteration_id=94c50842 attempt=4 candidate_id=616fc6f2 rollout=2 seed=0 duration_ms=216599 success=False reward=0.0 steps=50 error=None
+2026-09-10T18:02:07Z rollout_done  iteration_id=94c50842 attempt=4 candidate_id=616fc6f2 rollout=0 seed=0 duration_ms=252637 success=False reward=0.0 steps=50 error=None
+2026-09-10T18:02:07Z candidate_evaluated  iteration_id=94c50842 attempt=4 candidate_id=616fc6f2 k=5 success_rate=0.0 n_errors=0
+2026-09-10T18:02:12Z mutator_decision  iteration_id=94c50842 attempt=4 decision=reject failure_axis=O failure_label=ineffective_hint rationale=The O-axis nudge on "Nothing happens" made things dramatically worse: baseline SR was 0.40 and this candidate dropped to 0.00 (0/5), with all rollouts hitting 50 steps. The perturbation text prepend l
+2026-09-10T18:02:17Z candidate_reproposed  iteration_id=94c50842 attempt=4 rules_code_len=685
+2026-09-10T18:04:52Z rollout_done  iteration_id=94c50842 attempt=5 candidate_id=70e39950 rollout=4 seed=0 duration_ms=155259 success=False reward=0.0 steps=50 error=None
+2026-09-10T18:04:58Z rollout_done  iteration_id=94c50842 attempt=5 candidate_id=70e39950 rollout=2 seed=0 duration_ms=161590 success=False reward=0.0 steps=50 error=None
+2026-09-10T18:05:15Z rollout_done  iteration_id=94c50842 attempt=5 candidate_id=70e39950 rollout=1 seed=0 duration_ms=178652 success=False reward=0.0 steps=50 error=None
+2026-09-10T18:05:24Z rollout_done  iteration_id=94c50842 attempt=5 candidate_id=70e39950 rollout=0 seed=0 duration_ms=187075 success=False reward=0.0 steps=50 error=None
+2026-09-10T18:05:24Z rollout_done  iteration_id=94c50842 attempt=5 candidate_id=70e39950 rollout=3 seed=0 duration_ms=187560 success=False reward=0.0 steps=50 error=None
+2026-09-10T18:05:24Z candidate_evaluated  iteration_id=94c50842 attempt=5 candidate_id=70e39950 k=5 success_rate=0.0 n_errors=0
+2026-09-10T18:05:30Z mutator_decision  iteration_id=94c50842 attempt=5 decision=reject failure_axis=A failure_label=ineffective_hint rationale=Baseline SR was 0.40 (solvable, 9-step fast path). This candidate's filter_action blocked re-examine commands, which drove SR to 0.00 across all 5 rollouts — every rollout hit 50 steps with only 2-3 b
+2026-09-10T18:05:30Z budget_stop  iteration_id=94c50842 attempts=5
+2026-09-10T18:05:30Z checkpoint_saved  iteration_id=94c50842 path=checkpoints/task_0000_best_effort.json n_actions=0 rules_code_len=1016 best_effort=True rollout_success_rate=0.2
+2026-09-10T18:05:30Z task_end  task_idx=0 total_traces_so_far=30
+2026-09-10T18:05:30Z iteration_end  outer=0 total_traces_so_far=30
+2026-09-10T18:05:30Z task_start  task_idx=1
+2026-09-10T18:05:30Z iteration_start  outer=1
+2026-09-10T18:05:30Z baseline_compute_start  task_idx=1 task_id=1 n=5 key=e25d4afdea2299b0
+2026-09-10T18:05:57Z rollout_done  iteration_id=baseline-0001 attempt=0 candidate_id=baseline rollout=4 seed=1 duration_ms=27566 success=True reward=1.0 steps=9 error=None
+2026-09-10T18:05:57Z rollout_done  iteration_id=baseline-0001 attempt=0 candidate_id=baseline rollout=2 seed=1 duration_ms=27632 success=True reward=1.0 steps=9 error=None
+2026-09-10T18:05:58Z rollout_done  iteration_id=baseline-0001 attempt=0 candidate_id=baseline rollout=0 seed=1 duration_ms=27732 success=True reward=1.0 steps=9 error=None
+2026-09-10T18:05:58Z rollout_done  iteration_id=baseline-0001 attempt=0 candidate_id=baseline rollout=1 seed=1 duration_ms=28405 success=True reward=1.0 steps=9 error=None
+2026-09-10T18:05:58Z rollout_done  iteration_id=baseline-0001 attempt=0 candidate_id=baseline rollout=3 seed=1 duration_ms=28426 success=True reward=1.0 steps=9 error=None
+2026-09-10T18:05:58Z baseline_compute_done  task_idx=1 task_id=1 n=5 sr=1.0 avg_success_steps=9.0 sample_action_seq_len=9
+2026-09-10T18:06:03Z candidate_proposed  iteration_id=0f5cd3f7 attempt=0 rules_code_len=822 n_in_env_actions=0 rationale=Baseline is 1.00 with a clean 9-step trajectory. The recent traces show prior candidates produced "ineffective_hint" fai
+2026-09-10T18:06:36Z rollout_done  iteration_id=0f5cd3f7 attempt=1 candidate_id=778462b6 rollout=2 seed=1 duration_ms=32855 success=True reward=1.0 steps=11 error=None
+2026-09-10T18:06:37Z rollout_done  iteration_id=0f5cd3f7 attempt=1 candidate_id=778462b6 rollout=0 seed=1 duration_ms=33881 success=True reward=1.0 steps=11 error=None
+2026-09-10T18:06:40Z rollout_done  iteration_id=0f5cd3f7 attempt=1 candidate_id=778462b6 rollout=4 seed=1 duration_ms=36569 success=True reward=1.0 steps=11 error=None
+2026-09-10T18:06:44Z rollout_done  iteration_id=0f5cd3f7 attempt=1 candidate_id=778462b6 rollout=3 seed=1 duration_ms=41071 success=True reward=1.0 steps=14 error=None
+2026-09-10T18:06:47Z rollout_done  iteration_id=0f5cd3f7 attempt=1 candidate_id=778462b6 rollout=1 seed=1 duration_ms=43331 success=True reward=1.0 steps=14 error=None
+2026-09-10T18:06:47Z candidate_evaluated  iteration_id=0f5cd3f7 attempt=1 candidate_id=778462b6 k=5 success_rate=1.0 n_errors=0
+2026-09-10T18:06:52Z mutator_decision  iteration_id=0f5cd3f7 attempt=1 decision=refine failure_axis=none failure_label=mutation_too_mild rationale=The mutation is on-target (A-axis, failure-recovery) and keeps the task solvable, but its magnitude is far too mild: success_rate stayed at 1.00 and the only effect was +3.2 avg steps (9.0 → 12.2). Th
+2026-09-10T18:06:56Z candidate_refined  iteration_id=0f5cd3f7 attempt=1 rules_code_len=861
+2026-09-10T18:07:27Z rollout_done  iteration_id=0f5cd3f7 attempt=2 candidate_id=c4838ab5 rollout=4 seed=1 duration_ms=30950 success=True reward=1.0 steps=11 error=None
+2026-09-10T18:07:27Z rollout_done  iteration_id=0f5cd3f7 attempt=2 candidate_id=c4838ab5 rollout=0 seed=1 duration_ms=31327 success=True reward=1.0 steps=11 error=None
+2026-09-10T18:07:28Z rollout_done  iteration_id=0f5cd3f7 attempt=2 candidate_id=c4838ab5 rollout=2 seed=1 duration_ms=32008 success=True reward=1.0 steps=11 error=None
+2026-09-10T18:08:40Z rollout_done  iteration_id=0f5cd3f7 attempt=2 candidate_id=c4838ab5 rollout=1 seed=1 duration_ms=104362 success=True reward=1.0 steps=39 error=None
+2026-09-10T18:09:27Z rollout_done  iteration_id=0f5cd3f7 attempt=2 candidate_id=c4838ab5 rollout=3 seed=1 duration_ms=151233 success=False reward=0.0 steps=50 error=None
+2026-09-10T18:09:27Z candidate_evaluated  iteration_id=0f5cd3f7 attempt=2 candidate_id=c4838ab5 k=5 success_rate=0.8 n_errors=0
+2026-09-10T18:09:32Z mutator_decision  iteration_id=0f5cd3f7 attempt=2 decision=accept failure_axis=None failure_label=None rationale=Baseline SR was 1.00 (5/5) at 9 steps. This candidate's A-axis mutation (block first navigation + first open/examine) pulled SR to 0.80 (4/5) with avg success steps rising to 18.0 — a meaningful diffi
+2026-09-10T18:09:32Z checkpoint_saved  iteration_id=0f5cd3f7 path=checkpoints/task_0001_attempt_02.json n_actions=0 rules_code_len=861 best_effort=False
+2026-09-10T18:09:32Z budget_stop  iteration_id=0f5cd3f7 attempts=2
+2026-09-10T18:09:32Z task_end  task_idx=1 total_traces_so_far=45
+2026-09-10T18:09:32Z iteration_end  outer=1 total_traces_so_far=45
+2026-09-10T18:09:32Z task_start  task_idx=2
+2026-09-10T18:09:32Z iteration_start  outer=2
+2026-09-10T18:09:32Z baseline_compute_start  task_idx=2 task_id=2 n=5 key=5c81b64038e41e94
+2026-09-10T18:10:09Z rollout_done  iteration_id=baseline-0002 attempt=0 candidate_id=baseline rollout=2 seed=2 duration_ms=37649 success=True reward=1.0 steps=12 error=None
+2026-09-10T18:10:10Z rollout_done  iteration_id=baseline-0002 attempt=0 candidate_id=baseline rollout=4 seed=2 duration_ms=38128 success=True reward=1.0 steps=12 error=None
+2026-09-10T18:10:11Z rollout_done  iteration_id=baseline-0002 attempt=0 candidate_id=baseline rollout=3 seed=2 duration_ms=39297 success=True reward=1.0 steps=12 error=None
+2026-09-10T18:10:29Z rollout_done  iteration_id=baseline-0002 attempt=0 candidate_id=baseline rollout=1 seed=2 duration_ms=57742 success=True reward=1.0 steps=17 error=None
+2026-09-10T18:10:33Z rollout_done  iteration_id=baseline-0002 attempt=0 candidate_id=baseline rollout=0 seed=2 duration_ms=61082 success=True reward=1.0 steps=18 error=None
+2026-09-10T18:10:33Z baseline_compute_done  task_idx=2 task_id=2 n=5 sr=1.0 avg_success_steps=14.2 sample_action_seq_len=12
+2026-09-10T18:10:39Z candidate_proposed  iteration_id=43989e32 attempt=0 rules_code_len=496 n_in_env_actions=8 rationale=Baseline SR is 1.00 and the previous accepted candidate (c4838ab5) only pulled it to 0.80, labeled too easy by 0.20. The
+2026-09-10T18:11:26Z rollout_done  iteration_id=43989e32 attempt=1 candidate_id=5c1544eb rollout=3 seed=2 duration_ms=47259 success=True reward=1.0 steps=14 error=None
+2026-09-10T18:13:22Z rollout_done  iteration_id=43989e32 attempt=1 candidate_id=5c1544eb rollout=2 seed=2 duration_ms=162877 success=False reward=0.0 steps=42 error=None
+2026-09-10T18:13:23Z rollout_done  iteration_id=43989e32 attempt=1 candidate_id=5c1544eb rollout=1 seed=2 duration_ms=163762 success=False reward=0.0 steps=42 error=None
+2026-09-10T18:13:34Z rollout_done  iteration_id=43989e32 attempt=1 candidate_id=5c1544eb rollout=4 seed=2 duration_ms=175515 success=False reward=0.0 steps=42 error=None
+2026-09-10T18:13:39Z rollout_done  iteration_id=43989e32 attempt=1 candidate_id=5c1544eb rollout=0 seed=2 duration_ms=179920 success=False reward=0.0 steps=42 error=None
+2026-09-10T18:13:39Z candidate_evaluated  iteration_id=43989e32 attempt=1 candidate_id=5c1544eb k=5 success_rate=0.2 n_errors=0
+2026-09-10T18:13:45Z mutator_decision  iteration_id=43989e32 attempt=1 decision=reject failure_axis=S0 failure_label=unsolvable_mutation rationale=The candidate overshot badly: SR dropped from 0.80 (accepted) to 0.20, far below the [0.40, 0.60] target band. The in_env_actions field is broken — it contains 8 bare string entries `'do'` instead of
+2026-09-10T18:13:49Z candidate_reproposed  iteration_id=43989e32 attempt=1 rules_code_len=595
+2026-09-10T18:14:26Z rollout_done  iteration_id=43989e32 attempt=2 candidate_id=9e050562 rollout=4 seed=2 duration_ms=36474 success=True reward=1.0 steps=12 error=None
+2026-09-10T18:14:26Z rollout_done  iteration_id=43989e32 attempt=2 candidate_id=9e050562 rollout=2 seed=2 duration_ms=36920 success=True reward=1.0 steps=12 error=None
+2026-09-10T18:14:27Z rollout_done  iteration_id=43989e32 attempt=2 candidate_id=9e050562 rollout=3 seed=2 duration_ms=38188 success=True reward=1.0 steps=12 error=None
+2026-09-10T18:14:28Z rollout_done  iteration_id=43989e32 attempt=2 candidate_id=9e050562 rollout=1 seed=2 duration_ms=38641 success=True reward=1.0 steps=12 error=None
+2026-09-10T18:16:17Z rollout_done  iteration_id=43989e32 attempt=2 candidate_id=9e050562 rollout=0 seed=2 duration_ms=147569 success=False reward=0.0 steps=50 error=None
+2026-09-10T18:16:17Z candidate_evaluated  iteration_id=43989e32 attempt=2 candidate_id=9e050562 k=5 success_rate=0.8 n_errors=0
+2026-09-10T18:16:22Z mutator_decision  iteration_id=43989e32 attempt=2 decision=refine failure_axis=A failure_label=ineffective_filter rationale=The mutation moved SR from baseline 1.00 down to 0.80, but that's still above the target band [0.40, 0.60]. Notably, blocked_steps=0 across all 5 rollouts — the transient-put block never actually fire
+2026-09-10T18:16:26Z candidate_refined  iteration_id=43989e32 attempt=2 rules_code_len=862
+2026-09-10T18:17:04Z rollout_done  iteration_id=43989e32 attempt=3 candidate_id=b41e0865 rollout=3 seed=2 duration_ms=37366 success=True reward=1.0 steps=12 error=None
+2026-09-10T18:17:04Z rollout_done  iteration_id=43989e32 attempt=3 candidate_id=b41e0865 rollout=0 seed=2 duration_ms=37411 success=True reward=1.0 steps=12 error=None
+2026-09-10T18:17:04Z rollout_done  iteration_id=43989e32 attempt=3 candidate_id=b41e0865 rollout=4 seed=2 duration_ms=37631 success=True reward=1.0 steps=12 error=None
+2026-09-10T18:17:04Z rollout_done  iteration_id=43989e32 attempt=3 candidate_id=b41e0865 rollout=2 seed=2 duration_ms=37647 success=True reward=1.0 steps=12 error=None
+2026-09-10T18:17:19Z rollout_done  iteration_id=43989e32 attempt=3 candidate_id=b41e0865 rollout=1 seed=2 duration_ms=52961 success=True reward=1.0 steps=16 error=None
+2026-09-10T18:17:19Z candidate_evaluated  iteration_id=43989e32 attempt=3 candidate_id=b41e0865 k=5 success_rate=1.0 n_errors=0
+2026-09-10T18:17:24Z mutator_decision  iteration_id=43989e32 attempt=3 decision=reject failure_axis=A failure_label=no_effect_mutation rationale=The mutation had zero effect: blocked_steps=0 in all 5 rollouts, success_rate stayed at 1.00 (worse than the prior accepted 0.80), and the action text never matched the filter predicates. This means t
+2026-09-10T18:17:30Z candidate_reproposed  iteration_id=43989e32 attempt=3 rules_code_len=1306
+2026-09-10T18:21:12Z rollout_done  iteration_id=43989e32 attempt=4 candidate_id=f64a5a58 rollout=2 seed=2 duration_ms=222133 success=False reward=0.0 steps=50 error=None
+2026-09-10T18:21:12Z rollout_done  iteration_id=43989e32 attempt=4 candidate_id=f64a5a58 rollout=1 seed=2 duration_ms=222209 success=False reward=0.0 steps=50 error=None
+2026-09-10T18:21:19Z rollout_done  iteration_id=43989e32 attempt=4 candidate_id=f64a5a58 rollout=0 seed=2 duration_ms=229453 success=False reward=0.0 steps=50 error=None
+2026-09-10T18:21:39Z rollout_done  iteration_id=43989e32 attempt=4 candidate_id=f64a5a58 rollout=3 seed=2 duration_ms=249262 success=False reward=0.0 steps=50 error=None
+2026-09-10T18:21:59Z rollout_done  iteration_id=43989e32 attempt=4 candidate_id=f64a5a58 rollout=4 seed=2 duration_ms=268744 success=False reward=0.0 steps=50 error=None
+2026-09-10T18:21:59Z candidate_evaluated  iteration_id=43989e32 attempt=4 candidate_id=f64a5a58 k=5 success_rate=0.0 n_errors=0
+2026-09-10T18:22:04Z mutator_decision  iteration_id=43989e32 attempt=4 decision=reject failure_axis=A failure_label=unsolvable_mutation rationale=The candidate drove SR from baseline 1.00 (and prior 0.80) to 0.00 — all 5 rollouts failed at the 50-step cap with only 2 blocked steps each. The block on "take lettuce" until examine is clearly unsol
+2026-09-10T18:22:09Z candidate_reproposed  iteration_id=43989e32 attempt=4 rules_code_len=974
+2026-09-10T18:22:47Z rollout_done  iteration_id=43989e32 attempt=5 candidate_id=020ce78f rollout=4 seed=2 duration_ms=37106 success=True reward=1.0 steps=12 error=None
+2026-09-10T18:22:48Z rollout_done  iteration_id=43989e32 attempt=5 candidate_id=020ce78f rollout=2 seed=2 duration_ms=38298 success=True reward=1.0 steps=12 error=None
+2026-09-10T18:23:01Z rollout_done  iteration_id=43989e32 attempt=5 candidate_id=020ce78f rollout=3 seed=2 duration_ms=51616 success=True reward=1.0 steps=12 error=None
+2026-09-10T18:23:06Z rollout_done  iteration_id=43989e32 attempt=5 candidate_id=020ce78f rollout=1 seed=2 duration_ms=56936 success=True reward=1.0 steps=16 error=None
+2026-09-10T18:25:52Z rollout_done  iteration_id=43989e32 attempt=5 candidate_id=020ce78f rollout=0 seed=2 duration_ms=222638 success=False reward=0.0 steps=50 error=None
+2026-09-10T18:25:52Z candidate_evaluated  iteration_id=43989e32 attempt=5 candidate_id=020ce78f k=5 success_rate=0.8 n_errors=0
+2026-09-10T18:25:58Z mutator_decision  iteration_id=43989e32 attempt=5 decision=refine failure_axis=A failure_label=no_effect_mutation rationale=The candidate moved SR from baseline 1.00 down to 0.80, but the mutation had essentially no effect — blocked_steps=0 across all 5 rollouts, meaning the filter_action hook never actually fired. The one
+2026-09-10T18:25:58Z budget_stop  iteration_id=43989e32 attempts=5
+2026-09-10T18:25:58Z checkpoint_saved  iteration_id=43989e32 path=checkpoints/task_0002_best_effort.json n_actions=8 rules_code_len=496 best_effort=True rollout_success_rate=0.2
+2026-09-10T18:25:58Z task_end  task_idx=2 total_traces_so_far=75
+2026-09-10T18:25:58Z iteration_end  outer=2 total_traces_so_far=75
+2026-09-10T18:25:58Z task_start  task_idx=3
+2026-09-10T18:25:58Z iteration_start  outer=3
+2026-09-10T18:25:58Z baseline_compute_start  task_idx=3 task_id=3 n=5 key=cd878f923460652b
+2026-09-10T18:26:23Z rollout_done  iteration_id=baseline-0003 attempt=0 candidate_id=baseline rollout=2 seed=3 duration_ms=24558 success=True reward=1.0 steps=8 error=None
+2026-09-10T18:26:23Z rollout_done  iteration_id=baseline-0003 attempt=0 candidate_id=baseline rollout=4 seed=3 duration_ms=24846 success=True reward=1.0 steps=8 error=None
+2026-09-10T18:26:23Z rollout_done  iteration_id=baseline-0003 attempt=0 candidate_id=baseline rollout=1 seed=3 duration_ms=25002 success=True reward=1.0 steps=8 error=None
+2026-09-10T18:26:24Z rollout_done  iteration_id=baseline-0003 attempt=0 candidate_id=baseline rollout=3 seed=3 duration_ms=25399 success=True reward=1.0 steps=8 error=None
+2026-09-10T18:28:34Z rollout_done  iteration_id=baseline-0003 attempt=0 candidate_id=baseline rollout=0 seed=3 duration_ms=156198 success=False reward=0.0 steps=50 error=None
+2026-09-10T18:28:34Z baseline_compute_done  task_idx=3 task_id=3 n=5 sr=0.8 avg_success_steps=8.0 sample_action_seq_len=8
+2026-09-10T18:28:39Z candidate_proposed  iteration_id=a40f183f attempt=0 rules_code_len=656 n_in_env_actions=0 rationale=Baseline SR is 0.80 (too easy for the [0.40,0.60] band). The failed rollout shows the Policy stalling by re-picking-up t
+2026-09-10T18:30:56Z rollout_done  iteration_id=a40f183f attempt=1 candidate_id=212b4275 rollout=1 seed=3 duration_ms=136426 success=False reward=0.0 steps=50 error=None
+2026-09-10T18:31:15Z rollout_done  iteration_id=a40f183f attempt=1 candidate_id=212b4275 rollout=0 seed=3 duration_ms=156282 success=False reward=0.0 steps=50 error=None
+2026-09-10T18:31:20Z rollout_done  iteration_id=a40f183f attempt=1 candidate_id=212b4275 rollout=3 seed=3 duration_ms=160788 success=False reward=0.0 steps=50 error=None
+2026-09-10T18:31:34Z rollout_done  iteration_id=a40f183f attempt=1 candidate_id=212b4275 rollout=4 seed=3 duration_ms=175203 success=False reward=0.0 steps=50 error=None
+2026-09-10T18:31:59Z rollout_done  iteration_id=a40f183f attempt=1 candidate_id=212b4275 rollout=2 seed=3 duration_ms=200230 success=False reward=0.0 steps=50 error=None
+2026-09-10T18:31:59Z candidate_evaluated  iteration_id=a40f183f attempt=1 candidate_id=212b4275 k=5 success_rate=0.0 n_errors=0
+2026-09-10T18:32:04Z mutator_decision  iteration_id=a40f183f attempt=1 decision=reject failure_axis=A failure_label=unsolvable_mutation rationale=The mutation floored SR from 0.80 to 0.00 with 21-34 blocked steps per rollout and all 5 timing out at the 50-step cap. The A-axis hook blocks "put/move ... garbagecan" whenever env_state.inventory is
+2026-09-10T18:32:08Z candidate_reproposed  iteration_id=a40f183f attempt=1 rules_code_len=616
+2026-09-10T18:32:36Z rollout_done  iteration_id=a40f183f attempt=2 candidate_id=b470f0ca rollout=4 seed=3 duration_ms=27460 success=True reward=1.0 steps=9 error=None
+2026-09-10T18:32:36Z rollout_done  iteration_id=a40f183f attempt=2 candidate_id=b470f0ca rollout=1 seed=3 duration_ms=27621 success=True reward=1.0 steps=9 error=None
+2026-09-10T18:32:36Z rollout_done  iteration_id=a40f183f attempt=2 candidate_id=b470f0ca rollout=2 seed=3 duration_ms=27823 success=True reward=1.0 steps=9 error=None
+2026-09-10T18:32:40Z rollout_done  iteration_id=a40f183f attempt=2 candidate_id=b470f0ca rollout=3 seed=3 duration_ms=31673 success=True reward=1.0 steps=9 error=None
+2026-09-10T18:34:33Z rollout_done  iteration_id=a40f183f attempt=2 candidate_id=b470f0ca rollout=0 seed=3 duration_ms=144269 success=False reward=0.0 steps=50 error=None
+2026-09-10T18:34:33Z candidate_evaluated  iteration_id=a40f183f attempt=2 candidate_id=b470f0ca k=5 success_rate=0.8 n_errors=0
+2026-09-10T18:34:37Z mutator_decision  iteration_id=a40f183f attempt=2 decision=refine failure_axis=None failure_label=None rationale=The A-axis "block clean once" mutation had essentially no effect: SR stayed at 0.80 (4/5), identical to baseline. The single blocked step only added +1 step to the winning trajectories (8→9) and the P
+2026-09-10T18:34:41Z candidate_refined  iteration_id=a40f183f attempt=2 rules_code_len=556
+2026-09-10T18:35:46Z rollout_done  iteration_id=a40f183f attempt=3 candidate_id=dbe9da0b rollout=2 seed=3 duration_ms=64853 success=True reward=1.0 steps=23 error=None
+2026-09-10T18:37:16Z rollout_done  iteration_id=a40f183f attempt=3 candidate_id=dbe9da0b rollout=4 seed=3 duration_ms=155418 success=False reward=0.0 steps=50 error=None
+2026-09-10T18:37:18Z rollout_done  iteration_id=a40f183f attempt=3 candidate_id=dbe9da0b rollout=3 seed=3 duration_ms=157166 success=False reward=0.0 steps=50 error=None
+2026-09-10T18:37:27Z rollout_done  iteration_id=a40f183f attempt=3 candidate_id=dbe9da0b rollout=0 seed=3 duration_ms=166619 success=False reward=0.0 steps=50 error=None
+2026-09-10T18:37:30Z rollout_done  iteration_id=a40f183f attempt=3 candidate_id=dbe9da0b rollout=1 seed=3 duration_ms=168986 success=False reward=0.0 steps=50 error=None
+2026-09-10T18:37:30Z candidate_evaluated  iteration_id=a40f183f attempt=3 candidate_id=dbe9da0b k=5 success_rate=0.2 n_errors=0
+2026-09-10T18:37:35Z mutator_decision  iteration_id=a40f183f attempt=3 decision=refine failure_axis=A failure_label=overshot_magnitude rationale=Baseline SR was 0.80 (too easy, target band [0.40,0.60]). The previous single-block mutation was a no-op (SR stayed 0.80). This candidate blocks the first 3 "clean" attempts, which overshot hard: SR d
+2026-09-10T18:37:38Z candidate_refined  iteration_id=a40f183f attempt=3 rules_code_len=562
+2026-09-10T18:38:05Z rollout_done  iteration_id=a40f183f attempt=4 candidate_id=7a678007 rollout=4 seed=3 duration_ms=26445 success=True reward=1.0 steps=9 error=None
+2026-09-10T18:38:05Z rollout_done  iteration_id=a40f183f attempt=4 candidate_id=7a678007 rollout=1 seed=3 duration_ms=26762 success=True reward=1.0 steps=9 error=None
+2026-09-10T18:38:06Z rollout_done  iteration_id=a40f183f attempt=4 candidate_id=7a678007 rollout=0 seed=3 duration_ms=27983 success=True reward=1.0 steps=9 error=None
+2026-09-10T18:38:06Z rollout_done  iteration_id=a40f183f attempt=4 candidate_id=7a678007 rollout=3 seed=3 duration_ms=27982 success=True reward=1.0 steps=9 error=None
+2026-09-10T18:38:08Z rollout_done  iteration_id=a40f183f attempt=4 candidate_id=7a678007 rollout=2 seed=3 duration_ms=30018 success=True reward=1.0 steps=9 error=None
+2026-09-10T18:38:08Z candidate_evaluated  iteration_id=a40f183f attempt=4 candidate_id=7a678007 k=5 success_rate=1.0 n_errors=0
+2026-09-10T18:38:14Z mutator_decision  iteration_id=a40f183f attempt=4 decision=reject failure_axis=A failure_label=no_effect_mutation rationale=The candidate blocks only the first "clean" attempt (N=1), and the rollout shows SR=1.00 (5/5), identical to or slightly easier than the baseline 0.80. The single blocked step costs only 1 extra step
+2026-09-10T18:38:20Z candidate_reproposed  iteration_id=a40f183f attempt=4 rules_code_len=656
+2026-09-10T18:38:45Z rollout_done  iteration_id=a40f183f attempt=5 candidate_id=ad4da3ce rollout=2 seed=3 duration_ms=24329 success=True reward=1.0 steps=8 error=None
+2026-09-10T18:38:45Z rollout_done  iteration_id=a40f183f attempt=5 candidate_id=ad4da3ce rollout=3 seed=3 duration_ms=25016 success=True reward=1.0 steps=8 error=None
+2026-09-10T18:38:46Z rollout_done  iteration_id=a40f183f attempt=5 candidate_id=ad4da3ce rollout=1 seed=3 duration_ms=25246 success=True reward=1.0 steps=8 error=None
+2026-09-10T18:38:47Z rollout_done  iteration_id=a40f183f attempt=5 candidate_id=ad4da3ce rollout=4 seed=3 duration_ms=26948 success=True reward=1.0 steps=8 error=None
+2026-09-10T18:39:10Z rollout_done  iteration_id=a40f183f attempt=5 candidate_id=ad4da3ce rollout=0 seed=3 duration_ms=49232 success=True reward=1.0 steps=19 error=None
+2026-09-10T18:39:10Z candidate_evaluated  iteration_id=a40f183f attempt=5 candidate_id=ad4da3ce k=5 success_rate=1.0 n_errors=0
+2026-09-10T18:39:15Z mutator_decision  iteration_id=a40f183f attempt=5 decision=reject failure_axis=A failure_label=no_effect_mutation rationale=The candidate blocked "examine egg" but SR went UP from 0.80 to 1.00 (5/5), and blocked_steps=0 across all rollouts — the Policy never even attempted the blocked command, so the A-axis restriction had
+2026-09-10T18:39:15Z budget_stop  iteration_id=a40f183f attempts=5
+2026-09-10T18:39:15Z checkpoint_saved  iteration_id=a40f183f path=checkpoints/task_0003_best_effort.json n_actions=0 rules_code_len=556 best_effort=True rollout_success_rate=0.2
+2026-09-10T18:39:15Z task_end  task_idx=3 total_traces_so_far=105
+2026-09-10T18:39:15Z iteration_end  outer=3 total_traces_so_far=105
+2026-09-10T18:39:15Z task_start  task_idx=4
+2026-09-10T18:39:15Z iteration_start  outer=4
+2026-09-10T18:39:15Z baseline_compute_start  task_idx=4 task_id=4 n=5 key=ce723e74aed08bed
+2026-09-10T18:40:21Z rollout_done  iteration_id=baseline-0004 attempt=0 candidate_id=baseline rollout=2 seed=4 duration_ms=65415 success=True reward=1.0 steps=21 error=None
+2026-09-10T18:42:25Z rollout_done  iteration_id=baseline-0004 attempt=0 candidate_id=baseline rollout=0 seed=4 duration_ms=189408 success=False reward=0.0 steps=50 error=None
+2026-09-10T18:42:32Z rollout_done  iteration_id=baseline-0004 attempt=0 candidate_id=baseline rollout=1 seed=4 duration_ms=196254 success=False reward=0.0 steps=50 error=None
+2026-09-10T18:42:38Z rollout_done  iteration_id=baseline-0004 attempt=0 candidate_id=baseline rollout=4 seed=4 duration_ms=202716 success=False reward=0.0 steps=50 error=None
+2026-09-10T18:42:51Z rollout_done  iteration_id=baseline-0004 attempt=0 candidate_id=baseline rollout=3 seed=4 duration_ms=215774 success=False reward=0.0 steps=50 error=None
+2026-09-10T18:42:51Z baseline_compute_done  task_idx=4 task_id=4 n=5 sr=0.2 avg_success_steps=21.0 sample_action_seq_len=21
+2026-09-10T18:42:55Z candidate_proposed  iteration_id=3e6e5a81 attempt=0 rules_code_len=520 n_in_env_actions=0 rationale=Baseline SR is 0.20 on this task, but recent accepted episodes show SR=0.80 (too easy). The task requires finding two to
+2026-09-10T18:44:18Z rollout_done  iteration_id=3e6e5a81 attempt=1 candidate_id=df8c619e rollout=1 seed=4 duration_ms=82513 success=True reward=1.0 steps=25 error=None
+2026-09-10T18:44:20Z rollout_done  iteration_id=3e6e5a81 attempt=1 candidate_id=df8c619e rollout=2 seed=4 duration_ms=85102 success=True reward=1.0 steps=28 error=None
+2026-09-10T18:44:34Z rollout_done  iteration_id=3e6e5a81 attempt=1 candidate_id=df8c619e rollout=0 seed=4 duration_ms=98924 success=True reward=1.0 steps=25 error=None
+2026-09-10T18:44:55Z rollout_done  iteration_id=3e6e5a81 attempt=1 candidate_id=df8c619e rollout=4 seed=4 duration_ms=120105 success=True reward=1.0 steps=33 error=None
+2026-09-10T18:46:34Z rollout_done  iteration_id=3e6e5a81 attempt=1 candidate_id=df8c619e rollout=3 seed=4 duration_ms=218594 success=False reward=0.0 steps=50 error=None
+2026-09-10T18:46:34Z candidate_evaluated  iteration_id=3e6e5a81 attempt=1 candidate_id=df8c619e k=5 success_rate=0.8 n_errors=0
+2026-09-10T18:46:37Z mutator_decision  iteration_id=3e6e5a81 attempt=1 decision=refine failure_axis=none failure_label=no_effect_mutation rationale=The mutation blocked "examine toiletpaper" but SR stayed at 0.80 (4/5), identical to the recent accepted baseline of 0.80. The block only triggered once per rollout (blocked_steps=1) and had negligibl
+2026-09-10T18:46:41Z candidate_refined  iteration_id=3e6e5a81 attempt=1 rules_code_len=345
+2026-09-10T18:47:56Z rollout_done  iteration_id=3e6e5a81 attempt=2 candidate_id=1fa5472f rollout=1 seed=4 duration_ms=75417 success=True reward=1.0 steps=23 error=None
+2026-09-10T18:48:00Z rollout_done  iteration_id=3e6e5a81 attempt=2 candidate_id=1fa5472f rollout=4 seed=4 duration_ms=78948 success=True reward=1.0 steps=23 error=None
+2026-09-10T18:48:00Z rollout_done  iteration_id=3e6e5a81 attempt=2 candidate_id=1fa5472f rollout=0 seed=4 duration_ms=79392 success=True reward=1.0 steps=24 error=None
+2026-09-10T18:48:01Z rollout_done  iteration_id=3e6e5a81 attempt=2 candidate_id=1fa5472f rollout=2 seed=4 duration_ms=79915 success=True reward=1.0 steps=23 error=None
+2026-09-10T18:48:20Z rollout_done  iteration_id=3e6e5a81 attempt=2 candidate_id=1fa5472f rollout=3 seed=4 duration_ms=99204 success=True reward=1.0 steps=28 error=None
+2026-09-10T18:48:20Z candidate_evaluated  iteration_id=3e6e5a81 attempt=2 candidate_id=1fa5472f k=5 success_rate=1.0 n_errors=0
+2026-09-10T18:48:27Z mutator_decision  iteration_id=3e6e5a81 attempt=2 decision=refine failure_axis=A failure_label=no_effect_mutation rationale=The candidate made SR go UP to 1.00 (from 0.80), the opposite of the objective. Blocking "examine countertop 2" actually helped the policy: with targeted examines blocked, the policy was forced to `go
+2026-09-10T18:48:31Z candidate_refined  iteration_id=3e6e5a81 attempt=2 rules_code_len=328
+2026-09-10T18:51:29Z rollout_done  iteration_id=3e6e5a81 attempt=3 candidate_id=d459cd3d rollout=1 seed=4 duration_ms=177552 success=False reward=0.0 steps=50 error=None
+2026-09-10T18:51:37Z rollout_done  iteration_id=3e6e5a81 attempt=3 candidate_id=d459cd3d rollout=4 seed=4 duration_ms=185565 success=False reward=0.0 steps=50 error=None
+2026-09-10T18:51:45Z rollout_done  iteration_id=3e6e5a81 attempt=3 candidate_id=d459cd3d rollout=0 seed=4 duration_ms=194276 success=False reward=0.0 steps=50 error=None
+2026-09-10T18:52:04Z rollout_done  iteration_id=3e6e5a81 attempt=3 candidate_id=d459cd3d rollout=3 seed=4 duration_ms=212915 success=False reward=0.0 steps=50 error=None
+2026-09-10T18:52:16Z rollout_done  iteration_id=3e6e5a81 attempt=3 candidate_id=d459cd3d rollout=2 seed=4 duration_ms=224795 success=False reward=0.0 steps=50 error=None
+2026-09-10T18:52:16Z candidate_evaluated  iteration_id=3e6e5a81 attempt=3 candidate_id=d459cd3d k=5 success_rate=0.0 n_errors=0
+2026-09-10T18:52:21Z mutator_decision  iteration_id=3e6e5a81 attempt=3 decision=reject failure_axis=A failure_label=overshoot_to_unsolvable rationale=The mutation blocked "go to countertop 2" and SR collapsed from 0.80 to 0.00 (0/5), with every rollout hitting the 50-step cap. This is a textbook unsolvable/overshoot mutation: the policy's only disc
+2026-09-10T18:52:26Z candidate_reproposed  iteration_id=3e6e5a81 attempt=3 rules_code_len=541
+2026-09-10T18:54:04Z rollout_done  iteration_id=3e6e5a81 attempt=4 candidate_id=b2b78109 rollout=1 seed=4 duration_ms=97630 success=True reward=1.0 steps=29 error=None
+2026-09-10T18:55:00Z rollout_done  iteration_id=3e6e5a81 attempt=4 candidate_id=b2b78109 rollout=0 seed=4 duration_ms=154008 success=True reward=1.0 steps=37 error=None
+2026-09-10T18:55:26Z rollout_done  iteration_id=3e6e5a81 attempt=4 candidate_id=b2b78109 rollout=3 seed=4 duration_ms=180105 success=False reward=0.0 steps=50 error=None
+2026-09-10T18:56:01Z rollout_done  iteration_id=3e6e5a81 attempt=4 candidate_id=b2b78109 rollout=4 seed=4 duration_ms=214629 success=False reward=0.0 steps=50 error=None
+2026-09-10T18:56:17Z rollout_done  iteration_id=3e6e5a81 attempt=4 candidate_id=b2b78109 rollout=2 seed=4 duration_ms=231208 success=False reward=0.0 steps=50 error=None
+2026-09-10T18:56:17Z candidate_evaluated  iteration_id=3e6e5a81 attempt=4 candidate_id=b2b78109 k=5 success_rate=0.4 n_errors=0
+2026-09-10T18:56:23Z mutator_decision  iteration_id=3e6e5a81 attempt=4 decision=accept failure_axis=task_understanding failure_label=none rationale=Baseline SR was 0.20 (weak), and the objective's diagnostic showed recent accepted episodes at SR 0.80 (too easy, above the [0.40, 0.60] band). This candidate's single A-axis perturbation (blocking th
+2026-09-10T18:56:23Z checkpoint_saved  iteration_id=3e6e5a81 path=checkpoints/task_0004_attempt_04.json n_actions=0 rules_code_len=541 best_effort=False
+2026-09-10T18:56:23Z budget_stop  iteration_id=3e6e5a81 attempts=4
+2026-09-10T18:56:23Z task_end  task_idx=4 total_traces_so_far=130
+2026-09-10T18:56:23Z iteration_end  outer=4 total_traces_so_far=130
+2026-09-10T18:56:23Z task_start  task_idx=5
+2026-09-10T18:56:23Z iteration_start  outer=5
+2026-09-10T18:56:23Z baseline_compute_start  task_idx=5 task_id=5 n=5 key=d4f4b6f239e183a3
+2026-09-10T18:57:06Z rollout_done  iteration_id=baseline-0005 attempt=0 candidate_id=baseline rollout=3 seed=5 duration_ms=43290 success=True reward=1.0 steps=16 error=None
+2026-09-10T18:58:04Z rollout_done  iteration_id=baseline-0005 attempt=0 candidate_id=baseline rollout=2 seed=5 duration_ms=101300 success=True reward=1.0 steps=39 error=None
+2026-09-10T18:58:12Z rollout_done  iteration_id=baseline-0005 attempt=0 candidate_id=baseline rollout=1 seed=5 duration_ms=109258 success=True reward=1.0 steps=40 error=None
+2026-09-10T18:59:05Z rollout_done  iteration_id=baseline-0005 attempt=0 candidate_id=baseline rollout=0 seed=5 duration_ms=162064 success=False reward=0.0 steps=50 error=None
+2026-09-10T18:59:21Z rollout_done  iteration_id=baseline-0005 attempt=0 candidate_id=baseline rollout=4 seed=5 duration_ms=177950 success=False reward=0.0 steps=50 error=None
+2026-09-10T18:59:21Z baseline_compute_done  task_idx=5 task_id=5 n=5 sr=0.6 avg_success_steps=31.666666666666668 sample_action_seq_len=16
+2026-09-10T18:59:25Z candidate_proposed  iteration_id=3b519cf1 attempt=0 rules_code_len=333 n_in_env_actions=0 rationale=Baseline SR=0.60, already in target band [0.40,0.60]. Objective says maintain and prefer diversity. Recent failures are
+2026-09-10T19:01:22Z rollout_done  iteration_id=3b519cf1 attempt=1 candidate_id=f5425deb rollout=3 seed=5 duration_ms=116870 success=True reward=1.0 steps=40 error=None
+2026-09-10T19:02:39Z rollout_done  iteration_id=3b519cf1 attempt=1 candidate_id=f5425deb rollout=1 seed=5 duration_ms=194020 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:02:41Z rollout_done  iteration_id=3b519cf1 attempt=1 candidate_id=f5425deb rollout=4 seed=5 duration_ms=195287 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:02:47Z rollout_done  iteration_id=3b519cf1 attempt=1 candidate_id=f5425deb rollout=0 seed=5 duration_ms=201827 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:02:57Z rollout_done  iteration_id=3b519cf1 attempt=1 candidate_id=f5425deb rollout=2 seed=5 duration_ms=212040 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:02:57Z candidate_evaluated  iteration_id=3b519cf1 attempt=1 candidate_id=f5425deb k=5 success_rate=0.2 n_errors=0
+2026-09-10T19:03:03Z mutator_decision  iteration_id=3b519cf1 attempt=1 decision=reject failure_axis=O failure_label=overshoot rationale=Baseline SR=0.60 (in target band [0.40,0.60]). The O-axis "recovery hint" mutation dropped SR to 0.20 — a 40-point overshoot well below the band, and 4/5 rollouts hit the 50-step cap with no blocked s
+2026-09-10T19:03:10Z candidate_reproposed  iteration_id=3b519cf1 attempt=1 rules_code_len=1231
+2026-09-10T19:03:38Z rollout_done  iteration_id=3b519cf1 attempt=2 candidate_id=2b4ed665 rollout=1 seed=5 duration_ms=28382 success=True reward=1.0 steps=9 error=None
+2026-09-10T19:04:48Z rollout_done  iteration_id=3b519cf1 attempt=2 candidate_id=2b4ed665 rollout=0 seed=5 duration_ms=97536 success=True reward=1.0 steps=36 error=None
+2026-09-10T19:06:05Z rollout_done  iteration_id=3b519cf1 attempt=2 candidate_id=2b4ed665 rollout=4 seed=5 duration_ms=175440 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:06:27Z rollout_done  iteration_id=3b519cf1 attempt=2 candidate_id=2b4ed665 rollout=3 seed=5 duration_ms=196918 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:06:30Z rollout_done  iteration_id=3b519cf1 attempt=2 candidate_id=2b4ed665 rollout=2 seed=5 duration_ms=200358 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:06:30Z candidate_evaluated  iteration_id=3b519cf1 attempt=2 candidate_id=2b4ed665 k=5 success_rate=0.4 n_errors=0
+2026-09-10T19:06:36Z mutator_decision  iteration_id=3b519cf1 attempt=2 decision=accept failure_axis=O failure_label=in_band rationale=Baseline SR was 0.60 (3/5), and the target band is [0.40, 0.60]. This O-axis mutation (occasionally dropping "examine *" hints from admissible_commands) produced SR=0.40 (2/5), landing squarely inside
+2026-09-10T19:06:36Z checkpoint_saved  iteration_id=3b519cf1 path=checkpoints/task_0005_attempt_02.json n_actions=0 rules_code_len=1231 best_effort=False
+2026-09-10T19:06:36Z budget_stop  iteration_id=3b519cf1 attempts=2
+2026-09-10T19:06:36Z task_end  task_idx=5 total_traces_so_far=145
+2026-09-10T19:06:36Z iteration_end  outer=5 total_traces_so_far=145
+2026-09-10T19:06:36Z task_start  task_idx=6
+2026-09-10T19:06:36Z iteration_start  outer=6
+2026-09-10T19:06:36Z baseline_compute_start  task_idx=6 task_id=6 n=5 key=4ffc056dd6ad0f0c
+2026-09-10T19:08:00Z rollout_done  iteration_id=baseline-0006 attempt=0 candidate_id=baseline rollout=2 seed=6 duration_ms=83830 success=True reward=1.0 steps=22 error=None
+2026-09-10T19:08:05Z rollout_done  iteration_id=baseline-0006 attempt=0 candidate_id=baseline rollout=4 seed=6 duration_ms=88638 success=True reward=1.0 steps=22 error=None
+2026-09-10T19:09:37Z rollout_done  iteration_id=baseline-0006 attempt=0 candidate_id=baseline rollout=3 seed=6 duration_ms=181264 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:09:40Z rollout_done  iteration_id=baseline-0006 attempt=0 candidate_id=baseline rollout=1 seed=6 duration_ms=183856 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:10:07Z rollout_done  iteration_id=baseline-0006 attempt=0 candidate_id=baseline rollout=0 seed=6 duration_ms=211242 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:10:07Z baseline_compute_done  task_idx=6 task_id=6 n=5 sr=0.4 avg_success_steps=22.0 sample_action_seq_len=22
+2026-09-10T19:10:11Z candidate_proposed  iteration_id=6362128a attempt=0 rules_code_len=0 n_in_env_actions=4 rationale=Baseline SR is 0.40 (in band), and recent accepted episodes sit at 0.53. The Policy already fails via task_understanding
+2026-09-10T19:10:32Z rollout_done  iteration_id=6362128a attempt=1 candidate_id=d82716f7 rollout=2 seed=6 duration_ms=21614 success=True reward=1.0 steps=6 error=None
+2026-09-10T19:10:32Z rollout_done  iteration_id=6362128a attempt=1 candidate_id=d82716f7 rollout=1 seed=6 duration_ms=21615 success=True reward=1.0 steps=6 error=None
+2026-09-10T19:10:32Z rollout_done  iteration_id=6362128a attempt=1 candidate_id=d82716f7 rollout=0 seed=6 duration_ms=21616 success=True reward=1.0 steps=6 error=None
+2026-09-10T19:10:33Z rollout_done  iteration_id=6362128a attempt=1 candidate_id=d82716f7 rollout=4 seed=6 duration_ms=22620 success=True reward=1.0 steps=6 error=None
+2026-09-10T19:10:34Z rollout_done  iteration_id=6362128a attempt=1 candidate_id=d82716f7 rollout=3 seed=6 duration_ms=23227 success=True reward=1.0 steps=6 error=None
+2026-09-10T19:10:34Z candidate_evaluated  iteration_id=6362128a attempt=1 candidate_id=d82716f7 k=5 success_rate=1.0 n_errors=0
+2026-09-10T19:10:39Z mutator_decision  iteration_id=6362128a attempt=1 decision=reject failure_axis=none failure_label=no_effect rationale=The candidate's in_env_actions were empty strings of 'do' (no actual command text), so the Setup harness replayed 4 no-op 'do' actions that did nothing to mutate the world. The result is effectively a
+2026-09-10T19:10:44Z candidate_reproposed  iteration_id=6362128a attempt=1 rules_code_len=570
+2026-09-10T19:11:48Z rollout_done  iteration_id=6362128a attempt=2 candidate_id=10edc8e1 rollout=3 seed=6 duration_ms=64048 success=True reward=1.0 steps=18 error=None
+2026-09-10T19:12:46Z rollout_done  iteration_id=6362128a attempt=2 candidate_id=10edc8e1 rollout=0 seed=6 duration_ms=122635 success=True reward=1.0 steps=36 error=None
+2026-09-10T19:13:33Z rollout_done  iteration_id=6362128a attempt=2 candidate_id=10edc8e1 rollout=4 seed=6 duration_ms=169154 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:13:34Z rollout_done  iteration_id=6362128a attempt=2 candidate_id=10edc8e1 rollout=2 seed=6 duration_ms=170161 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:14:05Z rollout_done  iteration_id=6362128a attempt=2 candidate_id=10edc8e1 rollout=1 seed=6 duration_ms=201467 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:14:05Z candidate_evaluated  iteration_id=6362128a attempt=2 candidate_id=10edc8e1 k=5 success_rate=0.4 n_errors=0
+2026-09-10T19:14:11Z mutator_decision  iteration_id=6362128a attempt=2 decision=accept failure_axis=O failure_label=in_band rationale=The candidate's O-axis perturbation (injecting a recovery hint when repetition_count >= 2) produced success_rate 0.40 (2/5), exactly matching the baseline 0.40 and landing squarely in the target band
+2026-09-10T19:14:11Z checkpoint_saved  iteration_id=6362128a path=checkpoints/task_0006_attempt_02.json n_actions=0 rules_code_len=570 best_effort=False
+2026-09-10T19:14:11Z budget_stop  iteration_id=6362128a attempts=2
+2026-09-10T19:14:11Z task_end  task_idx=6 total_traces_so_far=160
+2026-09-10T19:14:11Z iteration_end  outer=6 total_traces_so_far=160
+2026-09-10T19:14:11Z task_start  task_idx=7
+2026-09-10T19:14:11Z iteration_start  outer=7
+2026-09-10T19:14:11Z baseline_compute_start  task_idx=7 task_id=7 n=5 key=9e3f366b710c9d8a
+2026-09-10T19:14:27Z rollout_done  iteration_id=baseline-0007 attempt=0 candidate_id=baseline rollout=4 seed=7 duration_ms=16341 success=True reward=1.0 steps=5 error=None
+2026-09-10T19:14:47Z rollout_done  iteration_id=baseline-0007 attempt=0 candidate_id=baseline rollout=3 seed=7 duration_ms=36488 success=True reward=1.0 steps=14 error=None
+2026-09-10T19:14:54Z rollout_done  iteration_id=baseline-0007 attempt=0 candidate_id=baseline rollout=2 seed=7 duration_ms=43566 success=True reward=1.0 steps=17 error=None
+2026-09-10T19:15:00Z rollout_done  iteration_id=baseline-0007 attempt=0 candidate_id=baseline rollout=0 seed=7 duration_ms=49559 success=True reward=1.0 steps=19 error=None
+2026-09-10T19:15:06Z rollout_done  iteration_id=baseline-0007 attempt=0 candidate_id=baseline rollout=1 seed=7 duration_ms=55280 success=True reward=1.0 steps=22 error=None
+2026-09-10T19:15:06Z baseline_compute_done  task_idx=7 task_id=7 n=5 sr=1.0 avg_success_steps=15.4 sample_action_seq_len=5
+2026-09-10T19:15:11Z candidate_proposed  iteration_id=8306ccf2 attempt=0 rules_code_len=928 n_in_env_actions=0 rationale=Baseline SR is 1.00 (5/5), and the current accepted candidate is already in band at 0.50, so I should preserve working s
+2026-09-10T19:15:27Z rollout_done  iteration_id=8306ccf2 attempt=1 candidate_id=214dba50 rollout=2 seed=7 duration_ms=15706 success=True reward=1.0 steps=5 error=None
+2026-09-10T19:15:30Z rollout_done  iteration_id=8306ccf2 attempt=1 candidate_id=214dba50 rollout=1 seed=7 duration_ms=18498 success=True reward=1.0 steps=6 error=None
+2026-09-10T19:15:41Z rollout_done  iteration_id=8306ccf2 attempt=1 candidate_id=214dba50 rollout=4 seed=7 duration_ms=29976 success=True reward=1.0 steps=11 error=None
+2026-09-10T19:16:01Z rollout_done  iteration_id=8306ccf2 attempt=1 candidate_id=214dba50 rollout=0 seed=7 duration_ms=49621 success=True reward=1.0 steps=19 error=None
+2026-09-10T19:16:01Z rollout_done  iteration_id=8306ccf2 attempt=1 candidate_id=214dba50 rollout=3 seed=7 duration_ms=49670 success=True reward=1.0 steps=19 error=None
+2026-09-10T19:16:01Z candidate_evaluated  iteration_id=8306ccf2 attempt=1 candidate_id=214dba50 k=5 success_rate=1.0 n_errors=0
+2026-09-10T19:16:06Z mutator_decision  iteration_id=8306ccf2 attempt=1 decision=reject failure_axis=none failure_label=no_effect rationale=The candidate's O-axis perturbation had zero measurable effect: success_rate stayed at 1.00 (5/5), identical to baseline, and avg_success_steps actually dropped from 15.4 to 12.0. The perturbation (st
+2026-09-10T19:16:10Z candidate_reproposed  iteration_id=8306ccf2 attempt=1 rules_code_len=537
+2026-09-10T19:16:49Z rollout_done  iteration_id=8306ccf2 attempt=2 candidate_id=9a947ca4 rollout=3 seed=7 duration_ms=38632 success=True reward=1.0 steps=14 error=None
+2026-09-10T19:17:01Z rollout_done  iteration_id=8306ccf2 attempt=2 candidate_id=9a947ca4 rollout=2 seed=7 duration_ms=50650 success=True reward=1.0 steps=19 error=None
+2026-09-10T19:17:03Z rollout_done  iteration_id=8306ccf2 attempt=2 candidate_id=9a947ca4 rollout=0 seed=7 duration_ms=52856 success=True reward=1.0 steps=20 error=None
+2026-09-10T19:17:03Z rollout_done  iteration_id=8306ccf2 attempt=2 candidate_id=9a947ca4 rollout=4 seed=7 duration_ms=53208 success=True reward=1.0 steps=20 error=None
+2026-09-10T19:17:05Z rollout_done  iteration_id=8306ccf2 attempt=2 candidate_id=9a947ca4 rollout=1 seed=7 duration_ms=55192 success=True reward=1.0 steps=21 error=None
+2026-09-10T19:17:05Z candidate_evaluated  iteration_id=8306ccf2 attempt=2 candidate_id=9a947ca4 k=5 success_rate=1.0 n_errors=0
+2026-09-10T19:17:10Z mutator_decision  iteration_id=8306ccf2 attempt=2 decision=reject failure_axis=none failure_label=no_effect rationale=The candidate had zero measurable effect: success_rate stayed at 1.00 (5/5), identical to baseline, and blocked_steps=0 across all rollouts — the Policy never even attempted to take the keychain, so t
+2026-09-10T19:17:15Z candidate_reproposed  iteration_id=8306ccf2 attempt=2 rules_code_len=664
+2026-09-10T19:17:35Z rollout_done  iteration_id=8306ccf2 attempt=3 candidate_id=fadf99f0 rollout=0 seed=7 duration_ms=20031 success=True reward=1.0 steps=7 error=None
+2026-09-10T19:17:51Z rollout_done  iteration_id=8306ccf2 attempt=3 candidate_id=fadf99f0 rollout=3 seed=7 duration_ms=36578 success=True reward=1.0 steps=14 error=None
+2026-09-10T19:17:51Z rollout_done  iteration_id=8306ccf2 attempt=3 candidate_id=fadf99f0 rollout=4 seed=7 duration_ms=36602 success=True reward=1.0 steps=14 error=None
+2026-09-10T19:17:52Z rollout_done  iteration_id=8306ccf2 attempt=3 candidate_id=fadf99f0 rollout=1 seed=7 duration_ms=37059 success=True reward=1.0 steps=14 error=None
+2026-09-10T19:18:04Z rollout_done  iteration_id=8306ccf2 attempt=3 candidate_id=fadf99f0 rollout=2 seed=7 duration_ms=49392 success=True reward=1.0 steps=19 error=None
+2026-09-10T19:18:04Z candidate_evaluated  iteration_id=8306ccf2 attempt=3 candidate_id=fadf99f0 k=5 success_rate=1.0 n_errors=0
+2026-09-10T19:18:08Z mutator_decision  iteration_id=8306ccf2 attempt=3 decision=reject failure_axis=O failure_label=no_effect rationale=The O-axis perturbation had zero effect: success_rate stayed at 1.00 (5/5), identical to baseline. The hook only strips admissible_commands when last_action_was_effective is False, but the Policy's tr
+2026-09-10T19:18:14Z candidate_reproposed  iteration_id=8306ccf2 attempt=3 rules_code_len=620
+2026-09-10T19:18:31Z rollout_done  iteration_id=8306ccf2 attempt=4 candidate_id=1532f54f rollout=0 seed=7 duration_ms=17532 success=True reward=1.0 steps=5 error=None
+2026-09-10T19:18:52Z rollout_done  iteration_id=8306ccf2 attempt=4 candidate_id=1532f54f rollout=1 seed=7 duration_ms=38576 success=True reward=1.0 steps=14 error=None
+2026-09-10T19:19:05Z rollout_done  iteration_id=8306ccf2 attempt=4 candidate_id=1532f54f rollout=4 seed=7 duration_ms=51234 success=True reward=1.0 steps=19 error=None
+2026-09-10T19:19:30Z rollout_done  iteration_id=8306ccf2 attempt=4 candidate_id=1532f54f rollout=3 seed=7 duration_ms=76945 success=True reward=1.0 steps=28 error=None
+2026-09-10T19:20:00Z rollout_done  iteration_id=8306ccf2 attempt=4 candidate_id=1532f54f rollout=2 seed=7 duration_ms=106026 success=True reward=1.0 steps=40 error=None
+2026-09-10T19:20:00Z candidate_evaluated  iteration_id=8306ccf2 attempt=4 candidate_id=1532f54f k=5 success_rate=1.0 n_errors=0
+2026-09-10T19:20:05Z mutator_decision  iteration_id=8306ccf2 attempt=4 decision=reject failure_axis=A failure_label=no_effect rationale=The baseline SR is 1.00 (5/5) and this candidate also produced SR=1.00 (5/5). The "examine" block had essentially no effect: only 2 blocked_steps across 5 rollouts (and those rollouts still succeeded)
+2026-09-10T19:20:09Z candidate_reproposed  iteration_id=8306ccf2 attempt=4 rules_code_len=731
+2026-09-10T19:20:26Z rollout_done  iteration_id=8306ccf2 attempt=5 candidate_id=d26d0bb2 rollout=1 seed=7 duration_ms=16499 success=True reward=1.0 steps=5 error=None
+2026-09-10T19:21:07Z rollout_done  iteration_id=8306ccf2 attempt=5 candidate_id=d26d0bb2 rollout=4 seed=7 duration_ms=57282 success=True reward=1.0 steps=21 error=None
+2026-09-10T19:21:13Z rollout_done  iteration_id=8306ccf2 attempt=5 candidate_id=d26d0bb2 rollout=0 seed=7 duration_ms=63299 success=True reward=1.0 steps=22 error=None
+2026-09-10T19:21:13Z rollout_done  iteration_id=8306ccf2 attempt=5 candidate_id=d26d0bb2 rollout=2 seed=7 duration_ms=63671 success=True reward=1.0 steps=23 error=None
+2026-09-10T19:21:15Z rollout_done  iteration_id=8306ccf2 attempt=5 candidate_id=d26d0bb2 rollout=3 seed=7 duration_ms=65463 success=True reward=1.0 steps=22 error=None
+2026-09-10T19:21:15Z candidate_evaluated  iteration_id=8306ccf2 attempt=5 candidate_id=d26d0bb2 k=5 success_rate=1.0 n_errors=0
+2026-09-10T19:21:19Z mutator_decision  iteration_id=8306ccf2 attempt=5 decision=reject failure_axis=none failure_label=no_effect rationale=The candidate had no measurable effect: success_rate stayed at 1.00 (5/5), identical to baseline, and the only change was avg_success_steps drifting from 15.4 to 18.6 (noise, not a difficulty signal).
+2026-09-10T19:21:19Z budget_stop  iteration_id=8306ccf2 attempts=5
+2026-09-10T19:21:19Z checkpoint_saved  iteration_id=8306ccf2 path=checkpoints/task_0007_best_effort.json n_actions=0 rules_code_len=928 best_effort=True rollout_success_rate=1.0
+2026-09-10T19:21:19Z task_end  task_idx=7 total_traces_so_far=190
+2026-09-10T19:21:19Z iteration_end  outer=7 total_traces_so_far=190
+2026-09-10T19:21:19Z task_start  task_idx=8
+2026-09-10T19:21:19Z iteration_start  outer=8
+2026-09-10T19:21:19Z baseline_compute_start  task_idx=8 task_id=8 n=5 key=37b6a8fba3eae878
+2026-09-10T19:23:27Z rollout_done  iteration_id=baseline-0008 attempt=0 candidate_id=baseline rollout=0 seed=8 duration_ms=127838 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:23:42Z rollout_done  iteration_id=baseline-0008 attempt=0 candidate_id=baseline rollout=4 seed=8 duration_ms=142312 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:23:43Z rollout_done  iteration_id=baseline-0008 attempt=0 candidate_id=baseline rollout=3 seed=8 duration_ms=143596 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:23:45Z rollout_done  iteration_id=baseline-0008 attempt=0 candidate_id=baseline rollout=1 seed=8 duration_ms=145943 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:24:12Z rollout_done  iteration_id=baseline-0008 attempt=0 candidate_id=baseline rollout=2 seed=8 duration_ms=172435 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:24:12Z baseline_compute_done  task_idx=8 task_id=8 n=5 sr=0.0 avg_success_steps=None sample_action_seq_len=0
+2026-09-10T19:24:17Z candidate_proposed  iteration_id=1fdbea38 attempt=0 rules_code_len=952 n_in_env_actions=0 rationale=Baseline SR is 0.00 (Policy loops on take/move soapbar, never cleans it), but recent accepted traces show SR=0.50 alread
+2026-09-10T19:26:35Z rollout_done  iteration_id=1fdbea38 attempt=1 candidate_id=550cf41b rollout=4 seed=8 duration_ms=137699 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:26:42Z rollout_done  iteration_id=1fdbea38 attempt=1 candidate_id=550cf41b rollout=1 seed=8 duration_ms=144279 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:26:47Z rollout_done  iteration_id=1fdbea38 attempt=1 candidate_id=550cf41b rollout=0 seed=8 duration_ms=149411 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:26:49Z rollout_done  iteration_id=1fdbea38 attempt=1 candidate_id=550cf41b rollout=3 seed=8 duration_ms=151223 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:26:49Z rollout_done  iteration_id=1fdbea38 attempt=1 candidate_id=550cf41b rollout=2 seed=8 duration_ms=151784 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:26:49Z candidate_evaluated  iteration_id=1fdbea38 attempt=1 candidate_id=550cf41b k=5 success_rate=0.0 n_errors=0
+2026-09-10T19:26:56Z mutator_decision  iteration_id=1fdbea38 attempt=1 decision=reject failure_axis=O failure_label=no_effect rationale=The candidate's O-axis hint never fired: all 5 rollouts show success_rate 0.00 with 50 steps and no blocked steps, and the hint is gated on `env_state.inventory` being populated — but the env_state sc
+2026-09-10T19:27:02Z candidate_reproposed  iteration_id=1fdbea38 attempt=1 rules_code_len=775
+2026-09-10T19:29:25Z rollout_done  iteration_id=1fdbea38 attempt=2 candidate_id=c5f5d8ae rollout=3 seed=8 duration_ms=143669 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:29:29Z rollout_done  iteration_id=1fdbea38 attempt=2 candidate_id=c5f5d8ae rollout=0 seed=8 duration_ms=147405 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:29:31Z rollout_done  iteration_id=1fdbea38 attempt=2 candidate_id=c5f5d8ae rollout=2 seed=8 duration_ms=149182 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:29:40Z rollout_done  iteration_id=1fdbea38 attempt=2 candidate_id=c5f5d8ae rollout=1 seed=8 duration_ms=158535 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:29:47Z rollout_done  iteration_id=1fdbea38 attempt=2 candidate_id=c5f5d8ae rollout=4 seed=8 duration_ms=165790 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:29:47Z candidate_evaluated  iteration_id=1fdbea38 attempt=2 candidate_id=c5f5d8ae k=5 success_rate=0.0 n_errors=0
+2026-09-10T19:29:54Z mutator_decision  iteration_id=1fdbea38 attempt=2 decision=reject failure_axis=O failure_label=no_effect rationale=The candidate's O-axis hint had no measurable effect: 0/5 success, identical to the unmutated baseline (0/5), with all rollouts hitting the 50-step timeout and looping through 'do' actions. The hint t
+2026-09-10T19:29:59Z candidate_reproposed  iteration_id=1fdbea38 attempt=2 rules_code_len=1011
+2026-09-10T19:31:54Z rollout_done  iteration_id=1fdbea38 attempt=3 candidate_id=ae14f0fa rollout=1 seed=8 duration_ms=115212 success=True reward=1.0 steps=34 error=None
+2026-09-10T19:32:14Z rollout_done  iteration_id=1fdbea38 attempt=3 candidate_id=ae14f0fa rollout=0 seed=8 duration_ms=135059 success=True reward=1.0 steps=38 error=None
+2026-09-10T19:32:16Z rollout_done  iteration_id=1fdbea38 attempt=3 candidate_id=ae14f0fa rollout=2 seed=8 duration_ms=136731 success=True reward=1.0 steps=35 error=None
+2026-09-10T19:32:39Z rollout_done  iteration_id=1fdbea38 attempt=3 candidate_id=ae14f0fa rollout=4 seed=8 duration_ms=160004 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:33:12Z rollout_done  iteration_id=1fdbea38 attempt=3 candidate_id=ae14f0fa rollout=3 seed=8 duration_ms=192900 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:33:12Z candidate_evaluated  iteration_id=1fdbea38 attempt=3 candidate_id=ae14f0fa k=5 success_rate=0.6 n_errors=0
+2026-09-10T19:33:16Z mutator_decision  iteration_id=1fdbea38 attempt=3 decision=accept failure_axis=None failure_label=None rationale=Baseline SR was 0.00 (Policy loops take/move soapbar 3 without cleaning it). The T-axis hint mutation lifted SR to 0.60 (3/5 wins, avg 35.7 steps), which lands squarely in the target band [0.40, 0.60]
+2026-09-10T19:33:16Z checkpoint_saved  iteration_id=1fdbea38 path=checkpoints/task_0008_attempt_03.json n_actions=0 rules_code_len=1011 best_effort=False
+2026-09-10T19:33:16Z budget_stop  iteration_id=1fdbea38 attempts=3
+2026-09-10T19:33:16Z task_end  task_idx=8 total_traces_so_far=210
+2026-09-10T19:33:16Z iteration_end  outer=8 total_traces_so_far=210
+2026-09-10T19:33:16Z task_start  task_idx=9
+2026-09-10T19:33:16Z iteration_start  outer=9
+2026-09-10T19:33:16Z baseline_compute_start  task_idx=9 task_id=9 n=5 key=f8ee0b5a2c1e699f
+2026-09-10T19:35:33Z rollout_done  iteration_id=baseline-0009 attempt=0 candidate_id=baseline rollout=1 seed=9 duration_ms=137280 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:35:40Z rollout_done  iteration_id=baseline-0009 attempt=0 candidate_id=baseline rollout=2 seed=9 duration_ms=144266 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:35:40Z rollout_done  iteration_id=baseline-0009 attempt=0 candidate_id=baseline rollout=3 seed=9 duration_ms=144346 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:35:47Z rollout_done  iteration_id=baseline-0009 attempt=0 candidate_id=baseline rollout=4 seed=9 duration_ms=150947 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:36:00Z rollout_done  iteration_id=baseline-0009 attempt=0 candidate_id=baseline rollout=0 seed=9 duration_ms=164793 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:36:00Z baseline_compute_done  task_idx=9 task_id=9 n=5 sr=0.0 avg_success_steps=None sample_action_seq_len=0
+2026-09-10T19:36:04Z candidate_proposed  iteration_id=b2243cfd attempt=0 rules_code_len=30 n_in_env_actions=1 rationale=Baseline SR is 0.00 (policy already fails this task with empty actions). The objective is to maintain SR in [0.40,0.60],
+2026-09-10T19:37:03Z rollout_done  iteration_id=b2243cfd attempt=1 candidate_id=d548658d rollout=2 seed=9 duration_ms=58485 success=True reward=1.0 steps=20 error=None
+2026-09-10T19:38:57Z rollout_done  iteration_id=b2243cfd attempt=1 candidate_id=d548658d rollout=1 seed=9 duration_ms=172486 success=False reward=0.0 steps=49 error=None
+2026-09-10T19:38:59Z rollout_done  iteration_id=b2243cfd attempt=1 candidate_id=d548658d rollout=4 seed=9 duration_ms=174475 success=False reward=0.0 steps=49 error=None
+2026-09-10T19:39:01Z rollout_done  iteration_id=b2243cfd attempt=1 candidate_id=d548658d rollout=0 seed=9 duration_ms=176327 success=False reward=0.0 steps=49 error=None
+2026-09-10T19:39:05Z rollout_done  iteration_id=b2243cfd attempt=1 candidate_id=d548658d rollout=3 seed=9 duration_ms=180358 success=False reward=0.0 steps=49 error=None
+2026-09-10T19:39:05Z candidate_evaluated  iteration_id=b2243cfd attempt=1 candidate_id=d548658d k=5 success_rate=0.2 n_errors=0
+2026-09-10T19:39:10Z mutator_decision  iteration_id=b2243cfd attempt=1 decision=reject failure_axis=S0 failure_label=malformed_in_env_actions rationale=The candidate's in_env_actions is malformed: it contains the bare string 'do' rather than a valid Action dict ({"name": "do", "kwargs_json": "{\"text\": \"...\"}"}). The rollout actions show ['do','do
+2026-09-10T19:39:13Z candidate_reproposed  iteration_id=b2243cfd attempt=1 rules_code_len=29
+2026-09-10T19:41:56Z rollout_done  iteration_id=b2243cfd attempt=2 candidate_id=c113d7f8 rollout=4 seed=9 duration_ms=163183 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:42:00Z rollout_done  iteration_id=b2243cfd attempt=2 candidate_id=c113d7f8 rollout=1 seed=9 duration_ms=166255 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:42:01Z rollout_done  iteration_id=b2243cfd attempt=2 candidate_id=c113d7f8 rollout=3 seed=9 duration_ms=167701 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:42:13Z rollout_done  iteration_id=b2243cfd attempt=2 candidate_id=c113d7f8 rollout=0 seed=9 duration_ms=179288 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:42:23Z rollout_done  iteration_id=b2243cfd attempt=2 candidate_id=c113d7f8 rollout=2 seed=9 duration_ms=189898 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:42:23Z candidate_evaluated  iteration_id=b2243cfd attempt=2 candidate_id=c113d7f8 k=5 success_rate=0.0 n_errors=0
+2026-09-10T19:42:28Z mutator_decision  iteration_id=b2243cfd attempt=2 decision=reject failure_axis=task_understanding failure_label=empty_action_loop rationale=The candidate is a pure pass-through (empty Rules, no in_env_actions), so it reproduces the baseline exactly: SR 0.00 across 5 rollouts, all timing out at 50 steps with empty actions (the Policy emits
+2026-09-10T19:42:34Z candidate_reproposed  iteration_id=b2243cfd attempt=2 rules_code_len=609
+2026-09-10T19:45:25Z rollout_done  iteration_id=b2243cfd attempt=3 candidate_id=fb36754c rollout=1 seed=9 duration_ms=171370 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:45:25Z rollout_done  iteration_id=b2243cfd attempt=3 candidate_id=fb36754c rollout=4 seed=9 duration_ms=171409 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:45:27Z rollout_done  iteration_id=b2243cfd attempt=3 candidate_id=fb36754c rollout=0 seed=9 duration_ms=173089 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:45:30Z rollout_done  iteration_id=b2243cfd attempt=3 candidate_id=fb36754c rollout=3 seed=9 duration_ms=175870 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:45:46Z rollout_done  iteration_id=b2243cfd attempt=3 candidate_id=fb36754c rollout=2 seed=9 duration_ms=192142 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:45:46Z candidate_evaluated  iteration_id=b2243cfd attempt=3 candidate_id=fb36754c k=5 success_rate=0.0 n_errors=0
+2026-09-10T19:45:51Z mutator_decision  iteration_id=b2243cfd attempt=3 decision=reject failure_axis=task_understanding failure_label=empty_action_loop rationale=The candidate's O-axis nudge had zero effect: SR stayed 0.00 (0/5) and every rollout degenerated into the same empty-action loop (all 8 sampled actions are 'do' with blank text, 50 steps, blocked_step
+2026-09-10T19:45:53Z candidate_reproposed  iteration_id=b2243cfd attempt=3 rules_code_len=0
+2026-09-10T19:48:33Z rollout_done  iteration_id=b2243cfd attempt=4 candidate_id=2d3c14ab rollout=0 seed=9 duration_ms=159169 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:48:33Z rollout_done  iteration_id=b2243cfd attempt=4 candidate_id=2d3c14ab rollout=2 seed=9 duration_ms=159629 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:48:36Z rollout_done  iteration_id=b2243cfd attempt=4 candidate_id=2d3c14ab rollout=3 seed=9 duration_ms=162670 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:48:44Z rollout_done  iteration_id=b2243cfd attempt=4 candidate_id=2d3c14ab rollout=4 seed=9 duration_ms=170271 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:48:45Z rollout_done  iteration_id=b2243cfd attempt=4 candidate_id=2d3c14ab rollout=1 seed=9 duration_ms=171519 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:48:45Z candidate_evaluated  iteration_id=b2243cfd attempt=4 candidate_id=2d3c14ab k=5 success_rate=0.0 n_errors=0
+2026-09-10T19:48:49Z mutator_decision  iteration_id=b2243cfd attempt=4 decision=accept failure_axis=task_understanding failure_label=empty_action_loop rationale=The candidate is a pass-through (no-op) harness. Baseline SR was already 0.00 with empty_action_loop failures, and these 5 rollouts reproduce exactly that: 0/5 success, all 50 steps, all empty 'do' ac
+2026-09-10T19:48:49Z budget_stop  iteration_id=b2243cfd attempts=4
+2026-09-10T19:48:49Z checkpoint_saved  iteration_id=b2243cfd path=checkpoints/task_0009_best_effort.json n_actions=1 rules_code_len=30 best_effort=True rollout_success_rate=0.2
+2026-09-10T19:48:49Z task_end  task_idx=9 total_traces_so_far=235
+2026-09-10T19:48:49Z iteration_end  outer=9 total_traces_so_far=235
+2026-09-10T19:48:49Z task_start  task_idx=10
+2026-09-10T19:48:49Z iteration_start  outer=10
+2026-09-10T19:48:49Z baseline_compute_start  task_idx=10 task_id=10 n=5 key=cb04d7d56af46406
+2026-09-10T19:52:52Z rollout_done  iteration_id=baseline-0010 attempt=0 candidate_id=baseline rollout=1 seed=10 duration_ms=243538 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:53:18Z rollout_done  iteration_id=baseline-0010 attempt=0 candidate_id=baseline rollout=2 seed=10 duration_ms=268943 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:53:24Z rollout_done  iteration_id=baseline-0010 attempt=0 candidate_id=baseline rollout=4 seed=10 duration_ms=275505 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:53:35Z rollout_done  iteration_id=baseline-0010 attempt=0 candidate_id=baseline rollout=3 seed=10 duration_ms=286709 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:53:40Z rollout_done  iteration_id=baseline-0010 attempt=0 candidate_id=baseline rollout=0 seed=10 duration_ms=291677 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:53:40Z baseline_compute_done  task_idx=10 task_id=10 n=5 sr=0.0 avg_success_steps=None sample_action_seq_len=0
+2026-09-10T19:53:44Z candidate_proposed  iteration_id=3dc0d18a attempt=0 rules_code_len=30 n_in_env_actions=0 rationale=Baseline SR is 0.00 and the policy is stuck in an empty_action_loop — it emits empty <action></action> repeatedly, never
+2026-09-10T19:57:43Z rollout_done  iteration_id=3dc0d18a attempt=1 candidate_id=25bfe0a8 rollout=4 seed=10 duration_ms=238681 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:57:45Z rollout_done  iteration_id=3dc0d18a attempt=1 candidate_id=25bfe0a8 rollout=3 seed=10 duration_ms=241039 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:58:10Z rollout_done  iteration_id=3dc0d18a attempt=1 candidate_id=25bfe0a8 rollout=2 seed=10 duration_ms=265400 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:58:13Z rollout_done  iteration_id=3dc0d18a attempt=1 candidate_id=25bfe0a8 rollout=1 seed=10 duration_ms=269247 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:58:47Z rollout_done  iteration_id=3dc0d18a attempt=1 candidate_id=25bfe0a8 rollout=0 seed=10 duration_ms=302719 success=False reward=0.0 steps=50 error=None
+2026-09-10T19:58:47Z candidate_evaluated  iteration_id=3dc0d18a attempt=1 candidate_id=25bfe0a8 k=5 success_rate=0.0 n_errors=0
+2026-09-10T19:58:52Z mutator_decision  iteration_id=3dc0d18a attempt=1 decision=reject failure_axis=task_understanding failure_label=empty_action_loop rationale=The candidate was a pass-through no-op (empty Rules, no in_env_actions), and it predictably reproduced the baseline exactly: 0/5 success, all rollouts stuck in empty_action_loop with the policy emitti
+2026-09-10T19:58:55Z candidate_reproposed  iteration_id=3dc0d18a attempt=1 rules_code_len=30
+2026-09-10T20:03:34Z rollout_done  iteration_id=3dc0d18a attempt=2 candidate_id=ad300a73 rollout=0 seed=10 duration_ms=278802 success=False reward=0.0 steps=50 error=None
+2026-09-10T20:03:43Z rollout_done  iteration_id=3dc0d18a attempt=2 candidate_id=ad300a73 rollout=2 seed=10 duration_ms=287905 success=False reward=0.0 steps=50 error=None
+2026-09-10T20:03:44Z rollout_done  iteration_id=3dc0d18a attempt=2 candidate_id=ad300a73 rollout=1 seed=10 duration_ms=288770 success=False reward=0.0 steps=50 error=None
+2026-09-10T20:03:48Z rollout_done  iteration_id=3dc0d18a attempt=2 candidate_id=ad300a73 rollout=3 seed=10 duration_ms=292224 success=False reward=0.0 steps=50 error=None
+2026-09-10T20:04:37Z rollout_done  iteration_id=3dc0d18a attempt=2 candidate_id=ad300a73 rollout=4 seed=10 duration_ms=341321 success=False reward=0.0 steps=50 error=None
+2026-09-10T20:04:37Z candidate_evaluated  iteration_id=3dc0d18a attempt=2 candidate_id=ad300a73 k=5 success_rate=0.0 n_errors=0
+2026-09-10T20:04:43Z mutator_decision  iteration_id=3dc0d18a attempt=2 decision=reject failure_axis=task_understanding failure_label=empty_action_loop rationale=The no-op candidate produced SR=0.00 with every rollout failing via empty_action_loop — the Policy emits empty `do` actions (empty text) and never actually issues a command. This is a task-understandi
+2026-09-10T20:04:50Z candidate_reproposed  iteration_id=3dc0d18a attempt=2 rules_code_len=620
+2026-09-10T20:08:54Z rollout_done  iteration_id=3dc0d18a attempt=3 candidate_id=2a0d10fa rollout=0 seed=10 duration_ms=244305 success=False reward=0.0 steps=50 error=None
+2026-09-10T20:08:57Z rollout_done  iteration_id=3dc0d18a attempt=3 candidate_id=2a0d10fa rollout=3 seed=10 duration_ms=246545 success=False reward=0.0 steps=50 error=None
+2026-09-10T20:09:08Z rollout_done  iteration_id=3dc0d18a attempt=3 candidate_id=2a0d10fa rollout=1 seed=10 duration_ms=258249 success=False reward=0.0 steps=50 error=None
+2026-09-10T20:09:12Z rollout_done  iteration_id=3dc0d18a attempt=3 candidate_id=2a0d10fa rollout=4 seed=10 duration_ms=262284 success=False reward=0.0 steps=50 error=None
+2026-09-10T20:09:29Z rollout_done  iteration_id=3dc0d18a attempt=3 candidate_id=2a0d10fa rollout=2 seed=10 duration_ms=278470 success=False reward=0.0 steps=50 error=None
+2026-09-10T20:09:29Z candidate_evaluated  iteration_id=3dc0d18a attempt=3 candidate_id=2a0d10fa k=5 success_rate=0.0 n_errors=0
+2026-09-10T20:09:35Z mutator_decision  iteration_id=3dc0d18a attempt=3 decision=reject failure_axis=task_understanding failure_label=empty_action_loop rationale=The candidate's O-axis hint had zero measurable effect: success_rate stayed 0.00 (0/5), identical to baseline. All 5 rollouts still end in empty_action_loop with the Policy emitting empty 'do' actions
+2026-09-10T20:09:39Z candidate_reproposed  iteration_id=3dc0d18a attempt=3 rules_code_len=30
+2026-09-10T20:14:03Z rollout_done  iteration_id=3dc0d18a attempt=4 candidate_id=7f1b83a1 rollout=1 seed=10 duration_ms=263616 success=False reward=0.0 steps=49 error=None
+2026-09-10T20:14:11Z rollout_done  iteration_id=3dc0d18a attempt=4 candidate_id=7f1b83a1 rollout=3 seed=10 duration_ms=271260 success=False reward=0.0 steps=49 error=None
+2026-09-10T20:14:17Z rollout_done  iteration_id=3dc0d18a attempt=4 candidate_id=7f1b83a1 rollout=0 seed=10 duration_ms=278022 success=False reward=0.0 steps=49 error=None
+2026-09-10T20:14:27Z rollout_done  iteration_id=3dc0d18a attempt=4 candidate_id=7f1b83a1 rollout=2 seed=10 duration_ms=287308 success=False reward=0.0 steps=49 error=None
+2026-09-10T20:14:29Z rollout_done  iteration_id=3dc0d18a attempt=4 candidate_id=7f1b83a1 rollout=4 seed=10 duration_ms=289947 success=False reward=0.0 steps=49 error=None
+2026-09-10T20:14:29Z candidate_evaluated  iteration_id=3dc0d18a attempt=4 candidate_id=7f1b83a1 k=5 success_rate=0.0 n_errors=0
+2026-09-10T20:14:35Z mutator_decision  iteration_id=3dc0d18a attempt=4 decision=reject failure_axis=S0 failure_label=malformed_in_env_actions rationale=The candidate's in_env_actions was malformed: it replayed the literal tool name 'do' with no kwargs_json, so the Setup layer emitted empty `do` calls (or no-op steps) rather than actually pre-heating
+2026-09-10T20:14:42Z candidate_reproposed  iteration_id=3dc0d18a attempt=4 rules_code_len=696
+2026-09-10T20:19:41Z rollout_done  iteration_id=3dc0d18a attempt=5 candidate_id=ea751da6 rollout=3 seed=10 duration_ms=299282 success=False reward=0.0 steps=50 error=None
+2026-09-10T20:19:43Z rollout_done  iteration_id=3dc0d18a attempt=5 candidate_id=ea751da6 rollout=4 seed=10 duration_ms=300570 success=False reward=0.0 steps=50 error=None
+2026-09-10T20:20:03Z rollout_done  iteration_id=3dc0d18a attempt=5 candidate_id=ea751da6 rollout=2 seed=10 duration_ms=320913 success=False reward=0.0 steps=50 error=None
+2026-09-10T20:20:14Z rollout_done  iteration_id=3dc0d18a attempt=5 candidate_id=ea751da6 rollout=1 seed=10 duration_ms=332248 success=False reward=0.0 steps=50 error=None
+2026-09-10T20:20:28Z rollout_done  iteration_id=3dc0d18a attempt=5 candidate_id=ea751da6 rollout=0 seed=10 duration_ms=345829 success=False reward=0.0 steps=50 error=None
+2026-09-10T20:20:28Z candidate_evaluated  iteration_id=3dc0d18a attempt=5 candidate_id=ea751da6 k=5 success_rate=0.0 n_errors=0
+2026-09-10T20:20:34Z mutator_decision  iteration_id=3dc0d18a attempt=5 decision=reject failure_axis=task_understanding failure_label=empty_action_loop rationale=The mutation had no effect: SR remains 0.00 (0/5), identical to baseline. Every rollout shows actions=['do','do',...] with empty action text — the Policy is emitting empty actions (empty `text` kwarg)
+2026-09-10T20:20:34Z budget_stop  iteration_id=3dc0d18a attempts=5
+2026-09-10T20:20:34Z checkpoint_saved  iteration_id=3dc0d18a path=checkpoints/task_0010_best_effort.json n_actions=0 rules_code_len=30 best_effort=True rollout_success_rate=0.0
+2026-09-10T20:20:34Z task_end  task_idx=10 total_traces_so_far=265
+2026-09-10T20:20:34Z iteration_end  outer=10 total_traces_so_far=265
+2026-09-10T20:20:34Z task_start  task_idx=11
+2026-09-10T20:20:34Z iteration_start  outer=11
+2026-09-10T20:20:34Z baseline_compute_start  task_idx=11 task_id=11 n=5 key=0092838e3d88665e
+2026-09-10T20:23:46Z rollout_done  iteration_id=baseline-0011 attempt=0 candidate_id=baseline rollout=0 seed=11 duration_ms=191656 success=False reward=0.0 steps=50 error=None
+2026-09-10T20:23:56Z rollout_done  iteration_id=baseline-0011 attempt=0 candidate_id=baseline rollout=2 seed=11 duration_ms=201768 success=False reward=0.0 steps=50 error=None
+2026-09-10T20:23:56Z rollout_done  iteration_id=baseline-0011 attempt=0 candidate_id=baseline rollout=3 seed=11 duration_ms=201798 success=False reward=0.0 steps=50 error=None
+2026-09-10T20:24:25Z rollout_done  iteration_id=baseline-0011 attempt=0 candidate_id=baseline rollout=4 seed=11 duration_ms=230255 success=False reward=0.0 steps=50 error=None
+2026-09-10T20:24:37Z rollout_done  iteration_id=baseline-0011 attempt=0 candidate_id=baseline rollout=1 seed=11 duration_ms=242468 success=False reward=0.0 steps=50 error=None
+2026-09-10T20:24:37Z baseline_compute_done  task_idx=11 task_id=11 n=5 sr=0.0 avg_success_steps=None sample_action_seq_len=0
+2026-09-10T20:24:43Z candidate_proposed  iteration_id=769ba201 attempt=0 rules_code_len=490 n_in_env_actions=0 rationale=Baseline SR is 0.00 (Policy already fails this task), so the right move is to make the task EASIER, not harder. The Poli
+2026-09-10T20:27:34Z rollout_done  iteration_id=769ba201 attempt=1 candidate_id=f6b5bff4 rollout=1 seed=11 duration_ms=170580 success=False reward=0.0 steps=50 error=None
+2026-09-10T20:27:38Z rollout_done  iteration_id=769ba201 attempt=1 candidate_id=f6b5bff4 rollout=2 seed=11 duration_ms=174710 success=False reward=0.0 steps=50 error=None
+2026-09-10T20:27:42Z rollout_done  iteration_id=769ba201 attempt=1 candidate_id=f6b5bff4 rollout=3 seed=11 duration_ms=178420 success=False reward=0.0 steps=50 error=None
+2026-09-10T20:27:50Z rollout_done  iteration_id=769ba201 attempt=1 candidate_id=f6b5bff4 rollout=4 seed=11 duration_ms=186981 success=False reward=0.0 steps=50 error=None
+2026-09-10T20:27:59Z rollout_done  iteration_id=769ba201 attempt=1 candidate_id=f6b5bff4 rollout=0 seed=11 duration_ms=195685 success=False reward=0.0 steps=50 error=None
+2026-09-10T20:27:59Z candidate_evaluated  iteration_id=769ba201 attempt=1 candidate_id=f6b5bff4 k=5 success_rate=0.0 n_errors=0
+2026-09-10T20:28:05Z mutator_decision  iteration_id=769ba201 attempt=1 decision=reject failure_axis=task_understanding failure_label=empty_action_loop rationale=The candidate had no measurable effect: SR stayed 0.00 (0/5), identical to baseline. All 5 rollouts ran to the 50-step cap with only 8 distinct actions (empty-action loops / task-understanding failure
+2026-09-10T20:28:09Z candidate_reproposed  iteration_id=769ba201 attempt=1 rules_code_len=0
+2026-09-10T20:31:46Z rollout_done  iteration_id=769ba201 attempt=2 candidate_id=4baad20e rollout=1 seed=11 duration_ms=216845 success=False reward=0.0 steps=50 error=None
+2026-09-10T20:31:59Z rollout_done  iteration_id=769ba201 attempt=2 candidate_id=4baad20e rollout=3 seed=11 duration_ms=229713 success=False reward=0.0 steps=50 error=None
+2026-09-10T20:32:01Z rollout_done  iteration_id=769ba201 attempt=2 candidate_id=4baad20e rollout=0 seed=11 duration_ms=231588 success=False reward=0.0 steps=50 error=None
+2026-09-10T20:32:04Z rollout_done  iteration_id=769ba201 attempt=2 candidate_id=4baad20e rollout=4 seed=11 duration_ms=235108 success=False reward=0.0 steps=50 error=None
+2026-09-10T20:32:23Z rollout_done  iteration_id=769ba201 attempt=2 candidate_id=4baad20e rollout=2 seed=11 duration_ms=254090 success=False reward=0.0 steps=50 error=None
+2026-09-10T20:32:23Z candidate_evaluated  iteration_id=769ba201 attempt=2 candidate_id=4baad20e k=5 success_rate=0.0 n_errors=0
+2026-09-10T20:32:31Z mutator_decision  iteration_id=769ba201 attempt=2 decision=reject failure_axis=task_understanding failure_label=empty_action_loop rationale=The candidate is a no-op pass-through and produced SR=0.00 (0/5), identical to baseline. All 5 rollouts show `actions=['do', 'do', ...]` with empty-action loops — the Policy emits empty `do` commands
+2026-09-10T20:32:34Z candidate_reproposed  iteration_id=769ba201 attempt=2 rules_code_len=0
+2026-09-10T20:35:49Z rollout_done  iteration_id=769ba201 attempt=3 candidate_id=00d19a06 rollout=3 seed=11 duration_ms=195341 success=False reward=0.0 steps=50 error=None
+2026-09-10T20:36:04Z rollout_done  iteration_id=769ba201 attempt=3 candidate_id=00d19a06 rollout=1 seed=11 duration_ms=209511 success=False reward=0.0 steps=50 error=None
+2026-09-10T20:36:16Z rollout_done  iteration_id=769ba201 attempt=3 candidate_id=00d19a06 rollout=2 seed=11 duration_ms=222303 success=False reward=0.0 steps=50 error=None
+2026-09-10T20:36:24Z rollout_done  iteration_id=769ba201 attempt=3 candidate_id=00d19a06 rollout=4 seed=11 duration_ms=229524 success=False reward=0.0 steps=50 error=None
+2026-09-10T20:36:31Z rollout_done  iteration_id=769ba201 attempt=3 candidate_id=00d19a06 rollout=0 seed=11 duration_ms=237325 success=False reward=0.0 steps=50 error=None
+2026-09-10T20:36:31Z candidate_evaluated  iteration_id=769ba201 attempt=3 candidate_id=00d19a06 k=5 success_rate=0.0 n_errors=0
+2026-09-10T20:36:38Z mutator_decision  iteration_id=769ba201 attempt=3 decision=reject failure_axis=task_understanding failure_label=empty_action_loop rationale=The pass-through candidate produced 0/5 success with all rollouts hitting empty_action_loop — identical to baseline. The Policy emits empty actions and never makes progress, so a no-op mutation teache
+2026-09-10T20:36:45Z candidate_reproposed  iteration_id=769ba201 attempt=3 rules_code_len=1225
+2026-09-10T20:40:00Z rollout_done  iteration_id=769ba201 attempt=4 candidate_id=2995eaf3 rollout=1 seed=11 duration_ms=195119 success=False reward=0.0 steps=50 error=None
+2026-09-10T20:40:17Z rollout_done  iteration_id=769ba201 attempt=4 candidate_id=2995eaf3 rollout=0 seed=11 duration_ms=211808 success=False reward=0.0 steps=50 error=None
+2026-09-10T20:40:23Z rollout_done  iteration_id=769ba201 attempt=4 candidate_id=2995eaf3 rollout=3 seed=11 duration_ms=218225 success=False reward=0.0 steps=50 error=None
+2026-09-10T20:40:25Z rollout_done  iteration_id=769ba201 attempt=4 candidate_id=2995eaf3 rollout=4 seed=11 duration_ms=220031 success=False reward=0.0 steps=50 error=None
+2026-09-10T20:40:37Z rollout_done  iteration_id=769ba201 attempt=4 candidate_id=2995eaf3 rollout=2 seed=11 duration_ms=232530 success=False reward=0.0 steps=50 error=None
+2026-09-10T20:40:37Z candidate_evaluated  iteration_id=769ba201 attempt=4 candidate_id=2995eaf3 k=5 success_rate=0.0 n_errors=0
+2026-09-10T20:40:43Z mutator_decision  iteration_id=769ba201 attempt=4 decision=reject failure_axis=task_understanding failure_label=empty_action_loop rationale=The candidate's O-axis filter had zero effect: SR remains 0.00 across all 5 rollouts, and every rollout still ends in empty_action_loop (the Policy emits empty actions, not meaningful commands). The f
+2026-09-10T20:40:48Z candidate_reproposed  iteration_id=769ba201 attempt=4 rules_code_len=557
+2026-09-10T20:43:44Z rollout_done  iteration_id=769ba201 attempt=5 candidate_id=93fb35b1 rollout=1 seed=11 duration_ms=175697 success=False reward=0.0 steps=50 error=None
+2026-09-10T20:43:49Z rollout_done  iteration_id=769ba201 attempt=5 candidate_id=93fb35b1 rollout=0 seed=11 duration_ms=181380 success=False reward=0.0 steps=50 error=None
+2026-09-10T20:44:01Z rollout_done  iteration_id=769ba201 attempt=5 candidate_id=93fb35b1 rollout=2 seed=11 duration_ms=192853 success=False reward=0.0 steps=50 error=None
+2026-09-10T20:44:03Z rollout_done  iteration_id=769ba201 attempt=5 candidate_id=93fb35b1 rollout=3 seed=11 duration_ms=195278 success=False reward=0.0 steps=50 error=None
+2026-09-10T20:44:38Z rollout_done  iteration_id=769ba201 attempt=5 candidate_id=93fb35b1 rollout=4 seed=11 duration_ms=229713 success=False reward=0.0 steps=50 error=None
+2026-09-10T20:44:38Z candidate_evaluated  iteration_id=769ba201 attempt=5 candidate_id=93fb35b1 k=5 success_rate=0.0 n_errors=0
+2026-09-10T20:44:43Z mutator_decision  iteration_id=769ba201 attempt=5 decision=reject failure_axis=task_understanding failure_label=empty_action_loop rationale=The candidate's O-axis mutation had zero measurable effect: all 5 rollouts still end in empty_action_loop (actions=['do','do',...] with empty text) and SR=0.00, identical to baseline. The Policy isn't
+2026-09-10T20:44:43Z budget_stop  iteration_id=769ba201 attempts=5
+2026-09-10T20:44:43Z checkpoint_saved  iteration_id=769ba201 path=checkpoints/task_0011_best_effort.json n_actions=0 rules_code_len=490 best_effort=True rollout_success_rate=0.0
+2026-09-10T20:44:43Z task_end  task_idx=11 total_traces_so_far=295
+2026-09-10T20:44:43Z iteration_end  outer=11 total_traces_so_far=295
+2026-09-10T20:44:43Z task_start  task_idx=12
+2026-09-10T20:44:43Z iteration_start  outer=12
+2026-09-10T20:44:43Z baseline_compute_start  task_idx=12 task_id=12 n=5 key=c09ba5f568525a91
+2026-09-10T20:45:19Z rollout_done  iteration_id=baseline-0012 attempt=0 candidate_id=baseline rollout=2 seed=12 duration_ms=35516 success=True reward=1.0 steps=12 error=None
+2026-09-10T20:45:21Z rollout_done  iteration_id=baseline-0012 attempt=0 candidate_id=baseline rollout=1 seed=12 duration_ms=37404 success=True reward=1.0 steps=12 error=None
+2026-09-10T20:45:21Z rollout_done  iteration_id=baseline-0012 attempt=0 candidate_id=baseline rollout=0 seed=12 duration_ms=38095 success=True reward=1.0 steps=12 error=None
+2026-09-10T20:45:21Z rollout_done  iteration_id=baseline-0012 attempt=0 candidate_id=baseline rollout=3 seed=12 duration_ms=38153 success=True reward=1.0 steps=12 error=None
+2026-09-10T20:45:24Z rollout_done  iteration_id=baseline-0012 attempt=0 candidate_id=baseline rollout=4 seed=12 duration_ms=41007 success=True reward=1.0 steps=12 error=None
+2026-09-10T20:45:24Z baseline_compute_done  task_idx=12 task_id=12 n=5 sr=1.0 avg_success_steps=12.0 sample_action_seq_len=12
+2026-09-10T20:45:29Z candidate_proposed  iteration_id=4d80c651 attempt=0 rules_code_len=30 n_in_env_actions=0 rationale=Baseline SR is 1.00 (trivially solved in 12 steps), but recent traces show a prior candidate drove SR to 0.35 (too hard,
+2026-09-10T20:46:08Z rollout_done  iteration_id=4d80c651 attempt=1 candidate_id=4257a4d8 rollout=3 seed=12 duration_ms=38927 success=True reward=1.0 steps=12 error=None
+2026-09-10T20:46:10Z rollout_done  iteration_id=4d80c651 attempt=1 candidate_id=4257a4d8 rollout=0 seed=12 duration_ms=40740 success=True reward=1.0 steps=12 error=None
+2026-09-10T20:46:10Z rollout_done  iteration_id=4d80c651 attempt=1 candidate_id=4257a4d8 rollout=2 seed=12 duration_ms=41030 success=True reward=1.0 steps=12 error=None
+2026-09-10T20:46:10Z rollout_done  iteration_id=4d80c651 attempt=1 candidate_id=4257a4d8 rollout=1 seed=12 duration_ms=41333 success=True reward=1.0 steps=12 error=None
+2026-09-10T20:46:11Z rollout_done  iteration_id=4d80c651 attempt=1 candidate_id=4257a4d8 rollout=4 seed=12 duration_ms=41849 success=True reward=1.0 steps=12 error=None
+2026-09-10T20:46:11Z candidate_evaluated  iteration_id=4d80c651 attempt=1 candidate_id=4257a4d8 k=5 success_rate=1.0 n_errors=0
+2026-09-10T20:46:16Z mutator_decision  iteration_id=4d80c651 attempt=1 decision=reject failure_axis=none failure_label=no_failures rationale=The pass-through (no-op) candidate produced success_rate=1.00 across all 5 rollouts, identical to baseline (12 steps each, zero blocked steps). This confirms the env and Policy are healthy and the pri
+2026-09-10T20:46:23Z candidate_reproposed  iteration_id=4d80c651 attempt=1 rules_code_len=671
+2026-09-10T20:46:58Z rollout_done  iteration_id=4d80c651 attempt=2 candidate_id=ca832568 rollout=1 seed=12 duration_ms=35023 success=True reward=1.0 steps=8 error=None
+2026-09-10T20:47:04Z rollout_done  iteration_id=4d80c651 attempt=2 candidate_id=ca832568 rollout=2 seed=12 duration_ms=40908 success=True reward=1.0 steps=13 error=None
+2026-09-10T20:47:05Z rollout_done  iteration_id=4d80c651 attempt=2 candidate_id=ca832568 rollout=3 seed=12 duration_ms=42083 success=True reward=1.0 steps=8 error=None
+2026-09-10T20:47:06Z rollout_done  iteration_id=4d80c651 attempt=2 candidate_id=ca832568 rollout=4 seed=12 duration_ms=42364 success=True reward=1.0 steps=13 error=None
+2026-09-10T20:47:06Z rollout_done  iteration_id=4d80c651 attempt=2 candidate_id=ca832568 rollout=0 seed=12 duration_ms=42540 success=True reward=1.0 steps=14 error=None
+2026-09-10T20:47:06Z candidate_evaluated  iteration_id=4d80c651 attempt=2 candidate_id=ca832568 k=5 success_rate=1.0 n_errors=0
+2026-09-10T20:47:12Z mutator_decision  iteration_id=4d80c651 attempt=2 decision=reject failure_axis=O failure_label=no_effect rationale=The candidate's O-axis nudge had zero measurable effect: success_rate stayed at 1.00 (5/5), identical to the unmutated baseline, with avg_success_steps actually dropping slightly (11.2 vs 12.0). The h
+2026-09-10T20:47:18Z candidate_reproposed  iteration_id=4d80c651 attempt=2 rules_code_len=864
+2026-09-10T20:47:43Z rollout_done  iteration_id=4d80c651 attempt=3 candidate_id=aefdce55 rollout=2 seed=12 duration_ms=25446 success=True reward=1.0 steps=8 error=None
+2026-09-10T20:47:43Z rollout_done  iteration_id=4d80c651 attempt=3 candidate_id=aefdce55 rollout=3 seed=12 duration_ms=25446 success=True reward=1.0 steps=8 error=None
+2026-09-10T20:47:43Z rollout_done  iteration_id=4d80c651 attempt=3 candidate_id=aefdce55 rollout=4 seed=12 duration_ms=25474 success=True reward=1.0 steps=8 error=None
+2026-09-10T20:47:47Z rollout_done  iteration_id=4d80c651 attempt=3 candidate_id=aefdce55 rollout=0 seed=12 duration_ms=29039 success=True reward=1.0 steps=8 error=None
+2026-09-10T20:47:49Z rollout_done  iteration_id=4d80c651 attempt=3 candidate_id=aefdce55 rollout=1 seed=12 duration_ms=31404 success=True reward=1.0 steps=8 error=None
+2026-09-10T20:47:49Z candidate_evaluated  iteration_id=4d80c651 attempt=3 candidate_id=aefdce55 k=5 success_rate=1.0 n_errors=0
+2026-09-10T20:47:55Z mutator_decision  iteration_id=4d80c651 attempt=3 decision=reject failure_axis=O failure_label=no_effect rationale=The candidate's O-axis mutation had no measurable effect: success_rate remained 1.00 (5/5) and avg_success_steps actually DROPPED from 12.0 to 8.0, meaning the Policy got faster, not slower. The filte
+2026-09-10T20:48:00Z candidate_reproposed  iteration_id=4d80c651 attempt=3 rules_code_len=30
+2026-09-10T20:48:36Z rollout_done  iteration_id=4d80c651 attempt=4 candidate_id=8a3706ca rollout=1 seed=12 duration_ms=35435 success=True reward=1.0 steps=12 error=None
+2026-09-10T20:48:39Z rollout_done  iteration_id=4d80c651 attempt=4 candidate_id=8a3706ca rollout=3 seed=12 duration_ms=38459 success=True reward=1.0 steps=12 error=None
+2026-09-10T20:48:40Z rollout_done  iteration_id=4d80c651 attempt=4 candidate_id=8a3706ca rollout=4 seed=12 duration_ms=39675 success=True reward=1.0 steps=12 error=None
+2026-09-10T20:48:42Z rollout_done  iteration_id=4d80c651 attempt=4 candidate_id=8a3706ca rollout=2 seed=12 duration_ms=41677 success=True reward=1.0 steps=12 error=None
+2026-09-10T20:48:46Z rollout_done  iteration_id=4d80c651 attempt=4 candidate_id=8a3706ca rollout=0 seed=12 duration_ms=45547 success=True reward=1.0 steps=12 error=None
+2026-09-10T20:48:46Z candidate_evaluated  iteration_id=4d80c651 attempt=4 candidate_id=8a3706ca k=5 success_rate=1.0 n_errors=0
+2026-09-10T20:48:50Z mutator_decision  iteration_id=4d80c651 attempt=4 decision=accept failure_axis=None failure_label=None rationale=The objective reports the aggregate is TOO HARD (SR 0.35, target [0.40,0.60]), with failures concentrated on the O axis. This specific task has a baseline SR of 1.00 with a clean 12-step solve — the P
+2026-09-10T20:48:50Z checkpoint_saved  iteration_id=4d80c651 path=checkpoints/task_0012_attempt_04.json n_actions=0 rules_code_len=30 best_effort=False
+2026-09-10T20:48:50Z budget_stop  iteration_id=4d80c651 attempts=4
+2026-09-10T20:48:50Z task_end  task_idx=12 total_traces_so_far=320
+2026-09-10T20:48:50Z iteration_end  outer=12 total_traces_so_far=320
+2026-09-10T20:48:50Z task_start  task_idx=13
+2026-09-10T20:48:50Z iteration_start  outer=13
+2026-09-10T20:48:50Z baseline_compute_start  task_idx=13 task_id=13 n=5 key=e95ba16515077677
+2026-09-10T20:49:46Z rollout_done  iteration_id=baseline-0013 attempt=0 candidate_id=baseline rollout=3 seed=13 duration_ms=55774 success=True reward=1.0 steps=18 error=None
+2026-09-10T20:49:46Z rollout_done  iteration_id=baseline-0013 attempt=0 candidate_id=baseline rollout=0 seed=13 duration_ms=56155 success=True reward=1.0 steps=18 error=None
+2026-09-10T20:50:11Z rollout_done  iteration_id=baseline-0013 attempt=0 candidate_id=baseline rollout=2 seed=13 duration_ms=80983 success=True reward=1.0 steps=30 error=None
+2026-09-10T20:50:12Z rollout_done  iteration_id=baseline-0013 attempt=0 candidate_id=baseline rollout=4 seed=13 duration_ms=82353 success=True reward=1.0 steps=30 error=None
+2026-09-10T20:50:16Z rollout_done  iteration_id=baseline-0013 attempt=0 candidate_id=baseline rollout=1 seed=13 duration_ms=86210 success=True reward=1.0 steps=30 error=None
+2026-09-10T20:50:16Z baseline_compute_done  task_idx=13 task_id=13 n=5 sr=1.0 avg_success_steps=25.2 sample_action_seq_len=18
+2026-09-10T20:50:23Z candidate_proposed  iteration_id=7649c1c8 attempt=0 rules_code_len=1149 n_in_env_actions=0 rationale=Baseline SR is 1.00 and recent accepted episodes sit at 0.50 (in band). The objective wants diversity and to maintain th
+2026-09-10T20:51:15Z rollout_done  iteration_id=7649c1c8 attempt=1 candidate_id=3196a41c rollout=4 seed=13 duration_ms=52404 success=True reward=1.0 steps=18 error=None
+2026-09-10T20:51:17Z rollout_done  iteration_id=7649c1c8 attempt=1 candidate_id=3196a41c rollout=3 seed=13 duration_ms=54093 success=True reward=1.0 steps=18 error=None
+2026-09-10T20:51:18Z rollout_done  iteration_id=7649c1c8 attempt=1 candidate_id=3196a41c rollout=0 seed=13 duration_ms=54759 success=True reward=1.0 steps=18 error=None
+2026-09-10T20:51:35Z rollout_done  iteration_id=7649c1c8 attempt=1 candidate_id=3196a41c rollout=2 seed=13 duration_ms=72462 success=True reward=1.0 steps=25 error=None
+2026-09-10T20:51:43Z rollout_done  iteration_id=7649c1c8 attempt=1 candidate_id=3196a41c rollout=1 seed=13 duration_ms=79618 success=True reward=1.0 steps=30 error=None
+2026-09-10T20:51:43Z candidate_evaluated  iteration_id=7649c1c8 attempt=1 candidate_id=3196a41c k=5 success_rate=1.0 n_errors=0
+2026-09-10T20:51:49Z mutator_decision  iteration_id=7649c1c8 attempt=1 decision=reject failure_axis=none failure_label=no_effect rationale=The mutation had no measurable effect: success_rate stayed at 1.00 (5/5), identical to baseline. avg_success_steps barely moved (25.2 → 21.8). The pruning logic is effectively a no-op because ALFWorld
+2026-09-10T20:51:55Z candidate_reproposed  iteration_id=7649c1c8 attempt=1 rules_code_len=621
+2026-09-10T20:53:15Z rollout_done  iteration_id=7649c1c8 attempt=2 candidate_id=91d7c3bb rollout=3 seed=13 duration_ms=80389 success=True reward=1.0 steps=30 error=None
+2026-09-10T20:53:19Z rollout_done  iteration_id=7649c1c8 attempt=2 candidate_id=91d7c3bb rollout=0 seed=13 duration_ms=84524 success=True reward=1.0 steps=30 error=None
+2026-09-10T20:53:23Z rollout_done  iteration_id=7649c1c8 attempt=2 candidate_id=91d7c3bb rollout=2 seed=13 duration_ms=87804 success=True reward=1.0 steps=30 error=None
+2026-09-10T20:53:23Z rollout_done  iteration_id=7649c1c8 attempt=2 candidate_id=91d7c3bb rollout=1 seed=13 duration_ms=87937 success=True reward=1.0 steps=30 error=None
+2026-09-10T20:53:53Z rollout_done  iteration_id=7649c1c8 attempt=2 candidate_id=91d7c3bb rollout=4 seed=13 duration_ms=117715 success=True reward=1.0 steps=40 error=None
+2026-09-10T20:53:53Z candidate_evaluated  iteration_id=7649c1c8 attempt=2 candidate_id=91d7c3bb k=5 success_rate=1.0 n_errors=0
+2026-09-10T20:53:59Z mutator_decision  iteration_id=7649c1c8 attempt=2 decision=reject failure_axis=none failure_label=no_effect rationale=The candidate's O-axis perturbation had no measurable effect: success_rate stayed at 1.00 (5/5), identical to baseline. The filter only dropped the admissible_commands key on steps where step_count %
+2026-09-10T20:54:04Z candidate_reproposed  iteration_id=7649c1c8 attempt=2 rules_code_len=30
+2026-09-10T20:54:27Z rollout_done  iteration_id=7649c1c8 attempt=3 candidate_id=7605f996 rollout=1 seed=13 duration_ms=22735 success=True reward=1.0 steps=6 error=None
+2026-09-10T20:54:27Z rollout_done  iteration_id=7649c1c8 attempt=3 candidate_id=7605f996 rollout=2 seed=13 duration_ms=23133 success=True reward=1.0 steps=7 error=None
+2026-09-10T20:54:28Z rollout_done  iteration_id=7649c1c8 attempt=3 candidate_id=7605f996 rollout=3 seed=13 duration_ms=23276 success=True reward=1.0 steps=6 error=None
+2026-09-10T20:54:28Z rollout_done  iteration_id=7649c1c8 attempt=3 candidate_id=7605f996 rollout=0 seed=13 duration_ms=23957 success=True reward=1.0 steps=7 error=None
+2026-09-10T20:54:41Z rollout_done  iteration_id=7649c1c8 attempt=3 candidate_id=7605f996 rollout=4 seed=13 duration_ms=36525 success=True reward=1.0 steps=11 error=None
+2026-09-10T20:54:41Z candidate_evaluated  iteration_id=7649c1c8 attempt=3 candidate_id=7605f996 k=5 success_rate=1.0 n_errors=0
+2026-09-10T20:54:46Z mutator_decision  iteration_id=7649c1c8 attempt=3 decision=reject failure_axis=S0 failure_label=malformed_candidate rationale=The candidate had no measurable effect. The in_env_actions field was emitted as a bare list of six 'do' strings rather than valid Action objects with name/kwargs_json, so the Setup harness replayed no
+2026-09-10T20:54:52Z candidate_reproposed  iteration_id=7649c1c8 attempt=3 rules_code_len=611
+2026-09-10T20:55:13Z rollout_done  iteration_id=7649c1c8 attempt=4 candidate_id=0ba60c34 rollout=1 seed=13 duration_ms=21341 success=True reward=1.0 steps=6 error=None
+2026-09-10T20:55:14Z rollout_done  iteration_id=7649c1c8 attempt=4 candidate_id=0ba60c34 rollout=4 seed=13 duration_ms=21765 success=True reward=1.0 steps=6 error=None
+2026-09-10T20:55:14Z rollout_done  iteration_id=7649c1c8 attempt=4 candidate_id=0ba60c34 rollout=0 seed=13 duration_ms=22005 success=True reward=1.0 steps=6 error=None
+2026-09-10T20:55:14Z rollout_done  iteration_id=7649c1c8 attempt=4 candidate_id=0ba60c34 rollout=2 seed=13 duration_ms=22603 success=True reward=1.0 steps=6 error=None
+2026-09-10T20:55:15Z rollout_done  iteration_id=7649c1c8 attempt=4 candidate_id=0ba60c34 rollout=3 seed=13 duration_ms=22794 success=True reward=1.0 steps=6 error=None
+2026-09-10T20:55:15Z candidate_evaluated  iteration_id=7649c1c8 attempt=4 candidate_id=0ba60c34 k=5 success_rate=1.0 n_errors=0
+2026-09-10T20:55:21Z mutator_decision  iteration_id=7649c1c8 attempt=4 decision=reject failure_axis=S0 failure_label=task_easier_not_harder rationale=The candidate failed to move SR toward the target band [0.40, 0.60]. Baseline SR was 1.00 and this candidate produced SR=1.00 (5/5) with avg_success_steps collapsing from 25.2 to 6.0. The in_env_actio
+2026-09-10T20:55:26Z candidate_reproposed  iteration_id=7649c1c8 attempt=4 rules_code_len=297
+2026-09-10T20:56:19Z rollout_done  iteration_id=7649c1c8 attempt=5 candidate_id=825849cc rollout=4 seed=13 duration_ms=52532 success=True reward=1.0 steps=18 error=None
+2026-09-10T20:56:21Z rollout_done  iteration_id=7649c1c8 attempt=5 candidate_id=825849cc rollout=2 seed=13 duration_ms=54367 success=True reward=1.0 steps=18 error=None
+2026-09-10T20:56:21Z rollout_done  iteration_id=7649c1c8 attempt=5 candidate_id=825849cc rollout=3 seed=13 duration_ms=54912 success=True reward=1.0 steps=18 error=None
+2026-09-10T20:56:21Z rollout_done  iteration_id=7649c1c8 attempt=5 candidate_id=825849cc rollout=1 seed=13 duration_ms=55190 success=True reward=1.0 steps=18 error=None
+2026-09-10T20:56:23Z rollout_done  iteration_id=7649c1c8 attempt=5 candidate_id=825849cc rollout=0 seed=13 duration_ms=56686 success=True reward=1.0 steps=18 error=None
+2026-09-10T20:56:23Z candidate_evaluated  iteration_id=7649c1c8 attempt=5 candidate_id=825849cc k=5 success_rate=1.0 n_errors=0
+2026-09-10T20:56:28Z mutator_decision  iteration_id=7649c1c8 attempt=5 decision=reject failure_axis=A failure_label=noop_mutation rationale=The mutation had zero measurable effect: blocking 'look' produced success_rate 1.00 (5/5), identical to baseline, with blocked_steps=0 across all rollouts — meaning the Policy never even attempted 'lo
+2026-09-10T20:56:28Z budget_stop  iteration_id=7649c1c8 attempts=5
+2026-09-10T20:56:28Z checkpoint_saved  iteration_id=7649c1c8 path=checkpoints/task_0013_best_effort.json n_actions=0 rules_code_len=1149 best_effort=True rollout_success_rate=1.0
+2026-09-10T20:56:28Z task_end  task_idx=13 total_traces_so_far=350
+2026-09-10T20:56:28Z iteration_end  outer=13 total_traces_so_far=350
+2026-09-10T20:56:28Z task_start  task_idx=14
+2026-09-10T20:56:28Z iteration_start  outer=14
+2026-09-10T20:56:28Z baseline_compute_start  task_idx=14 task_id=14 n=5 key=75acd3d34528432e
+2026-09-10T20:59:29Z rollout_done  iteration_id=baseline-0014 attempt=0 candidate_id=baseline rollout=0 seed=14 duration_ms=181038 success=False reward=0.0 steps=50 error=None
+2026-09-10T20:59:37Z rollout_done  iteration_id=baseline-0014 attempt=0 candidate_id=baseline rollout=3 seed=14 duration_ms=189059 success=False reward=0.0 steps=50 error=None
+2026-09-10T20:59:51Z rollout_done  iteration_id=baseline-0014 attempt=0 candidate_id=baseline rollout=4 seed=14 duration_ms=203199 success=False reward=0.0 steps=50 error=None
+2026-09-10T20:59:57Z rollout_done  iteration_id=baseline-0014 attempt=0 candidate_id=baseline rollout=2 seed=14 duration_ms=209118 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:00:00Z rollout_done  iteration_id=baseline-0014 attempt=0 candidate_id=baseline rollout=1 seed=14 duration_ms=212442 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:00:00Z baseline_compute_done  task_idx=14 task_id=14 n=5 sr=0.0 avg_success_steps=None sample_action_seq_len=0
+2026-09-10T21:00:06Z candidate_proposed  iteration_id=9f2f1aaf attempt=0 rules_code_len=0 n_in_env_actions=0 rationale=Baseline SR is 0.00 (Policy fails this task unmutated — all 5 rollouts time out at 50 steps with the Policy stuck facing
+2026-09-10T21:00:06Z task_skipped_passthrough  iteration_id=9f2f1aaf task_idx=14 task_id=14 rationale=Baseline SR is 0.00 (Policy fails this task unmutated — all 5 rollouts time out at 50 steps with the Policy stuck facing
+2026-09-10T21:00:06Z task_end  task_idx=14 total_traces_so_far=355
+2026-09-10T21:00:06Z iteration_end  outer=14 total_traces_so_far=355
+2026-09-10T21:00:06Z task_start  task_idx=15
+2026-09-10T21:00:06Z iteration_start  outer=15
+2026-09-10T21:00:06Z baseline_compute_start  task_idx=15 task_id=15 n=5 key=b44efaa7b9d38e58
+2026-09-10T21:01:02Z rollout_done  iteration_id=baseline-0015 attempt=0 candidate_id=baseline rollout=4 seed=15 duration_ms=56629 success=True reward=1.0 steps=19 error=None
+2026-09-10T21:01:03Z rollout_done  iteration_id=baseline-0015 attempt=0 candidate_id=baseline rollout=3 seed=15 duration_ms=57053 success=True reward=1.0 steps=18 error=None
+2026-09-10T21:01:03Z rollout_done  iteration_id=baseline-0015 attempt=0 candidate_id=baseline rollout=1 seed=15 duration_ms=57057 success=True reward=1.0 steps=18 error=None
+2026-09-10T21:01:03Z rollout_done  iteration_id=baseline-0015 attempt=0 candidate_id=baseline rollout=2 seed=15 duration_ms=57276 success=True reward=1.0 steps=18 error=None
+2026-09-10T21:01:06Z rollout_done  iteration_id=baseline-0015 attempt=0 candidate_id=baseline rollout=0 seed=15 duration_ms=60114 success=True reward=1.0 steps=23 error=None
+2026-09-10T21:01:06Z baseline_compute_done  task_idx=15 task_id=15 n=5 sr=1.0 avg_success_steps=19.2 sample_action_seq_len=18
+2026-09-10T21:01:16Z candidate_proposed  iteration_id=2511f33c attempt=0 rules_code_len=1247 n_in_env_actions=0 rationale=Baseline SR is 1.00 with a long, meandering 19-step search (the policy wanders through cabinets/drawers before finding t
+2026-09-10T21:02:02Z rollout_done  iteration_id=2511f33c attempt=1 candidate_id=699c85ea rollout=0 seed=15 duration_ms=45533 success=True reward=1.0 steps=13 error=None
+2026-09-10T21:02:13Z rollout_done  iteration_id=2511f33c attempt=1 candidate_id=699c85ea rollout=2 seed=15 duration_ms=57079 success=True reward=1.0 steps=18 error=None
+2026-09-10T21:02:14Z rollout_done  iteration_id=2511f33c attempt=1 candidate_id=699c85ea rollout=3 seed=15 duration_ms=57991 success=True reward=1.0 steps=18 error=None
+2026-09-10T21:02:19Z rollout_done  iteration_id=2511f33c attempt=1 candidate_id=699c85ea rollout=1 seed=15 duration_ms=62899 success=True reward=1.0 steps=18 error=None
+2026-09-10T21:02:19Z rollout_done  iteration_id=2511f33c attempt=1 candidate_id=699c85ea rollout=4 seed=15 duration_ms=62901 success=True reward=1.0 steps=18 error=None
+2026-09-10T21:02:19Z candidate_evaluated  iteration_id=2511f33c attempt=1 candidate_id=699c85ea k=5 success_rate=1.0 n_errors=0
+2026-09-10T21:02:27Z mutator_decision  iteration_id=2511f33c attempt=1 decision=reject failure_axis=O failure_label=noop_mutation rationale=The candidate is a no-op in practice: success_rate stayed at 1.00 (5/5) and avg_success_steps actually DROPPED from 19.2 to 17.0, meaning the perturbation did not add difficulty. The O-axis filter onl
+2026-09-10T21:02:34Z candidate_reproposed  iteration_id=2511f33c attempt=1 rules_code_len=0
+2026-09-10T21:02:55Z rollout_done  iteration_id=2511f33c attempt=2 candidate_id=3c34ac6f rollout=4 seed=15 duration_ms=20796 success=True reward=1.0 steps=5 error=None
+2026-09-10T21:02:55Z rollout_done  iteration_id=2511f33c attempt=2 candidate_id=3c34ac6f rollout=2 seed=15 duration_ms=20844 success=True reward=1.0 steps=5 error=None
+2026-09-10T21:02:55Z rollout_done  iteration_id=2511f33c attempt=2 candidate_id=3c34ac6f rollout=1 seed=15 duration_ms=20857 success=True reward=1.0 steps=5 error=None
+2026-09-10T21:02:55Z rollout_done  iteration_id=2511f33c attempt=2 candidate_id=3c34ac6f rollout=3 seed=15 duration_ms=21030 success=True reward=1.0 steps=5 error=None
+2026-09-10T21:02:55Z rollout_done  iteration_id=2511f33c attempt=2 candidate_id=3c34ac6f rollout=0 seed=15 duration_ms=21136 success=True reward=1.0 steps=5 error=None
+2026-09-10T21:02:55Z candidate_evaluated  iteration_id=2511f33c attempt=2 candidate_id=3c34ac6f k=5 success_rate=1.0 n_errors=0
+2026-09-10T21:03:02Z mutator_decision  iteration_id=2511f33c attempt=2 decision=reject failure_axis=S0 failure_label=noop_mutation rationale=The candidate's in_env_actions was a list of 4 bare 'do' tool names with no kwargs_json — the Setup harness replayed them as empty/invalid actions, which did nothing to the environment. All 5 rollouts
+2026-09-10T21:03:08Z candidate_reproposed  iteration_id=2511f33c attempt=2 rules_code_len=635
+2026-09-10T21:06:01Z rollout_done  iteration_id=2511f33c attempt=3 candidate_id=6108626b rollout=2 seed=15 duration_ms=173176 success=True reward=1.0 steps=48 error=None
+2026-09-10T21:06:06Z rollout_done  iteration_id=2511f33c attempt=3 candidate_id=6108626b rollout=1 seed=15 duration_ms=177658 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:06:28Z rollout_done  iteration_id=2511f33c attempt=3 candidate_id=6108626b rollout=4 seed=15 duration_ms=200619 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:06:31Z rollout_done  iteration_id=2511f33c attempt=3 candidate_id=6108626b rollout=0 seed=15 duration_ms=202850 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:06:40Z rollout_done  iteration_id=2511f33c attempt=3 candidate_id=6108626b rollout=3 seed=15 duration_ms=212273 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:06:40Z candidate_evaluated  iteration_id=2511f33c attempt=3 candidate_id=6108626b k=5 success_rate=0.2 n_errors=0
+2026-09-10T21:06:46Z mutator_decision  iteration_id=2511f33c attempt=3 decision=refine failure_axis=A failure_label=overshoot_blocking rationale=The A-axis mutation overshot the target band: SR dropped from 1.00 to 0.20 (target [0.40,0.60]). Blocking "go to countertop 1" was too disruptive — the Policy apparently relies on that exact destinati
+2026-09-10T21:06:52Z candidate_refined  iteration_id=2511f33c attempt=3 rules_code_len=737
+2026-09-10T21:08:00Z rollout_done  iteration_id=2511f33c attempt=4 candidate_id=82eb36ec rollout=1 seed=15 duration_ms=67398 success=True reward=1.0 steps=21 error=None
+2026-09-10T21:08:12Z rollout_done  iteration_id=2511f33c attempt=4 candidate_id=82eb36ec rollout=2 seed=15 duration_ms=79712 success=True reward=1.0 steps=26 error=None
+2026-09-10T21:08:40Z rollout_done  iteration_id=2511f33c attempt=4 candidate_id=82eb36ec rollout=3 seed=15 duration_ms=107618 success=True reward=1.0 steps=29 error=None
+2026-09-10T21:09:48Z rollout_done  iteration_id=2511f33c attempt=4 candidate_id=82eb36ec rollout=0 seed=15 duration_ms=176208 success=True reward=1.0 steps=47 error=None
+2026-09-10T21:10:18Z rollout_done  iteration_id=2511f33c attempt=4 candidate_id=82eb36ec rollout=4 seed=15 duration_ms=205292 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:10:18Z candidate_evaluated  iteration_id=2511f33c attempt=4 candidate_id=82eb36ec k=5 success_rate=0.8 n_errors=0
+2026-09-10T21:10:24Z mutator_decision  iteration_id=2511f33c attempt=4 decision=refine failure_axis=A failure_label=undershoot_magnitude rationale=The single-block detour moved SR from 1.00 (baseline) to 0.80 — a step in the right direction but still ABOVE the target band [0.40, 0.60]. The mutation type is correct (recoverable detour, only 1 blo
+2026-09-10T21:10:28Z candidate_refined  iteration_id=2511f33c attempt=4 rules_code_len=655
+2026-09-10T21:11:35Z rollout_done  iteration_id=2511f33c attempt=5 candidate_id=fae244c8 rollout=4 seed=15 duration_ms=66778 success=True reward=1.0 steps=21 error=None
+2026-09-10T21:11:36Z rollout_done  iteration_id=2511f33c attempt=5 candidate_id=fae244c8 rollout=3 seed=15 duration_ms=68297 success=True reward=1.0 steps=21 error=None
+2026-09-10T21:11:37Z rollout_done  iteration_id=2511f33c attempt=5 candidate_id=fae244c8 rollout=1 seed=15 duration_ms=69069 success=True reward=1.0 steps=21 error=None
+2026-09-10T21:11:40Z rollout_done  iteration_id=2511f33c attempt=5 candidate_id=fae244c8 rollout=2 seed=15 duration_ms=72062 success=True reward=1.0 steps=21 error=None
+2026-09-10T21:11:41Z rollout_done  iteration_id=2511f33c attempt=5 candidate_id=fae244c8 rollout=0 seed=15 duration_ms=73063 success=True reward=1.0 steps=22 error=None
+2026-09-10T21:11:41Z candidate_evaluated  iteration_id=2511f33c attempt=5 candidate_id=fae244c8 k=5 success_rate=1.0 n_errors=0
+2026-09-10T21:11:46Z mutator_decision  iteration_id=2511f33c attempt=5 decision=reject failure_axis=none failure_label=noop_mutation rationale=The mutation had no measurable effect: success_rate stayed at 1.00 (5/5) and only 1 step was actually blocked per rollout (blocked_steps=1), meaning the Policy only ever attempted "go to countertop 1"
+2026-09-10T21:11:46Z budget_stop  iteration_id=2511f33c attempts=5
+2026-09-10T21:11:46Z checkpoint_saved  iteration_id=2511f33c path=checkpoints/task_0015_best_effort.json n_actions=0 rules_code_len=635 best_effort=True rollout_success_rate=0.2
+2026-09-10T21:11:46Z task_end  task_idx=15 total_traces_so_far=385
+2026-09-10T21:11:46Z iteration_end  outer=15 total_traces_so_far=385
+2026-09-10T21:11:46Z task_start  task_idx=16
+2026-09-10T21:11:46Z iteration_start  outer=16
+2026-09-10T21:11:46Z baseline_compute_start  task_idx=16 task_id=16 n=5 key=c7e1f3d57527a74f
+2026-09-10T21:13:08Z rollout_done  iteration_id=baseline-0016 attempt=0 candidate_id=baseline rollout=4 seed=16 duration_ms=82152 success=True reward=1.0 steps=29 error=None
+2026-09-10T21:14:05Z rollout_done  iteration_id=baseline-0016 attempt=0 candidate_id=baseline rollout=0 seed=16 duration_ms=138817 success=True reward=1.0 steps=45 error=None
+2026-09-10T21:14:19Z rollout_done  iteration_id=baseline-0016 attempt=0 candidate_id=baseline rollout=1 seed=16 duration_ms=152736 success=True reward=1.0 steps=46 error=None
+2026-09-10T21:14:22Z rollout_done  iteration_id=baseline-0016 attempt=0 candidate_id=baseline rollout=3 seed=16 duration_ms=155793 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:14:37Z rollout_done  iteration_id=baseline-0016 attempt=0 candidate_id=baseline rollout=2 seed=16 duration_ms=170267 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:14:37Z baseline_compute_done  task_idx=16 task_id=16 n=5 sr=0.6 avg_success_steps=40.0 sample_action_seq_len=29
+2026-09-10T21:14:44Z candidate_proposed  iteration_id=b8bc519c attempt=0 rules_code_len=30 n_in_env_actions=0 rationale=Baseline SR is 0.60, already in/near the target band. Recent traces show the two prior candidates were effectively no-op
+2026-09-10T21:16:05Z rollout_done  iteration_id=b8bc519c attempt=1 candidate_id=c4f7640f rollout=2 seed=16 duration_ms=81840 success=True reward=1.0 steps=29 error=None
+2026-09-10T21:16:35Z rollout_done  iteration_id=b8bc519c attempt=1 candidate_id=c4f7640f rollout=4 seed=16 duration_ms=111174 success=True reward=1.0 steps=35 error=None
+2026-09-10T21:17:15Z rollout_done  iteration_id=b8bc519c attempt=1 candidate_id=c4f7640f rollout=0 seed=16 duration_ms=150890 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:17:16Z rollout_done  iteration_id=b8bc519c attempt=1 candidate_id=c4f7640f rollout=1 seed=16 duration_ms=152773 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:17:26Z rollout_done  iteration_id=b8bc519c attempt=1 candidate_id=c4f7640f rollout=3 seed=16 duration_ms=162319 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:17:26Z candidate_evaluated  iteration_id=b8bc519c attempt=1 candidate_id=c4f7640f k=5 success_rate=0.4 n_errors=0
+2026-09-10T21:17:31Z mutator_decision  iteration_id=b8bc519c attempt=1 decision=accept failure_axis=task_understanding failure_label=natural_seed_variance rationale=The candidate is a pass-through (no-op) Rules, but its rollout SR landed at 0.40, which is inside the target band [0.40, 0.60]. Baseline was 0.60, and prior candidates overshot to 0.80/1.00. This run'
+2026-09-10T21:17:31Z checkpoint_saved  iteration_id=b8bc519c path=checkpoints/task_0016_attempt_01.json n_actions=0 rules_code_len=30 best_effort=False
+2026-09-10T21:17:31Z budget_stop  iteration_id=b8bc519c attempts=1
+2026-09-10T21:17:31Z task_end  task_idx=16 total_traces_so_far=395
+2026-09-10T21:17:31Z iteration_end  outer=16 total_traces_so_far=395
+2026-09-10T21:17:31Z task_start  task_idx=17
+2026-09-10T21:17:31Z iteration_start  outer=17
+2026-09-10T21:17:31Z baseline_compute_start  task_idx=17 task_id=17 n=5 key=23fe9d808f26655f
+2026-09-10T21:19:41Z rollout_done  iteration_id=baseline-0017 attempt=0 candidate_id=baseline rollout=2 seed=17 duration_ms=129440 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:20:10Z rollout_done  iteration_id=baseline-0017 attempt=0 candidate_id=baseline rollout=0 seed=17 duration_ms=158406 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:20:14Z rollout_done  iteration_id=baseline-0017 attempt=0 candidate_id=baseline rollout=3 seed=17 duration_ms=162723 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:20:19Z rollout_done  iteration_id=baseline-0017 attempt=0 candidate_id=baseline rollout=1 seed=17 duration_ms=167607 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:20:47Z rollout_done  iteration_id=baseline-0017 attempt=0 candidate_id=baseline rollout=4 seed=17 duration_ms=195646 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:20:47Z baseline_compute_done  task_idx=17 task_id=17 n=5 sr=0.0 avg_success_steps=None sample_action_seq_len=0
+2026-09-10T21:20:54Z candidate_proposed  iteration_id=8508e242 attempt=0 rules_code_len=1289 n_in_env_actions=0 rationale=Baseline is 0.00 but recent accepted traces show 0.50 SR (natural seed variance), already in target band [0.40,0.60]. Th
+2026-09-10T21:23:32Z rollout_done  iteration_id=8508e242 attempt=1 candidate_id=f17f0682 rollout=1 seed=17 duration_ms=158302 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:23:46Z rollout_done  iteration_id=8508e242 attempt=1 candidate_id=f17f0682 rollout=2 seed=17 duration_ms=171438 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:23:53Z rollout_done  iteration_id=8508e242 attempt=1 candidate_id=f17f0682 rollout=4 seed=17 duration_ms=178516 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:24:04Z rollout_done  iteration_id=8508e242 attempt=1 candidate_id=f17f0682 rollout=3 seed=17 duration_ms=189661 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:24:12Z rollout_done  iteration_id=8508e242 attempt=1 candidate_id=f17f0682 rollout=0 seed=17 duration_ms=197798 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:24:12Z candidate_evaluated  iteration_id=8508e242 attempt=1 candidate_id=f17f0682 k=5 success_rate=0.0 n_errors=0
+2026-09-10T21:24:18Z mutator_decision  iteration_id=8508e242 attempt=1 decision=reject failure_axis=O failure_label=unsolvable_mutation rationale=The O-axis admissible_commands trimming mutation drove SR from ~0.50 (recent accepted) to 0.00 (0/5). All 5 rollouts hit the 50-step cap with no blocked steps, meaning the perturbation broke solvabili
+2026-09-10T21:24:25Z candidate_reproposed  iteration_id=8508e242 attempt=1 rules_code_len=678
+2026-09-10T21:27:05Z rollout_done  iteration_id=8508e242 attempt=2 candidate_id=87eb29b5 rollout=2 seed=17 duration_ms=160613 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:27:28Z rollout_done  iteration_id=8508e242 attempt=2 candidate_id=87eb29b5 rollout=3 seed=17 duration_ms=183909 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:27:30Z rollout_done  iteration_id=8508e242 attempt=2 candidate_id=87eb29b5 rollout=1 seed=17 duration_ms=185070 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:28:00Z rollout_done  iteration_id=8508e242 attempt=2 candidate_id=87eb29b5 rollout=0 seed=17 duration_ms=215270 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:28:02Z rollout_done  iteration_id=8508e242 attempt=2 candidate_id=87eb29b5 rollout=4 seed=17 duration_ms=217639 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:28:02Z candidate_evaluated  iteration_id=8508e242 attempt=2 candidate_id=87eb29b5 k=5 success_rate=0.0 n_errors=0
+2026-09-10T21:28:09Z mutator_decision  iteration_id=8508e242 attempt=2 decision=reject failure_axis=task_understanding failure_label=no_effect rationale=The candidate's O-axis hint produced SR=0.00 across all 5 rollouts, identical to the baseline of 0.00. The mutation had no measurable effect on the failure axis (task_understanding) and did not move S
+2026-09-10T21:28:15Z candidate_reproposed  iteration_id=8508e242 attempt=2 rules_code_len=849
+2026-09-10T21:28:43Z rollout_done  iteration_id=8508e242 attempt=3 candidate_id=65bc1f1b rollout=4 seed=17 duration_ms=27348 success=True reward=1.0 steps=9 error=None
+2026-09-10T21:28:43Z rollout_done  iteration_id=8508e242 attempt=3 candidate_id=65bc1f1b rollout=1 seed=17 duration_ms=27655 success=True reward=1.0 steps=9 error=None
+2026-09-10T21:28:44Z rollout_done  iteration_id=8508e242 attempt=3 candidate_id=65bc1f1b rollout=2 seed=17 duration_ms=28869 success=True reward=1.0 steps=9 error=None
+2026-09-10T21:28:45Z rollout_done  iteration_id=8508e242 attempt=3 candidate_id=65bc1f1b rollout=0 seed=17 duration_ms=29522 success=True reward=1.0 steps=9 error=None
+2026-09-10T21:28:45Z rollout_done  iteration_id=8508e242 attempt=3 candidate_id=65bc1f1b rollout=3 seed=17 duration_ms=30052 success=True reward=1.0 steps=10 error=None
+2026-09-10T21:28:45Z candidate_evaluated  iteration_id=8508e242 attempt=3 candidate_id=65bc1f1b k=5 success_rate=1.0 n_errors=0
+2026-09-10T21:28:52Z mutator_decision  iteration_id=8508e242 attempt=3 decision=reject failure_axis=O failure_label=overshoot_trivial rationale=The candidate overshot catastrophically: baseline SR was 0.00 (Policy already failing), and this O-axis trim of admissible_commands drove SR to 1.00 (5/5 wins in ~9 steps). The mutation did not "nudge
+2026-09-10T21:28:58Z candidate_reproposed  iteration_id=8508e242 attempt=3 rules_code_len=432
+2026-09-10T21:31:27Z rollout_done  iteration_id=8508e242 attempt=4 candidate_id=4549ee11 rollout=0 seed=17 duration_ms=148702 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:31:45Z rollout_done  iteration_id=8508e242 attempt=4 candidate_id=4549ee11 rollout=1 seed=17 duration_ms=166497 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:31:53Z rollout_done  iteration_id=8508e242 attempt=4 candidate_id=4549ee11 rollout=4 seed=17 duration_ms=174832 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:31:54Z rollout_done  iteration_id=8508e242 attempt=4 candidate_id=4549ee11 rollout=3 seed=17 duration_ms=175652 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:32:22Z rollout_done  iteration_id=8508e242 attempt=4 candidate_id=4549ee11 rollout=2 seed=17 duration_ms=203063 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:32:22Z candidate_evaluated  iteration_id=8508e242 attempt=4 candidate_id=4549ee11 k=5 success_rate=0.0 n_errors=0
+2026-09-10T21:32:28Z mutator_decision  iteration_id=8508e242 attempt=4 decision=reject failure_axis=task_understanding failure_label=no_effect rationale=Baseline SR is 0.00 (all 50-step timeouts), and this O-axis hint mutation produced SR 0.00 across all 5 rollouts — no measurable effect. The Policy still times out at 50 steps every time. The task is
+2026-09-10T21:32:34Z candidate_reproposed  iteration_id=8508e242 attempt=4 rules_code_len=546
+2026-09-10T21:35:03Z rollout_done  iteration_id=8508e242 attempt=5 candidate_id=22db5eb7 rollout=3 seed=17 duration_ms=149282 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:35:04Z rollout_done  iteration_id=8508e242 attempt=5 candidate_id=22db5eb7 rollout=0 seed=17 duration_ms=150532 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:35:04Z rollout_done  iteration_id=8508e242 attempt=5 candidate_id=22db5eb7 rollout=4 seed=17 duration_ms=150658 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:35:07Z rollout_done  iteration_id=8508e242 attempt=5 candidate_id=22db5eb7 rollout=1 seed=17 duration_ms=153315 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:35:57Z rollout_done  iteration_id=8508e242 attempt=5 candidate_id=22db5eb7 rollout=2 seed=17 duration_ms=203749 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:35:57Z candidate_evaluated  iteration_id=8508e242 attempt=5 candidate_id=22db5eb7 k=5 success_rate=0.0 n_errors=0
+2026-09-10T21:36:05Z mutator_decision  iteration_id=8508e242 attempt=5 decision=reject failure_axis=task_understanding failure_label=no_effect rationale=The candidate's O-axis reminder hook had no measurable effect: success_rate stayed 0.00 (0/5), identical to baseline 0.00. All 5 rollouts hit the 50-step cap with 0 blocked steps, meaning the mutation
+2026-09-10T21:36:05Z budget_stop  iteration_id=8508e242 attempts=5
+2026-09-10T21:36:05Z checkpoint_saved  iteration_id=8508e242 path=checkpoints/task_0017_best_effort.json n_actions=0 rules_code_len=1289 best_effort=True rollout_success_rate=0.0
+2026-09-10T21:36:05Z task_end  task_idx=17 total_traces_so_far=425
+2026-09-10T21:36:05Z iteration_end  outer=17 total_traces_so_far=425
+2026-09-10T21:36:05Z task_start  task_idx=18
+2026-09-10T21:36:05Z iteration_start  outer=18
+2026-09-10T21:36:05Z baseline_compute_start  task_idx=18 task_id=18 n=5 key=6764beb1c934dbec
+2026-09-10T21:39:38Z rollout_done  iteration_id=baseline-0018 attempt=0 candidate_id=baseline rollout=1 seed=18 duration_ms=213390 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:39:50Z rollout_done  iteration_id=baseline-0018 attempt=0 candidate_id=baseline rollout=3 seed=18 duration_ms=225174 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:39:58Z rollout_done  iteration_id=baseline-0018 attempt=0 candidate_id=baseline rollout=4 seed=18 duration_ms=233728 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:40:12Z rollout_done  iteration_id=baseline-0018 attempt=0 candidate_id=baseline rollout=0 seed=18 duration_ms=247339 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:40:12Z rollout_done  iteration_id=baseline-0018 attempt=0 candidate_id=baseline rollout=2 seed=18 duration_ms=247475 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:40:12Z baseline_compute_done  task_idx=18 task_id=18 n=5 sr=0.0 avg_success_steps=None sample_action_seq_len=0
+2026-09-10T21:40:18Z candidate_proposed  iteration_id=ec4c5cd9 attempt=0 rules_code_len=0 n_in_env_actions=5 rationale=Baseline SR is 0.00 — the Policy cannot solve this task at all (all 5 rollouts hit 50 steps with no_effect failures). Th
+2026-09-10T21:42:01Z rollout_done  iteration_id=ec4c5cd9 attempt=1 candidate_id=4f51b1ec rollout=2 seed=18 duration_ms=103535 success=True reward=1.0 steps=36 error=None
+2026-09-10T21:42:05Z rollout_done  iteration_id=ec4c5cd9 attempt=1 candidate_id=4f51b1ec rollout=4 seed=18 duration_ms=107447 success=True reward=1.0 steps=36 error=None
+2026-09-10T21:42:10Z rollout_done  iteration_id=ec4c5cd9 attempt=1 candidate_id=4f51b1ec rollout=1 seed=18 duration_ms=112615 success=True reward=1.0 steps=37 error=None
+2026-09-10T21:42:47Z rollout_done  iteration_id=ec4c5cd9 attempt=1 candidate_id=4f51b1ec rollout=3 seed=18 duration_ms=149422 success=False reward=0.0 steps=45 error=None
+2026-09-10T21:43:27Z rollout_done  iteration_id=ec4c5cd9 attempt=1 candidate_id=4f51b1ec rollout=0 seed=18 duration_ms=189481 success=False reward=0.0 steps=45 error=None
+2026-09-10T21:43:27Z candidate_evaluated  iteration_id=ec4c5cd9 attempt=1 candidate_id=4f51b1ec k=5 success_rate=0.6 n_errors=0
+2026-09-10T21:43:31Z mutator_decision  iteration_id=ec4c5cd9 attempt=1 decision=accept failure_axis=None failure_label=None rationale=Baseline SR was 0.00 (Policy completely unable to solve "put hot apple in fridge", all 5 rollouts hit 50 steps with no_effect). This S0 candidate pre-heats an apple via in_env_actions, leaving the Pol
+2026-09-10T21:43:31Z checkpoint_saved  iteration_id=ec4c5cd9 path=checkpoints/task_0018_attempt_01.json n_actions=5 rules_code_len=0 best_effort=False
+2026-09-10T21:43:31Z budget_stop  iteration_id=ec4c5cd9 attempts=1
+2026-09-10T21:43:31Z task_end  task_idx=18 total_traces_so_far=435
+2026-09-10T21:43:31Z iteration_end  outer=18 total_traces_so_far=435
+2026-09-10T21:43:31Z task_start  task_idx=19
+2026-09-10T21:43:31Z iteration_start  outer=19
+2026-09-10T21:43:31Z baseline_compute_start  task_idx=19 task_id=19 n=5 key=4e07e625ceb3d702
+2026-09-10T21:44:54Z rollout_done  iteration_id=baseline-0019 attempt=0 candidate_id=baseline rollout=3 seed=19 duration_ms=83336 success=True reward=1.0 steps=29 error=None
+2026-09-10T21:46:00Z rollout_done  iteration_id=baseline-0019 attempt=0 candidate_id=baseline rollout=2 seed=19 duration_ms=148999 success=True reward=1.0 steps=45 error=None
+2026-09-10T21:46:00Z rollout_done  iteration_id=baseline-0019 attempt=0 candidate_id=baseline rollout=1 seed=19 duration_ms=149017 success=True reward=1.0 steps=46 error=None
+2026-09-10T21:46:00Z rollout_done  iteration_id=baseline-0019 attempt=0 candidate_id=baseline rollout=0 seed=19 duration_ms=149033 success=True reward=1.0 steps=46 error=None
+2026-09-10T21:46:02Z rollout_done  iteration_id=baseline-0019 attempt=0 candidate_id=baseline rollout=4 seed=19 duration_ms=151349 success=True reward=1.0 steps=46 error=None
+2026-09-10T21:46:02Z baseline_compute_done  task_idx=19 task_id=19 n=5 sr=1.0 avg_success_steps=42.4 sample_action_seq_len=29
+2026-09-10T21:46:10Z candidate_proposed  iteration_id=927ba398 attempt=0 rules_code_len=1193 n_in_env_actions=0 rationale=Baseline SR=1.00 with a 42-step solution, but the policy wastes many steps wandering (stoveburner 1→2→3→4→1→toaster→1→mi
+2026-09-10T21:47:47Z rollout_done  iteration_id=927ba398 attempt=1 candidate_id=72bef962 rollout=0 seed=19 duration_ms=97095 success=True reward=1.0 steps=35 error=None
+2026-09-10T21:48:41Z rollout_done  iteration_id=927ba398 attempt=1 candidate_id=72bef962 rollout=3 seed=19 duration_ms=151172 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:48:46Z rollout_done  iteration_id=927ba398 attempt=1 candidate_id=72bef962 rollout=4 seed=19 duration_ms=156114 success=True reward=1.0 steps=50 error=None
+2026-09-10T21:48:56Z rollout_done  iteration_id=927ba398 attempt=1 candidate_id=72bef962 rollout=2 seed=19 duration_ms=166511 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:49:00Z rollout_done  iteration_id=927ba398 attempt=1 candidate_id=72bef962 rollout=1 seed=19 duration_ms=170409 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:49:00Z candidate_evaluated  iteration_id=927ba398 attempt=1 candidate_id=72bef962 k=5 success_rate=0.4 n_errors=0
+2026-09-10T21:49:04Z mutator_decision  iteration_id=927ba398 attempt=1 decision=accept failure_axis=O failure_label=narrowed_admissible_commands rationale=The candidate produces SR=0.40 (2/5), which lands exactly at the bottom edge of the target band [0.40, 0.60]. The O-axis perturbation (stripping non-essential 'examine' commands on a sparse step subse
+2026-09-10T21:49:04Z checkpoint_saved  iteration_id=927ba398 path=checkpoints/task_0019_attempt_01.json n_actions=0 rules_code_len=1193 best_effort=False
+2026-09-10T21:49:04Z budget_stop  iteration_id=927ba398 attempts=1
+2026-09-10T21:49:04Z task_end  task_idx=19 total_traces_so_far=445
+2026-09-10T21:49:04Z iteration_end  outer=19 total_traces_so_far=445
+2026-09-10T21:49:04Z task_start  task_idx=20
+2026-09-10T21:49:04Z iteration_start  outer=20
+2026-09-10T21:49:04Z baseline_compute_start  task_idx=20 task_id=20 n=5 key=399183830dfde962
+2026-09-10T21:51:41Z rollout_done  iteration_id=baseline-0020 attempt=0 candidate_id=baseline rollout=4 seed=20 duration_ms=156250 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:51:44Z rollout_done  iteration_id=baseline-0020 attempt=0 candidate_id=baseline rollout=3 seed=20 duration_ms=159350 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:52:17Z rollout_done  iteration_id=baseline-0020 attempt=0 candidate_id=baseline rollout=0 seed=20 duration_ms=192690 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:52:40Z rollout_done  iteration_id=baseline-0020 attempt=0 candidate_id=baseline rollout=2 seed=20 duration_ms=215470 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:52:45Z rollout_done  iteration_id=baseline-0020 attempt=0 candidate_id=baseline rollout=1 seed=20 duration_ms=221209 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:52:45Z baseline_compute_done  task_idx=20 task_id=20 n=5 sr=0.0 avg_success_steps=None sample_action_seq_len=0
+2026-09-10T21:52:50Z candidate_proposed  iteration_id=4a0e9fb1 attempt=0 rules_code_len=680 n_in_env_actions=0 rationale=Baseline shows the Policy already fails this task (0/5) but recent traces show a previous mutation (narrowed_admissible_
+2026-09-10T21:55:22Z rollout_done  iteration_id=4a0e9fb1 attempt=1 candidate_id=c86370c0 rollout=0 seed=20 duration_ms=151908 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:55:35Z rollout_done  iteration_id=4a0e9fb1 attempt=1 candidate_id=c86370c0 rollout=2 seed=20 duration_ms=164771 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:55:39Z rollout_done  iteration_id=4a0e9fb1 attempt=1 candidate_id=c86370c0 rollout=1 seed=20 duration_ms=169169 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:55:40Z rollout_done  iteration_id=4a0e9fb1 attempt=1 candidate_id=c86370c0 rollout=3 seed=20 duration_ms=169973 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:55:59Z rollout_done  iteration_id=4a0e9fb1 attempt=1 candidate_id=c86370c0 rollout=4 seed=20 duration_ms=189500 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:55:59Z candidate_evaluated  iteration_id=4a0e9fb1 attempt=1 candidate_id=c86370c0 k=5 success_rate=0.0 n_errors=0
+2026-09-10T21:56:03Z mutator_decision  iteration_id=4a0e9fb1 attempt=1 decision=reject failure_axis=O failure_label=ineffective_perturbation rationale=The candidate's O-axis nudge moved SR from the in-band 0.60 (cand 72bef962) down to 0.00 across all 5 rollouts. Every rollout hit the 50-step cap with no blocked steps, indicating the Policy flailed t
+2026-09-10T21:56:09Z candidate_reproposed  iteration_id=4a0e9fb1 attempt=1 rules_code_len=542
+2026-09-10T21:59:06Z rollout_done  iteration_id=4a0e9fb1 attempt=2 candidate_id=99fe303c rollout=3 seed=20 duration_ms=177755 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:59:07Z rollout_done  iteration_id=4a0e9fb1 attempt=2 candidate_id=99fe303c rollout=4 seed=20 duration_ms=178436 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:59:11Z rollout_done  iteration_id=4a0e9fb1 attempt=2 candidate_id=99fe303c rollout=0 seed=20 duration_ms=182197 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:59:12Z rollout_done  iteration_id=4a0e9fb1 attempt=2 candidate_id=99fe303c rollout=1 seed=20 duration_ms=183270 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:59:14Z rollout_done  iteration_id=4a0e9fb1 attempt=2 candidate_id=99fe303c rollout=2 seed=20 duration_ms=185089 success=False reward=0.0 steps=50 error=None
+2026-09-10T21:59:14Z candidate_evaluated  iteration_id=4a0e9fb1 attempt=2 candidate_id=99fe303c k=5 success_rate=0.0 n_errors=0
+2026-09-10T21:59:18Z mutator_decision  iteration_id=4a0e9fb1 attempt=2 decision=reject failure_axis=A failure_label=ineffective_perturbation rationale=The candidate's A-axis block had zero measurable effect: blocked_steps=0 across all 5 rollouts, meaning the Policy never even attempted the blocked "put X in garbagecan" action. The baseline was alrea
+2026-09-10T21:59:22Z candidate_reproposed  iteration_id=4a0e9fb1 attempt=2 rules_code_len=652
+2026-09-10T22:02:04Z rollout_done  iteration_id=4a0e9fb1 attempt=3 candidate_id=27af83e7 rollout=4 seed=20 duration_ms=161680 success=False reward=0.0 steps=50 error=None
+2026-09-10T22:02:09Z rollout_done  iteration_id=4a0e9fb1 attempt=3 candidate_id=27af83e7 rollout=1 seed=20 duration_ms=167304 success=False reward=0.0 steps=50 error=None
+2026-09-10T22:02:19Z rollout_done  iteration_id=4a0e9fb1 attempt=3 candidate_id=27af83e7 rollout=0 seed=20 duration_ms=177377 success=False reward=0.0 steps=50 error=None
+2026-09-10T22:02:28Z rollout_done  iteration_id=4a0e9fb1 attempt=3 candidate_id=27af83e7 rollout=2 seed=20 duration_ms=185642 success=False reward=0.0 steps=50 error=None
+2026-09-10T22:02:28Z rollout_done  iteration_id=4a0e9fb1 attempt=3 candidate_id=27af83e7 rollout=3 seed=20 duration_ms=186181 success=False reward=0.0 steps=50 error=None
+2026-09-10T22:02:28Z candidate_evaluated  iteration_id=4a0e9fb1 attempt=3 candidate_id=27af83e7 k=5 success_rate=0.0 n_errors=0
+2026-09-10T22:02:34Z mutator_decision  iteration_id=4a0e9fb1 attempt=3 decision=reject failure_axis=task_understanding failure_label=ineffective_perturbation rationale=Baseline SR was already 0.00 (0/5), and this O-axis hint mutation produced 0.00 (0/5) as well — no measurable effect. The hint never fired in a useful way because the Policy is emitting empty actions
+2026-09-10T22:02:39Z candidate_reproposed  iteration_id=4a0e9fb1 attempt=3 rules_code_len=30
+2026-09-10T22:05:20Z rollout_done  iteration_id=4a0e9fb1 attempt=4 candidate_id=e970e17e rollout=2 seed=20 duration_ms=161204 success=False reward=0.0 steps=50 error=None
+2026-09-10T22:05:32Z rollout_done  iteration_id=4a0e9fb1 attempt=4 candidate_id=e970e17e rollout=4 seed=20 duration_ms=173050 success=False reward=0.0 steps=50 error=None
+2026-09-10T22:05:48Z rollout_done  iteration_id=4a0e9fb1 attempt=4 candidate_id=e970e17e rollout=3 seed=20 duration_ms=189598 success=False reward=0.0 steps=50 error=None
+2026-09-10T22:05:51Z rollout_done  iteration_id=4a0e9fb1 attempt=4 candidate_id=e970e17e rollout=0 seed=20 duration_ms=191884 success=False reward=0.0 steps=50 error=None
+2026-09-10T22:05:55Z rollout_done  iteration_id=4a0e9fb1 attempt=4 candidate_id=e970e17e rollout=1 seed=20 duration_ms=196372 success=False reward=0.0 steps=50 error=None
+2026-09-10T22:05:55Z candidate_evaluated  iteration_id=4a0e9fb1 attempt=4 candidate_id=e970e17e k=5 success_rate=0.0 n_errors=0
+2026-09-10T22:06:00Z mutator_decision  iteration_id=4a0e9fb1 attempt=4 decision=reject failure_axis=task_understanding failure_label=policy_cannot_solve_task rationale=The candidate was a no-op (empty rules_code, empty in_env_actions), so it produced exactly the baseline: SR 0.0 across all 5 rollouts with the Policy issuing empty actions and drifting. This mutation
+2026-09-10T22:06:05Z candidate_reproposed  iteration_id=4a0e9fb1 attempt=4 rules_code_len=506
+2026-09-10T22:09:01Z rollout_done  iteration_id=4a0e9fb1 attempt=5 candidate_id=3d639c15 rollout=2 seed=20 duration_ms=176711 success=False reward=0.0 steps=50 error=None
+2026-09-10T22:09:05Z rollout_done  iteration_id=4a0e9fb1 attempt=5 candidate_id=3d639c15 rollout=1 seed=20 duration_ms=180069 success=False reward=0.0 steps=50 error=None
+2026-09-10T22:09:20Z rollout_done  iteration_id=4a0e9fb1 attempt=5 candidate_id=3d639c15 rollout=3 seed=20 duration_ms=194986 success=False reward=0.0 steps=50 error=None
+2026-09-10T22:09:30Z rollout_done  iteration_id=4a0e9fb1 attempt=5 candidate_id=3d639c15 rollout=4 seed=20 duration_ms=205406 success=False reward=0.0 steps=50 error=None
+2026-09-10T22:09:32Z rollout_done  iteration_id=4a0e9fb1 attempt=5 candidate_id=3d639c15 rollout=0 seed=20 duration_ms=207714 success=False reward=0.0 steps=50 error=None
+2026-09-10T22:09:32Z candidate_evaluated  iteration_id=4a0e9fb1 attempt=5 candidate_id=3d639c15 k=5 success_rate=0.0 n_errors=0
+2026-09-10T22:09:38Z mutator_decision  iteration_id=4a0e9fb1 attempt=5 decision=reject failure_axis=task_understanding failure_label=policy_cannot_solve_task rationale=The O-axis hint mutation had zero measurable effect: SR stayed 0.00 (0/5), identical to baseline. The policy is fundamentally unable to solve this task — it never performs the required cleaning step a
+2026-09-10T22:09:38Z budget_stop  iteration_id=4a0e9fb1 attempts=5
+2026-09-10T22:09:38Z checkpoint_saved  iteration_id=4a0e9fb1 path=checkpoints/task_0020_best_effort.json n_actions=0 rules_code_len=680 best_effort=True rollout_success_rate=0.0
+2026-09-10T22:09:38Z task_end  task_idx=20 total_traces_so_far=475
+2026-09-10T22:09:38Z iteration_end  outer=20 total_traces_so_far=475
+2026-09-10T22:09:38Z task_start  task_idx=21
+2026-09-10T22:09:38Z iteration_start  outer=21
+2026-09-10T22:09:38Z baseline_compute_start  task_idx=21 task_id=21 n=5 key=0999eeb34eb0a991
+2026-09-10T22:10:02Z rollout_done  iteration_id=baseline-0021 attempt=0 candidate_id=baseline rollout=0 seed=21 duration_ms=23908 success=True reward=1.0 steps=7 error=None
+2026-09-10T22:10:08Z rollout_done  iteration_id=baseline-0021 attempt=0 candidate_id=baseline rollout=3 seed=21 duration_ms=29970 success=True reward=1.0 steps=9 error=None
+2026-09-10T22:10:09Z rollout_done  iteration_id=baseline-0021 attempt=0 candidate_id=baseline rollout=1 seed=21 duration_ms=30732 success=True reward=1.0 steps=10 error=None
+2026-09-10T22:10:12Z rollout_done  iteration_id=baseline-0021 attempt=0 candidate_id=baseline rollout=4 seed=21 duration_ms=33384 success=True reward=1.0 steps=10 error=None
+2026-09-10T22:10:39Z rollout_done  iteration_id=baseline-0021 attempt=0 candidate_id=baseline rollout=2 seed=21 duration_ms=60508 success=True reward=1.0 steps=20 error=None
+2026-09-10T22:10:39Z baseline_compute_done  task_idx=21 task_id=21 n=5 sr=1.0 avg_success_steps=11.2 sample_action_seq_len=7
+2026-09-10T22:10:45Z candidate_proposed  iteration_id=b36867a8 attempt=0 rules_code_len=713 n_in_env_actions=0 rationale=Baseline SR is 1.00 (5/5), so the task is currently too easy for the Policy. The objective wants SR in [0.40, 0.60] and
+2026-09-10T22:11:09Z rollout_done  iteration_id=b36867a8 attempt=1 candidate_id=e31091ef rollout=0 seed=21 duration_ms=24063 success=True reward=1.0 steps=7 error=None
+2026-09-10T22:11:09Z rollout_done  iteration_id=b36867a8 attempt=1 candidate_id=e31091ef rollout=3 seed=21 duration_ms=24441 success=True reward=1.0 steps=7 error=None
+2026-09-10T22:11:10Z rollout_done  iteration_id=b36867a8 attempt=1 candidate_id=e31091ef rollout=1 seed=21 duration_ms=25222 success=True reward=1.0 steps=7 error=None
+2026-09-10T22:11:10Z rollout_done  iteration_id=b36867a8 attempt=1 candidate_id=e31091ef rollout=2 seed=21 duration_ms=25256 success=True reward=1.0 steps=7 error=None
+2026-09-10T22:11:11Z rollout_done  iteration_id=b36867a8 attempt=1 candidate_id=e31091ef rollout=4 seed=21 duration_ms=26882 success=True reward=1.0 steps=7 error=None
+2026-09-10T22:11:11Z candidate_evaluated  iteration_id=b36867a8 attempt=1 candidate_id=e31091ef k=5 success_rate=1.0 n_errors=0
+2026-09-10T22:11:16Z mutator_decision  iteration_id=b36867a8 attempt=1 decision=reject failure_axis=none failure_label=no_effect rationale=The mutation had no measurable effect: success_rate stayed at 1.00 (5/5), identical to baseline. The O-axis perturbation (rephrasing "put a pencil in sidetable" to "place a pencil inside the sidetable
+2026-09-10T22:11:20Z candidate_reproposed  iteration_id=b36867a8 attempt=1 rules_code_len=0
+2026-09-10T22:11:48Z rollout_done  iteration_id=b36867a8 attempt=2 candidate_id=39058176 rollout=4 seed=21 duration_ms=28030 success=True reward=1.0 steps=9 error=None
+2026-09-10T22:13:00Z rollout_done  iteration_id=b36867a8 attempt=2 candidate_id=39058176 rollout=2 seed=21 duration_ms=100467 success=True reward=1.0 steps=33 error=None
+2026-09-10T22:14:08Z rollout_done  iteration_id=b36867a8 attempt=2 candidate_id=39058176 rollout=0 seed=21 duration_ms=168119 success=False reward=0.0 steps=49 error=None
+2026-09-10T22:14:28Z rollout_done  iteration_id=b36867a8 attempt=2 candidate_id=39058176 rollout=1 seed=21 duration_ms=187936 success=False reward=0.0 steps=49 error=None
+2026-09-10T22:14:29Z rollout_done  iteration_id=b36867a8 attempt=2 candidate_id=39058176 rollout=3 seed=21 duration_ms=189166 success=False reward=0.0 steps=49 error=None
+2026-09-10T22:14:29Z candidate_evaluated  iteration_id=b36867a8 attempt=2 candidate_id=39058176 k=5 success_rate=0.4 n_errors=0
+2026-09-10T22:14:35Z mutator_decision  iteration_id=b36867a8 attempt=2 decision=accept failure_axis=None failure_label=None rationale=Baseline SR was 1.00 (5/5) on a trivial 7-step fetch-and-place. The candidate's S0 mutation (opening drawer 1 via in_env_actions) drops SR to 0.40 (2/5), landing exactly inside the target band [0.40,
+2026-09-10T22:14:35Z checkpoint_saved  iteration_id=b36867a8 path=checkpoints/task_0021_attempt_02.json n_actions=1 rules_code_len=0 best_effort=False
+2026-09-10T22:14:35Z budget_stop  iteration_id=b36867a8 attempts=2
+2026-09-10T22:14:35Z task_end  task_idx=21 total_traces_so_far=490
+2026-09-10T22:14:35Z iteration_end  outer=21 total_traces_so_far=490
+2026-09-10T22:14:35Z task_start  task_idx=22
+2026-09-10T22:14:35Z iteration_start  outer=22
+2026-09-10T22:14:35Z baseline_compute_start  task_idx=22 task_id=22 n=5 key=6698dbd1874f1925
+2026-09-10T22:15:16Z rollout_done  iteration_id=baseline-0022 attempt=0 candidate_id=baseline rollout=4 seed=22 duration_ms=40939 success=True reward=1.0 steps=13 error=None
+2026-09-10T22:15:17Z rollout_done  iteration_id=baseline-0022 attempt=0 candidate_id=baseline rollout=3 seed=22 duration_ms=41895 success=True reward=1.0 steps=13 error=None
+2026-09-10T22:15:17Z rollout_done  iteration_id=baseline-0022 attempt=0 candidate_id=baseline rollout=1 seed=22 duration_ms=42219 success=True reward=1.0 steps=13 error=None
+2026-09-10T22:15:17Z rollout_done  iteration_id=baseline-0022 attempt=0 candidate_id=baseline rollout=0 seed=22 duration_ms=42437 success=True reward=1.0 steps=13 error=None
+2026-09-10T22:15:17Z rollout_done  iteration_id=baseline-0022 attempt=0 candidate_id=baseline rollout=2 seed=22 duration_ms=42523 success=True reward=1.0 steps=13 error=None
+2026-09-10T22:15:17Z baseline_compute_done  task_idx=22 task_id=22 n=5 sr=1.0 avg_success_steps=13.0 sample_action_seq_len=13
+2026-09-10T22:15:26Z candidate_proposed  iteration_id=163f3661 attempt=0 rules_code_len=1529 n_in_env_actions=0 rationale=Baseline SR is 1.00 (5/5, 13 steps, deterministic path). Recent accepted episodes show SR=0.45 already in band. Objectiv
+2026-09-10T22:16:07Z rollout_done  iteration_id=163f3661 attempt=1 candidate_id=b96d21b0 rollout=4 seed=22 duration_ms=41483 success=True reward=1.0 steps=13 error=None
+2026-09-10T22:16:13Z rollout_done  iteration_id=163f3661 attempt=1 candidate_id=b96d21b0 rollout=3 seed=22 duration_ms=47437 success=True reward=1.0 steps=15 error=None
+2026-09-10T22:16:13Z rollout_done  iteration_id=163f3661 attempt=1 candidate_id=b96d21b0 rollout=1 seed=22 duration_ms=47880 success=True reward=1.0 steps=15 error=None
+2026-09-10T22:16:15Z rollout_done  iteration_id=163f3661 attempt=1 candidate_id=b96d21b0 rollout=0 seed=22 duration_ms=49139 success=True reward=1.0 steps=15 error=None
+2026-09-10T22:16:17Z rollout_done  iteration_id=163f3661 attempt=1 candidate_id=b96d21b0 rollout=2 seed=22 duration_ms=51040 success=True reward=1.0 steps=15 error=None
+2026-09-10T22:16:17Z candidate_evaluated  iteration_id=163f3661 attempt=1 candidate_id=b96d21b0 k=5 success_rate=1.0 n_errors=0
+2026-09-10T22:16:23Z mutator_decision  iteration_id=163f3661 attempt=1 decision=reject failure_axis=O failure_label=no_effect rationale=The candidate had no measurable effect on difficulty. Baseline SR was 1.00 (5/5, 13 steps); this candidate still produced 1.00 (5/5, ~14.6 steps). The O-axis perturbation (hiding the first listed obje
+2026-09-10T22:16:29Z candidate_reproposed  iteration_id=163f3661 attempt=1 rules_code_len=672
+2026-09-10T22:17:09Z rollout_done  iteration_id=163f3661 attempt=2 candidate_id=b15b8aeb rollout=4 seed=22 duration_ms=40010 success=True reward=1.0 steps=13 error=None
+2026-09-10T22:17:10Z rollout_done  iteration_id=163f3661 attempt=2 candidate_id=b15b8aeb rollout=0 seed=22 duration_ms=41224 success=True reward=1.0 steps=13 error=None
+2026-09-10T22:17:10Z rollout_done  iteration_id=163f3661 attempt=2 candidate_id=b15b8aeb rollout=3 seed=22 duration_ms=41555 success=True reward=1.0 steps=13 error=None
+2026-09-10T22:17:10Z rollout_done  iteration_id=163f3661 attempt=2 candidate_id=b15b8aeb rollout=2 seed=22 duration_ms=41618 success=True reward=1.0 steps=13 error=None
+2026-09-10T22:17:13Z rollout_done  iteration_id=163f3661 attempt=2 candidate_id=b15b8aeb rollout=1 seed=22 duration_ms=44598 success=True reward=1.0 steps=13 error=None
+2026-09-10T22:17:13Z candidate_evaluated  iteration_id=163f3661 attempt=2 candidate_id=b15b8aeb k=5 success_rate=1.0 n_errors=0
+2026-09-10T22:17:18Z mutator_decision  iteration_id=163f3661 attempt=2 decision=reject failure_axis=none failure_label=no_effect rationale=The O-axis noise mutation had NO measurable effect: success_rate stayed at 1.00 (5/5) with identical 13-step trajectories, matching the baseline exactly. The injected distractor line (step_count>=6 an
+2026-09-10T22:17:23Z candidate_reproposed  iteration_id=163f3661 attempt=2 rules_code_len=573
+2026-09-10T22:18:08Z rollout_done  iteration_id=163f3661 attempt=3 candidate_id=269600f6 rollout=0 seed=22 duration_ms=44885 success=True reward=1.0 steps=16 error=None
+2026-09-10T22:18:36Z rollout_done  iteration_id=163f3661 attempt=3 candidate_id=269600f6 rollout=3 seed=22 duration_ms=73549 success=True reward=1.0 steps=27 error=None
+2026-09-10T22:18:37Z rollout_done  iteration_id=163f3661 attempt=3 candidate_id=269600f6 rollout=2 seed=22 duration_ms=74234 success=True reward=1.0 steps=27 error=None
+2026-09-10T22:18:37Z rollout_done  iteration_id=163f3661 attempt=3 candidate_id=269600f6 rollout=1 seed=22 duration_ms=74264 success=True reward=1.0 steps=27 error=None
+2026-09-10T22:18:38Z rollout_done  iteration_id=163f3661 attempt=3 candidate_id=269600f6 rollout=4 seed=22 duration_ms=75139 success=True reward=1.0 steps=27 error=None
+2026-09-10T22:18:38Z candidate_evaluated  iteration_id=163f3661 attempt=3 candidate_id=269600f6 k=5 success_rate=1.0 n_errors=0
+2026-09-10T22:18:43Z mutator_decision  iteration_id=163f3661 attempt=3 decision=reject failure_axis=none failure_label=no_effect rationale=The O-axis perturbation (dropping Admissible commands on odd steps) had no effect on success rate: baseline 1.00 → candidate 1.00 (5/5). It did inflate avg_success_steps from 13 to 24.8, but the objec
+2026-09-10T22:18:49Z candidate_reproposed  iteration_id=163f3661 attempt=3 rules_code_len=485
+2026-09-10T22:19:13Z rollout_done  iteration_id=163f3661 attempt=4 candidate_id=40858809 rollout=0 seed=22 duration_ms=23841 success=True reward=1.0 steps=7 error=None
+2026-09-10T22:19:13Z rollout_done  iteration_id=163f3661 attempt=4 candidate_id=40858809 rollout=2 seed=22 duration_ms=23975 success=True reward=1.0 steps=7 error=None
+2026-09-10T22:19:13Z rollout_done  iteration_id=163f3661 attempt=4 candidate_id=40858809 rollout=4 seed=22 duration_ms=23980 success=True reward=1.0 steps=7 error=None
+2026-09-10T22:19:13Z rollout_done  iteration_id=163f3661 attempt=4 candidate_id=40858809 rollout=1 seed=22 duration_ms=24228 success=True reward=1.0 steps=7 error=None
+2026-09-10T22:19:13Z rollout_done  iteration_id=163f3661 attempt=4 candidate_id=40858809 rollout=3 seed=22 duration_ms=24665 success=True reward=1.0 steps=7 error=None
+2026-09-10T22:19:13Z candidate_evaluated  iteration_id=163f3661 attempt=4 candidate_id=40858809 k=5 success_rate=1.0 n_errors=0
+2026-09-10T22:19:18Z mutator_decision  iteration_id=163f3661 attempt=4 decision=reject failure_axis=none failure_label=no_effect rationale=The candidate had no measurable effect: SR stayed at 1.00 across all 5 rollouts (vs baseline 1.00), and blocked_steps=0 in every rollout — meaning the A-axis filter never fired and the S0 mutation (in
+2026-09-10T22:19:24Z candidate_reproposed  iteration_id=163f3661 attempt=4 rules_code_len=905
+2026-09-10T22:20:08Z rollout_done  iteration_id=163f3661 attempt=5 candidate_id=a4dc995a rollout=3 seed=22 duration_ms=43629 success=True reward=1.0 steps=13 error=None
+2026-09-10T22:20:08Z rollout_done  iteration_id=163f3661 attempt=5 candidate_id=a4dc995a rollout=2 seed=22 duration_ms=44369 success=True reward=1.0 steps=13 error=None
+2026-09-10T22:20:10Z rollout_done  iteration_id=163f3661 attempt=5 candidate_id=a4dc995a rollout=0 seed=22 duration_ms=46224 success=True reward=1.0 steps=13 error=None
+2026-09-10T22:20:10Z rollout_done  iteration_id=163f3661 attempt=5 candidate_id=a4dc995a rollout=4 seed=22 duration_ms=46397 success=True reward=1.0 steps=13 error=None
+2026-09-10T22:20:11Z rollout_done  iteration_id=163f3661 attempt=5 candidate_id=a4dc995a rollout=1 seed=22 duration_ms=46636 success=True reward=1.0 steps=13 error=None
+2026-09-10T22:20:11Z candidate_evaluated  iteration_id=163f3661 attempt=5 candidate_id=a4dc995a k=5 success_rate=1.0 n_errors=0
+2026-09-10T22:20:16Z mutator_decision  iteration_id=163f3661 attempt=5 decision=reject failure_axis=none failure_label=no_effect rationale=The mutation had zero measurable effect: success_rate stayed 1.00 (5/5), avg_success_steps stayed 13.0, and every rollout shows fail=no_effect in the trace store. The O-axis filter only drops a 'go to
+2026-09-10T22:20:16Z budget_stop  iteration_id=163f3661 attempts=5
+2026-09-10T22:20:16Z checkpoint_saved  iteration_id=163f3661 path=checkpoints/task_0022_best_effort.json n_actions=0 rules_code_len=1529 best_effort=True rollout_success_rate=1.0
+2026-09-10T22:20:16Z task_end  task_idx=22 total_traces_so_far=520
+2026-09-10T22:20:16Z iteration_end  outer=22 total_traces_so_far=520
+2026-09-10T22:20:16Z task_start  task_idx=23
+2026-09-10T22:20:16Z iteration_start  outer=23
+2026-09-10T22:20:16Z baseline_compute_start  task_idx=23 task_id=23 n=5 key=70ad8b71a2681405
+2026-09-10T22:20:51Z rollout_done  iteration_id=baseline-0023 attempt=0 candidate_id=baseline rollout=3 seed=23 duration_ms=34660 success=True reward=1.0 steps=12 error=None
+2026-09-10T22:20:52Z rollout_done  iteration_id=baseline-0023 attempt=0 candidate_id=baseline rollout=0 seed=23 duration_ms=35735 success=True reward=1.0 steps=12 error=None
+2026-09-10T22:20:52Z rollout_done  iteration_id=baseline-0023 attempt=0 candidate_id=baseline rollout=4 seed=23 duration_ms=36212 success=True reward=1.0 steps=13 error=None
+2026-09-10T22:21:26Z rollout_done  iteration_id=baseline-0023 attempt=0 candidate_id=baseline rollout=2 seed=23 duration_ms=69527 success=True reward=1.0 steps=27 error=None
+2026-09-10T22:22:09Z rollout_done  iteration_id=baseline-0023 attempt=0 candidate_id=baseline rollout=1 seed=23 duration_ms=113296 success=True reward=1.0 steps=34 error=None
+2026-09-10T22:22:09Z baseline_compute_done  task_idx=23 task_id=23 n=5 sr=1.0 avg_success_steps=19.6 sample_action_seq_len=12
+2026-09-10T22:22:15Z candidate_proposed  iteration_id=dee06e85 attempt=0 rules_code_len=611 n_in_env_actions=0 rationale=Baseline SR is 1.00 (5/5) with a short, fast-path solution (~12-34 steps). The recent traces show all successes with 'no
+2026-09-10T22:22:47Z rollout_done  iteration_id=dee06e85 attempt=1 candidate_id=b1dec964 rollout=2 seed=23 duration_ms=31516 success=True reward=1.0 steps=11 error=None
+2026-09-10T22:22:47Z rollout_done  iteration_id=dee06e85 attempt=1 candidate_id=b1dec964 rollout=4 seed=23 duration_ms=32347 success=True reward=1.0 steps=11 error=None
+2026-09-10T22:23:14Z rollout_done  iteration_id=dee06e85 attempt=1 candidate_id=b1dec964 rollout=1 seed=23 duration_ms=59125 success=True reward=1.0 steps=23 error=None
+2026-09-10T22:23:18Z rollout_done  iteration_id=dee06e85 attempt=1 candidate_id=b1dec964 rollout=0 seed=23 duration_ms=63223 success=True reward=1.0 steps=23 error=None
+2026-09-10T22:24:46Z rollout_done  iteration_id=dee06e85 attempt=1 candidate_id=b1dec964 rollout=3 seed=23 duration_ms=151051 success=True reward=1.0 steps=47 error=None
+2026-09-10T22:24:46Z candidate_evaluated  iteration_id=dee06e85 attempt=1 candidate_id=b1dec964 k=5 success_rate=1.0 n_errors=0
+2026-09-10T22:24:51Z mutator_decision  iteration_id=dee06e85 attempt=1 decision=reject failure_axis=O failure_label=no_effect rationale=The O-axis perturbation (intermittently dropping admissible_commands) had zero effect: success_rate stayed at 1.00 (5/5), identical to baseline. All rollouts succeeded with no blocked steps and no mea
+2026-09-10T22:24:56Z candidate_reproposed  iteration_id=dee06e85 attempt=1 rules_code_len=0
+2026-09-10T22:26:30Z rollout_done  iteration_id=dee06e85 attempt=2 candidate_id=55d4b440 rollout=0 seed=23 duration_ms=94380 success=True reward=1.0 steps=32 error=None
+2026-09-10T22:27:14Z rollout_done  iteration_id=dee06e85 attempt=2 candidate_id=55d4b440 rollout=1 seed=23 duration_ms=138756 success=False reward=0.0 steps=44 error=None
+2026-09-10T22:27:22Z rollout_done  iteration_id=dee06e85 attempt=2 candidate_id=55d4b440 rollout=4 seed=23 duration_ms=146764 success=False reward=0.0 steps=44 error=None
+2026-09-10T22:27:24Z rollout_done  iteration_id=dee06e85 attempt=2 candidate_id=55d4b440 rollout=2 seed=23 duration_ms=147989 success=False reward=0.0 steps=44 error=None
+2026-09-10T22:27:28Z rollout_done  iteration_id=dee06e85 attempt=2 candidate_id=55d4b440 rollout=3 seed=23 duration_ms=151895 success=False reward=0.0 steps=44 error=None
+2026-09-10T22:27:28Z candidate_evaluated  iteration_id=dee06e85 attempt=2 candidate_id=55d4b440 k=5 success_rate=0.2 n_errors=0
+2026-09-10T22:27:34Z mutator_decision  iteration_id=dee06e85 attempt=2 decision=reject failure_axis=S0 failure_label=malformed_harness rationale=The candidate's in_env_actions is malformed: it emitted 6 bare 'do' strings instead of valid Action objects with name='do' and kwargs_json containing a real command. This means the Setup replay effect
+2026-09-10T22:27:38Z candidate_reproposed  iteration_id=dee06e85 attempt=2 rules_code_len=0
+2026-09-10T22:30:12Z rollout_done  iteration_id=dee06e85 attempt=3 candidate_id=28868823 rollout=3 seed=23 duration_ms=153268 success=False reward=0.0 steps=46 error=None
+2026-09-10T22:30:14Z rollout_done  iteration_id=dee06e85 attempt=3 candidate_id=28868823 rollout=1 seed=23 duration_ms=155320 success=False reward=0.0 steps=46 error=None
+2026-09-10T22:30:19Z rollout_done  iteration_id=dee06e85 attempt=3 candidate_id=28868823 rollout=0 seed=23 duration_ms=161192 success=False reward=0.0 steps=46 error=None
+2026-09-10T22:30:23Z rollout_done  iteration_id=dee06e85 attempt=3 candidate_id=28868823 rollout=2 seed=23 duration_ms=164684 success=False reward=0.0 steps=46 error=None
+2026-09-10T22:30:36Z rollout_done  iteration_id=dee06e85 attempt=3 candidate_id=28868823 rollout=4 seed=23 duration_ms=178196 success=False reward=0.0 steps=46 error=None
+2026-09-10T22:30:36Z candidate_evaluated  iteration_id=dee06e85 attempt=3 candidate_id=28868823 k=5 success_rate=0.0 n_errors=0
+2026-09-10T22:30:41Z mutator_decision  iteration_id=dee06e85 attempt=3 decision=reject failure_axis=S0 failure_label=malformed_harness rationale=The candidate's in_env_actions is malformed — it was emitted as a list of bare strings ('do', 'do', 'do', 'do') instead of the required Action dicts with name/kwargs_json. All 5 rollouts collapsed to
+2026-09-10T22:30:48Z candidate_reproposed  iteration_id=dee06e85 attempt=3 rules_code_len=947
+2026-09-10T22:31:27Z rollout_done  iteration_id=dee06e85 attempt=4 candidate_id=ae0ff46a rollout=2 seed=23 duration_ms=39305 success=True reward=1.0 steps=13 error=None
+2026-09-10T22:31:36Z rollout_done  iteration_id=dee06e85 attempt=4 candidate_id=ae0ff46a rollout=1 seed=23 duration_ms=48168 success=True reward=1.0 steps=17 error=None
+2026-09-10T22:31:37Z rollout_done  iteration_id=dee06e85 attempt=4 candidate_id=ae0ff46a rollout=3 seed=23 duration_ms=49421 success=True reward=1.0 steps=17 error=None
+2026-09-10T22:31:39Z rollout_done  iteration_id=dee06e85 attempt=4 candidate_id=ae0ff46a rollout=0 seed=23 duration_ms=50876 success=True reward=1.0 steps=17 error=None
+2026-09-10T22:31:59Z rollout_done  iteration_id=dee06e85 attempt=4 candidate_id=ae0ff46a rollout=4 seed=23 duration_ms=70948 success=True reward=1.0 steps=24 error=None
+2026-09-10T22:31:59Z candidate_evaluated  iteration_id=dee06e85 attempt=4 candidate_id=ae0ff46a k=5 success_rate=1.0 n_errors=0
+2026-09-10T22:32:04Z mutator_decision  iteration_id=dee06e85 attempt=4 decision=reject failure_axis=O failure_label=no_effect rationale=The O-axis perturbation had zero measurable effect: success_rate stayed at 1.00 (5/5), identical to baseline, and avg_success_steps actually dropped slightly (17.6 vs 19.6). The mutation only trims 'h
+2026-09-10T22:32:10Z candidate_reproposed  iteration_id=dee06e85 attempt=4 rules_code_len=536
+2026-09-10T22:32:41Z rollout_done  iteration_id=dee06e85 attempt=5 candidate_id=e707b804 rollout=2 seed=23 duration_ms=30758 success=True reward=1.0 steps=12 error=None
+2026-09-10T22:32:42Z rollout_done  iteration_id=dee06e85 attempt=5 candidate_id=e707b804 rollout=0 seed=23 duration_ms=32051 success=True reward=1.0 steps=12 error=None
+2026-09-10T22:33:15Z rollout_done  iteration_id=dee06e85 attempt=5 candidate_id=e707b804 rollout=4 seed=23 duration_ms=65088 success=True reward=1.0 steps=27 error=None
+2026-09-10T22:33:16Z rollout_done  iteration_id=dee06e85 attempt=5 candidate_id=e707b804 rollout=3 seed=23 duration_ms=65956 success=True reward=1.0 steps=27 error=None
+2026-09-10T22:33:18Z rollout_done  iteration_id=dee06e85 attempt=5 candidate_id=e707b804 rollout=1 seed=23 duration_ms=68140 success=True reward=1.0 steps=27 error=None
+2026-09-10T22:33:18Z candidate_evaluated  iteration_id=dee06e85 attempt=5 candidate_id=e707b804 k=5 success_rate=1.0 n_errors=0
+2026-09-10T22:33:23Z mutator_decision  iteration_id=dee06e85 attempt=5 decision=reject failure_axis=A failure_label=no_effect rationale=The candidate's filter_action blocks the "look" command only when inventory is empty, but the rollout stats show blocked_steps=0 across all 5 rollouts — meaning the Policy never actually invoked "look
+2026-09-10T22:33:23Z budget_stop  iteration_id=dee06e85 attempts=5
+2026-09-10T22:33:23Z checkpoint_saved  iteration_id=dee06e85 path=checkpoints/task_0023_best_effort.json n_actions=6 rules_code_len=0 best_effort=True rollout_success_rate=0.2
+2026-09-10T22:33:23Z task_end  task_idx=23 total_traces_so_far=550
+2026-09-10T22:33:23Z iteration_end  outer=23 total_traces_so_far=550
+2026-09-10T22:33:23Z task_start  task_idx=24
+2026-09-10T22:33:23Z iteration_start  outer=24
+2026-09-10T22:33:23Z baseline_compute_start  task_idx=24 task_id=24 n=5 key=c318e8b2d79dc753
+2026-09-10T22:33:51Z rollout_done  iteration_id=baseline-0024 attempt=0 candidate_id=baseline rollout=2 seed=24 duration_ms=27488 success=True reward=1.0 steps=9 error=None
+2026-09-10T22:33:51Z rollout_done  iteration_id=baseline-0024 attempt=0 candidate_id=baseline rollout=1 seed=24 duration_ms=27776 success=True reward=1.0 steps=9 error=None
+2026-09-10T22:33:51Z rollout_done  iteration_id=baseline-0024 attempt=0 candidate_id=baseline rollout=4 seed=24 duration_ms=27978 success=True reward=1.0 steps=9 error=None
+2026-09-10T22:33:53Z rollout_done  iteration_id=baseline-0024 attempt=0 candidate_id=baseline rollout=3 seed=24 duration_ms=29310 success=True reward=1.0 steps=9 error=None
+2026-09-10T22:33:53Z rollout_done  iteration_id=baseline-0024 attempt=0 candidate_id=baseline rollout=0 seed=24 duration_ms=29458 success=True reward=1.0 steps=9 error=None
+2026-09-10T22:33:53Z baseline_compute_done  task_idx=24 task_id=24 n=5 sr=1.0 avg_success_steps=9.0 sample_action_seq_len=9
+2026-09-10T22:33:57Z candidate_proposed  iteration_id=3cce8652 attempt=0 rules_code_len=0 n_in_env_actions=1 rationale=Baseline SR is 1.00 with a clean 9-step solution, so the Policy is strong here. The objective says to maintain (SR 0.45
+2026-09-10T22:34:28Z rollout_done  iteration_id=3cce8652 attempt=1 candidate_id=d7457e08 rollout=2 seed=24 duration_ms=31103 success=True reward=1.0 steps=10 error=None
+2026-09-10T22:34:28Z rollout_done  iteration_id=3cce8652 attempt=1 candidate_id=d7457e08 rollout=3 seed=24 duration_ms=31496 success=True reward=1.0 steps=10 error=None
+2026-09-10T22:34:28Z rollout_done  iteration_id=3cce8652 attempt=1 candidate_id=d7457e08 rollout=0 seed=24 duration_ms=31604 success=True reward=1.0 steps=10 error=None
+2026-09-10T22:34:28Z rollout_done  iteration_id=3cce8652 attempt=1 candidate_id=d7457e08 rollout=1 seed=24 duration_ms=31691 success=True reward=1.0 steps=10 error=None
+2026-09-10T22:34:48Z rollout_done  iteration_id=3cce8652 attempt=1 candidate_id=d7457e08 rollout=4 seed=24 duration_ms=51110 success=True reward=1.0 steps=17 error=None
+2026-09-10T22:34:48Z candidate_evaluated  iteration_id=3cce8652 attempt=1 candidate_id=d7457e08 k=5 success_rate=1.0 n_errors=0
+2026-09-10T22:34:54Z mutator_decision  iteration_id=3cce8652 attempt=1 decision=reject failure_axis=none failure_label=no_effect_mutation rationale=The candidate's in_env_actions list is just ['do'] with no kwargs, so the Setup replay did not actually mutate S0 in any meaningful way — the env walked a no-op step and the Policy then solved the tas
+2026-09-10T22:34:59Z candidate_reproposed  iteration_id=3cce8652 attempt=1 rules_code_len=577
+2026-09-10T22:35:27Z rollout_done  iteration_id=3cce8652 attempt=2 candidate_id=f79f4321 rollout=2 seed=24 duration_ms=28105 success=True reward=1.0 steps=9 error=None
+2026-09-10T22:35:28Z rollout_done  iteration_id=3cce8652 attempt=2 candidate_id=f79f4321 rollout=4 seed=24 duration_ms=28613 success=True reward=1.0 steps=9 error=None
+2026-09-10T22:35:29Z rollout_done  iteration_id=3cce8652 attempt=2 candidate_id=f79f4321 rollout=3 seed=24 duration_ms=29488 success=True reward=1.0 steps=9 error=None
+2026-09-10T22:35:40Z rollout_done  iteration_id=3cce8652 attempt=2 candidate_id=f79f4321 rollout=0 seed=24 duration_ms=40338 success=True reward=1.0 steps=12 error=None
+2026-09-10T22:35:50Z rollout_done  iteration_id=3cce8652 attempt=2 candidate_id=f79f4321 rollout=1 seed=24 duration_ms=50432 success=True reward=1.0 steps=15 error=None
+2026-09-10T22:35:50Z candidate_evaluated  iteration_id=3cce8652 attempt=2 candidate_id=f79f4321 k=5 success_rate=1.0 n_errors=0
+2026-09-10T22:35:56Z mutator_decision  iteration_id=3cce8652 attempt=2 decision=reject failure_axis=O failure_label=no_effect_mutation rationale=The candidate had no measurable effect: success_rate stayed at 1.00 (5/5), identical to baseline, and the O-axis distractor only marginally increased avg_success_steps from 9.0 to 10.8 (two rollouts t
+2026-09-10T22:36:01Z candidate_reproposed  iteration_id=3cce8652 attempt=2 rules_code_len=0
+2026-09-10T22:36:25Z rollout_done  iteration_id=3cce8652 attempt=3 candidate_id=4b467b91 rollout=1 seed=24 duration_ms=24652 success=True reward=1.0 steps=7 error=None
+2026-09-10T22:36:26Z rollout_done  iteration_id=3cce8652 attempt=3 candidate_id=4b467b91 rollout=4 seed=24 duration_ms=24912 success=True reward=1.0 steps=7 error=None
+2026-09-10T22:36:26Z rollout_done  iteration_id=3cce8652 attempt=3 candidate_id=4b467b91 rollout=2 seed=24 duration_ms=25713 success=True reward=1.0 steps=7 error=None
+2026-09-10T22:36:27Z rollout_done  iteration_id=3cce8652 attempt=3 candidate_id=4b467b91 rollout=0 seed=24 duration_ms=26738 success=True reward=1.0 steps=7 error=None
+2026-09-10T22:36:28Z rollout_done  iteration_id=3cce8652 attempt=3 candidate_id=4b467b91 rollout=3 seed=24 duration_ms=27206 success=True reward=1.0 steps=7 error=None
+2026-09-10T22:36:28Z candidate_evaluated  iteration_id=3cce8652 attempt=3 candidate_id=4b467b91 k=5 success_rate=1.0 n_errors=0
+2026-09-10T22:36:33Z mutator_decision  iteration_id=3cce8652 attempt=3 decision=reject failure_axis=S0 failure_label=no_effect_mutation rationale=The candidate's in_env_actions were serialized incorrectly: it emitted the bare strings 'do' and 'do' rather than the full Action objects ({"name":"do","kwargs_json":"{\"text\":\"...\"}"}). The Setup
+2026-09-10T22:36:39Z candidate_reproposed  iteration_id=3cce8652 attempt=3 rules_code_len=1139
+2026-09-10T22:37:06Z rollout_done  iteration_id=3cce8652 attempt=4 candidate_id=9f0354a3 rollout=4 seed=24 duration_ms=26888 success=True reward=1.0 steps=9 error=None
+2026-09-10T22:37:07Z rollout_done  iteration_id=3cce8652 attempt=4 candidate_id=9f0354a3 rollout=2 seed=24 duration_ms=27548 success=True reward=1.0 steps=9 error=None
+2026-09-10T22:37:08Z rollout_done  iteration_id=3cce8652 attempt=4 candidate_id=9f0354a3 rollout=0 seed=24 duration_ms=29055 success=True reward=1.0 steps=9 error=None
+2026-09-10T22:37:09Z rollout_done  iteration_id=3cce8652 attempt=4 candidate_id=9f0354a3 rollout=1 seed=24 duration_ms=30249 success=True reward=1.0 steps=9 error=None
+2026-09-10T22:37:11Z rollout_done  iteration_id=3cce8652 attempt=4 candidate_id=9f0354a3 rollout=3 seed=24 duration_ms=31970 success=True reward=1.0 steps=9 error=None
+2026-09-10T22:37:11Z candidate_evaluated  iteration_id=3cce8652 attempt=4 candidate_id=9f0354a3 k=5 success_rate=1.0 n_errors=0
+2026-09-10T22:37:17Z mutator_decision  iteration_id=3cce8652 attempt=4 decision=reject failure_axis=none failure_label=no_effect_mutation rationale=The candidate's T-axis mutation had zero measurable effect: SR stayed 1.00 (5/5), avg_success_steps stayed 9.0, identical to baseline. The "fail every 3rd navigation" logic never actually fired into t
+2026-09-10T22:37:25Z candidate_reproposed  iteration_id=3cce8652 attempt=4 rules_code_len=862
+2026-09-10T22:37:51Z rollout_done  iteration_id=3cce8652 attempt=5 candidate_id=c530b681 rollout=2 seed=24 duration_ms=26425 success=True reward=1.0 steps=10 error=None
+2026-09-10T22:37:52Z rollout_done  iteration_id=3cce8652 attempt=5 candidate_id=c530b681 rollout=0 seed=24 duration_ms=27462 success=True reward=1.0 steps=10 error=None
+2026-09-10T22:37:54Z rollout_done  iteration_id=3cce8652 attempt=5 candidate_id=c530b681 rollout=3 seed=24 duration_ms=29754 success=True reward=1.0 steps=10 error=None
+2026-09-10T22:37:59Z rollout_done  iteration_id=3cce8652 attempt=5 candidate_id=c530b681 rollout=1 seed=24 duration_ms=34304 success=True reward=1.0 steps=10 error=None
+2026-09-10T22:37:59Z rollout_done  iteration_id=3cce8652 attempt=5 candidate_id=c530b681 rollout=4 seed=24 duration_ms=34524 success=True reward=1.0 steps=10 error=None
+2026-09-10T22:37:59Z candidate_evaluated  iteration_id=3cce8652 attempt=5 candidate_id=c530b681 k=5 success_rate=1.0 n_errors=0
+2026-09-10T22:38:04Z mutator_decision  iteration_id=3cce8652 attempt=5 decision=reject failure_axis=A failure_label=no_effect_mutation rationale=The candidate added a transient A-axis block on "open fridge 1" but the Policy simply retried and still succeeded on every rollout (SR 1.00, avg steps 10 vs baseline 9). The block only added one redun
+2026-09-10T22:38:04Z budget_stop  iteration_id=3cce8652 attempts=5
+2026-09-10T22:38:04Z checkpoint_saved  iteration_id=3cce8652 path=checkpoints/task_0024_best_effort.json n_actions=1 rules_code_len=0 best_effort=True rollout_success_rate=1.0
+2026-09-10T22:38:04Z task_end  task_idx=24 total_traces_so_far=580
+2026-09-10T22:38:04Z iteration_end  outer=24 total_traces_so_far=580
+2026-09-10T22:38:04Z task_start  task_idx=25
+2026-09-10T22:38:04Z iteration_start  outer=25
+2026-09-10T22:38:04Z baseline_compute_start  task_idx=25 task_id=25 n=5 key=a99bb7656d891ea9
+2026-09-10T22:38:22Z rollout_done  iteration_id=baseline-0025 attempt=0 candidate_id=baseline rollout=0 seed=25 duration_ms=18750 success=True reward=1.0 steps=5 error=None
+2026-09-10T22:38:23Z rollout_done  iteration_id=baseline-0025 attempt=0 candidate_id=baseline rollout=1 seed=25 duration_ms=19085 success=True reward=1.0 steps=5 error=None
+2026-09-10T22:38:23Z rollout_done  iteration_id=baseline-0025 attempt=0 candidate_id=baseline rollout=3 seed=25 duration_ms=19402 success=True reward=1.0 steps=5 error=None
+2026-09-10T22:38:25Z rollout_done  iteration_id=baseline-0025 attempt=0 candidate_id=baseline rollout=2 seed=25 duration_ms=20823 success=True reward=1.0 steps=5 error=None
+2026-09-10T22:38:26Z rollout_done  iteration_id=baseline-0025 attempt=0 candidate_id=baseline rollout=4 seed=25 duration_ms=21836 success=True reward=1.0 steps=5 error=None
+2026-09-10T22:38:26Z baseline_compute_done  task_idx=25 task_id=25 n=5 sr=1.0 avg_success_steps=5.0 sample_action_seq_len=5
+2026-09-10T22:38:30Z candidate_proposed  iteration_id=8e9ea91c attempt=0 rules_code_len=0 n_in_env_actions=2 rationale=Baseline SR is 1.00 (5/5) but the objective reports recent accepted SR=0.45, already in band. The task is a 5-step exami
+2026-09-10T22:38:58Z rollout_done  iteration_id=8e9ea91c attempt=1 candidate_id=7092ce51 rollout=4 seed=25 duration_ms=27850 success=True reward=1.0 steps=8 error=None
+2026-09-10T22:39:02Z rollout_done  iteration_id=8e9ea91c attempt=1 candidate_id=7092ce51 rollout=0 seed=25 duration_ms=31591 success=True reward=1.0 steps=8 error=None
+2026-09-10T22:39:03Z rollout_done  iteration_id=8e9ea91c attempt=1 candidate_id=7092ce51 rollout=3 seed=25 duration_ms=32486 success=True reward=1.0 steps=8 error=None
+2026-09-10T22:39:05Z rollout_done  iteration_id=8e9ea91c attempt=1 candidate_id=7092ce51 rollout=2 seed=25 duration_ms=34311 success=True reward=1.0 steps=8 error=None
+2026-09-10T22:39:05Z rollout_done  iteration_id=8e9ea91c attempt=1 candidate_id=7092ce51 rollout=1 seed=25 duration_ms=34355 success=True reward=1.0 steps=8 error=None
+2026-09-10T22:39:05Z candidate_evaluated  iteration_id=8e9ea91c attempt=1 candidate_id=7092ce51 k=5 success_rate=1.0 n_errors=0
+2026-09-10T22:39:10Z mutator_decision  iteration_id=8e9ea91c attempt=1 decision=reject failure_axis=S0 failure_label=no_effect_mutation rationale=The candidate's in_env_actions was malformed: it was emitted as ['do', 'do'] (bare strings) instead of valid Action dicts with name + kwargs_json, so the Setup replay did nothing meaningful. The rollo
+2026-09-10T22:39:17Z candidate_reproposed  iteration_id=8e9ea91c attempt=1 rules_code_len=862
+2026-09-10T22:39:49Z rollout_done  iteration_id=8e9ea91c attempt=2 candidate_id=66faafd8 rollout=2 seed=25 duration_ms=32441 success=True reward=1.0 steps=11 error=None
+2026-09-10T22:39:49Z rollout_done  iteration_id=8e9ea91c attempt=2 candidate_id=66faafd8 rollout=0 seed=25 duration_ms=32571 success=True reward=1.0 steps=11 error=None
+2026-09-10T22:41:46Z rollout_done  iteration_id=8e9ea91c attempt=2 candidate_id=66faafd8 rollout=1 seed=25 duration_ms=149742 success=False reward=0.0 steps=50 error=None
+2026-09-10T22:41:55Z rollout_done  iteration_id=8e9ea91c attempt=2 candidate_id=66faafd8 rollout=3 seed=25 duration_ms=158642 success=False reward=0.0 steps=50 error=None
+2026-09-10T22:42:22Z rollout_done  iteration_id=8e9ea91c attempt=2 candidate_id=66faafd8 rollout=4 seed=25 duration_ms=185088 success=False reward=0.0 steps=50 error=None
+2026-09-10T22:42:22Z candidate_evaluated  iteration_id=8e9ea91c attempt=2 candidate_id=66faafd8 k=5 success_rate=0.4 n_errors=0
+2026-09-10T22:42:27Z mutator_decision  iteration_id=8e9ea91c attempt=2 decision=accept failure_axis=O failure_label=goal-retention_failure rationale=Baseline SR was 1.00 (5/5, trivially solvable). The O-axis mutation (stripping the "Task:" goal line after step 1) brought SR to 0.40 (2/5), landing squarely inside the target band [0.40, 0.60]. The f
+2026-09-10T22:42:27Z checkpoint_saved  iteration_id=8e9ea91c path=checkpoints/task_0025_attempt_02.json n_actions=0 rules_code_len=862 best_effort=False
+2026-09-10T22:42:27Z budget_stop  iteration_id=8e9ea91c attempts=2
+2026-09-10T22:42:27Z task_end  task_idx=25 total_traces_so_far=595
+2026-09-10T22:42:27Z iteration_end  outer=25 total_traces_so_far=595
+2026-09-10T22:42:27Z task_start  task_idx=26
+2026-09-10T22:42:27Z iteration_start  outer=26
+2026-09-10T22:42:27Z baseline_compute_start  task_idx=26 task_id=26 n=5 key=2cca9270406e24b4
+2026-09-10T22:44:38Z rollout_done  iteration_id=baseline-0026 attempt=0 candidate_id=baseline rollout=0 seed=26 duration_ms=131024 success=True reward=1.0 steps=45 error=None
+2026-09-10T22:44:39Z rollout_done  iteration_id=baseline-0026 attempt=0 candidate_id=baseline rollout=2 seed=26 duration_ms=131496 success=True reward=1.0 steps=45 error=None
+2026-09-10T22:44:41Z rollout_done  iteration_id=baseline-0026 attempt=0 candidate_id=baseline rollout=4 seed=26 duration_ms=133654 success=True reward=1.0 steps=47 error=None
+2026-09-10T22:44:49Z rollout_done  iteration_id=baseline-0026 attempt=0 candidate_id=baseline rollout=1 seed=26 duration_ms=141259 success=True reward=1.0 steps=47 error=None
+2026-09-10T22:45:19Z rollout_done  iteration_id=baseline-0026 attempt=0 candidate_id=baseline rollout=3 seed=26 duration_ms=171554 success=False reward=0.0 steps=50 error=None
+2026-09-10T22:45:19Z baseline_compute_done  task_idx=26 task_id=26 n=5 sr=0.8 avg_success_steps=46.0 sample_action_seq_len=45
+2026-09-10T22:45:25Z candidate_proposed  iteration_id=bd3a4fc9 attempt=0 rules_code_len=652 n_in_env_actions=0 rationale=Baseline SR is 0.80 and the failed trajectory shows the Policy getting stuck repeating "Nothing happens" after cooling t
+2026-09-10T22:47:30Z rollout_done  iteration_id=bd3a4fc9 attempt=1 candidate_id=da5c1ee5 rollout=0 seed=26 duration_ms=124440 success=True reward=1.0 steps=47 error=None
+2026-09-10T22:47:31Z rollout_done  iteration_id=bd3a4fc9 attempt=1 candidate_id=da5c1ee5 rollout=2 seed=26 duration_ms=125417 success=True reward=1.0 steps=47 error=None
+2026-09-10T22:47:32Z rollout_done  iteration_id=bd3a4fc9 attempt=1 candidate_id=da5c1ee5 rollout=4 seed=26 duration_ms=126564 success=True reward=1.0 steps=47 error=None
+2026-09-10T22:47:48Z rollout_done  iteration_id=bd3a4fc9 attempt=1 candidate_id=da5c1ee5 rollout=1 seed=26 duration_ms=142666 success=False reward=0.0 steps=50 error=None
+2026-09-10T22:47:53Z rollout_done  iteration_id=bd3a4fc9 attempt=1 candidate_id=da5c1ee5 rollout=3 seed=26 duration_ms=148178 success=False reward=0.0 steps=50 error=None
+2026-09-10T22:47:53Z candidate_evaluated  iteration_id=bd3a4fc9 attempt=1 candidate_id=da5c1ee5 k=5 success_rate=0.6 n_errors=0
+2026-09-10T22:47:58Z mutator_decision  iteration_id=bd3a4fc9 attempt=1 decision=accept failure_axis=None failure_label=None rationale=Baseline SR was 0.80; this T-axis mutation (nudging repetition_count upward on ineffective actions to truncate sooner) brought SR to 0.60 (3/5), which sits at the top edge of the target band [0.40, 0.
+2026-09-10T22:47:58Z checkpoint_saved  iteration_id=bd3a4fc9 path=checkpoints/task_0026_attempt_01.json n_actions=0 rules_code_len=652 best_effort=False
+2026-09-10T22:47:58Z budget_stop  iteration_id=bd3a4fc9 attempts=1
+2026-09-10T22:47:58Z task_end  task_idx=26 total_traces_so_far=605
+2026-09-10T22:47:58Z iteration_end  outer=26 total_traces_so_far=605
+2026-09-10T22:47:58Z task_start  task_idx=27
+2026-09-10T22:47:58Z iteration_start  outer=27
+2026-09-10T22:47:58Z baseline_compute_start  task_idx=27 task_id=27 n=5 key=66c568560f21c1a9
+2026-09-10T22:50:16Z rollout_done  iteration_id=baseline-0027 attempt=0 candidate_id=baseline rollout=1 seed=27 duration_ms=138103 success=False reward=0.0 steps=50 error=None
+2026-09-10T22:50:16Z rollout_done  iteration_id=baseline-0027 attempt=0 candidate_id=baseline rollout=4 seed=27 duration_ms=138129 success=False reward=0.0 steps=50 error=None
+2026-09-10T22:50:17Z rollout_done  iteration_id=baseline-0027 attempt=0 candidate_id=baseline rollout=0 seed=27 duration_ms=139268 success=False reward=0.0 steps=50 error=None
+2026-09-10T22:50:18Z rollout_done  iteration_id=baseline-0027 attempt=0 candidate_id=baseline rollout=3 seed=27 duration_ms=140066 success=False reward=0.0 steps=50 error=None
+2026-09-10T22:50:19Z rollout_done  iteration_id=baseline-0027 attempt=0 candidate_id=baseline rollout=2 seed=27 duration_ms=141364 success=False reward=0.0 steps=50 error=None
+2026-09-10T22:50:19Z baseline_compute_done  task_idx=27 task_id=27 n=5 sr=0.0 avg_success_steps=None sample_action_seq_len=0
+2026-09-10T22:50:25Z candidate_proposed  iteration_id=dba32244 attempt=0 rules_code_len=943 n_in_env_actions=0 rationale=Baseline SR is 0.00 (Policy wanders aimlessly, never finds the potato). The objective wants SR in [0.40,0.60], so I must
+2026-09-10T22:50:54Z rollout_done  iteration_id=dba32244 attempt=1 candidate_id=49acbd09 rollout=4 seed=27 duration_ms=28939 success=True reward=1.0 steps=9 error=None
+2026-09-10T22:50:54Z rollout_done  iteration_id=dba32244 attempt=1 candidate_id=49acbd09 rollout=1 seed=27 duration_ms=28949 success=True reward=1.0 steps=9 error=None
+2026-09-10T22:52:56Z rollout_done  iteration_id=dba32244 attempt=1 candidate_id=49acbd09 rollout=2 seed=27 duration_ms=150558 success=False reward=0.0 steps=50 error=None
+2026-09-10T22:53:01Z rollout_done  iteration_id=dba32244 attempt=1 candidate_id=49acbd09 rollout=3 seed=27 duration_ms=156437 success=False reward=0.0 steps=50 error=None
+2026-09-10T22:53:08Z rollout_done  iteration_id=dba32244 attempt=1 candidate_id=49acbd09 rollout=0 seed=27 duration_ms=162587 success=False reward=0.0 steps=50 error=None
+2026-09-10T22:53:08Z candidate_evaluated  iteration_id=dba32244 attempt=1 candidate_id=49acbd09 k=5 success_rate=0.4 n_errors=0
+2026-09-10T22:53:12Z mutator_decision  iteration_id=dba32244 attempt=1 decision=accept failure_axis=O failure_label=search_space_confusion rationale=Baseline SR was 0.00 and the objective wants SR in [0.40,0.60]. This O-axis mutation (pruning admissible_commands to relevant keywords) raised SR to 0.40 over 5 rollouts, landing exactly at the bottom
+2026-09-10T22:53:12Z checkpoint_saved  iteration_id=dba32244 path=checkpoints/task_0027_attempt_01.json n_actions=0 rules_code_len=943 best_effort=False
+2026-09-10T22:53:12Z budget_stop  iteration_id=dba32244 attempts=1
+2026-09-10T22:53:12Z task_end  task_idx=27 total_traces_so_far=615
+2026-09-10T22:53:12Z iteration_end  outer=27 total_traces_so_far=615
+2026-09-10T22:53:12Z task_start  task_idx=28
+2026-09-10T22:53:12Z iteration_start  outer=28
+2026-09-10T22:53:12Z baseline_compute_start  task_idx=28 task_id=28 n=5 key=6bfaf635808abd57
+2026-09-10T22:55:18Z rollout_done  iteration_id=baseline-0028 attempt=0 candidate_id=baseline rollout=0 seed=28 duration_ms=125621 success=True reward=1.0 steps=39 error=None
+2026-09-10T22:55:50Z rollout_done  iteration_id=baseline-0028 attempt=0 candidate_id=baseline rollout=2 seed=28 duration_ms=157419 success=True reward=1.0 steps=50 error=None
+2026-09-10T22:55:51Z rollout_done  iteration_id=baseline-0028 attempt=0 candidate_id=baseline rollout=3 seed=28 duration_ms=158937 success=True reward=1.0 steps=50 error=None
+2026-09-10T22:55:55Z rollout_done  iteration_id=baseline-0028 attempt=0 candidate_id=baseline rollout=1 seed=28 duration_ms=162580 success=True reward=1.0 steps=50 error=None
+2026-09-10T22:55:55Z rollout_done  iteration_id=baseline-0028 attempt=0 candidate_id=baseline rollout=4 seed=28 duration_ms=163056 success=True reward=1.0 steps=50 error=None
+2026-09-10T22:55:55Z baseline_compute_done  task_idx=28 task_id=28 n=5 sr=1.0 avg_success_steps=47.8 sample_action_seq_len=39
+2026-09-10T22:56:00Z candidate_proposed  iteration_id=5f2ca253 attempt=0 rules_code_len=0 n_in_env_actions=3 rationale=Baseline SR is 1.00 (5/5) with ~48-step solutions; the Policy is strong on this task but recent accepted episodes are at
+2026-09-10T22:58:08Z rollout_done  iteration_id=5f2ca253 attempt=1 candidate_id=59b9ce8c rollout=2 seed=28 duration_ms=128635 success=True reward=1.0 steps=41 error=None
+2026-09-10T22:58:15Z rollout_done  iteration_id=5f2ca253 attempt=1 candidate_id=59b9ce8c rollout=0 seed=28 duration_ms=135309 success=True reward=1.0 steps=41 error=None
+2026-09-10T22:58:15Z rollout_done  iteration_id=5f2ca253 attempt=1 candidate_id=59b9ce8c rollout=1 seed=28 duration_ms=135342 success=True reward=1.0 steps=42 error=None
+2026-09-10T22:58:49Z rollout_done  iteration_id=5f2ca253 attempt=1 candidate_id=59b9ce8c rollout=4 seed=28 duration_ms=168846 success=False reward=0.0 steps=47 error=None
+2026-09-10T22:59:15Z rollout_done  iteration_id=5f2ca253 attempt=1 candidate_id=59b9ce8c rollout=3 seed=28 duration_ms=194840 success=False reward=0.0 steps=47 error=None
+2026-09-10T22:59:15Z candidate_evaluated  iteration_id=5f2ca253 attempt=1 candidate_id=59b9ce8c k=5 success_rate=0.6 n_errors=0
+2026-09-10T22:59:19Z mutator_decision  iteration_id=5f2ca253 attempt=1 decision=accept failure_axis=S0 failure_label=recovery_search rationale=Baseline SR was 1.00 (5/5), ~48 steps. This S0 mutation (moving bread off countertop 2 to force re-navigation) brought SR to 0.60 (3/5), which lands squarely inside the target band [0.40, 0.60]. The t
+2026-09-10T22:59:19Z checkpoint_saved  iteration_id=5f2ca253 path=checkpoints/task_0028_attempt_01.json n_actions=3 rules_code_len=0 best_effort=False
+2026-09-10T22:59:19Z budget_stop  iteration_id=5f2ca253 attempts=1
+2026-09-10T22:59:19Z task_end  task_idx=28 total_traces_so_far=625
+2026-09-10T22:59:19Z iteration_end  outer=28 total_traces_so_far=625
+2026-09-10T22:59:19Z task_start  task_idx=29
+2026-09-10T22:59:19Z iteration_start  outer=29
+2026-09-10T22:59:19Z baseline_compute_start  task_idx=29 task_id=29 n=5 key=b350daeb066f6136
+2026-09-10T22:59:47Z rollout_done  iteration_id=baseline-0029 attempt=0 candidate_id=baseline rollout=1 seed=29 duration_ms=27932 success=True reward=1.0 steps=8 error=None
+2026-09-10T22:59:48Z rollout_done  iteration_id=baseline-0029 attempt=0 candidate_id=baseline rollout=4 seed=29 duration_ms=28022 success=True reward=1.0 steps=8 error=None
+2026-09-10T22:59:48Z rollout_done  iteration_id=baseline-0029 attempt=0 candidate_id=baseline rollout=3 seed=29 duration_ms=28118 success=True reward=1.0 steps=8 error=None
+2026-09-10T22:59:48Z rollout_done  iteration_id=baseline-0029 attempt=0 candidate_id=baseline rollout=2 seed=29 duration_ms=28450 success=True reward=1.0 steps=8 error=None
+2026-09-10T22:59:49Z rollout_done  iteration_id=baseline-0029 attempt=0 candidate_id=baseline rollout=0 seed=29 duration_ms=29215 success=True reward=1.0 steps=8 error=None
+2026-09-10T22:59:49Z baseline_compute_done  task_idx=29 task_id=29 n=5 sr=1.0 avg_success_steps=8.0 sample_action_seq_len=8
+2026-09-10T22:59:55Z candidate_proposed  iteration_id=5a453227 attempt=0 rules_code_len=1023 n_in_env_actions=0 rationale=Baseline SR is 1.00 (trivial), and the previous accepted candidate (59b9ce8c) brought SR to 0.50, landing in band. To ma
+2026-09-10T23:00:20Z rollout_done  iteration_id=5a453227 attempt=1 candidate_id=5474e4ff rollout=0 seed=29 duration_ms=25930 success=True reward=1.0 steps=8 error=None
+2026-09-10T23:00:21Z rollout_done  iteration_id=5a453227 attempt=1 candidate_id=5474e4ff rollout=4 seed=29 duration_ms=26477 success=True reward=1.0 steps=8 error=None
+2026-09-10T23:00:22Z rollout_done  iteration_id=5a453227 attempt=1 candidate_id=5474e4ff rollout=2 seed=29 duration_ms=26970 success=True reward=1.0 steps=8 error=None
+2026-09-10T23:00:22Z rollout_done  iteration_id=5a453227 attempt=1 candidate_id=5474e4ff rollout=1 seed=29 duration_ms=27002 success=True reward=1.0 steps=8 error=None
+2026-09-10T23:00:23Z rollout_done  iteration_id=5a453227 attempt=1 candidate_id=5474e4ff rollout=3 seed=29 duration_ms=28280 success=True reward=1.0 steps=8 error=None
+2026-09-10T23:00:23Z candidate_evaluated  iteration_id=5a453227 attempt=1 candidate_id=5474e4ff k=5 success_rate=1.0 n_errors=0
+2026-09-10T23:00:32Z mutator_decision  iteration_id=5a453227 attempt=1 decision=reject failure_axis=T failure_label=noop_mutation rationale=The candidate's T-axis perturbation had zero measurable effect: SR stayed at 1.00 (5/5) with avg steps still 8.0, identical to baseline. The fake "Nothing happens." appended to a successful move/picku
+2026-09-10T23:00:40Z candidate_reproposed  iteration_id=5a453227 attempt=1 rules_code_len=510
+2026-09-10T23:01:05Z rollout_done  iteration_id=5a453227 attempt=2 candidate_id=98ed48a4 rollout=4 seed=29 duration_ms=24913 success=True reward=1.0 steps=8 error=None
+2026-09-10T23:01:06Z rollout_done  iteration_id=5a453227 attempt=2 candidate_id=98ed48a4 rollout=1 seed=29 duration_ms=25723 success=True reward=1.0 steps=8 error=None
+2026-09-10T23:01:06Z rollout_done  iteration_id=5a453227 attempt=2 candidate_id=98ed48a4 rollout=0 seed=29 duration_ms=26207 success=True reward=1.0 steps=8 error=None
+2026-09-10T23:01:07Z rollout_done  iteration_id=5a453227 attempt=2 candidate_id=98ed48a4 rollout=3 seed=29 duration_ms=26588 success=True reward=1.0 steps=8 error=None
+2026-09-10T23:01:07Z rollout_done  iteration_id=5a453227 attempt=2 candidate_id=98ed48a4 rollout=2 seed=29 duration_ms=26785 success=True reward=1.0 steps=8 error=None
+2026-09-10T23:01:07Z candidate_evaluated  iteration_id=5a453227 attempt=2 candidate_id=98ed48a4 k=5 success_rate=1.0 n_errors=0
+2026-09-10T23:01:15Z mutator_decision  iteration_id=5a453227 attempt=2 decision=reject failure_axis=none failure_label=noop_mutation rationale=The candidate's A-axis filter (blocking 'examine egg') had zero measurable effect: success_rate stayed 1.00 (5/5), avg_success_steps unchanged at 8.0, and blocked_steps=0 across every rollout — meanin
+2026-09-10T23:01:23Z candidate_reproposed  iteration_id=5a453227 attempt=2 rules_code_len=0
+2026-09-10T23:01:50Z rollout_done  iteration_id=5a453227 attempt=3 candidate_id=4c448ec1 rollout=0 seed=29 duration_ms=26869 success=True reward=1.0 steps=7 error=None
+2026-09-10T23:01:50Z rollout_done  iteration_id=5a453227 attempt=3 candidate_id=4c448ec1 rollout=1 seed=29 duration_ms=27080 success=True reward=1.0 steps=7 error=None
+2026-09-10T23:01:50Z rollout_done  iteration_id=5a453227 attempt=3 candidate_id=4c448ec1 rollout=2 seed=29 duration_ms=27116 success=True reward=1.0 steps=7 error=None
+2026-09-10T23:01:50Z rollout_done  iteration_id=5a453227 attempt=3 candidate_id=4c448ec1 rollout=4 seed=29 duration_ms=27150 success=True reward=1.0 steps=7 error=None
+2026-09-10T23:01:50Z rollout_done  iteration_id=5a453227 attempt=3 candidate_id=4c448ec1 rollout=3 seed=29 duration_ms=27161 success=True reward=1.0 steps=7 error=None
+2026-09-10T23:01:50Z candidate_evaluated  iteration_id=5a453227 attempt=3 candidate_id=4c448ec1 k=5 success_rate=1.0 n_errors=0
+2026-09-10T23:01:57Z mutator_decision  iteration_id=5a453227 attempt=3 decision=reject failure_axis=S0 failure_label=noop_mutation rationale=The candidate is a no-op. The in_env_actions field was emitted as a bare list ['do','do',...] with no name/kwargs_json structure, so the Setup harness never actually replayed any valid tool calls — OR
+2026-09-10T23:02:05Z candidate_reproposed  iteration_id=5a453227 attempt=3 rules_code_len=1263
+2026-09-10T23:02:35Z rollout_done  iteration_id=5a453227 attempt=4 candidate_id=5334ccd3 rollout=0 seed=29 duration_ms=29771 success=True reward=1.0 steps=9 error=None
+2026-09-10T23:02:36Z rollout_done  iteration_id=5a453227 attempt=4 candidate_id=5334ccd3 rollout=2 seed=29 duration_ms=30410 success=True reward=1.0 steps=9 error=None
+2026-09-10T23:02:36Z rollout_done  iteration_id=5a453227 attempt=4 candidate_id=5334ccd3 rollout=3 seed=29 duration_ms=30621 success=True reward=1.0 steps=9 error=None
+2026-09-10T23:02:36Z rollout_done  iteration_id=5a453227 attempt=4 candidate_id=5334ccd3 rollout=4 seed=29 duration_ms=30838 success=True reward=1.0 steps=9 error=None
+2026-09-10T23:02:36Z rollout_done  iteration_id=5a453227 attempt=4 candidate_id=5334ccd3 rollout=1 seed=29 duration_ms=30944 success=True reward=1.0 steps=9 error=None
+2026-09-10T23:02:36Z candidate_evaluated  iteration_id=5a453227 attempt=4 candidate_id=5334ccd3 k=5 success_rate=1.0 n_errors=0
+2026-09-10T23:02:43Z mutator_decision  iteration_id=5a453227 attempt=4 decision=reject failure_axis=T failure_label=noop_mutation rationale=The mutation had no measurable effect on difficulty. Baseline SR=1.00 (8 steps); after mutation SR=1.00 (9 steps). The T-axis "fake clean no-op" perturbation only added exactly one retry step (8→9) an
+2026-09-10T23:02:47Z candidate_reproposed  iteration_id=5a453227 attempt=4 rules_code_len=0
+2026-09-10T23:06:47Z rollout_done  iteration_id=5a453227 attempt=5 candidate_id=2fe994c0 rollout=4 seed=29 duration_ms=240024 success=False reward=0.0 steps=48 error=None
+2026-09-10T23:06:55Z rollout_done  iteration_id=5a453227 attempt=5 candidate_id=2fe994c0 rollout=3 seed=29 duration_ms=248448 success=False reward=0.0 steps=48 error=None
+2026-09-10T23:07:04Z rollout_done  iteration_id=5a453227 attempt=5 candidate_id=2fe994c0 rollout=1 seed=29 duration_ms=257446 success=False reward=0.0 steps=48 error=None
+2026-09-10T23:07:05Z rollout_done  iteration_id=5a453227 attempt=5 candidate_id=2fe994c0 rollout=0 seed=29 duration_ms=257827 success=False reward=0.0 steps=48 error=None
+2026-09-10T23:07:26Z rollout_done  iteration_id=5a453227 attempt=5 candidate_id=2fe994c0 rollout=2 seed=29 duration_ms=278838 success=False reward=0.0 steps=48 error=None
+2026-09-10T23:07:26Z candidate_evaluated  iteration_id=5a453227 attempt=5 candidate_id=2fe994c0 k=5 success_rate=0.0 n_errors=0
+2026-09-10T23:07:32Z mutator_decision  iteration_id=5a453227 attempt=5 decision=reject failure_axis=S0 failure_label=malformed_in_env_actions rationale=The candidate's in_env_actions was malformed: it emitted two bare 'do' entries with no actual command text (the actions list shows ['do','do',...] with no kwargs). This means the Setup harness replaye
+2026-09-10T23:07:32Z budget_stop  iteration_id=5a453227 attempts=5
+2026-09-10T23:07:32Z checkpoint_saved  iteration_id=5a453227 path=checkpoints/task_0029_best_effort.json n_actions=0 rules_code_len=1023 best_effort=True rollout_success_rate=1.0
+2026-09-10T23:07:32Z task_end  task_idx=29 total_traces_so_far=655
+2026-09-10T23:07:32Z iteration_end  outer=29 total_traces_so_far=655
+2026-09-10T23:07:32Z run_end  n_accepted=75 n_total=655 n_failed=0
