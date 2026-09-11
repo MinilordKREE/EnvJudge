@@ -157,10 +157,19 @@ def wait_for_e3(marker: str, poll_s: int = 120) -> None:
     print(json.dumps({"e3_marker": marker, "seen": True}), flush=True)
 
 
+CONCURRENCY_OVERRIDE = RUNS / "e3sl_concurrency.txt"
+
+
 def job_concurrency() -> int:
+    """Episodes in flight for the next job: the ceiling (``MAX_JOB_CONCURRENCY``, or the integer
+    in ``runs/e3sl_concurrency.txt`` when the owner raises it during the run; every job's value is
+    logged and written into its resolved eval config) minus the E3 chain's episodes in flight."""
+    ceiling = MAX_JOB_CONCURRENCY
+    if CONCURRENCY_OVERRIDE.exists() and CONCURRENCY_OVERRIDE.read_text().strip().isdigit():
+        ceiling = max(1, min(64, int(CONCURRENCY_OVERRIDE.read_text().strip())))
     stage = e3_stage()
     inflight = E3_INFLIGHT.get(stage or "", 0)
-    return max(MIN_JOB_CONCURRENCY, min(MAX_JOB_CONCURRENCY, 16 - inflight))
+    return max(MIN_JOB_CONCURRENCY, min(ceiling, ceiling - inflight))
 
 
 # ---------------------------------------------------------------------------- bank inputs
