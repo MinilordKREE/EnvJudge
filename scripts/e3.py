@@ -66,7 +66,27 @@ E2_TASKS: tuple[int, ...] = (0, 8, 9, 10, 11, 14, 17, 18, 20, 27)  # shared K16 
 NEW_SHARED: tuple[int, ...] = tuple(t for t in TASKS if t not in E2_TASKS)
 H100_TASKS: tuple[int, ...] = (8, 9, 27)
 PREREG_SHA = "08a09b7"
+PREREG10_SHA = "6d48728"
 CAP_USD = 330.0
+VARIANT = "e3"
+A_RUN_ID = "e3-A"
+CONFIRM_RUN_ID = "e3-confirm"
+SPEND_GLOB = "e3-*"
+EXPERIMENT = "E3 layer 1"
+
+
+def set_variant(variant: str) -> None:
+    """E3b (PREREG10): aea v0.3's A arm, confirmations and SL column live in runs/e3b-*; G, R,
+    H100 and the shared K16 are reused from E3 (never re-run). Spend = every runs/e3b-* ledger
+    against the E3b cap."""
+    global VARIANT, A_RUN_ID, CONFIRM_RUN_ID, SPEND_GLOB, CAP_USD, PREREG_SHA, EXPERIMENT
+    if variant == "e3b":
+        VARIANT, A_RUN_ID, CONFIRM_RUN_ID, SPEND_GLOB = "e3b", "e3b-A", "e3b-confirm", "e3b-*"
+        CAP_USD, PREREG_SHA, EXPERIMENT = 120.0, PREREG10_SHA, "E3b (aea v0.3, PREREG10)"
+    elif variant != "e3":
+        raise ConfigError(f"unknown variant {variant}")
+
+
 ROLLOUT_CONCURRENCY = 4  # subprocess episodes per rollout batch (arm A)
 MAX_INFLIGHT_EPISODES = 16  # PREREG7 A2.4: total eval concurrency
 CONFIRM_K = 16
@@ -125,7 +145,7 @@ def dir_spend(d: Path) -> float:
 
 
 def e3_spend() -> float:
-    return sum(dir_spend(d) for d in RUNS.glob("e3-*") if d.is_dir())
+    return sum(dir_spend(d) for d in RUNS.glob(SPEND_GLOB) if d.is_dir())
 
 
 def guard(where: str) -> None:
@@ -246,10 +266,13 @@ def write_arm_manifest(d: Path, arm: str, extra: dict[str, Any]) -> None:
     (d / "arm_manifest.json").write_text(
         json.dumps(
             {
-                "experiment": "E3 layer 1",
+                "experiment": EXPERIMENT,
                 "arm": arm,
-                "prereg": "experiments/alfworld_e3/PREREG9.md",
+                "prereg": "experiments/alfworld_e3/PREREG9.md"
+                if VARIANT == "e3"
+                else "experiments/alfworld_e3/PREREG10.md",
                 "prereg_sha": PREREG_SHA,
+                "aea_config_schema": AEAConfig().schema_version,
                 "tasks": list(TASKS),
                 "policy": policy_qwen().model_dump(mode="json"),
                 "designer": designer_deepseek().model_dump(mode="json"),
@@ -409,7 +432,7 @@ def stage_a(task_concurrency: int) -> None:
         )
     order = a_task_order()
     policy, designer = policy_qwen(), designer_deepseek()
-    run_id = "e3-A"
+    run_id = A_RUN_ID
     run_config = RunConfig(
         schema_version=1,
         name=run_id,
@@ -435,9 +458,10 @@ def stage_a(task_concurrency: int) -> None:
         run_config,
         envharness_sha=_git_sha(ENVHARNESS),
         extra={
-            "experiment": "E3 layer 1",
+            "experiment": EXPERIMENT,
             "arm": "A",
             "prereg_sha": PREREG_SHA,
+            "aea_config_schema": AEAConfig().schema_version,
             "tasks": [int(t.task_id) for t in order],
             "task_order": "zero first (ascending shared p16, ties by id)",
             "policy_endpoint_pin": policy.provider_pin,
@@ -762,7 +786,7 @@ def learner_facing() -> list[dict[str, Any]]:
             e["arms"].append(arm)
         e["refs"][arm] = ref
 
-    a_corpus = RUNS / "e3-A" / "corpus.jsonl"
+    a_corpus = RUNS / A_RUN_ID / "corpus.jsonl"
     if a_corpus.exists():
         for e in read_corpus(a_corpus):
             if e.aea.kind == "kept":
@@ -801,14 +825,24 @@ def learner_facing() -> list[dict[str, Any]]:
     return sorted(envs.values(), key=lambda e: (int(e["task"]), e["id"]))
 
 
+def _prior_confirm() -> dict[str, dict[str, Any]]:
+    """E3b: E3's confirmations, reused for any environment E3 already confirmed (same task and
+    candidate key), never re-run."""
+    if VARIANT != "e3b":
+        return {}
+    p = RUNS / "e3-confirm" / "confirm_summary.json"
+    return json.loads(p.read_text(encoding="utf-8")) if p.exists() else {}
+
+
 def stage_confirm(concurrency: int) -> None:
     guard("confirm")
-    d = RUNS / "e3-confirm"
+    d = RUNS / CONFIRM_RUN_ID
     d.mkdir(parents=True, exist_ok=True)
     envs = learner_facing()
     (d / "envs.json").write_text(json.dumps(envs, indent=1), encoding="utf-8")
     os.environ.setdefault("ALFWORLD_DATA", str(Path.home() / "eh_alfworld_data"))
-    sub = substrate(d, "e3-confirm", with_designer=False, concurrency=concurrency)
+    sub = substrate(d, CONFIRM_RUN_ID, with_designer=False, concurrency=concurrency)
+    prior = _prior_confirm()
     summary_path = d / "confirm_summary.json"
     summary: dict[str, Any] = (
         json.loads(summary_path.read_text(encoding="utf-8")) if summary_path.exists() else {}
@@ -820,6 +854,10 @@ def stage_confirm(concurrency: int) -> None:
     for env in envs:
         if env["id"] in summary:
             summary[env["id"]]["arms"] = env["arms"]
+            continue
+        if env["id"] in prior:  # already confirmed in E3 (G, R, or an identical environment)
+            summary[env["id"]] = {**prior[env["id"]], "arms": env["arms"], "reused": "e3-confirm"}
+            summary_path.write_text(json.dumps(summary, indent=1), encoding="utf-8")
             continue
         task = TaskRef(env["task"], int(env["task"]))
         if env["kind"] == "kept":  # A keeps the original: the shared K16 is its confirmation
@@ -909,8 +947,10 @@ def main(argv: list[str] | None = None) -> int:
         choices=["probe", "shared", "A", "G", "R", "h100", "confirm", "tables", "spend"],
     )
     ap.add_argument("--concurrency", type=int, default=4)
+    ap.add_argument("--variant", default="e3", choices=["e3", "e3b"])
     args = ap.parse_args(argv)
     try:
+        set_variant(args.variant)
         if args.stage == "probe":
             return stage_probe()
         if args.stage == "shared":
@@ -925,7 +965,9 @@ def main(argv: list[str] | None = None) -> int:
             stage_confirm(max(args.concurrency, 8))
         elif args.stage == "tables":
             sys.path.insert(0, str(Path(__file__).resolve().parent))
-            mte3 = importlib.import_module("make_tables_e3")
+            mte3 = importlib.import_module(
+                "make_tables_e3b" if VARIANT == "e3b" else "make_tables_e3"
+            )
             return int(mte3.main([]))
         else:
             print(
@@ -935,7 +977,7 @@ def main(argv: list[str] | None = None) -> int:
                         "cap": CAP_USD,
                         "by_run": {
                             d.name: round(dir_spend(d), 2)
-                            for d in sorted(RUNS.glob("e3-*"))
+                            for d in sorted(RUNS.glob(SPEND_GLOB))
                             if d.is_dir()
                         },
                         "ts": time.strftime("%FT%TZ", time.gmtime()),

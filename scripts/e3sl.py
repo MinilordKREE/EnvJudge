@@ -63,9 +63,26 @@ PRICING = e3.PRICING
 BANKS = RUNS / "e3sl-banks"
 EVAL = RUNS / "e3sl-eval"
 META = BANKS / "banks_e3.json"
+VARIANT = "e3"
+E3SL_META = RUNS / "e3sl-banks" / "banks_e3.json"  # E3-SL's matched size, reused by E3b
 CHAIN_LOG = RUNS / "r1-logs" / "e3_chain.log"
 ADDENDUM_SHA = "f9623e2"
 CAP_USD = 180.0
+
+
+def set_variant(variant: str) -> None:
+    """E3b-SL (PREREG10): only A_v0.3's banks and evaluations are new (runs/e3b-slbanks,
+    runs/e3b-sleval, counted against the E3b cap); G_lf, R_lf, O, N and placebo cells are reused
+    from runs/e3sl-eval by the tables; the matched size is E3-SL's k."""
+    global VARIANT, BANKS, EVAL, META, CAP_USD
+    e3.set_variant(variant)
+    if variant == "e3b":
+        VARIANT = "e3b"
+        BANKS, EVAL = RUNS / "e3b-slbanks", RUNS / "e3b-sleval"
+        META = BANKS / "banks_e3b.json"
+        CAP_USD = e3.CAP_USD
+
+
 SEEDS: tuple[int, ...] = (0, 1000, 2000)
 SPLITS: dict[str, int] = {"in_distribution": 140, "out_of_distribution": 134}
 INDUCTIONS: tuple[int, ...] = (20260920, 20260921)
@@ -90,6 +107,8 @@ def _dir_usd(d: Path) -> float:
 
 
 def sl_spend() -> float:
+    if VARIANT == "e3b":
+        return e3.e3_spend()  # every runs/e3b-* ledger, one cap for search + confirm + SL
     total = 0.0
     for top in RUNS.glob("e3sl-*"):
         if not top.is_dir():
@@ -186,7 +205,8 @@ def lf_inputs(arm: str) -> dict[str, list[dict[str, Any]]]:
                 by_task[str(r["rollout_seed"])].append(r)
         return dict(by_task)
     envs = [e for e in e3.learner_facing() if arm in e["arms"]]
-    traces = _successes(e3.jsonl(RUNS / f"e3-{arm}" / "traces.jsonl"))
+    run_dir = RUNS / (e3.A_RUN_ID if arm == "A" else f"e3-{arm}")
+    traces = _successes(e3.jsonl(run_dir / "traces.jsonl"))
     for env in envs:
         task = str(env["task"])
         for r in traces:
@@ -209,7 +229,7 @@ def cascade_traces(arm: str) -> Path:
     """R and G: their released traces as they are. A: kinds remapped for the released Stage 2
     (estimate rollouts -> baseline; rollouts on an accepted environment -> accepted; else
     exploration)."""
-    src = RUNS / f"e3-{arm}" / "traces.jsonl"
+    src = RUNS / (e3.A_RUN_ID if arm == "A" else f"e3-{arm}") / "traces.jsonl"
     if arm != "A":
         return src
     keys = {
@@ -496,8 +516,13 @@ def stage_placebo() -> None:
 
 
 # ---------------------------------------------------------------------------- matching
+def built_lf_arms() -> tuple[str, ...]:
+    """E3b builds only A_v0.3's banks; the others are E3-SL's."""
+    return ("A",) if VARIANT == "e3b" else LF_ARMS
+
+
 def lf_bank_names() -> list[str]:
-    return [f"{arm}_lf_i{k}" for arm in LF_ARMS for k in (1, 2)]
+    return [f"{arm}_lf_i{k}" for arm in built_lf_arms() for k in (1, 2)]
 
 
 def stage_matched() -> None:
@@ -507,6 +532,14 @@ def stage_matched() -> None:
         raise ConfigError(f"learner-facing banks missing: {missing}")
     sizes = {n: len(read_jsonl(BANKS / f"{n}.jsonl")) for n in lf_bank_names()}
     k = min(sizes.values())
+    if VARIANT == "e3b":  # item matching to E3-SL's k (the minimum across A_v0.3_lf, G_lf, R_lf, O)
+        k_e3 = int(json.loads(E3SL_META.read_text(encoding="utf-8"))["matched"]["k"])
+        if k < k_e3:
+            raise ConfigError(
+                f"A_v0.3's smallest bank has {k} items, below E3-SL's matched size {k_e3}: the "
+                "reused G_lf / R_lf / O cells would no longer be item-matched; STOP for the owner"
+            )
+        k = k_e3
     if k == 0:
         raise ConfigError(f"an empty learner-facing bank: {sizes}")
     (BANKS / "matched").mkdir(exist_ok=True)
@@ -551,19 +584,20 @@ def conditions() -> dict[str, tuple[str, Path | None]]:
 def jobs(group: str) -> list[tuple[str, int]]:
     conds = conditions()
     matched_report = meta().get("matched", {}).get("banks", {})
+    lf_arms, cas_arms = (("A",), ("A",)) if VARIANT == "e3b" else (LF_ARMS, CAS_ARMS)
     if group == "anchors":
-        names = [c for c in ("N", "placebo") if c in conds]
+        names = [c for c in ("N", "placebo") if c in conds] if VARIANT == "e3" else []
     elif group == "matched":
-        names = [f"{a}_lf_i{k}_m" for a in LF_ARMS for k in (1, 2)]
+        names = [f"{a}_lf_i{k}_m" for a in lf_arms for k in (1, 2)]
     elif group == "full":  # a full bank the size of the matched one is already evaluated
         names = [
             f"{a}_lf_i{k}"
-            for a in LF_ARMS
+            for a in lf_arms
             for k in (1, 2)
             if not matched_report.get(f"{a}_lf_i{k}_m", {}).get("full_row_is_matched_row")
         ]
     elif group == "cascade":
-        names = [f"{a}_cas_i{k}" for a in CAS_ARMS for k in (1, 2)]
+        names = [f"{a}_cas_i{k}" for a in cas_arms for k in (1, 2)]
     else:
         raise ConfigError(f"unknown group {group}")
     missing = [n for n in names if n not in conds]
@@ -786,8 +820,10 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--concurrency", type=int, default=8)
     ap.add_argument("--for", dest="marker", default="done")
+    ap.add_argument("--variant", default="e3", choices=["e3", "e3b"])
     args = ap.parse_args(argv)
     try:
+        set_variant(args.variant)
         if args.stage == "placebo":
             stage_placebo()
         elif args.stage == "banks":
@@ -800,7 +836,7 @@ def main(argv: list[str] | None = None) -> int:
             stage_evals(args.group)
         elif args.stage == "tables":
             mt3 = importlib.import_module("make_tables_e3sl")
-            return int(mt3.main([]))
+            return int(mt3.main(["--variant", VARIANT]))
         elif args.stage == "wait":
             wait_for_e3(args.marker)
         else:

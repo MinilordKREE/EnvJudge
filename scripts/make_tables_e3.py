@@ -45,8 +45,14 @@ def fmt(x: float | None, nd: int = 1) -> str:
     return f"{x:.{nd}f}"
 
 
+RUN_DIRS: dict[str, Path] = {}
+"""Overrides per name (E3b: ``A`` -> runs/e3b-A, ``confirm`` -> runs/e3b-confirm); the rest are
+the E3 directories."""
+SPEND_GLOB = "e3-*"
+
+
 def d(name: str) -> Path:
-    return RUNS / f"e3-{name}"
+    return RUN_DIRS.get(name, RUNS / f"e3-{name}")
 
 
 # ---------------------------------------------------------------------------- inputs
@@ -270,7 +276,7 @@ def rate(
 
 def spend() -> dict[str, dict[str, float]]:
     out: dict[str, dict[str, float]] = defaultdict(lambda: defaultdict(float))
-    for run in sorted(RUNS.glob("e3-*")):
+    for run in sorted(RUNS.glob(SPEND_GLOB)):
         if not run.is_dir():
             continue
         for r in e3._ledger_rows(run):
@@ -281,7 +287,7 @@ def spend() -> dict[str, dict[str, float]]:
 
 def incidents() -> dict[str, Any]:
     out: dict[str, Any] = {"guard_incidents": 0, "retries_429": 0, "retries_other": 0}
-    for run in sorted(RUNS.glob("e3-*")):
+    for run in sorted(RUNS.glob(SPEND_GLOB)):
         if not run.is_dir():
             continue
         out["guard_incidents"] += len(e3.jsonl(run / "guard_incidents.jsonl"))

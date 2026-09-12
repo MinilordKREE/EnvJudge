@@ -42,12 +42,13 @@ def fmt(x: float | None, nd: int = 1) -> str:
 
 
 # ---------------------------------------------------------------------------- cells
-def eval_cells() -> Cells:
-    """{condition: {split: {seed block: [records]}}} from runs/e3sl-eval."""
+def eval_cells(root: Path | None = None) -> Cells:
+    """{condition: {split: {seed block: [records]}}} from an eval run directory."""
+    root = root or EVAL
     out: Cells = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
-    if not EVAL.exists():
+    if not root.exists():
         return {}
-    for d in sorted(EVAL.iterdir()):
+    for d in sorted(root.iterdir()):
         m = re.match(r"(.+)-seeds-(\d+)(-resume-\d+)?$", d.name)
         if not m or not d.is_dir():
             continue
@@ -178,9 +179,13 @@ def bank_rows(cells: Cells, label: str, conds: list[str]) -> list[str]:
 
 
 # ---------------------------------------------------------------------------- spend, incidents
+def sl_glob() -> str:
+    return "e3b-sl*" if e3sl.VARIANT == "e3b" else "e3sl-*"
+
+
 def spend() -> dict[str, dict[str, float]]:
     out: dict[str, dict[str, float]] = defaultdict(lambda: defaultdict(float))
-    for top in sorted(RUNS.glob("e3sl-*")):
+    for top in sorted(RUNS.glob(sl_glob())):
         if not top.is_dir():
             continue
         for d in [top, *sorted(p for p in top.rglob("*") if p.is_dir())]:
@@ -205,7 +210,7 @@ def incidents() -> dict[str, Any]:
         "retries_other": 0,
         "errored_episodes": 0,
     }
-    for top in RUNS.glob("e3sl-*"):
+    for top in RUNS.glob(sl_glob()):
         if not top.is_dir():
             continue
         for f in top.rglob("ledger*.jsonl"):
@@ -223,30 +228,60 @@ def incidents() -> dict[str, Any]:
 # ---------------------------------------------------------------------------- report
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", default=str(RESULTS / "e3_sl.md"))
+    ap.add_argument("--out", default=None)
     ap.add_argument("--seed", type=int, default=20260912)
+    ap.add_argument("--variant", default="e3", choices=["e3", "e3b"])
     args = ap.parse_args(argv)
     rng = random.Random(args.seed)
     RESULTS.mkdir(parents=True, exist_ok=True)
-    cells = eval_cells()
-    meta = e3sl.meta()
-    matched = meta.get("matched", {})
-    lf = {arm: [f"{arm}_lf_i1_m", f"{arm}_lf_i2_m"] for arm in e3sl.LF_ARMS}
-    full = {arm: [f"{arm}_lf_i1", f"{arm}_lf_i2"] for arm in e3sl.LF_ARMS}
-    cas = {arm: [f"{arm}_cas_i1", f"{arm}_cas_i2"] for arm in e3sl.CAS_ARMS}
-    avg = {
-        (arm, split): averaged(cells, lf[arm], split) for arm in e3sl.LF_ARMS for split in SPLITS
-    }
+    variant = args.variant
+    if variant == "e3b":
+        # E3b-SL: A_v0.3's cells and banks (runs/e3b-sl*) as arm "A3", beside E3-SL's reused
+        # A (v0.2), G, R, O, N and placebo cells (runs/e3sl-eval)
+        e3sl.set_variant("e3b")
+        base = eval_cells(RUNS / "e3sl-eval")
+        new = eval_cells(e3sl.EVAL)
+        cells = {**base, **{"A3" + k[1:]: v for k, v in new.items() if k.startswith("A_")}}
+        meta_e3 = json.loads(e3sl.E3SL_META.read_text(encoding="utf-8"))
+        meta_new = e3sl.meta()
+        meta = {
+            **{k: v for k, v in meta_e3.items() if k != "matched"},
+            **{("A3" + k[1:] if k.startswith("A_") else k): v for k, v in meta_new.items()},
+        }
+        matched = dict(meta_new.get("matched", {}))
+        matched["banks"] = {
+            ("A3" + k[1:] if k.startswith("A_") else k): v
+            for k, v in {
+                **meta_e3.get("matched", {}).get("banks", {}),
+                **matched.get("banks", {}),
+            }.items()
+        }
+        primary, lf_arms, cas_arms = "A3", ("A3", "A", "G", "R", "O"), ("A3", "A", "G", "R")
+        label, out_md, out_json = "E3b-SL", "e3b_sl.md", "e3b_sl_data.json"
+        prereg = f"PREREG10 @ {e3sl.e3.PREREG10_SHA} (banks and evaluation as PREREG9 Addendum SL @ {e3sl.ADDENDUM_SHA}; A = the E3 arm, aea v0.2, reused)"  # noqa: E501
+    else:
+        cells = eval_cells()
+        meta = e3sl.meta()
+        matched = meta.get("matched", {})
+        primary, lf_arms, cas_arms = "A", e3sl.LF_ARMS, e3sl.CAS_ARMS
+        label, out_md, out_json = "E3-SL", "e3_sl.md", "e3_sl_data.json"
+        prereg = f"Addendum @ {e3sl.ADDENDUM_SHA}"
+    out_path = Path(args.out) if args.out else RESULTS / out_md
+    p_ = primary
+    lf = {arm: [f"{arm}_lf_i1_m", f"{arm}_lf_i2_m"] for arm in lf_arms}
+    full = {arm: [f"{arm}_lf_i1", f"{arm}_lf_i2"] for arm in lf_arms}
+    cas = {arm: [f"{arm}_cas_i1", f"{arm}_cas_i2"] for arm in cas_arms}
+    avg = {(arm, split): averaged(cells, lf[arm], split) for arm in lf_arms for split in SPLITS}
     anchors = {
         (c, split): episode_values(cells, c, split) for c in ("N", "placebo") for split in SPLITS
     }
     diffs: dict[str, dict[str, dict[str, Any]]] = defaultdict(dict)
+    others = [a for a in lf_arms if a != p_]
     for split in SPLITS:
-        for other in ("G", "R", "O"):
-            diffs[f"A_lf - {other}_lf" if other != "O" else "A_lf - O"][split] = diff_stats(
-                avg[("A", split)], avg[(other, split)], rng
-            )
-        for arm in e3sl.LF_ARMS:
+        for other in others:
+            name = f"{p_}_lf - {other}_lf" if other != "O" else f"{p_}_lf - O"
+            diffs[name][split] = diff_stats(avg[(p_, split)], avg[(other, split)], rng)
+        for arm in lf_arms:
             for anc in ("N", "placebo"):
                 diffs[f"{arm}_lf - {anc}"][split] = diff_stats(
                     avg[(arm, split)], anchors[(anc, split)], rng
@@ -254,10 +289,10 @@ def main(argv: list[str] | None = None) -> int:
         diffs["placebo - N"][split] = diff_stats(
             anchors[("placebo", split)], anchors[("N", split)], rng
         )
-    # verdict: A_lf >= G_lf and A_lf >= R_lf on ID or OOD with a 95% CI excluding 0
+    # verdict: P_lf >= G_lf and P_lf >= R_lf on ID or OOD with a 95% CI excluding 0
     holds_on = []
     for split in SPLITS:
-        dg, dr = diffs["A_lf - G_lf"][split], diffs["A_lf - R_lf"][split]
+        dg, dr = diffs[f"{p_}_lf - G_lf"][split], diffs[f"{p_}_lf - R_lf"][split]
         if (
             dg.get("n")
             and dr.get("n")
@@ -267,25 +302,25 @@ def main(argv: list[str] | None = None) -> int:
             and dr["excludes_zero"]
         ):
             holds_on.append(split)
-    evaluated = all(diffs["A_lf - G_lf"][s].get("n") for s in SPLITS)
+    evaluated = all(diffs[f"{p_}_lf - G_lf"][s].get("n") for s in SPLITS)
 
     lines: list[str] = [
-        "# E3-SL — downstream skill evaluation of the E3 learner-facing sets (PREREG9 Addendum SL)",
+        f"# {label} — downstream skill evaluation of the learner-facing sets ({'PREREG10; aea v0.3 as A3 beside the E3 rows' if variant == 'e3b' else 'PREREG9 Addendum SL'})",  # noqa: E501
         "",
-        f"Banks: released single-success induction (`_build_bank`, success-only trajectories, shortest success per environment), DeepSeek V4 Pro extractor (thinking off) through the eval hook, embeddings through OpenRouter; two inductions per bank (i1 / i2, labelled by the addendum's seeds 20260920 / 20260921 — the released single-success induction samples at temperature 0, so i1 and i2 are replicate runs whose spread is the endpoint's own nondeterminism). Item matching: every learner-facing bank subsampled to k = {matched.get('k', '-')} items (seed {e3sl.MATCHED_SEED}). Eval: released `reasoning_bank_eval.py` through the eval hook, Qwen3-8B consumer (alibaba pin, reasoning off), SkillOS prompt, history 4, temperature 0.4, top-5 MMR, ID 140 + OOD 134, seeds 0 / 1000 / 2000. Addendum @ {e3sl.ADDENDUM_SHA}. Tables from scripts/make_tables_e3sl.py.",  # noqa: E501
+        f"Banks: released single-success induction (`_build_bank`, success-only trajectories, shortest success per environment), DeepSeek V4 Pro extractor (thinking off) through the eval hook, embeddings through OpenRouter; two inductions per bank (i1 / i2, labelled by the addendum's seeds 20260920 / 20260921 — the released single-success induction samples at temperature 0, so i1 and i2 are replicate runs whose spread is the endpoint's own nondeterminism). Item matching: every learner-facing bank subsampled to k = {matched.get('k', '-')} items (seed {e3sl.MATCHED_SEED}). Eval: released `reasoning_bank_eval.py` through the eval hook, Qwen3-8B consumer (alibaba pin, reasoning off), SkillOS prompt, history 4, temperature 0.4, top-5 MMR, ID 140 + OOD 134, seeds 0 / 1000 / 2000. {prereg}. Tables from scripts/make_tables_e3sl.py.",  # noqa: E501
         "",
         "## Verdict",
         "",
     ]
     if not evaluated:
-        lines.append("**E3-SL: not evaluated yet (matched cells incomplete).**")
+        lines.append(f"**{label}: not evaluated yet (matched cells incomplete).**")
     elif holds_on:
         lines.append(
-            f"**E3-SL holds on {' and '.join(holds_on)}: item-matched, induction-averaged A_lf above G_lf and R_lf with 95% CIs excluding 0.**"  # noqa: E501
+            f"**{label} holds on {' and '.join(holds_on)}: item-matched, induction-averaged {p_}_lf above G_lf and R_lf with 95% CIs excluding 0.**"  # noqa: E501
         )
     else:
         lines.append(
-            "**E3-SL fails: on neither split are both A_lf - G_lf and A_lf - R_lf positive with 95% CIs excluding 0.**"  # noqa: E501
+            f"**{label} fails: on neither split are both {p_}_lf - G_lf and {p_}_lf - R_lf positive with 95% CIs excluding 0.**"  # noqa: E501
         )
     lines += [
         "",
@@ -307,7 +342,7 @@ def main(argv: list[str] | None = None) -> int:
         "| bank | induction | ID | OOD |",
         "|---|---|---|---|",
     ]
-    for arm in e3sl.LF_ARMS:
+    for arm in lf_arms:
         lines += bank_rows(cells, f"{arm}_lf (matched)", lf[arm])
     for anc in ("N", "placebo"):
         lines += bank_rows(cells, anc, [anc])
@@ -315,15 +350,16 @@ def main(argv: list[str] | None = None) -> int:
     supp: dict[str, dict[str, dict[str, Any]]] = defaultdict(dict)
     for split in SPLITS:
         favg = {
-            arm: averaged(cells, lf[arm] if arm == "R" else full[arm], split)
-            for arm in e3sl.LF_ARMS
+            arm: averaged(cells, lf[arm] if arm == "R" else full[arm], split) for arm in lf_arms
         }  # R's full bank is its matched bank
-        for other in ("G", "R", "O"):
-            supp[f"A_lf(full) - {other}_lf(full)"][split] = diff_stats(favg["A"], favg[other], rng)
-        cavg = {arm: averaged(cells, cas[arm], split) for arm in e3sl.CAS_ARMS}
-        for other in ("G", "R"):
-            supp[f"A_cas - {other}_cas"][split] = diff_stats(cavg["A"], cavg[other], rng)
-        supp["A_lf(full) - A_cas"][split] = diff_stats(favg["A"], cavg["A"], rng)
+        for other in others:
+            supp[f"{p_}_lf(full) - {other}_lf(full)"][split] = diff_stats(
+                favg[p_], favg[other], rng
+            )
+        cavg = {arm: averaged(cells, cas[arm], split) for arm in cas_arms}
+        for other in [a for a in cas_arms if a != p_]:
+            supp[f"{p_}_cas - {other}_cas"][split] = diff_stats(cavg[p_], cavg[other], rng)
+        supp[f"{p_}_lf(full) - {p_}_cas"][split] = diff_stats(favg[p_], cavg[p_], rng)
     lines += [
         "",
         "## Supplementary paired differences (full-bank and released-cascade rows; same estimator)",
@@ -342,7 +378,7 @@ def main(argv: list[str] | None = None) -> int:
         "| bank | induction | ID | OOD |",
         "|---|---|---|---|",
     ]
-    for arm in e3sl.LF_ARMS:
+    for arm in lf_arms:
         same = all(
             matched.get("banks", {}).get(f"{n}_m", {}).get("full_row_is_matched_row")
             for n in full[arm]
@@ -360,7 +396,7 @@ def main(argv: list[str] | None = None) -> int:
         "| bank | induction | ID | OOD |",
         "|---|---|---|---|",
     ]
-    for arm in e3sl.CAS_ARMS:
+    for arm in cas_arms:
         if any(c in cells for c in cas[arm]):
             lines += bank_rows(cells, f"{arm}_cas", cas[arm])
         else:
@@ -403,15 +439,15 @@ def main(argv: list[str] | None = None) -> int:
     inc = incidents()
     lines += [
         "",
-        f"E3-SL total USD {total:.2f} (cap {e3sl.CAP_USD:.0f}).",
+        f"{label} total USD {total:.2f} (cap {e3sl.CAP_USD:.0f}).",
         "",
         "## Incidents (UTC timestamps in experiments/alfworld_e3/LOG.md)",
         "",
         f"- Guard incidents {inc['guard_incidents']}; ledgered retries 429 {inc['retries_429']}, other {inc['retries_other']}; errored episodes re-run {inc['errored_episodes']}.",  # noqa: E501
         "",
     ]
-    Path(args.out).write_text("\n".join(lines) + "\n", encoding="utf-8")
-    (RESULTS / "e3_sl_data.json").write_text(
+    out_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    (RESULTS / out_json).write_text(
         json.dumps(
             {
                 "verdict": {"evaluated": evaluated, "holds_on": holds_on},
