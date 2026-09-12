@@ -96,14 +96,30 @@ def diff_stats(
     y = np.array([b[k] for k in keys])
     d = x - y
     gen = np.random.default_rng(rng.randrange(2**32))
+    # episode-level bootstrap (superseded; kept in the artifacts)
     idx = gen.integers(0, n, size=(BOOT, n))
-    boots = np.sort(100 * d[idx].mean(axis=1))
-    diff = float(100 * d.mean())
+    boots_ep = np.sort(100 * d[idx].mean(axis=1))
+    # task-clustered bootstrap (the addendum's estimator): a task = one held-out game; its
+    # seed blocks (and both inductions, already averaged per episode) move together
+    tasks: dict[int, list[float]] = defaultdict(list)
+    for k, v in zip(keys, d, strict=True):
+        tasks[int(k[1]) - int(k[0])].append(float(v))
+    tm = np.array([sum(v) / len(v) for _, v in sorted(tasks.items())])
+    nt = len(tm)
+    idx_t = gen.integers(0, nt, size=(BOOT, nt))
+    boots = np.sort(100 * tm[idx_t].mean(axis=1))
+    diff = float(100 * tm.mean())
     lo, hi = float(boots[int(0.025 * BOOT)]), float(boots[int(0.975 * BOOT)])
     return {
         "n": n,
+        "n_tasks": nt,
         "diff": diff,
+        "diff_episode_mean": float(100 * d.mean()),
         "ci95": [lo, hi],
+        "ci95_episode_superseded": [
+            float(boots_ep[int(0.025 * BOOT)]),
+            float(boots_ep[int(0.975 * BOOT)]),
+        ],
         "excludes_zero": bool(lo > 0 or hi < 0),
         "indistinguishable": abs(diff) <= INDIST,
         "a_mean": float(100 * x.mean()),
@@ -116,6 +132,16 @@ def diff_cell(d: dict[str, Any]) -> str:
         return "-"
     tag = " ≈" if d["indistinguishable"] else (" *" if d["excludes_zero"] else "")
     return f"{d['diff']:+.1f} [{d['ci95'][0]:+.1f}, {d['ci95'][1]:+.1f}]{tag}"
+
+
+def induction_se(values: list[float]) -> float | None:
+    """Standard error of the mean over the induction replicates (n = 2: |i1 - i2| / 2)."""
+    k = len(values)
+    if k < 2:
+        return None
+    m = sum(values) / k
+    var = sum((v - m) ** 2 for v in values) / (k - 1)
+    return (var / k) ** 0.5
 
 
 def per_seed(cells: Cells, cond: str, split: str) -> str:
@@ -138,8 +164,16 @@ def bank_rows(cells: Cells, label: str, conds: list[str]) -> list[str]:
             parts.append(f"{fmt(p)} (n={n}) [{per_seed(cells, c, split)}]")
         rows.append(f"| {label} | i{i} | {parts[0]} | {parts[1]} |")
     if len(conds) > 1:
-        parts = [fmt(sum(means[s]) / len(means[s])) if means[s] else "-" for s in SPLITS]
-        rows.append(f"| **{label}** | mean | **{parts[0]}** | **{parts[1]}** |")
+        parts = []
+        for s in SPLITS:
+            if not means[s]:
+                parts.append("-")
+                continue
+            se = induction_se(means[s])
+            parts.append(
+                f"{fmt(sum(means[s]) / len(means[s]))} ± {fmt(se)}" if se is not None else "-"
+            )
+        rows.append(f"| **{label}** | mean ± SE(induction) | **{parts[0]}** | **{parts[1]}** |")
     return rows
 
 
@@ -255,7 +289,7 @@ def main(argv: list[str] | None = None) -> int:
         )
     lines += [
         "",
-        "Per-episode paired differences (points; induction-averaged per episode; 10k episode bootstrap; ≈ = gap within 3 points, * = CI excludes 0):",  # noqa: E501
+        "Paired per-task differences (points; induction-averaged per episode, then averaged over a task's seed blocks; 10k task-level bootstrap over the 140 ID / 134 OOD tasks, as pre-registered — the episode-level intervals of the first version of this report were superseded and are kept in e3_sl_data.json; ≈ = gap within 3 points, * = CI excludes 0):",  # noqa: E501
         "",
         "| difference | ID | OOD | n (ID / OOD) |",
         "|---|---|---|---|",
@@ -267,6 +301,8 @@ def main(argv: list[str] | None = None) -> int:
     lines += [
         "",
         f"## Item-matched table (k = {matched.get('k', '-')} items per bank; success %, n, per seed 0 / 1000 / 2000)",  # noqa: E501
+        "",
+        "The mean row carries the between-induction standard error of the mean over the two replicate inductions (|i1 - i2| / 2). The released single-success induction samples at temperature 0, so this spread is the extractor endpoint's own nondeterminism (and, for the matched rows, the 12-item subsample), not sampling variance.",  # noqa: E501
         "",
         "| bank | induction | ID | OOD |",
         "|---|---|---|---|",
@@ -307,17 +343,16 @@ def main(argv: list[str] | None = None) -> int:
         "|---|---|---|---|",
     ]
     for arm in e3sl.LF_ARMS:
-        rows = bank_rows(cells, f"{arm}_lf (full)", full[arm])
-        same = [
-            n
+        same = all(
+            matched.get("banks", {}).get(f"{n}_m", {}).get("full_row_is_matched_row")
             for n in full[arm]
-            if matched.get("banks", {}).get(f"{n}_m", {}).get("full_row_is_matched_row")
-        ]
-        lines += rows if any(c in cells for c in full[arm]) else []
-        if same:
-            lines.append(
-                f"| {arm}_lf (full) | {', '.join(same)} | = matched row (full bank of k items) | |"
+        )
+        if same:  # the full bank has exactly k items: its cells are the matched cells
+            lines += bank_rows(
+                cells, f"{arm}_lf (full = matched, {matched.get('k')} items)", lf[arm]
             )
+        elif any(c in cells for c in full[arm]):
+            lines += bank_rows(cells, f"{arm}_lf (full)", full[arm])
     lines += [
         "",
         "## Released-cascade rows (supplementary)",
