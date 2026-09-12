@@ -275,6 +275,30 @@ def main(argv: list[str] | None = None) -> int:
         lines += bank_rows(cells, f"{arm}_lf (matched)", lf[arm])
     for anc in ("N", "placebo"):
         lines += bank_rows(cells, anc, [anc])
+    # supplementary paired differences at native bank size and for the released cascades
+    supp: dict[str, dict[str, dict[str, Any]]] = defaultdict(dict)
+    for split in SPLITS:
+        favg = {
+            arm: averaged(cells, lf[arm] if arm == "R" else full[arm], split)
+            for arm in e3sl.LF_ARMS
+        }  # R's full bank is its matched bank
+        for other in ("G", "R", "O"):
+            supp[f"A_lf(full) - {other}_lf(full)"][split] = diff_stats(favg["A"], favg[other], rng)
+        cavg = {arm: averaged(cells, cas[arm], split) for arm in e3sl.CAS_ARMS}
+        for other in ("G", "R"):
+            supp[f"A_cas - {other}_cas"][split] = diff_stats(cavg["A"], cavg[other], rng)
+        supp["A_lf(full) - A_cas"][split] = diff_stats(favg["A"], cavg["A"], rng)
+    lines += [
+        "",
+        "## Supplementary paired differences (full-bank and released-cascade rows; same estimator)",
+        "",
+        "| difference | ID | OOD | n (ID / OOD) |",
+        "|---|---|---|---|",
+    ]
+    for name, by_split in supp.items():
+        lines.append(
+            f"| {name} | {diff_cell(by_split['in_distribution'])} | {diff_cell(by_split['out_of_distribution'])} | {by_split['in_distribution'].get('n', 0)} / {by_split['out_of_distribution'].get('n', 0)} |"  # noqa: E501
+        )
     lines += [
         "",
         "## Full-bank rows (supplementary)",
@@ -357,6 +381,7 @@ def main(argv: list[str] | None = None) -> int:
             {
                 "verdict": {"evaluated": evaluated, "holds_on": holds_on},
                 "diffs": diffs,
+                "supplementary_diffs": supp,
                 "matched": matched,
                 "banks": {k: v for k, v in meta.items() if k != "matched"},
                 "spend": sp,

@@ -1,0 +1,28 @@
+{
+  "rows": [
+    {
+      "condition": "placebo",
+      "split": "eval_in_distribution",
+      "n_won": 38,
+      "n": 140,
+      "sr": 0.2714285714285714,
+      "start_seed": 1000,
+      "round": 1
+    },
+    {
+      "condition": "placebo",
+      "split": "eval_out_of_distribution",
+      "n_won": 35,
+      "n": 134,
+      "sr": 0.26119402985074625,
+      "start_seed": 1000,
+      "round": 1
+    }
+  ],
+  "config_path": "/home/kree/work/EnvJudge/runs/e3sl-eval/placebo-seeds-1000/reasoning_bank_eval_e3sl.yaml",
+  "start_seeds": [
+    1000
+  ],
+  "concurrency": 11,
+  "n_api_keys": 1
+}

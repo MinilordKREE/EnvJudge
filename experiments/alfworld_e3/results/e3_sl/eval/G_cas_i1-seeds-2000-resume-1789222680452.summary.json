@@ -1,0 +1,19 @@
+{
+  "rows": [
+    {
+      "condition": "G_cas_i1",
+      "split": "eval_in_distribution",
+      "n_won": 42,
+      "n": 105,
+      "sr": 0.4,
+      "start_seed": 2035,
+      "round": 1
+    }
+  ],
+  "config_path": "/home/kree/work/EnvJudge/runs/e3sl-eval/G_cas_i1-seeds-2000-resume-1789222680452/reasoning_bank_eval_e3sl.yaml",
+  "start_seeds": [
+    2035
+  ],
+  "concurrency": 32,
+  "n_api_keys": 1
+}

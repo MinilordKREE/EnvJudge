@@ -1,0 +1,101 @@
+placebo start 2026-09-10T12:13:11Z
+placebo done 2026-09-10T12:13:21Z {"usd": 0.0, "cap": 180.0, "e3_stage": "shared", "ts": "2026
+probe ok 1/3 2026-09-10T12:13:31Z
+probe ok 2/3 2026-09-10T12:18:36Z
+probe ok 3/3 2026-09-10T12:23:41Z
+evals-anchors start 2026-09-10T12:23:41Z
+evals-anchors done 2026-09-11T00:56:35Z {"usd": 12.85, "cap": 180.0, "e3_stage": "R", "ts": "2026-09
+wait-shared start 2026-09-11T00:56:39Z
+wait-shared done 2026-09-11T00:56:42Z {"usd": 12.85, "cap": 180.0, "e3_stage": "R", "ts": "2026-09
+banks-O start 2026-09-11T00:56:45Z
+banks-O done 2026-09-11T00:57:59Z {"usd": 12.92, "cap": 180.0, "e3_stage": "R", "ts": "2026-09
+wait-confirm start 2026-09-11T00:58:02Z
+wait-confirm done 2026-09-11T05:44:05Z {"usd": 12.92, "cap": 180.0, "e3_stage": null, "ts": "2026-0
+banks-A start 2026-09-11T05:44:08Z
+banks-A done 2026-09-11T05:47:35Z {"usd": 13.41, "cap": 180.0, "e3_stage": null, "ts": "2026-0
+banks-G start 2026-09-11T05:47:38Z
+banks-G done 2026-09-11T05:51:29Z {"usd": 13.92, "cap": 180.0, "e3_stage": null, "ts": "2026-0
+banks-R start 2026-09-11T05:51:32Z
+banks-R done 2026-09-11T05:54:48Z {"usd": 14.31, "cap": 180.0, "e3_stage": null, "ts": "2026-0
+matched start 2026-09-11T05:54:51Z
+matched done 2026-09-11T05:54:54Z {"usd": 14.31, "cap": 180.0, "e3_stage": null, "ts": "2026-0
+probe ok 1/3 2026-09-11T05:55:02Z
+probe fail 2026-09-11T06:00:05Z
+probe ok 1/3 2026-09-11T06:05:09Z
+probe ok 2/3 2026-09-11T06:10:14Z
+probe ok 3/3 2026-09-11T06:15:19Z
+evals-matched start 2026-09-11T06:15:19Z
+placebo start 2026-09-11T16:04:47Z
+placebo done 2026-09-11T16:04:54Z {"usd": 36.28, "cap": 180.0, "e3_stage": null, "ts": "2026-0
+probe ok 1/3 2026-09-11T16:05:07Z
+probe ok 2/3 2026-09-11T16:10:14Z
+probe ok 3/3 2026-09-11T16:15:21Z
+evals-anchors start 2026-09-11T16:15:21Z
+evals-anchors done 2026-09-11T16:15:29Z {"usd": 36.28, "cap": 180.0, "e3_stage": null, "ts": "2026-0
+wait-shared start 2026-09-11T16:15:34Z
+wait-shared done 2026-09-11T16:15:39Z {"usd": 36.28, "cap": 180.0, "e3_stage": null, "ts": "2026-0
+banks-O start 2026-09-11T16:15:44Z
+banks-O done 2026-09-11T16:15:53Z {"usd": 36.28, "cap": 180.0, "e3_stage": null, "ts": "2026-0
+wait-confirm start 2026-09-11T16:15:58Z
+wait-confirm done 2026-09-11T16:16:03Z {"usd": 36.28, "cap": 180.0, "e3_stage": null, "ts": "2026-0
+banks-A start 2026-09-11T16:16:09Z
+banks-A done 2026-09-11T16:16:20Z {"usd": 36.28, "cap": 180.0, "e3_stage": null, "ts": "2026-0
+banks-G start 2026-09-11T16:16:26Z
+banks-G done 2026-09-11T16:16:38Z {"usd": 36.28, "cap": 180.0, "e3_stage": null, "ts": "2026-0
+banks-R start 2026-09-11T16:16:44Z
+banks-R done 2026-09-11T16:16:54Z {"usd": 36.28, "cap": 180.0, "e3_stage": null, "ts": "2026-0
+matched start 2026-09-11T16:17:00Z
+matched done 2026-09-11T16:17:05Z {"usd": 36.28, "cap": 180.0, "e3_stage": null, "ts": "2026-0
+probe ok 1/3 2026-09-11T16:17:18Z
+probe ok 2/3 2026-09-11T16:22:24Z
+probe ok 3/3 2026-09-11T16:27:31Z
+evals-matched start 2026-09-11T16:27:31Z
+evals-matched done 2026-09-11T23:24:55Z {"usd": 65.96, "cap": 180.0, "e3_stage": null, "ts": "2026-0
+probe ok 1/3 2026-09-11T23:25:13Z
+probe ok 2/3 2026-09-11T23:30:21Z
+probe ok 3/3 2026-09-11T23:35:29Z
+evals-full start 2026-09-11T23:35:29Z
+evals-full done 2026-09-12T08:19:28Z {"usd": 103.68, "cap": 180.0, "e3_stage": null, "ts": "2026-
+probe ok 1/3 2026-09-12T08:19:37Z
+probe ok 2/3 2026-09-12T08:24:42Z
+probe ok 3/3 2026-09-12T08:29:46Z
+evals-cascade start 2026-09-12T08:29:46Z
+placebo start 2026-09-12T13:34:58Z
+placebo done 2026-09-12T13:35:04Z {"usd": 122.63, "cap": 180.0, "e3_stage": null, "ts": "2026-
+probe ok 1/3 2026-09-12T13:35:15Z
+probe ok 2/3 2026-09-12T13:40:19Z
+probe ok 3/3 2026-09-12T13:45:23Z
+evals-anchors start 2026-09-12T13:45:23Z
+evals-anchors done 2026-09-12T13:45:31Z {"usd": 122.63, "cap": 180.0, "e3_stage": null, "ts": "2026-
+wait-shared start 2026-09-12T13:45:35Z
+wait-shared done 2026-09-12T13:45:38Z {"usd": 122.63, "cap": 180.0, "e3_stage": null, "ts": "2026-
+banks-O start 2026-09-12T13:45:42Z
+banks-O done 2026-09-12T13:45:50Z {"usd": 122.63, "cap": 180.0, "e3_stage": null, "ts": "2026-
+wait-confirm start 2026-09-12T13:45:54Z
+wait-confirm done 2026-09-12T13:45:57Z {"usd": 122.63, "cap": 180.0, "e3_stage": null, "ts": "2026-
+banks-A start 2026-09-12T13:46:01Z
+banks-A done 2026-09-12T13:46:11Z {"usd": 122.63, "cap": 180.0, "e3_stage": null, "ts": "2026-
+banks-G start 2026-09-12T13:46:16Z
+banks-G done 2026-09-12T13:46:25Z {"usd": 122.63, "cap": 180.0, "e3_stage": null, "ts": "2026-
+banks-R start 2026-09-12T13:46:30Z
+banks-R done 2026-09-12T13:46:39Z {"usd": 122.63, "cap": 180.0, "e3_stage": null, "ts": "2026-
+matched start 2026-09-12T13:46:44Z
+matched done 2026-09-12T13:46:46Z {"usd": 122.63, "cap": 180.0, "e3_stage": null, "ts": "2026-
+probe ok 1/3 2026-09-12T13:46:55Z
+probe ok 2/3 2026-09-12T13:51:58Z
+probe ok 3/3 2026-09-12T13:57:03Z
+evals-matched start 2026-09-12T13:57:03Z
+evals-matched done 2026-09-12T13:57:10Z {"usd": 122.63, "cap": 180.0, "e3_stage": null, "ts": "2026-
+probe ok 1/3 2026-09-12T13:57:18Z
+probe ok 2/3 2026-09-12T14:02:22Z
+probe ok 3/3 2026-09-12T14:07:27Z
+evals-full start 2026-09-12T14:07:27Z
+evals-full done 2026-09-12T14:07:35Z {"usd": 122.63, "cap": 180.0, "e3_stage": null, "ts": "2026-
+probe ok 1/3 2026-09-12T14:07:44Z
+probe ok 2/3 2026-09-12T14:12:49Z
+probe ok 3/3 2026-09-12T14:17:54Z
+evals-cascade start 2026-09-12T14:17:54Z
+evals-cascade done 2026-09-12T19:22:48Z {"usd": 144.0, "cap": 180.0, "e3_stage": null, "ts": "2026-0
+tables start 2026-09-12T19:22:55Z
+tables done 2026-09-12T19:23:05Z {"usd": 144.0, "cap": 180.0, "e3_stage": null, "ts": "2026-0
+E3SL_DONE

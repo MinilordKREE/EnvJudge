@@ -1,0 +1,19 @@
+{
+  "rows": [
+    {
+      "condition": "G_lf_i2_m",
+      "split": "eval_out_of_distribution",
+      "n_won": 48,
+      "n": 133,
+      "sr": 0.3609022556390977,
+      "start_seed": 1001,
+      "round": 1
+    }
+  ],
+  "config_path": "/home/kree/work/EnvJudge/runs/e3sl-eval/G_lf_i2_m-seeds-1000-resume-1789144556650/reasoning_bank_eval_e3sl.yaml",
+  "start_seeds": [
+    1001
+  ],
+  "concurrency": 32,
+  "n_api_keys": 1
+}

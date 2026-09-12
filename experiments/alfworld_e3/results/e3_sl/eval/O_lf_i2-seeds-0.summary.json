@@ -1,0 +1,28 @@
+{
+  "rows": [
+    {
+      "condition": "O_lf_i2",
+      "split": "eval_in_distribution",
+      "n_won": 76,
+      "n": 140,
+      "sr": 0.5428571428571428,
+      "start_seed": 0,
+      "round": 1
+    },
+    {
+      "condition": "O_lf_i2",
+      "split": "eval_out_of_distribution",
+      "n_won": 78,
+      "n": 134,
+      "sr": 0.582089552238806,
+      "start_seed": 0,
+      "round": 1
+    }
+  ],
+  "config_path": "/home/kree/work/EnvJudge/runs/e3sl-eval/O_lf_i2-seeds-0/reasoning_bank_eval_e3sl.yaml",
+  "start_seeds": [
+    0
+  ],
+  "concurrency": 32,
+  "n_api_keys": 1
+}
