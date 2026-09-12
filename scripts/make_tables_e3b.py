@@ -65,6 +65,49 @@ def arm_block(arm: str, sh: dict[str, dict[str, Any]], rng: random.Random) -> di
     }
 
 
+def a_events(run_dir: Path) -> list[dict[str, Any]]:
+    return e3.jsonl(run_dir / "events.jsonl")
+
+
+def probe_batches(events: list[dict[str, Any]]) -> dict[str, list[list[tuple[int, int]]]]:
+    """Per task, the probe rollouts grouped per candidate as [(n, successes), ...]: a batch of 4
+    that is 0/4 ends the candidate; any other first batch (mixed, or 4/4 under v0.3) is followed
+    by its top-up batch."""
+    per: dict[str, list[list[tuple[int, int]]]] = {}
+    pending: dict[str, list[tuple[int, int]]] = {}
+    for e in events:
+        if e.get("kind") != "rollouts" or e["payload"].get("phase") != "probe":
+            continue
+        t = str(e["payload"]["task_id"])
+        n, s = int(e["payload"]["n"]), int(e["payload"]["successes"])
+        cur = pending.setdefault(t, [])
+        cur.append((n, s))
+        if len(cur) == 2 or (len(cur) == 1 and s == 0):
+            per.setdefault(t, []).append(cur)
+            pending[t] = []
+    for t, cur in pending.items():
+        if cur:
+            per.setdefault(t, []).append(cur)
+    return per
+
+
+def stage_kinds(events: list[dict[str, Any]]) -> dict[str, dict[str, str]]:
+    """Per task, candidate id -> kind (v0.3 events carry ``kinds``)."""
+    out: dict[str, dict[str, str]] = {}
+    for e in events:
+        if e.get("kind") == "stage_candidates":
+            out[str(e["payload"]["task_id"])] = dict(e["payload"].get("kinds") or {})
+    return out
+
+
+def brackets(events: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
+    out: dict[str, list[dict[str, Any]]] = {}
+    for e in events:
+        if e.get("kind") == "bracket":
+            out.setdefault(str(e["payload"]["task_id"]), []).append(e["payload"])
+    return out
+
+
 def rate_row(label: str, r: dict[str, Any]) -> str:
     return (
         f"| {label} | {r['envs']} | {r['learnable']} | {r['rollouts']} | {fmt(r['per_1000'])} "
@@ -314,6 +357,143 @@ def main(argv: list[str] | None = None) -> int:
         lines.append(
             f"| {env_id[:40]} | {e['task']} | {e.get('kind')} {e.get('t') if e.get('t') is not None else ''} | {e.get('successes')}/{e.get('n')} | {fmt(e.get('p16'), 3)} | {'y' if e.get('learnable') else '-'} | {e.get('reused') or 'new'} |"  # noqa: E501
         )
+    # ---------------------------------------------------------------- v0.2 -> v0.3 per task
+    ev3 = a_events(RUNS / "e3b-A")
+    ev2 = a_events(RUNS / "e3-A")
+    br3, br2 = brackets(ev3), brackets(ev2)
+    pb3 = probe_batches(ev3)
+    kinds3 = stage_kinds(ev3)
+    acc3 = {t: [c for c in corpus3.get(t, []) if c["kind"] != "kept"] for t in TASKS}
+    lines += [
+        "",
+        "## Per-task diff v0.2 → v0.3 (outcome and reason; saturated tasks: family, seeded bracket, doses visited, accepted dose)",  # noqa: E501
+        "",
+        "| task | class | v0.2 outcome:reason | v0.3 outcome:reason | changed | v0.3 family | v0.3 seed [lo_pop, hi_pop] | v0.3 doses (d: s/n) | v0.3 accepted d | v0.2 family / doses |",  # noqa: E501
+        "|---|---|---|---|---|---|---|---|---|---|",
+    ]
+    changed_tasks: list[str] = []
+    for t in TASKS:
+        v, w = prof3[t], prof2[t]
+        o3 = f"{v['outcome']}{':' + v['reason'] if v['reason'] else ''}"
+        o2 = f"{w['outcome']}{':' + w['reason'] if w['reason'] else ''}"
+        changed = o3 != o2
+        if changed:
+            changed_tasks.append(t)
+        b3 = br3.get(t, [])
+        fam3 = ", ".join(b["family"] for b in b3) or "-"
+        seed3 = "; ".join(str(b.get("seed")) for b in b3) or "-"
+        doses3 = (
+            "; ".join(
+                "/".join(f"{h['d']}:{h['s']}/{h['n']}" for h in (b.get("history") or []))
+                for b in b3
+            )
+            or "-"
+        )
+        acc_d = ", ".join(fmt(c.get("d"), 4) for c in acc3[t] if c.get("d") is not None) or "-"
+        b2 = br2.get(t, [])
+        v2 = (
+            "; ".join(
+                f"{b['family']}: "
+                + "/".join(f"{h['d']}:{h['s']}/{h['n']}" for h in (b.get("history") or []))
+                for b in b2
+            )
+            or "-"
+        )
+        lines.append(
+            f"| {t} | {sh[t]['cls']} | {o2} | {o3} | {'yes' if changed else '-'} | {fam3} | {seed3} | {doses3} | {acc_d} | {v2} |"  # noqa: E501
+        )
+    # ---------------------------------------------------------------- attribution from events
+    seeded = {
+        t: [b for b in br3.get(t, []) if list(b.get("seed") or [0, 1]) != [0.0, 1.0]] for t in TASKS
+    }
+    seeded_accept = [
+        t
+        for t in TASKS
+        if prof3[t]["outcome"] == "accepted"
+        and any(b.get("status") == "accepted" for b in seeded[t])
+    ]
+    topped = {t: [c for c in pb3.get(t, []) if c and c[0] == (4, 4) and len(c) == 2] for t in TASKS}
+    topped_tasks = [t for t in TASKS if topped[t]]
+    topped_verdicts: Counter[str] = Counter()
+    for t in topped_tasks:
+        for c in topped[t]:
+            s8 = c[0][1] + c[1][1]
+            topped_verdicts[
+                "in_band" if 3 <= s8 <= 5 else ("too_easy" if s8 > 5 else "too_hard")
+            ] += 1
+    topped_accept = [
+        t
+        for t in TASKS
+        if prof3[t]["outcome"] == "accepted"
+        and prof3[t]["regime"] == "zero"
+        and any(3 <= c[0][1] + c[1][1] <= 5 for c in topped[t])
+    ]
+    quarter_probed = [t for t in TASKS if any(k == "quarter" for k in kinds3.get(t, {}).values())]
+    quarter_accept = [
+        t
+        for t in TASKS
+        for c in acc3[t]
+        if c["kind"] == "stage" and kinds3.get(t, {}).get(str(c.get("candidate_id"))) == "quarter"
+    ]
+    v2_out = {t: prof2[t]["outcome"] for t in TASKS}
+    by_cause: dict[str, list[str]] = {
+        "(1) population-seeded bracket": [t for t in seeded_accept if v2_out[t] != "accepted"],
+        "(2) stage-side 4/4 top-up": [t for t in topped_accept if v2_out[t] != "accepted"],
+        "(3) quarter-point candidates": [t for t in quarter_accept if v2_out[t] != "accepted"],
+    }
+    explained = {t for ts in by_cause.values() for t in ts}
+    lost = [
+        t
+        for t in TASKS
+        if v2_out[t] in ("accepted", "kept") and prof3[t]["outcome"] not in ("accepted", "kept")
+    ]
+    unexplained = [t for t in changed_tasks if t not in explained and t not in lost]
+    c1_, c2_, c3_ = (
+        by_cause["(1) population-seeded bracket"],
+        by_cause["(2) stage-side 4/4 top-up"],
+        by_cause["(3) quarter-point candidates"],
+    )
+    lines += [
+        "",
+        "## Attribution of the three rule changes (counted from runs/e3b-A/events.jsonl)",
+        "",
+        f"- (1) Population-seeded bracket: {len([t for t in TASKS if seeded[t]])} tasks bracketed from a seed other than [0, 1] ({', '.join(t for t in TASKS if seeded[t]) or '-'}); {len(seeded_accept)} accepted through a seeded bracket ({', '.join(seeded_accept) or '-'}); outcome changed from v0.2 because of it on {len(c1_)} ({', '.join(c1_) or '-'}).",  # noqa: E501
+        f"- (2) Stage-side 4/4 top-up: {sum(len(v) for v in topped.values())} staged candidates had a 4/4 first batch and were topped up, on {len(topped_tasks)} tasks ({', '.join(topped_tasks) or '-'}); verdicts after the top-up: "  # noqa: E501
+        + (", ".join(f"{k} {n}" for k, n in sorted(topped_verdicts.items())) or "-")
+        + f"; accepted through a topped-up 4/4 candidate: {len(topped_accept)} ({', '.join(topped_accept) or '-'}); outcome changed from v0.2 because of it on {len(c2_)} ({', '.join(c2_) or '-'}).",  # noqa: E501
+        f"- (3) Quarter-point candidates: a quarter state was certified on {len(quarter_probed)} tasks ({', '.join(quarter_probed) or '-'}); accepted at a quarter state: {len(quarter_accept)} ({', '.join(quarter_accept) or '-'}); outcome changed from v0.2 because of it on {len(c3_)} ({', '.join(c3_) or '-'}).",  # noqa: E501
+        f"- Tasks whose outcome:reason differs from v0.2: {len(changed_tasks)} ({', '.join(changed_tasks) or '-'}); explained by a rule change above: {len(explained)}; lost relative to v0.2 (accepted or kept in v0.2, not in v0.3): {len(lost)} ({', '.join(lost) or '-'}); other (estimate regime, proposer families, sampling): {len(unexplained)} ({', '.join(unexplained) or '-'}).",  # noqa: E501
+        "",
+        "## Charged search rollouts per task (the per-1,000 denominators)",
+        "",
+        "| task | A_v0.3 | A_v0.2 | G | R |",
+        "|---|---|---|---|---|",
+    ]
+    for t in TASKS:
+        lines.append(
+            f"| {t} | {blocks['A_v0.3']['rolls'].get(t, 0)} | {blocks['A_v0.2']['rolls'].get(t, 0)} | {blocks['G']['rolls'].get(t, 0)} | {blocks['R']['rolls'].get(t, 0)} |"  # noqa: E501
+        )
+    lines.append(
+        "| **total** | "
+        + " | ".join(f"**{sum(blocks[k]['rolls'].values())}**" for k in order)
+        + " |"
+    )
+    lines += [
+        "",
+        "## Learner-facing set of A_v0.3 (the deferred SL stage's input)",
+        "",
+        "| task | kind | family | source | dose | t | p8 | p16 | learnable |",
+        "|---|---|---|---|---|---|---|---|---|",
+    ]
+    for t in TASKS:
+        for c in corpus3.get(t, []):
+            ce = conf3.get(f"{t}:{c['key']}", {})
+            src = {"library": "exemplar", "llm": "proposer"}.get(
+                str(c.get("source")), c.get("source")
+            )
+            lines.append(
+                f"| {t} | {c['kind']} | {c.get('family') or '-'} | {src or '-'} | {fmt(c.get('d'), 4) if c.get('d') is not None else '-'} | {c.get('t') if c.get('t') is not None else '-'} | {fmt(c.get('p_hat'), 3)} | {fmt(ce.get('p16'), 3)} | {'y' if ce.get('learnable') else '-'} |"  # noqa: E501
+            )
     total_usd = sum(sum(v.values()) for v in sp.values())
     lines += [
         "",
@@ -346,6 +526,15 @@ def main(argv: list[str] | None = None) -> int:
                     for k, v in blocks.items()
                 },
                 "claims": {"E3b-1": e3b1, "E3b-3": e3b3},
+                "attribution": {
+                    "by_cause": by_cause,
+                    "changed_tasks": changed_tasks,
+                    "lost": lost,
+                    "unexplained": unexplained,
+                    "seeded_brackets": {t: v for t, v in seeded.items() if v},
+                    "topped_up": {t: v for t, v in topped.items() if v},
+                    "quarter_probed": quarter_probed,
+                },
                 "h100_attribution": attr3,
                 "a_v03_profile": {
                     t: {k: v for k, v in p.items() if k != "rollouts"}
