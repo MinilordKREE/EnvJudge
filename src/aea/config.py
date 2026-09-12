@@ -1,4 +1,4 @@
-"""The method's constants (docs/spec/AEA_v0.2.md, "Six method constants") and the implementation
+"""The method's constants (docs/spec/AEA_v0.3.md, "Six method constants") and the implementation
 block.
 
 ``AEAConfig`` carries exactly the six constants of the box — B_T, B_L, K, the accept range, the
@@ -21,7 +21,7 @@ from aea.core.config import StrictModel, config_sha256
 from aea.core.io import read_text
 from aea.errors import ConfigError
 
-AEA_CONFIG_SCHEMA_VERSION = 2
+AEA_CONFIG_SCHEMA_VERSION = 3
 
 
 class ImplConfig(StrictModel):
@@ -38,10 +38,6 @@ class ImplConfig(StrictModel):
     verdicts consistent, and a non-monotone family ends as ``exhausted``). 0.375 = more than three
     of eight, above the sampling noise of one 4-rollout batch (6/8 vs 8/8, 0/4 vs 2/8 do not
     count)."""
-    prior_min_tasks: int = Field(default=5, ge=1)
-    prior_min_rate: float = Field(default=0.9, ge=0.0, le=1.0)
-    """A family with leverage rate >= prior_min_rate over >= prior_min_tasks starts its bracket at
-    its last accepted dose instead of the midpoint."""
     proposer_cap: int = Field(default=2, ge=0)
     n_failed_rollouts: int = Field(default=3, ge=1)
     max_candidates: int = Field(default=6, ge=1)
@@ -52,7 +48,7 @@ class ImplConfig(StrictModel):
 
 
 class AEAConfig(StrictModel):
-    schema_version: Literal[2] = 2
+    schema_version: Literal[3] = 3
     band_t: tuple[float, float] = (0.4, 0.6)
     """Target band B_T: the accept range is B_T expressed at ``probe[1]`` rollouts."""
     band_l: tuple[float, float] = (0.2, 0.8)

@@ -7,8 +7,9 @@ new families per task under the dose contract, validated before any rollout (loa
 released ``code_loader``, references DOSE, passes an LLM-free smoke at d = 1). The proposer never
 decides acceptance. ``LeverageTable`` keeps one counter per family — the rate, over the tasks where
 it was evaluated at d = 1, of not returning ``no_effect`` — orders families by it (proposer order
-until a family has been seen) and yields the bracket start dose of a family with rate >=
-``impl.prior_min_rate`` over >= ``impl.prior_min_tasks`` tasks (its last accepted dose).
+until a family has been seen) and keeps the population bracket seed ``[lo_pop, hi_pop]`` per
+family (the highest dose seen ``too_easy`` below 1 and the lowest seen ``too_hard`` on any task;
+docs/spec/AEA_v0.3.md).
 
 References: ``harness_agent.py:124-198`` (the released ``propose_candidate`` tool schema; ours
 mirrors its field names), ``rules.py:93-104`` (hook signatures), ``code_loader.py:68-107``.
@@ -334,7 +335,10 @@ def propose_families(
 class FamilyStats:
     tested: int = 0
     with_leverage: int = 0
-    last_accepted_dose: float | None = None
+    lo_pop: float = 0.0
+    """Highest dose (< 1) observed ``too_easy`` on any task."""
+    hi_pop: float = 1.0
+    """Lowest dose observed ``too_hard`` on any task."""
 
     @property
     def rate(self) -> float | None:
@@ -342,11 +346,11 @@ class FamilyStats:
 
 
 class LeverageTable:
-    """One counter per family, shared across the tasks of a run (thread-safe)."""
+    """One record per family, shared across the tasks of a run (thread-safe): the leverage rate
+    (family ordering) and the population bracket seed ``[lo_pop, hi_pop]``
+    (docs/spec/AEA_v0.3.md, "Families and leverage")."""
 
-    def __init__(self, *, min_tasks: int = 5, min_rate: float = 0.9) -> None:
-        self.min_tasks = min_tasks
-        self.min_rate = min_rate
+    def __init__(self) -> None:
         self._stats: dict[str, FamilyStats] = {}
         self._lock = threading.Lock()
 
@@ -360,10 +364,15 @@ class LeverageTable:
             s.tested += 1
             s.with_leverage += int(has_leverage)
 
-    def record_accepted(self, family: str, dose: float) -> None:
+    def record_dose(self, family: str, dose: float, verdict: str) -> None:
+        """A bracket observation on any task: ``too_easy`` below d = 1 raises ``lo_pop``,
+        ``too_hard`` lowers ``hi_pop``; ``in_band`` leaves the seed alone."""
         s = self.stats(family)
         with self._lock:
-            s.last_accepted_dose = dose
+            if verdict == "too_easy" and dose < 1.0:
+                s.lo_pop = max(s.lo_pop, dose)
+            elif verdict == "too_hard":
+                s.hi_pop = min(s.hi_pop, dose)
 
     def order(self, families: Sequence[Family]) -> list[Family]:
         """By leverage rate, descending; unseen families keep their given (proposer) order."""
@@ -376,15 +385,14 @@ class LeverageTable:
 
         return [f for _, f in sorted(enumerate(families), key=key)]
 
-    def start_dose(self, family: str) -> float | None:
-        """The family's last accepted dose when its leverage rate qualifies, else None
-        (midpoint)."""
+    def bracket_seed(self, family: str) -> tuple[float, float]:
+        """``[lo_pop, hi_pop]`` for a new task's bracket; ``[0, 1]`` when the family has no
+        population data or its observations are inconsistent (``lo_pop >= hi_pop``)."""
         s = self.stats(family)
         with self._lock:
-            rate = s.rate
-            if s.tested >= self.min_tasks and rate is not None and rate >= self.min_rate:
-                return s.last_accepted_dose
-            return None
+            if s.lo_pop < s.hi_pop:
+                return (s.lo_pop, s.hi_pop)
+            return (0.0, 1.0)
 
     def snapshot(self) -> dict[str, dict[str, object]]:
         with self._lock:
@@ -393,7 +401,8 @@ class LeverageTable:
                     "tested": v.tested,
                     "with_leverage": v.with_leverage,
                     "rate": v.rate,
-                    "last_accepted_dose": v.last_accepted_dose,
+                    "lo_pop": v.lo_pop,
+                    "hi_pop": v.hi_pop,
                 }
                 for k, v in self._stats.items()
             }

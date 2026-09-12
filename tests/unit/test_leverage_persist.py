@@ -9,13 +9,13 @@ from typing import Any
 
 import pytest
 
-from aea.config import AEAConfig, ImplConfig
+from aea.config import AEAConfig
 from aea.controller import Controller, TaskRef
 from aea.core.trace import read_trace
 from tests.fixtures.fake_substrate import FakeSubstrate
 
 POLICIES = {"7": "footer", "2": "expert", "8": "footer", "1": "coin"}  # 1: kept or accepted
-CONFIG = AEAConfig(impl=ImplConfig(prior_min_tasks=1))
+CONFIG = AEAConfig()
 TASKS = [TaskRef(t, int(t)) for t in POLICIES]
 
 
@@ -76,11 +76,27 @@ def test_interrupted_attempts_do_not_count(tmp_path: Path) -> None:
     ev.write("task_done", {"task_id": "7", "outcome": "infra_error"})
     ev.write("task_start", {"task_id": "7"})
     ev.write("leverage", {"task_id": "7", "family": "footer_mask", "has_leverage": False})
-    ev.write("leverage", {"task_id": "7", "family": "footer_mask", "accepted_dose": 0.5})
+    ev.write(
+        "leverage", {"task_id": "7", "family": "footer_mask", "dose": 1.0, "verdict": "too_hard"}
+    )
+    ev.write(
+        "leverage", {"task_id": "7", "family": "footer_mask", "dose": 0.875, "verdict": "too_easy"}
+    )
+    ev.write("leverage", {"task_id": "7", "family": "footer_mask", "accepted_dose": 0.5})  # v0.2
     ev.write("task_done", {"task_id": "7", "outcome": "accepted"})
     ev.write("task_start", {"task_id": "8"})
     ev.write("leverage", {"task_id": "8", "family": "footer_mask", "has_leverage": True})
+    ev.write(
+        "leverage", {"task_id": "8", "family": "footer_mask", "dose": 0.5, "verdict": "too_hard"}
+    )
     ev.close()
     ctrl, _ = _controller(tmp_path, "run")
     snap = ctrl.leverage.snapshot()["footer_mask"]
-    assert snap == {"tested": 1, "with_leverage": 0, "rate": 0.0, "last_accepted_dose": 0.5}
+    assert snap == {
+        "tested": 1,
+        "with_leverage": 0,
+        "rate": 0.0,
+        "lo_pop": 0.875,
+        "hi_pop": 1.0,
+    }  # task 8's attempt (not done) and the v0.2 accepted_dose event do not count
+    assert ctrl.leverage.bracket_seed("footer_mask") == (0.875, 1.0)

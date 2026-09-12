@@ -1,10 +1,11 @@
-"""The one acceptance rule (docs/spec/AEA_v0.2.md, "One acceptance rule").
+"""The one acceptance rule (docs/spec/AEA_v0.3.md, "One acceptance rule").
 
-``evaluate``: ``probe[0]`` policy rollouts; 0 of them -> ``too_hard``; all of them -> ``too_easy``;
-otherwise top up to ``probe[1]`` and read the count: ``in_band`` iff it lies in ``accept``
-(3-5 of 8), below -> ``too_hard``, above -> ``too_easy``. Both operators (harden, stage) use it;
-the harden loop reads ``too_easy`` at d = 1 as ``no_effect``. The caller's ``run`` charges the cap
-and raises ``BudgetExhausted`` when the next batch would exceed it.
+``evaluate``: ``probe[0]`` policy rollouts; 0 of them -> ``too_hard``; all of them -> ``too_easy``
+on the harden side (a cheaper next dose exists there) but, on a staged state
+(``top_up_full=True``), topped up like a mixed batch; otherwise top up to ``probe[1]`` and read
+the count: ``in_band`` iff it lies in ``accept`` (3-5 of 8), below -> ``too_hard``, above ->
+``too_easy``. The harden loop reads ``too_easy`` at d = 1 as ``no_effect``. The caller's ``run``
+charges the cap and raises ``BudgetExhausted`` when the next batch would exceed it.
 """
 
 from __future__ import annotations
@@ -49,11 +50,13 @@ def verdict(successes: int, n: int, config: AEAConfig) -> Verdict:
     return "too_hard" if successes < lo else "too_easy"
 
 
-def evaluate(run: RunFn, config: AEAConfig) -> Eval:
+def evaluate(run: RunFn, config: AEAConfig, *, top_up_full: bool = False) -> Eval:
+    """``top_up_full``: a first batch of all successes is topped up too (the stage operator;
+    P(p > 0.8 | 4/4) is only about 0.67, and no cheaper candidate follows on that side)."""
     first, full = config.probe
     traces = list(run(first))
     s = sum(int(bool(t.success)) for t in traces)
-    if s in (0, len(traces)):
+    if s == 0 or (s == len(traces) and not top_up_full):
         return Eval(s, len(traces), verdict(s, len(traces), config), traces)
     traces += list(run(full - first))
     s = sum(int(bool(t.success)) for t in traces)

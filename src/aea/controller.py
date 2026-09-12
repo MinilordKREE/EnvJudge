@@ -1,4 +1,4 @@
-"""The box (docs/spec/AEA_v0.2.md): estimate -> keep | harden | stage; three outcomes.
+"""The box (docs/spec/AEA_v0.3.md): estimate -> keep | harden | stage; three outcomes.
 
 Every policy rollout is charged to the one budget (``aea.budget``) before it runs; the cap is a
 hard stop and ends the task with ``dropped: budget``. Proposer calls, replays and oracle sessions
@@ -21,11 +21,12 @@ written in the run's task order, so the pooled run's files equal the sequential 
 byte. The pool size is recorded in ``events.jsonl`` (``run_start``) and by the driver in the
 manifest.
 
-The leverage prior is persistent: every ``record_leverage`` / ``record_accepted`` is written as a
-``leverage`` event, and a new controller on an existing run directory rebuilds the table from the
-events of the tasks that completed (a task's events count once its ``task_done`` is not
-``infra_error``; an interrupted attempt's events are discarded with the attempt), so a resumed run
-and a later extension of the task set continue the same prior the uninterrupted run would have.
+The leverage table (leverage rates and the population bracket seeds) is persistent: every
+``record_leverage`` / ``record_dose`` is written as a ``leverage`` event, and a new controller on
+an existing run directory rebuilds the table from the events of the tasks that completed (a task's
+events count once its ``task_done`` is not ``infra_error``; an interrupted attempt's events are
+discarded with the attempt), so a resumed run and a later extension of the task set continue the
+same table the uninterrupted run would have.
 """
 
 from __future__ import annotations
@@ -129,9 +130,7 @@ class Controller:
         self.run_id = run_id
         self.arm = arm
         self.use_proposer = use_proposer
-        self.leverage = leverage or LeverageTable(
-            min_tasks=config.impl.prior_min_tasks, min_rate=config.impl.prior_min_rate
-        )
+        self.leverage = leverage or LeverageTable()
         run_dir.mkdir(parents=True, exist_ok=True)
         self.budget = Budget(config.cap)
         self.events = EventWriter(run_dir / "events.jsonl", run_id)
@@ -200,9 +199,9 @@ class Controller:
         self.leverage.record_leverage(family, has_leverage)
         self._ev("leverage", task, family=family, tested=True, has_leverage=has_leverage)
 
-    def _record_accepted(self, task: TaskRef, family: str, dose: float) -> None:
-        self.leverage.record_accepted(family, dose)
-        self._ev("leverage", task, family=family, accepted_dose=dose)
+    def _record_dose(self, task: TaskRef, family: str, dose: float, verdict: str) -> None:
+        self.leverage.record_dose(family, dose, verdict)
+        self._ev("leverage", task, family=family, dose=dose, verdict=verdict)
 
     def _restore_leverage(self) -> None:
         """Replay the ``leverage`` events of every completed task, in order, into the table."""
@@ -221,8 +220,10 @@ class Controller:
                 committed.extend(pending.pop(t, []))
         for p in committed:
             family = str(p["family"])
-            if "accepted_dose" in p:
-                self.leverage.record_accepted(family, float(p["accepted_dose"]))
+            if "dose" in p:
+                self.leverage.record_dose(family, float(p["dose"]), str(p.get("verdict")))
+            elif "accepted_dose" in p:
+                continue  # v0.2 event (last accepted dose); no longer part of the table
             else:
                 self.leverage.record_leverage(family, bool(p.get("has_leverage")))
         if committed:
@@ -460,24 +461,25 @@ class Controller:
         has_leverage = lev.verdict != "too_easy"
         self._record_leverage(task, fam.name, has_leverage)
         if lev.verdict == "in_band":
-            self._record_accepted(task, fam.name, 1.0)
             return self._accept_knob(task, fam, cache[1.0], 1.0, lev, est, [DoseEval(1.0, lev)])
         if not has_leverage:
             self._ev("no_leverage", task, family=fam.name, successes=lev.successes, n=lev.n)
             return None
-        start = self.leverage.start_dose(fam.name)
+        lo, hi = self.leverage.bracket_seed(fam.name)
         try:
             result: BracketResult = bracket(
-                evaluate_at, self.config, leverage=DoseEval(1.0, lev), start=start
+                evaluate_at, self.config, leverage=DoseEval(1.0, lev), lo=lo, hi=hi
             )
         except _InfeasibleError as why:
             self._ev("family_skipped", task, family=fam.name, reason=str(why))
             return None
+        for h in result.history:  # the population seed learns from every dose, on every task
+            self._record_dose(task, fam.name, h.d, h.eval.verdict)
         self._ev(
             "bracket",
             task,
             family=fam.name,
-            start=start,
+            seed=[lo, hi],
             status=result.status,
             history=[
                 {"d": h.d, "s": h.eval.successes, "n": h.eval.n, "verdict": h.eval.verdict}
@@ -486,7 +488,6 @@ class Controller:
         )
         if result.status == "accepted" and result.accepted is not None:
             ev = result.accepted
-            self._record_accepted(task, fam.name, ev.d)
             return self._accept_knob(task, fam, cache[ev.d], ev.d, ev.eval, est, result.history)
         if result.status == "budget":
             raise BudgetExhausted(
@@ -577,7 +578,7 @@ class Controller:
                 def run(n: int, c: StagedCandidate = c) -> list[Trace]:
                     return self._rollouts(task, c.candidate, n, "probe", reset_options=opts)
 
-                ev = evaluate(run, self.config)
+                ev = evaluate(run, self.config, top_up_full=True)  # a 4/4 staged state tops up
                 profile.append(
                     {
                         "id": c.id,

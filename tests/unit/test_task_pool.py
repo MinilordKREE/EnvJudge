@@ -13,7 +13,7 @@ from typing import Any
 from envharness.core.types import Candidate, Trace
 from envharness.orchestration.runner import PolicySpec, SubprocessRunner
 
-from aea.config import AEAConfig, ImplConfig
+from aea.config import AEAConfig
 from aea.controller import Controller, TaskRef
 from aea.core.trace import read_trace
 from aea.io import canonicalize_corpus, read_corpus
@@ -25,7 +25,7 @@ from tests.fixtures.fake_substrate import FakeSubstrate
 # saturated (no leverage), zero (stage), saturated (bracket), zero, coin, saturated (bracket,
 # with the prior from task 7 once its rate qualifies)
 POLICIES = {"2": "expert", "9": "random", "7": "footer", "11": "random", "1": "coin", "8": "footer"}
-CONFIG = AEAConfig(impl=ImplConfig(prior_min_tasks=1))
+CONFIG = AEAConfig()
 
 
 def _run(

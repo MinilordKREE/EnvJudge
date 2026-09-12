@@ -67,22 +67,25 @@ def test_validate_and_parse_proposals() -> None:
     assert isinstance(families[0], ProposedFamily) and families[0].source == "llm"
 
 
-def test_leverage_table_orders_and_starts_the_bracket() -> None:
-    lt = LeverageTable(min_tasks=5, min_rate=0.9)
+def test_leverage_table_orders_and_seeds_the_bracket() -> None:
+    lt = LeverageTable()
     fams: list[Any] = [FooterMask(), HorizonSqueeze()]
     assert [f.name for f in lt.order(fams)] == ["footer_mask", "horizon_squeeze"]  # cold start
     for _ in range(5):
         lt.record_leverage("footer_mask", False)  # no effect on 5 tasks
         lt.record_leverage("horizon_squeeze", True)
     assert [f.name for f in lt.order(fams)] == ["horizon_squeeze", "footer_mask"]
-    assert lt.start_dose("horizon_squeeze") is None  # qualifies but never accepted
-    lt.record_accepted("horizon_squeeze", 0.625)
-    assert lt.start_dose("horizon_squeeze") == 0.625
-    assert lt.start_dose("footer_mask") is None  # rate 0
-    lt2 = LeverageTable(min_tasks=5, min_rate=0.9)
-    for _ in range(4):
-        lt2.record_leverage("x", True)
-    lt2.record_accepted("x", 0.5)
-    assert lt2.start_dose("x") is None  # fewer than 5 tasks
+    assert lt.bracket_seed("horizon_squeeze") == (0.0, 1.0)  # no population data
+    # the E3 footer-mask walk on one task: 1.0 too_hard, 0.5 / 0.75 / 0.875 too_easy
+    for d, v in ((1.0, "too_hard"), (0.5, "too_easy"), (0.75, "too_easy"), (0.875, "too_easy")):
+        lt.record_dose("footer_mask", d, v)
+    assert lt.bracket_seed("footer_mask") == (0.875, 1.0)
+    lt.record_dose("footer_mask", 0.9375, "in_band")  # in band leaves the seed alone
+    assert lt.bracket_seed("footer_mask") == (0.875, 1.0)
+    lt.record_dose("footer_mask", 1.0, "too_easy")  # a no-effect d = 1 test is not a lo_pop
+    assert lt.bracket_seed("footer_mask") == (0.875, 1.0)
+    lt.record_dose("footer_mask", 0.8, "too_hard")  # inconsistent population: back to [0, 1]
+    assert lt.bracket_seed("footer_mask") == (0.0, 1.0)
     snap = lt.snapshot()
     assert snap["horizon_squeeze"]["rate"] == 1.0 and snap["footer_mask"]["rate"] == 0.0
+    assert snap["footer_mask"]["lo_pop"] == 0.875 and snap["footer_mask"]["hi_pop"] == 0.8

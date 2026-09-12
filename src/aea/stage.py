@@ -1,9 +1,11 @@
-"""The stage operator's candidates (docs/spec/AEA_v0.2.md, "Candidate states"): for each of
-``impl.n_failed_rollouts`` seeded failed rollouts of the estimate, the end state and the midpoint
-state; each prefix is compiled (ineffective actions dropped, ``look`` appended), replayed under the
-100-step config (``reset_options.config_path``, ``bridge.py:149``) so the prefix does not consume
-the policy's horizon, deduplicated by the hash of the compiled prefix, capped at
-``impl.max_candidates``, walked latest-first. Each candidate is guarded by ``solvable()`` with the
+"""The stage operator's candidates (docs/spec/AEA_v0.3.md, "Candidate states"): for each of
+``impl.n_failed_rollouts`` seeded failed rollouts of the estimate, the end state, the midpoint
+state and the quarter state (t = T/4); each prefix is compiled (ineffective actions dropped,
+``look`` appended), replayed under the 100-step config (``reset_options.config_path``,
+``bridge.py:149``) so the prefix does not consume the policy's horizon, deduplicated by the hash
+of the compiled prefix, then capped at ``impl.max_candidates`` by priority end > mid > quarter
+(a quarter state enters when ends or midpoints collapse to one state, as they do when the policy
+loops to the step cap), walked latest-first. Each candidate is guarded by ``solvable()`` with the
 oracle as the only source (a reset-origin success cannot witness a mid-trajectory state); without
 an oracle the probe self-certifies. One fidelity check per task: the observation after replay
 equals the archived observation at the cut.
@@ -81,26 +83,40 @@ def seeded_failures(traces: Sequence[Trace], n: int, seed: int) -> list[Trace]:
     return rnd.sample(fails, min(n, len(fails)))
 
 
-def candidate_states(lengths: dict[str, int], cap: int) -> list[tuple[str, int, str]]:
-    """(episode, t, kind) for the end (``end``) and midpoint (``mid``) of each rollout, latest
-    first, capped by dropping the candidate nearest in t to another kept one."""
+KIND_RANK = {"end": 0, "mid": 1, "quarter": 2}
+"""Priority when capping: end > mid > quarter."""
+
+
+def candidate_states(lengths: dict[str, int], cap: int | None = None) -> list[tuple[str, int, str]]:
+    """(episode, t, kind) for the end, midpoint and quarter state of each rollout, latest first;
+    with ``cap``, reduced by :func:`cap_by_priority`."""
     cands: dict[tuple[str, int], str] = {}
     for eid, total in lengths.items():
         if total <= 0:
             continue
         cands.setdefault((eid, total), "end")
         cands.setdefault((eid, max(1, total // 2)), "mid")
-    items = sorted(cands.items(), key=lambda kv: (-kv[0][1], kv[0][0]))
-    while len(items) > cap:
-        head = items[0]
+        cands.setdefault((eid, max(1, total // 4)), "quarter")
+    items = [(eid, t, kind) for (eid, t), kind in cands.items()]
+    items.sort(key=lambda it: (-it[1], it[0]))
+    return cap_by_priority(items, cap) if cap is not None else items
 
-        def gap(it: tuple[tuple[str, int], str]) -> tuple[int, int]:
-            others = [o for o in items if o is not it]
-            return (min(abs(it[0][1] - o[0][1]) for o in others), it[0][1])
 
-        drop = min((it for it in items if it is not head), key=gap)
-        items.remove(drop)
-    return [(eid, t, kind) for (eid, t), kind in items]
+def cap_by_priority(items: list[tuple[str, int, str]], cap: int) -> list[tuple[str, int, str]]:
+    """Drop the lowest-priority kind first (quarter, then mid; the latest end never drops), among
+    equals the candidate nearest in t to another kept one; the result stays latest-first."""
+    kept = list(items)
+    while len(kept) > cap:
+        head = kept[0]
+
+        def key(it: tuple[str, int, str]) -> tuple[int, int, int]:
+            others = [o for o in kept if o is not it]
+            gap = min(abs(it[1] - o[1]) for o in others) if others else 0
+            return (-KIND_RANK[it[2]], gap, it[1])
+
+        drop = min((it for it in kept if it is not head), key=key)
+        kept.remove(drop)
+    return kept
 
 
 @dataclass
@@ -135,18 +151,32 @@ def build_stage_candidates(
     *,
     oracle: bool = True,
 ) -> StageResult:
-    """Select the states, compile and replay each prefix, guard it with ``solvable()``."""
+    """Select the states, compile every prefix, deduplicate by state hash, cap by priority, then
+    guard the kept candidates with ``solvable()``."""
     result = StageResult()
     by_traj = {t.episode_id: t for t in failures}
     lengths = {eid: min(len(tr.steps), config.impl.policy_max_steps) for eid, tr in by_traj.items()}
-    seen: set[str] = set()
-    for eid, t, kind in candidate_states(lengths, config.impl.max_candidates):
+    compiled_by_cid: dict[str, list[str]] = {}
+    first: dict[str, tuple[str, int, str]] = {}
+    for eid, t, kind in candidate_states(lengths):
         actions = trace_actions(by_traj[eid])[:t]
         compiled = compile_prefix(open_fn, actions, reset_options)
         cid = candidate_id(task_id, compiled)
-        if cid in seen:  # two prefixes compiling to the same staged state are one candidate
+        if cid in first:  # two prefixes compiling to the same staged state are one candidate
+            if KIND_RANK[kind] < KIND_RANK[first[cid][2]]:  # keep the higher-priority label
+                first[cid] = (first[cid][0], first[cid][1], kind)
             continue
-        seen.add(cid)
+        first[cid] = (eid, t, kind)
+        compiled_by_cid[cid] = compiled
+    unique = [(eid, t, kind, cid) for cid, (eid, t, kind) in first.items()]
+    kept = cap_by_priority(
+        [(cid, t, kind) for eid, t, kind, cid in unique], config.impl.max_candidates
+    )
+    kept_cids = {cid for cid, _, _ in kept}
+    for eid, t, kind, cid in unique:
+        if cid not in kept_cids:
+            continue
+        compiled = compiled_by_cid[cid]
         cand = stage_candidate(compiled)
         guard = solvable(cand, lambda c: open_fn(c, reset_options), config, oracle=oracle)
         staged = StagedCandidate(cid, eid, t, kind, compiled, cand, guard)
@@ -156,7 +186,7 @@ def build_stage_candidates(
         if guard.ok:
             result.candidates.append(staged)
         else:
-            result.rejected.append({"id": staged.id, "t": t, "reason": guard.detail})
+            result.rejected.append({"id": staged.id, "t": t, "kind": kind, "reason": guard.detail})
     return result
 
 
