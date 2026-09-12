@@ -557,6 +557,7 @@ class Controller:
             "stage_candidates",
             task,
             certified=[c.id for c in staged.candidates],
+            kinds={c.id: c.kind for c in staged.candidates},
             rejected=staged.rejected,
             fidelity_ok=[c.fidelity_ok for c in staged.candidates if c.fidelity_ok is not None],
         )

@@ -82,7 +82,8 @@ def set_variant(variant: str) -> None:
     global VARIANT, A_RUN_ID, CONFIRM_RUN_ID, SPEND_GLOB, CAP_USD, PREREG_SHA, EXPERIMENT
     if variant == "e3b":
         VARIANT, A_RUN_ID, CONFIRM_RUN_ID, SPEND_GLOB = "e3b", "e3b-A", "e3b-confirm", "e3b-*"
-        CAP_USD, PREREG_SHA, EXPERIMENT = 120.0, PREREG10_SHA, "E3b (aea v0.3, PREREG10)"
+        # amendment 2026-09-12: E3b stops after layer 1; cap USD 60 (the SL portion is deferred)
+        CAP_USD, PREREG_SHA, EXPERIMENT = 60.0, PREREG10_SHA, "E3b (aea v0.3, PREREG10)"
     elif variant != "e3":
         raise ConfigError(f"unknown variant {variant}")
 
