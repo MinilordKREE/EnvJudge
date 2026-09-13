@@ -59,8 +59,8 @@ SMOKES: dict[int, dict[str, Any]] = {
         "run_id": "e6-smoke2-llm-v1",
         "confirm_id": "e6-smoke2-confirm",
         "prereg": "PREREG_SMOKE2.md",
-        "prereg_sha": None,  # recorded before the first paid call of smoke 2
-        "method_sha": None,  # the phase-3.1 correctness commit, recorded before smoke 2
+        "prereg_sha": "c37dfce",  # PREREG_SMOKE2.md commit, recorded before the first paid call
+        "method_sha": "f63c47b",  # the phase-3.1 correctness commit (src/aea frozen)
         "exclude": (1, 7, 12, 8, 9, 10),  # smoke 1's tasks: outcomes already known
         "report": "e6_smoke2",
     },
