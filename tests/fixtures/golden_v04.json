@@ -1,0 +1,957 @@
+{
+ "library": {
+  "corpus": [
+   [
+    "1",
+    "knob",
+    "horizon_squeeze",
+    "library",
+    "1:horizon_squeeze:1.0",
+    null
+   ]
+  ],
+  "designer_calls": 0,
+  "event_kinds": [
+   "task_start",
+   "rollouts",
+   "rollouts",
+   "rollouts",
+   "rollouts",
+   "estimate",
+   "families",
+   "solvable",
+   "rollouts",
+   "leverage",
+   "no_leverage",
+   "solvable",
+   "rollouts",
+   "leverage",
+   "no_leverage",
+   "task_done",
+   "task_start",
+   "rollouts",
+   "rollouts",
+   "rollouts",
+   "rollouts",
+   "estimate",
+   "families",
+   "solvable",
+   "rollouts",
+   "leverage",
+   "rollouts",
+   "rollouts",
+   "rollouts",
+   "rollouts",
+   "leverage",
+   "bracket",
+   "solvable",
+   "task_done",
+   "task_start",
+   "rollouts",
+   "rollouts",
+   "rollouts",
+   "rollouts",
+   "estimate",
+   "stage_candidates",
+   "rollouts",
+   "rollouts",
+   "rollouts",
+   "probe",
+   "task_done",
+   "task_start",
+   "rollouts",
+   "rollouts",
+   "rollouts",
+   "rollouts",
+   "estimate",
+   "families",
+   "solvable",
+   "rollouts",
+   "leverage",
+   "no_leverage",
+   "solvable",
+   "rollouts",
+   "rollouts",
+   "leverage",
+   "corpus_entry",
+   "task_done"
+  ],
+  "events": [
+   {
+    "kind": "families",
+    "order": [
+     "footer_mask",
+     "horizon_squeeze"
+    ],
+    "task_id": "2"
+   },
+   {
+    "d": 1.0,
+    "family": "footer_mask",
+    "kind": "solvable",
+    "ok": true,
+    "source": "by_construction",
+    "task_id": "2"
+   },
+   {
+    "family": "footer_mask",
+    "kind": "no_leverage",
+    "n": 4,
+    "successes": 4,
+    "task_id": "2"
+   },
+   {
+    "d": 1.0,
+    "family": "horizon_squeeze",
+    "kind": "solvable",
+    "ok": true,
+    "source": "policy_replay",
+    "task_id": "2"
+   },
+   {
+    "family": "horizon_squeeze",
+    "kind": "no_leverage",
+    "n": 4,
+    "successes": 4,
+    "task_id": "2"
+   },
+   {
+    "kind": "families",
+    "order": [
+     "footer_mask",
+     "horizon_squeeze"
+    ],
+    "task_id": "7"
+   },
+   {
+    "d": 1.0,
+    "family": "footer_mask",
+    "kind": "solvable",
+    "ok": true,
+    "source": "by_construction",
+    "task_id": "7"
+   },
+   {
+    "family": "footer_mask",
+    "history": [
+     {
+      "d": 1.0,
+      "n": 4,
+      "s": 0,
+      "verdict": "too_hard"
+     },
+     {
+      "d": 0.5,
+      "n": 4,
+      "s": 4,
+      "verdict": "too_easy"
+     },
+     {
+      "d": 0.75,
+      "n": 4,
+      "s": 4,
+      "verdict": "too_easy"
+     },
+     {
+      "d": 0.875,
+      "n": 4,
+      "s": 4,
+      "verdict": "too_easy"
+     },
+     {
+      "d": 0.9375,
+      "n": 4,
+      "s": 4,
+      "verdict": "too_easy"
+     }
+    ],
+    "kind": "bracket",
+    "local": [
+     0.9375,
+     1.0
+    ],
+    "start": 0.5,
+    "status": "exhausted",
+    "task_id": "7"
+   },
+   {
+    "d": 1.0,
+    "family": "horizon_squeeze",
+    "kind": "solvable",
+    "ok": true,
+    "source": "policy_replay",
+    "task_id": "7"
+   },
+   {
+    "certified": [
+     "9:3c614ed873de7280",
+     "9:6522816306e0dbaa",
+     "9:f143e5c0f32025f0"
+    ],
+    "fidelity_ok": [],
+    "kind": "stage_candidates",
+    "kinds": {
+     "9:3c614ed873de7280": "mid",
+     "9:6522816306e0dbaa": "mid",
+     "9:f143e5c0f32025f0": "mid"
+    },
+    "rejected": [
+     {
+      "id": "9:079fa1db3f0f86ab",
+      "reason": {
+       "oracle_1": "verifier_fail",
+       "oracle_2": "verifier_fail",
+       "oracle_3": "verifier_fail"
+      },
+      "t": 50
+     },
+     {
+      "id": "9:c2836773b82d3e54",
+      "reason": {
+       "oracle_1": "verifier_fail",
+       "oracle_2": "verifier_fail",
+       "oracle_3": "verifier_fail"
+      },
+      "t": 50
+     },
+     {
+      "id": "9:c4a7ebbaa3524c82",
+      "reason": {
+       "oracle_1": "verifier_fail",
+       "oracle_2": "verifier_fail",
+       "oracle_3": "verifier_fail"
+      },
+      "t": 50
+     }
+    ],
+    "task_id": "9"
+   },
+   {
+    "kind": "families",
+    "order": [
+     "footer_mask",
+     "horizon_squeeze"
+    ],
+    "task_id": "1"
+   },
+   {
+    "d": 1.0,
+    "family": "footer_mask",
+    "kind": "solvable",
+    "ok": true,
+    "source": "by_construction",
+    "task_id": "1"
+   },
+   {
+    "family": "footer_mask",
+    "kind": "no_leverage",
+    "n": 4,
+    "successes": 4,
+    "task_id": "1"
+   },
+   {
+    "d": 1.0,
+    "family": "horizon_squeeze",
+    "kind": "solvable",
+    "ok": true,
+    "source": "policy_replay",
+    "task_id": "1"
+   }
+  ],
+  "outcomes": [
+   [
+    "2",
+    "dropped",
+    "no_leverage",
+    "saturated",
+    18
+   ],
+   [
+    "7",
+    "dropped",
+    "budget",
+    "saturated",
+    30
+   ],
+   [
+    "9",
+    "dropped",
+    "dead",
+    "zero",
+    22
+   ],
+   [
+    "1",
+    "accepted",
+    "",
+    "saturated",
+    22
+   ]
+  ],
+  "rollout_phases": [
+   [
+    "2",
+    "estimate",
+    4
+   ],
+   [
+    "2",
+    "estimate",
+    2
+   ],
+   [
+    "2",
+    "estimate",
+    2
+   ],
+   [
+    "2",
+    "estimate",
+    2
+   ],
+   [
+    "2",
+    "dose:footer_mask",
+    4
+   ],
+   [
+    "2",
+    "dose:horizon_squeeze",
+    4
+   ],
+   [
+    "7",
+    "estimate",
+    4
+   ],
+   [
+    "7",
+    "estimate",
+    2
+   ],
+   [
+    "7",
+    "estimate",
+    2
+   ],
+   [
+    "7",
+    "estimate",
+    2
+   ],
+   [
+    "7",
+    "dose:footer_mask",
+    4
+   ],
+   [
+    "7",
+    "dose:footer_mask",
+    4
+   ],
+   [
+    "7",
+    "dose:footer_mask",
+    4
+   ],
+   [
+    "7",
+    "dose:footer_mask",
+    4
+   ],
+   [
+    "7",
+    "dose:footer_mask",
+    4
+   ],
+   [
+    "9",
+    "estimate",
+    4
+   ],
+   [
+    "9",
+    "estimate",
+    2
+   ],
+   [
+    "9",
+    "estimate",
+    2
+   ],
+   [
+    "9",
+    "estimate",
+    2
+   ],
+   [
+    "9",
+    "probe",
+    4
+   ],
+   [
+    "9",
+    "probe",
+    4
+   ],
+   [
+    "9",
+    "probe",
+    4
+   ],
+   [
+    "1",
+    "estimate",
+    4
+   ],
+   [
+    "1",
+    "estimate",
+    2
+   ],
+   [
+    "1",
+    "estimate",
+    2
+   ],
+   [
+    "1",
+    "estimate",
+    2
+   ],
+   [
+    "1",
+    "dose:footer_mask",
+    4
+   ],
+   [
+    "1",
+    "dose:horizon_squeeze",
+    4
+   ],
+   [
+    "1",
+    "dose:horizon_squeeze",
+    4
+   ]
+  ]
+ },
+ "proposer": {
+  "corpus": [
+   [
+    "1",
+    "knob",
+    "horizon_squeeze",
+    "library",
+    "1:horizon_squeeze:1.0",
+    null
+   ]
+  ],
+  "designer_calls": 3,
+  "event_kinds": [
+   "task_start",
+   "rollouts",
+   "rollouts",
+   "rollouts",
+   "rollouts",
+   "estimate",
+   "proposer",
+   "families",
+   "solvable",
+   "rollouts",
+   "leverage",
+   "no_leverage",
+   "solvable",
+   "rollouts",
+   "leverage",
+   "no_leverage",
+   "solvable",
+   "rollouts",
+   "leverage",
+   "no_leverage",
+   "task_done",
+   "task_start",
+   "rollouts",
+   "rollouts",
+   "rollouts",
+   "rollouts",
+   "estimate",
+   "proposer",
+   "families",
+   "solvable",
+   "rollouts",
+   "leverage",
+   "rollouts",
+   "rollouts",
+   "rollouts",
+   "rollouts",
+   "leverage",
+   "bracket",
+   "solvable",
+   "task_done",
+   "task_start",
+   "rollouts",
+   "rollouts",
+   "rollouts",
+   "rollouts",
+   "estimate",
+   "stage_candidates",
+   "rollouts",
+   "rollouts",
+   "rollouts",
+   "probe",
+   "task_done",
+   "task_start",
+   "rollouts",
+   "rollouts",
+   "rollouts",
+   "rollouts",
+   "estimate",
+   "proposer",
+   "families",
+   "solvable",
+   "rollouts",
+   "leverage",
+   "no_leverage",
+   "solvable",
+   "rollouts",
+   "leverage",
+   "no_leverage",
+   "solvable",
+   "rollouts",
+   "rollouts",
+   "leverage",
+   "corpus_entry",
+   "task_done"
+  ],
+  "events": [
+   {
+    "kind": "proposer",
+    "proposed": [
+     "case_flip"
+    ],
+    "ranking": [],
+    "rejected": [],
+    "task_id": "2"
+   },
+   {
+    "kind": "families",
+    "order": [
+     "case_flip",
+     "footer_mask",
+     "horizon_squeeze"
+    ],
+    "task_id": "2"
+   },
+   {
+    "d": 1.0,
+    "family": "case_flip",
+    "kind": "solvable",
+    "ok": true,
+    "source": "by_construction",
+    "task_id": "2"
+   },
+   {
+    "family": "case_flip",
+    "kind": "no_leverage",
+    "n": 4,
+    "successes": 4,
+    "task_id": "2"
+   },
+   {
+    "d": 1.0,
+    "family": "footer_mask",
+    "kind": "solvable",
+    "ok": true,
+    "source": "by_construction",
+    "task_id": "2"
+   },
+   {
+    "family": "footer_mask",
+    "kind": "no_leverage",
+    "n": 4,
+    "successes": 4,
+    "task_id": "2"
+   },
+   {
+    "d": 1.0,
+    "family": "horizon_squeeze",
+    "kind": "solvable",
+    "ok": true,
+    "source": "policy_replay",
+    "task_id": "2"
+   },
+   {
+    "family": "horizon_squeeze",
+    "kind": "no_leverage",
+    "n": 4,
+    "successes": 4,
+    "task_id": "2"
+   },
+   {
+    "kind": "proposer",
+    "proposed": [
+     "case_flip"
+    ],
+    "ranking": [],
+    "rejected": [],
+    "task_id": "7"
+   },
+   {
+    "kind": "families",
+    "order": [
+     "case_flip",
+     "footer_mask",
+     "horizon_squeeze"
+    ],
+    "task_id": "7"
+   },
+   {
+    "d": 1.0,
+    "family": "case_flip",
+    "kind": "solvable",
+    "ok": true,
+    "source": "by_construction",
+    "task_id": "7"
+   },
+   {
+    "family": "case_flip",
+    "history": [
+     {
+      "d": 1.0,
+      "n": 4,
+      "s": 0,
+      "verdict": "too_hard"
+     },
+     {
+      "d": 0.5,
+      "n": 4,
+      "s": 4,
+      "verdict": "too_easy"
+     },
+     {
+      "d": 0.75,
+      "n": 4,
+      "s": 0,
+      "verdict": "too_hard"
+     },
+     {
+      "d": 0.625,
+      "n": 4,
+      "s": 0,
+      "verdict": "too_hard"
+     },
+     {
+      "d": 0.5625,
+      "n": 4,
+      "s": 0,
+      "verdict": "too_hard"
+     }
+    ],
+    "kind": "bracket",
+    "local": [
+     0.5,
+     0.5625
+    ],
+    "start": 0.5,
+    "status": "exhausted",
+    "task_id": "7"
+   },
+   {
+    "d": 1.0,
+    "family": "footer_mask",
+    "kind": "solvable",
+    "ok": true,
+    "source": "by_construction",
+    "task_id": "7"
+   },
+   {
+    "certified": [
+     "9:3c614ed873de7280",
+     "9:6522816306e0dbaa",
+     "9:f143e5c0f32025f0"
+    ],
+    "fidelity_ok": [],
+    "kind": "stage_candidates",
+    "kinds": {
+     "9:3c614ed873de7280": "mid",
+     "9:6522816306e0dbaa": "mid",
+     "9:f143e5c0f32025f0": "mid"
+    },
+    "rejected": [
+     {
+      "id": "9:079fa1db3f0f86ab",
+      "reason": {
+       "oracle_1": "verifier_fail",
+       "oracle_2": "verifier_fail",
+       "oracle_3": "verifier_fail"
+      },
+      "t": 50
+     },
+     {
+      "id": "9:c2836773b82d3e54",
+      "reason": {
+       "oracle_1": "verifier_fail",
+       "oracle_2": "verifier_fail",
+       "oracle_3": "verifier_fail"
+      },
+      "t": 50
+     },
+     {
+      "id": "9:c4a7ebbaa3524c82",
+      "reason": {
+       "oracle_1": "verifier_fail",
+       "oracle_2": "verifier_fail",
+       "oracle_3": "verifier_fail"
+      },
+      "t": 50
+     }
+    ],
+    "task_id": "9"
+   },
+   {
+    "kind": "proposer",
+    "proposed": [
+     "case_flip"
+    ],
+    "ranking": [],
+    "rejected": [],
+    "task_id": "1"
+   },
+   {
+    "kind": "families",
+    "order": [
+     "case_flip",
+     "footer_mask",
+     "horizon_squeeze"
+    ],
+    "task_id": "1"
+   },
+   {
+    "d": 1.0,
+    "family": "case_flip",
+    "kind": "solvable",
+    "ok": true,
+    "source": "by_construction",
+    "task_id": "1"
+   },
+   {
+    "family": "case_flip",
+    "kind": "no_leverage",
+    "n": 4,
+    "successes": 4,
+    "task_id": "1"
+   },
+   {
+    "d": 1.0,
+    "family": "footer_mask",
+    "kind": "solvable",
+    "ok": true,
+    "source": "by_construction",
+    "task_id": "1"
+   },
+   {
+    "family": "footer_mask",
+    "kind": "no_leverage",
+    "n": 4,
+    "successes": 4,
+    "task_id": "1"
+   },
+   {
+    "d": 1.0,
+    "family": "horizon_squeeze",
+    "kind": "solvable",
+    "ok": true,
+    "source": "policy_replay",
+    "task_id": "1"
+   }
+  ],
+  "outcomes": [
+   [
+    "2",
+    "dropped",
+    "no_leverage",
+    "saturated",
+    22
+   ],
+   [
+    "7",
+    "dropped",
+    "budget",
+    "saturated",
+    30
+   ],
+   [
+    "9",
+    "dropped",
+    "dead",
+    "zero",
+    22
+   ],
+   [
+    "1",
+    "accepted",
+    "",
+    "saturated",
+    26
+   ]
+  ],
+  "rollout_phases": [
+   [
+    "2",
+    "estimate",
+    4
+   ],
+   [
+    "2",
+    "estimate",
+    2
+   ],
+   [
+    "2",
+    "estimate",
+    2
+   ],
+   [
+    "2",
+    "estimate",
+    2
+   ],
+   [
+    "2",
+    "dose:case_flip",
+    4
+   ],
+   [
+    "2",
+    "dose:footer_mask",
+    4
+   ],
+   [
+    "2",
+    "dose:horizon_squeeze",
+    4
+   ],
+   [
+    "7",
+    "estimate",
+    4
+   ],
+   [
+    "7",
+    "estimate",
+    2
+   ],
+   [
+    "7",
+    "estimate",
+    2
+   ],
+   [
+    "7",
+    "estimate",
+    2
+   ],
+   [
+    "7",
+    "dose:case_flip",
+    4
+   ],
+   [
+    "7",
+    "dose:case_flip",
+    4
+   ],
+   [
+    "7",
+    "dose:case_flip",
+    4
+   ],
+   [
+    "7",
+    "dose:case_flip",
+    4
+   ],
+   [
+    "7",
+    "dose:case_flip",
+    4
+   ],
+   [
+    "9",
+    "estimate",
+    4
+   ],
+   [
+    "9",
+    "estimate",
+    2
+   ],
+   [
+    "9",
+    "estimate",
+    2
+   ],
+   [
+    "9",
+    "estimate",
+    2
+   ],
+   [
+    "9",
+    "probe",
+    4
+   ],
+   [
+    "9",
+    "probe",
+    4
+   ],
+   [
+    "9",
+    "probe",
+    4
+   ],
+   [
+    "1",
+    "estimate",
+    4
+   ],
+   [
+    "1",
+    "estimate",
+    2
+   ],
+   [
+    "1",
+    "estimate",
+    2
+   ],
+   [
+    "1",
+    "estimate",
+    2
+   ],
+   [
+    "1",
+    "dose:case_flip",
+    4
+   ],
+   [
+    "1",
+    "dose:footer_mask",
+    4
+   ],
+   [
+    "1",
+    "dose:horizon_squeeze",
+    4
+   ],
+   [
+    "1",
+    "dose:horizon_squeeze",
+    4
+   ]
+  ]
+ }
+}

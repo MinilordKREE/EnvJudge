@@ -53,6 +53,11 @@ class ImplConfig(StrictModel):
 
 class AEAConfig(StrictModel):
     schema_version: Literal[4] = 4
+    method_version: Literal["v0.4", "llm_v1"] = "v0.4"
+    """Which method the controller runs. ``v0.4`` (default; a config without the field is v0.4)
+    is the box of docs/spec/AEA_v0.4.md unchanged; ``llm_v1`` (docs/spec/AEA_llm_v1.md) replaces
+    the source of interventions on both out-of-band sides by one regime-conditioned designer call
+    and keeps every measurement, guard and budget rule. Same schema: the field has a default."""
     band_t: tuple[float, float] = (0.4, 0.6)
     """Target band B_T: the accept range is B_T expressed at ``probe[1]`` rollouts."""
     band_l: tuple[float, float] = (0.2, 0.8)

@@ -18,6 +18,7 @@ def test_aea_config_six_constants_and_impl() -> None:
     assert cfg.learnable_range() == (4, 12) and cfg.learnable(4) and not cfg.learnable(13)
     assert set(AEAConfig.model_fields) == {
         "schema_version",
+        "method_version",  # the method selector (default v0.4; phase 2 of the LLM-first redesign)
         "band_t",
         "band_l",
         "k",
