@@ -57,7 +57,8 @@ BANKS = RUNS / "e4-banks"
 EVAL = RUNS / "e4-eval"
 META = BANKS / "banks_e4.json"
 PREREG_SHA = "0833b8d"
-CAP_USD = 40.0
+AMENDMENT1_SHA = "419b45b"
+CAP_USD = 130.0  # PREREG11 amendment 1 (2026-09-13): 130, full-bank rows decide
 INDUCTIONS: tuple[int, ...] = (20260930, 20260931)
 MATCHED_SEED = 20260932
 COUNT_SEED = 20260933
@@ -276,22 +277,20 @@ def conditions() -> dict[str, tuple[str, Path | None]]:
 def jobs(group: str) -> list[tuple[str, int]]:
     m = meta()
     matched_report = m.get("matched", {}).get("banks", {})
-    if group == "matched":
-        names = [f"{a}_i{k}_m" for a in ("M", "B", "S", "MB") for k in (1, 2)]
-    elif group == "count":
+    # amendment 1: full-bank rows decide and run first (every bank, including one whose full
+    # bank is its matched bank); the matched rows skip a bank identical to its full bank (the
+    # tables alias its cells); the task-count sub-row runs group g3 only (indicative)
+    if group == "full":
+        names = [f"{a}_i{k}" for a in ("M", "B", "S", "MB") for k in (1, 2)]
+    elif group == "matched":
         names = [
-            f"{a}2_{g}_i{k}"
-            for g in sorted(m.get("count_groups", {}))
-            for a in ("B", "S")
-            for k in (1, 2)
-        ]
-    elif group == "full":
-        names = [
-            f"{a}_i{k}"
+            f"{a}_i{k}_m"
             for a in ("M", "B", "S", "MB")
             for k in (1, 2)
             if not matched_report.get(f"{a}_i{k}_m", {}).get("full_row_is_matched_row")
         ]
+    elif group == "count":
+        names = [f"{a}2_g3_i{k}" for a in ("B", "S") for k in (1, 2)]
     else:
         raise ConfigError(f"unknown group {group}")
     conds = conditions()

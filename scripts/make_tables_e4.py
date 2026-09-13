@@ -51,6 +51,9 @@ def main(argv: list[str] | None = None) -> int:
             cells[c] = reused[c]
     meta = e4.meta()
     matched = meta.get("matched", {})
+    for name, rep in matched.get("banks", {}).items():  # a matched bank identical to its full
+        if rep.get("full_row_is_matched_row") and name not in cells and name[:-2] in cells:
+            cells[name] = cells[name[:-2]]  # bank (M_i2): the full cells serve the matched row
     groups = meta.get("groups", {})
     count_groups = meta.get("count_groups", {})
     arms = ("M", "B", "S", "MB")
@@ -113,20 +116,20 @@ def main(argv: list[str] | None = None) -> int:
             pb = {k: sum(p[k] for p in b2) / len(b2) for k in kb}
             ps = {k: sum(p[k] for p in s2) / len(s2) for k in ks}
             cnt["B2 - S2 (2 tasks each)"][s] = ms.diff_stats(pb, ps, rng)
-    # verdicts
+    # verdicts: per PREREG11 amendment 1 the FULL-bank rows decide (matched rows = robustness)
     e41 = [
         s
         for s in SPLITS
-        if diffs["B - S (matched)"][s].get("n")
-        and diffs["B - S (matched)"][s]["diff"] > 0
-        and diffs["B - S (matched)"][s]["excludes_zero"]
+        if diffs["B - S (full)"][s].get("n")
+        and diffs["B - S (full)"][s]["diff"] > 0
+        and diffs["B - S (full)"][s]["excludes_zero"]
     ]
-    e42 = verdict_e4_2(diffs["M - B (matched)"])
-    mb_s = diffs["MB - S (matched)"]
-    mb_o = diffs["MB - O_all(k12) (matched)"]
+    e42 = verdict_e4_2(diffs["M - B (full)"])
+    mb_s = diffs["MB - S (full)"]
+    mb_o = diffs["MB - O_all (full)"]
     e43_a = all(mb_s[s].get("n") and mb_s[s]["diff"] > 0 for s in SPLITS)
     e43_b = all(mb_o[s].get("n") and mb_o[s]["diff"] >= 0 for s in SPLITS)
-    evaluated = all(diffs["B - S (matched)"][s].get("n") for s in SPLITS)
+    evaluated = all(diffs["B - S (full)"][s].get("n") for s in SPLITS)
 
     lines: list[str] = [
         "# E4 — regime origin of successful trajectories (PREREG11)",
@@ -137,12 +140,14 @@ def main(argv: list[str] | None = None) -> int:
         "",
     ]
     if not evaluated:
-        lines.append("**E4: not evaluated yet (matched cells incomplete).**")
+        lines.append("**E4: not evaluated yet (full-bank cells incomplete).**")
     else:
         lines += [
-            f"- **E4-1 (B > S, item-matched, CI excluding 0 on ID or OOD): {'holds on ' + ' and '.join(e41) if e41 else 'FAILS'}.**",  # noqa: E501
-            f"- **E4-2 (M vs B, item-matched): {e42}.**",
-            f"- **E4-3 (MB > S and MB >= O_all, point estimates): MB > S {'holds' if e43_a else 'fails'}; MB >= O_all(k12) {'holds' if e43_b else 'fails'}.**",  # noqa: E501
+            "Per PREREG11 amendment 1 the full-bank rows decide; the item-matched rows (k = 4, where top-5 retrieval returns the whole bank on every step) are a size-control robustness check; the task-count sub-row (group g3 only) is indicative.",  # noqa: E501
+            "",
+            f"- **E4-1 (B > S, full banks, CI excluding 0 on ID or OOD): {'holds on ' + ' and '.join(e41) if e41 else 'FAILS'}.**",  # noqa: E501
+            f"- **E4-2 (M vs B, full banks): {e42}.**",
+            f"- **E4-3 (MB > S and MB >= O_all, full banks, point estimates): MB > S {'holds' if e43_a else 'fails'}; MB >= O_all {'holds' if e43_b else 'fails'}.**",  # noqa: E501
         ]
     lines += [
         "",
@@ -157,7 +162,7 @@ def main(argv: list[str] | None = None) -> int:
         )
     lines += [
         "",
-        "## Task-count-matched sub-row (M's 2 tasks vs 2 tasks drawn from B and from S; group-averaged per episode)",  # noqa: E501
+        "## Task-count-matched sub-row (indicative; amendment 1: group g3 only — M's 2 tasks vs B{16, 19} and S{1, 13})",  # noqa: E501
         "",
         "| difference | ID | OOD | n (ID / OOD) |",
         "|---|---|---|---|",
