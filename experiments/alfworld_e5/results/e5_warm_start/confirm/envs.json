@@ -1,0 +1,58 @@
+[
+ {
+  "id": "15:2cc95ad436d3a302",
+  "task": "15",
+  "candidate": {
+   "rules_code": "import hashlib\n\n\nclass _Rules(Rules):\n    \"\"\"FooterMask (O axis, harder with DOSE): hide the admissible-commands footer at a\n    deterministic fraction DOSE of the steps. bucket = sha256(f\"{task_id}:{step}\")[:8] % 10000;\n    masked iff bucket < DOSE * 10000, so the masked step set is nested in DOSE. Solvable by\n    construction (the world is untouched).\"\"\"\n\n    DOSE = 0.5\n    TASK_ID = '15'\n\n    def _masked(self, env_state):\n        step = int(getattr(env_state, \"step_count\", 0) or 0)\n        digest = hashlib.sha256(f\"{self.TASK_ID}:{step}\".encode(\"utf-8\")).hexdigest()\n        return (int(digest[:8], 16) % 10000) < int(self.DOSE * 10000)\n\n    def filter_observation(self, obs, env_state):\n        if not self._masked(env_state):\n            return obs\n        text = obs.text\n        cut = text.find(\"\\n\\nAdmissible commands: \")\n        if cut >= 0:\n            text = text[:cut]\n        data = dict(obs.data or {})\n        data.pop(\"admissible_commands\", None)\n        return Observation(text=text, data=data)\n",
+   "in_env_actions": []
+  },
+  "kind": "knob",
+  "family": "footer_mask",
+  "d": 0.5,
+  "arms": [
+   "A2"
+  ]
+ },
+ {
+  "id": "22:44b92a0c76254200",
+  "task": "22",
+  "candidate": {
+   "rules_code": "import hashlib\n\n\nclass _Rules(Rules):\n    \"\"\"FooterMask (O axis, harder with DOSE): hide the admissible-commands footer at a\n    deterministic fraction DOSE of the steps. bucket = sha256(f\"{task_id}:{step}\")[:8] % 10000;\n    masked iff bucket < DOSE * 10000, so the masked step set is nested in DOSE. Solvable by\n    construction (the world is untouched).\"\"\"\n\n    DOSE = 0.847656\n    TASK_ID = '22'\n\n    def _masked(self, env_state):\n        step = int(getattr(env_state, \"step_count\", 0) or 0)\n        digest = hashlib.sha256(f\"{self.TASK_ID}:{step}\".encode(\"utf-8\")).hexdigest()\n        return (int(digest[:8], 16) % 10000) < int(self.DOSE * 10000)\n\n    def filter_observation(self, obs, env_state):\n        if not self._masked(env_state):\n            return obs\n        text = obs.text\n        cut = text.find(\"\\n\\nAdmissible commands: \")\n        if cut >= 0:\n            text = text[:cut]\n        data = dict(obs.data or {})\n        data.pop(\"admissible_commands\", None)\n        return Observation(text=text, data=data)\n",
+   "in_env_actions": []
+  },
+  "kind": "knob",
+  "family": "footer_mask",
+  "d": 0.847656,
+  "arms": [
+   "A4"
+  ]
+ },
+ {
+  "id": "23:7a2094973bc5bd9d",
+  "task": "23",
+  "candidate": {
+   "rules_code": "import hashlib\n\n\nclass _Rules(Rules):\n    \"\"\"FooterMask (O axis, harder with DOSE): hide the admissible-commands footer at a\n    deterministic fraction DOSE of the steps. bucket = sha256(f\"{task_id}:{step}\")[:8] % 10000;\n    masked iff bucket < DOSE * 10000, so the masked step set is nested in DOSE. Solvable by\n    construction (the world is untouched).\"\"\"\n\n    DOSE = 0.847656\n    TASK_ID = '23'\n\n    def _masked(self, env_state):\n        step = int(getattr(env_state, \"step_count\", 0) or 0)\n        digest = hashlib.sha256(f\"{self.TASK_ID}:{step}\".encode(\"utf-8\")).hexdigest()\n        return (int(digest[:8], 16) % 10000) < int(self.DOSE * 10000)\n\n    def filter_observation(self, obs, env_state):\n        if not self._masked(env_state):\n            return obs\n        text = obs.text\n        cut = text.find(\"\\n\\nAdmissible commands: \")\n        if cut >= 0:\n            text = text[:cut]\n        data = dict(obs.data or {})\n        data.pop(\"admissible_commands\", None)\n        return Observation(text=text, data=data)\n",
+   "in_env_actions": []
+  },
+  "kind": "knob",
+  "family": "footer_mask",
+  "d": 0.847656,
+  "arms": [
+   "A4"
+  ]
+ },
+ {
+  "id": "23:86255b043f4177e9",
+  "task": "23",
+  "candidate": {
+   "rules_code": "import hashlib\n\n\nclass _Rules(Rules):\n    \"\"\"FooterMask (O axis, harder with DOSE): hide the admissible-commands footer at a\n    deterministic fraction DOSE of the steps. bucket = sha256(f\"{task_id}:{step}\")[:8] % 10000;\n    masked iff bucket < DOSE * 10000, so the masked step set is nested in DOSE. Solvable by\n    construction (the world is untouched).\"\"\"\n\n    DOSE = 0.75\n    TASK_ID = '23'\n\n    def _masked(self, env_state):\n        step = int(getattr(env_state, \"step_count\", 0) or 0)\n        digest = hashlib.sha256(f\"{self.TASK_ID}:{step}\".encode(\"utf-8\")).hexdigest()\n        return (int(digest[:8], 16) % 10000) < int(self.DOSE * 10000)\n\n    def filter_observation(self, obs, env_state):\n        if not self._masked(env_state):\n            return obs\n        text = obs.text\n        cut = text.find(\"\\n\\nAdmissible commands: \")\n        if cut >= 0:\n            text = text[:cut]\n        data = dict(obs.data or {})\n        data.pop(\"admissible_commands\", None)\n        return Observation(text=text, data=data)\n",
+   "in_env_actions": []
+  },
+  "kind": "knob",
+  "family": "footer_mask",
+  "d": 0.75,
+  "arms": [
+   "A2"
+  ]
+ }
+]

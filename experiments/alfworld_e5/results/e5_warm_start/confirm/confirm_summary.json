@@ -1,0 +1,58 @@
+{
+ "15:2cc95ad436d3a302": {
+  "task": "15",
+  "successes": 3,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.1875,
+  "learnable": false,
+  "kind": "knob",
+  "family": "footer_mask",
+  "d": 0.5,
+  "arms": [
+   "A2"
+  ]
+ },
+ "22:44b92a0c76254200": {
+  "task": "22",
+  "successes": 12,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.75,
+  "learnable": true,
+  "kind": "knob",
+  "family": "footer_mask",
+  "d": 0.847656,
+  "arms": [
+   "A4"
+  ]
+ },
+ "23:7a2094973bc5bd9d": {
+  "task": "23",
+  "successes": 10,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.625,
+  "learnable": true,
+  "kind": "knob",
+  "family": "footer_mask",
+  "d": 0.847656,
+  "arms": [
+   "A4"
+  ]
+ },
+ "23:86255b043f4177e9": {
+  "task": "23",
+  "successes": 5,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.3125,
+  "learnable": true,
+  "kind": "knob",
+  "family": "footer_mask",
+  "d": 0.75,
+  "arms": [
+   "A2"
+  ]
+ }
+}

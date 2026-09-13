@@ -1,0 +1,18 @@
+probe fail 2026-09-13T14:36:17Z
+probe fail 2026-09-13T14:41:24Z
+probe fail 2026-09-13T14:46:30Z
+probe ok 1/3 2026-09-13T14:51:39Z
+probe fail 2026-09-13T14:56:47Z
+probe fail 2026-09-13T15:01:55Z
+probe ok 1/3 2026-09-13T15:07:03Z
+probe ok 2/3 2026-09-13T15:12:11Z
+probe ok 3/3 2026-09-13T15:17:20Z
+A2 start 2026-09-13T15:17:20Z
+A2 done 2026-09-13T17:14:40Z {"usd": 3.11, "cap": 70.0, "by_run": {"e5-A2": 3.1
+A4 start 2026-09-13T17:14:42Z
+A4 done 2026-09-13T18:43:02Z {"usd": 6.25, "cap": 70.0, "by_run": {"e5-A2": 3.1
+confirm start 2026-09-13T18:43:06Z
+confirm done 2026-09-13T19:04:03Z {"usd": 8.07, "cap": 70.0, "by_run": {"e5-A2": 3.1
+tables start 2026-09-13T19:04:08Z
+tables done 2026-09-13T19:04:14Z {"usd": 8.07, "cap": 70.0, "by_run": {"e5-A2": 3.1
+E5_DONE

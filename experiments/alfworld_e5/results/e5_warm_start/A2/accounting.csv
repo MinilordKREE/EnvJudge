@@ -1,0 +1,17 @@
+task_id,budget,phase,n,refunded
+3,search,dose:footer_mask,12,0
+3,search,estimate,16,0
+12,search,dose:footer_mask,20,0
+12,search,estimate,10,0
+13,search,dose:footer_mask,20,0
+13,search,estimate,10,0
+15,search,dose:footer_mask,12,0
+15,search,estimate,10,0
+22,search,dose:footer_mask,20,0
+22,search,estimate,10,0
+23,search,dose:footer_mask,16,0
+23,search,estimate,10,0
+24,search,dose:footer_mask,20,0
+24,search,estimate,10,0
+29,search,dose:footer_mask,20,0
+29,search,estimate,10,0

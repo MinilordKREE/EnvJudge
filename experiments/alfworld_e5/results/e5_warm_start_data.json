@@ -1,0 +1,787 @@
+{
+ "rows": {
+  "3": {
+   "A2": {
+    "outcome": "dropped:budget",
+    "regime": "saturated",
+    "p_hat": 0.9375,
+    "n_est": 16,
+    "rollouts": 28,
+    "n_search": 28,
+    "no_leverage": [],
+    "family": "footer_mask",
+    "start": 0.5,
+    "history": [
+     [
+      1.0,
+      0,
+      4,
+      "too_hard"
+     ],
+     [
+      0.5,
+      4,
+      4,
+      "too_easy"
+     ],
+     [
+      0.75,
+      4,
+      4,
+      "too_easy"
+     ]
+    ],
+    "probes": 2,
+    "accepted_d": null,
+    "env": null,
+    "local": [
+     0.75,
+     1.0
+    ],
+    "status": "budget"
+   },
+   "A4": {
+    "outcome": "dropped:budget",
+    "regime": "saturated",
+    "p_hat": 0.875,
+    "n_est": 16,
+    "rollouts": 28,
+    "n_search": 28,
+    "no_leverage": [],
+    "family": "footer_mask",
+    "start": 0.5,
+    "history": [
+     [
+      1.0,
+      0,
+      4,
+      "too_hard"
+     ],
+     [
+      0.5,
+      4,
+      4,
+      "too_easy"
+     ],
+     [
+      0.75,
+      4,
+      4,
+      "too_easy"
+     ]
+    ],
+    "probes": 2,
+    "accepted_d": null,
+    "env": null,
+    "local": [
+     0.75,
+     1.0
+    ],
+    "status": "budget"
+   },
+   "warm_start": "n/a (no history)",
+   "recovered": "-"
+  },
+  "12": {
+   "A2": {
+    "outcome": "dropped:budget",
+    "regime": "saturated",
+    "p_hat": 1.0,
+    "n_est": 10,
+    "rollouts": 30,
+    "n_search": 30,
+    "no_leverage": [],
+    "family": "footer_mask",
+    "start": 0.5,
+    "history": [
+     [
+      1.0,
+      0,
+      4,
+      "too_hard"
+     ],
+     [
+      0.5,
+      4,
+      4,
+      "too_easy"
+     ],
+     [
+      0.75,
+      4,
+      4,
+      "too_easy"
+     ],
+     [
+      0.875,
+      4,
+      4,
+      "too_easy"
+     ],
+     [
+      0.9375,
+      0,
+      4,
+      "too_hard"
+     ]
+    ],
+    "probes": 4,
+    "accepted_d": null,
+    "env": null,
+    "local": [
+     0.875,
+     0.9375
+    ],
+    "status": "exhausted"
+   },
+   "A4": {
+    "outcome": "dropped:budget",
+    "regime": "saturated",
+    "p_hat": 1.0,
+    "n_est": 10,
+    "rollouts": 30,
+    "n_search": 30,
+    "no_leverage": [],
+    "family": "footer_mask",
+    "start": 0.5,
+    "history": [
+     [
+      1.0,
+      0,
+      4,
+      "too_hard"
+     ],
+     [
+      0.5,
+      4,
+      4,
+      "too_easy"
+     ],
+     [
+      0.75,
+      4,
+      4,
+      "too_easy"
+     ],
+     [
+      0.875,
+      4,
+      4,
+      "too_easy"
+     ],
+     [
+      0.9375,
+      0,
+      4,
+      "too_hard"
+     ]
+    ],
+    "probes": 4,
+    "accepted_d": null,
+    "env": null,
+    "local": [
+     0.875,
+     0.9375
+    ],
+    "status": "exhausted"
+   },
+   "warm_start": "n/a (no history)",
+   "recovered": "-"
+  },
+  "13": {
+   "A2": {
+    "outcome": "dropped:budget",
+    "regime": "saturated",
+    "p_hat": 1.0,
+    "n_est": 10,
+    "rollouts": 30,
+    "n_search": 30,
+    "no_leverage": [],
+    "family": "footer_mask",
+    "start": 0.5,
+    "history": [
+     [
+      1.0,
+      0,
+      4,
+      "too_hard"
+     ],
+     [
+      0.5,
+      6,
+      8,
+      "too_easy"
+     ],
+     [
+      0.75,
+      4,
+      4,
+      "too_easy"
+     ]
+    ],
+    "probes": 2,
+    "accepted_d": null,
+    "env": null,
+    "local": [
+     0.75,
+     1.0
+    ],
+    "status": "budget"
+   },
+   "A4": {
+    "outcome": "dropped:budget",
+    "regime": "saturated",
+    "p_hat": 1.0,
+    "n_est": 10,
+    "rollouts": 30,
+    "n_search": 30,
+    "no_leverage": [],
+    "family": "footer_mask",
+    "start": 0.5,
+    "history": [
+     [
+      1.0,
+      0,
+      4,
+      "too_hard"
+     ],
+     [
+      0.5,
+      4,
+      4,
+      "too_easy"
+     ],
+     [
+      0.75,
+      7,
+      8,
+      "too_easy"
+     ],
+     [
+      0.875,
+      0,
+      4,
+      "too_hard"
+     ]
+    ],
+    "probes": 3,
+    "accepted_d": null,
+    "env": null,
+    "local": [
+     0.75,
+     0.875
+    ],
+    "status": "budget"
+   },
+   "warm_start": "n/a (no history)",
+   "recovered": "-"
+  },
+  "15": {
+   "A2": {
+    "outcome": "accepted",
+    "regime": "saturated",
+    "p_hat": 1.0,
+    "n_est": 10,
+    "rollouts": 22,
+    "n_search": 22,
+    "no_leverage": [],
+    "family": "footer_mask",
+    "start": 0.5,
+    "history": [
+     [
+      1.0,
+      0,
+      4,
+      "too_hard"
+     ],
+     [
+      0.5,
+      3,
+      8,
+      "in_band"
+     ]
+    ],
+    "probes": 1,
+    "accepted_d": 0.5,
+    "env": "15:2cc95ad436d3a302",
+    "local": [
+     0.0,
+     1.0
+    ],
+    "status": "accepted"
+   },
+   "A4": {
+    "outcome": "dropped:budget",
+    "regime": "saturated",
+    "p_hat": 1.0,
+    "n_est": 10,
+    "rollouts": 30,
+    "n_search": 30,
+    "no_leverage": [],
+    "family": "footer_mask",
+    "start": 0.875,
+    "history": [
+     [
+      1.0,
+      0,
+      4,
+      "too_hard"
+     ],
+     [
+      0.875,
+      0,
+      4,
+      "too_hard"
+     ],
+     [
+      0.4375,
+      4,
+      4,
+      "too_easy"
+     ],
+     [
+      0.65625,
+      4,
+      4,
+      "too_easy"
+     ],
+     [
+      0.765625,
+      4,
+      4,
+      "too_easy"
+     ]
+    ],
+    "probes": 4,
+    "accepted_d": null,
+    "env": null,
+    "local": [
+     0.765625,
+     0.875
+    ],
+    "status": "exhausted"
+   },
+   "warm_start": "harmful",
+   "recovered": "no"
+  },
+  "22": {
+   "A2": {
+    "outcome": "dropped:budget",
+    "regime": "saturated",
+    "p_hat": 1.0,
+    "n_est": 10,
+    "rollouts": 30,
+    "n_search": 30,
+    "no_leverage": [],
+    "family": "footer_mask",
+    "start": 0.5,
+    "history": [
+     [
+      1.0,
+      0,
+      4,
+      "too_hard"
+     ],
+     [
+      0.5,
+      4,
+      4,
+      "too_easy"
+     ],
+     [
+      0.75,
+      4,
+      4,
+      "too_easy"
+     ],
+     [
+      0.875,
+      0,
+      4,
+      "too_hard"
+     ],
+     [
+      0.8125,
+      4,
+      4,
+      "too_easy"
+     ]
+    ],
+    "probes": 4,
+    "accepted_d": null,
+    "env": null,
+    "local": [
+     0.8125,
+     0.875
+    ],
+    "status": "exhausted"
+   },
+   "A4": {
+    "outcome": "accepted",
+    "regime": "saturated",
+    "p_hat": 1.0,
+    "n_est": 10,
+    "rollouts": 22,
+    "n_search": 22,
+    "no_leverage": [],
+    "family": "footer_mask",
+    "start": 0.84765625,
+    "history": [
+     [
+      1.0,
+      0,
+      4,
+      "too_hard"
+     ],
+     [
+      0.847656,
+      5,
+      8,
+      "in_band"
+     ]
+    ],
+    "probes": 1,
+    "accepted_d": 0.847656,
+    "env": "22:44b92a0c76254200",
+    "local": [
+     0.0,
+     1.0
+    ],
+    "status": "accepted"
+   },
+   "warm_start": "helpful",
+   "recovered": "-"
+  },
+  "23": {
+   "A2": {
+    "outcome": "accepted",
+    "regime": "saturated",
+    "p_hat": 1.0,
+    "n_est": 10,
+    "rollouts": 26,
+    "n_search": 26,
+    "no_leverage": [],
+    "family": "footer_mask",
+    "start": 0.5,
+    "history": [
+     [
+      1.0,
+      0,
+      4,
+      "too_hard"
+     ],
+     [
+      0.5,
+      4,
+      4,
+      "too_easy"
+     ],
+     [
+      0.75,
+      5,
+      8,
+      "in_band"
+     ]
+    ],
+    "probes": 2,
+    "accepted_d": 0.75,
+    "env": "23:86255b043f4177e9",
+    "local": [
+     0.5,
+     1.0
+    ],
+    "status": "accepted"
+   },
+   "A4": {
+    "outcome": "accepted",
+    "regime": "saturated",
+    "p_hat": 1.0,
+    "n_est": 10,
+    "rollouts": 22,
+    "n_search": 22,
+    "no_leverage": [],
+    "family": "footer_mask",
+    "start": 0.847656,
+    "history": [
+     [
+      1.0,
+      0,
+      4,
+      "too_hard"
+     ],
+     [
+      0.847656,
+      4,
+      8,
+      "in_band"
+     ]
+    ],
+    "probes": 1,
+    "accepted_d": 0.847656,
+    "env": "23:7a2094973bc5bd9d",
+    "local": [
+     0.0,
+     1.0
+    ],
+    "status": "accepted"
+   },
+   "warm_start": "helpful",
+   "recovered": "-"
+  },
+  "24": {
+   "A2": {
+    "outcome": "dropped:budget",
+    "regime": "saturated",
+    "p_hat": 1.0,
+    "n_est": 10,
+    "rollouts": 30,
+    "n_search": 30,
+    "no_leverage": [],
+    "family": "footer_mask",
+    "start": 0.5,
+    "history": [
+     [
+      1.0,
+      0,
+      4,
+      "too_hard"
+     ],
+     [
+      0.5,
+      4,
+      4,
+      "too_easy"
+     ],
+     [
+      0.75,
+      4,
+      4,
+      "too_easy"
+     ],
+     [
+      0.875,
+      6,
+      8,
+      "too_easy"
+     ]
+    ],
+    "probes": 3,
+    "accepted_d": null,
+    "env": null,
+    "local": [
+     0.875,
+     1.0
+    ],
+    "status": "budget"
+   },
+   "A4": {
+    "outcome": "dropped:budget",
+    "regime": "saturated",
+    "p_hat": 1.0,
+    "n_est": 10,
+    "rollouts": 30,
+    "n_search": 30,
+    "no_leverage": [],
+    "family": "footer_mask",
+    "start": 0.847656,
+    "history": [
+     [
+      1.0,
+      0,
+      4,
+      "too_hard"
+     ],
+     [
+      0.847656,
+      4,
+      4,
+      "too_easy"
+     ],
+     [
+      0.923828,
+      4,
+      4,
+      "too_easy"
+     ],
+     [
+      0.961914,
+      4,
+      4,
+      "too_easy"
+     ],
+     [
+      0.980957,
+      0,
+      4,
+      "too_hard"
+     ]
+    ],
+    "probes": 4,
+    "accepted_d": null,
+    "env": null,
+    "local": [
+     0.961914,
+     0.980957
+    ],
+    "status": "exhausted"
+   },
+   "warm_start": "harmful",
+   "recovered": "no"
+  },
+  "29": {
+   "A2": {
+    "outcome": "dropped:budget",
+    "regime": "saturated",
+    "p_hat": 1.0,
+    "n_est": 10,
+    "rollouts": 30,
+    "n_search": 30,
+    "no_leverage": [],
+    "family": "footer_mask",
+    "start": 0.5,
+    "history": [
+     [
+      1.0,
+      0,
+      4,
+      "too_hard"
+     ],
+     [
+      0.5,
+      4,
+      4,
+      "too_easy"
+     ],
+     [
+      0.75,
+      4,
+      4,
+      "too_easy"
+     ],
+     [
+      0.875,
+      4,
+      4,
+      "too_easy"
+     ],
+     [
+      0.9375,
+      4,
+      4,
+      "too_easy"
+     ]
+    ],
+    "probes": 4,
+    "accepted_d": null,
+    "env": null,
+    "local": [
+     0.9375,
+     1.0
+    ],
+    "status": "exhausted"
+   },
+   "A4": {
+    "outcome": "dropped:budget",
+    "regime": "saturated",
+    "p_hat": 1.0,
+    "n_est": 10,
+    "rollouts": 30,
+    "n_search": 30,
+    "no_leverage": [],
+    "family": "footer_mask",
+    "start": 0.847656,
+    "history": [
+     [
+      1.0,
+      0,
+      4,
+      "too_hard"
+     ],
+     [
+      0.847656,
+      4,
+      4,
+      "too_easy"
+     ],
+     [
+      0.923828,
+      4,
+      4,
+      "too_easy"
+     ],
+     [
+      0.961914,
+      0,
+      4,
+      "too_hard"
+     ],
+     [
+      0.942871,
+      4,
+      4,
+      "too_easy"
+     ]
+    ],
+    "probes": 4,
+    "accepted_d": null,
+    "env": null,
+    "local": [
+     0.942871,
+     0.961914
+    ],
+    "status": "exhausted"
+   },
+   "warm_start": "neutral",
+   "recovered": "-"
+  }
+ },
+ "aggregates": {
+  "A2": {
+   "tested_saturated": 8,
+   "accepted": 2,
+   "accepted_tasks": [
+    "15",
+    "23"
+   ],
+   "rollouts_total": 226,
+   "rollouts_saturated": 226,
+   "rollouts_per_task": 28.25,
+   "rollouts_per_accept": 113.0,
+   "confirmed_learnable": 1,
+   "precision": 0.5
+  },
+  "A4": {
+   "tested_saturated": 8,
+   "accepted": 2,
+   "accepted_tasks": [
+    "22",
+    "23"
+   ],
+   "rollouts_total": 222,
+   "rollouts_saturated": 222,
+   "rollouts_per_task": 27.75,
+   "rollouts_per_accept": 111.0,
+   "confirmed_learnable": 2,
+   "precision": 1.0
+  }
+ },
+ "decision": {
+  "keep": false,
+  "inconclusive": false,
+  "cond_a": false,
+  "cond_b": true,
+  "no_collapse": false,
+  "precision_ok": true
+ },
+ "spend": {
+  "e5-A2": {
+   "search": 3.111990856000018
+  },
+  "e5-A4": {
+   "search": 3.1341254100000064
+  },
+  "e5-confirm": {
+   "eval": 1.8279422849999867
+  }
+ }
+}
