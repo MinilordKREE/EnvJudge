@@ -23,6 +23,7 @@ from envharness.orchestration.runner import PolicySpec
 from aea.config import AEAConfig
 from aea.controller import TaskRef
 from aea.core.config import LLMConfig
+from aea.designer import ExpertReference, ReferenceProvider
 from aea.io import relative_game_file
 from aea.llm.attribution import attributed
 from aea.llm.client import OpenAICompatibleClient, make_openai_transport
@@ -176,6 +177,24 @@ class AeaSubstrate:
 
     def has_oracle(self) -> bool:
         return True  # ALFWorld ships a handcoded expert (read through the session's proxy)
+
+    def reference_provider(self, config: AEAConfig) -> ReferenceProvider | None:
+        """The production wiring of the privileged reference: ``llm_v1`` only (v0.4 gets
+        ``None`` and can never request one). Lazy: nothing runs until the controller calls
+        the provider on a zero-regime task."""
+        return reference_provider(config, self.open_session)
+
+
+def reference_provider(
+    config: AEAConfig, open_session: Callable[..., Session]
+) -> ReferenceProvider | None:
+    """``open_session(task, candidate, reset_options)`` is the substrate's own (any task type
+    with ``task_id`` / ``seed``)."""
+    if config.method_version != "llm_v1":
+        return None
+    return ExpertReference(
+        lambda task: open_session(task, None, None), max_steps=config.impl.oracle_max_steps
+    )
 
 
 def now_utc() -> datetime:

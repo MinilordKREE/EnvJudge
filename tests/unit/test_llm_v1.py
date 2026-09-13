@@ -28,9 +28,11 @@ from aea.designer import (
 )
 from aea.io import read_corpus
 from aea.llm.types import ChatRequest
-from aea.session import SESSION_LOCK
+from aea.session import SESSION_LOCK, Session
 from tests.fixtures.fake_designer import ScriptedDesigner
 from tests.fixtures.fake_substrate import PLAN, FakeSubstrate
+
+ROOT = Path(__file__).resolve().parents[2]
 
 LLM = AEAConfig(method_version="llm_v1")
 
@@ -75,7 +77,8 @@ def _run(
     sub = FakeSubstrate(policies, seed=3, with_designer=True, designer_fn=designer)
     if reference == "expert":
         reference = ExpertReference(
-            lambda tid: sub.open_session(TaskRef(tid, int(tid)), None, None), max_steps=20
+            lambda task: sub.open_session(TaskRef(task.task_id, task.seed), None, None),
+            max_steps=20,
         )
     ctrl = Controller(
         config, sub, tmp_path / "run", "r1", arm="L", use_proposer=True, reference=reference, **kw
@@ -206,7 +209,8 @@ def test_7_10_11_valid_family_enters_try_family_and_the_local_bracket(tmp_path: 
     _, outcomes, designer, _sub = _run(tmp_path, {"7": "footer"}, HIGH_OK)
     ev = _events(tmp_path / "run")
     guard = next(e for e in ev if e.kind == "solvable")
-    assert guard.payload["family"] == "case_flip" and guard.payload["source"] == "by_construction"
+    # llm_v1: the declared O axis certifies nothing; the policy witness was replayed
+    assert guard.payload["family"] == "case_flip" and guard.payload["source"] == "policy_replay"
     br = next(e for e in ev if e.kind == "bracket")
     hist = br.payload["history"]
     assert br.payload["family"] == "case_flip" and hist[0]["d"] == 1.0
@@ -312,9 +316,9 @@ def test_13_16_19_20_low_requests_the_reference_lazily_under_the_lock(tmp_path: 
     designer = ScriptedDesigner(LOW_BOTH)
     sub = FakeSubstrate({"9": "random"}, seed=3, with_designer=True, designer_fn=designer)
 
-    def open_fn(tid: str) -> Any:
+    def open_fn(task: Any) -> Any:
         seen_locked.append(SESSION_LOCK._is_owned())  # type: ignore[attr-defined]
-        return sub.open_session(TaskRef(tid, int(tid)), None, None)
+        return sub.open_session(TaskRef(task.task_id, task.seed), None, None)
 
     ref = ExpertReference(open_fn, max_steps=20)
     ctrl = Controller(LLM, sub, tmp_path / "run", "r1", arm="L", reference=ref)
@@ -333,8 +337,8 @@ def test_13_16_19_20_low_requests_the_reference_lazily_under_the_lock(tmp_path: 
 def test_14_15_band_and_saturated_never_request_the_reference(tmp_path: Path) -> None:
     calls: list[str] = []
 
-    def provider(task_id: str) -> Reference:
-        calls.append(task_id)
+    def provider(task: Any) -> Reference:
+        calls.append(task.task_id)
         return Reference(True, "pass", tuple(PLAN))
 
     designer = ScriptedDesigner(HIGH_OK)
@@ -397,9 +401,9 @@ def test_21_failure_only_low_works_without_a_reference(tmp_path: Path) -> None:
     assert o.outcome in ("accepted", "dropped") and o.reason != "no_valid_proposal"
     assert any(e.kind == "stage_candidates" and e.payload["source"] == "designer" for e in ev)
     failing = ExpertReference(
-        lambda tid: (_ for _ in ()).throw(RuntimeError("expert down")), max_steps=5
+        lambda task: (_ for _ in ()).throw(RuntimeError("expert down")), max_steps=5
     )
-    got = failing("9")
+    got = failing(TaskRef("9", 9))
     assert not got.ok and "expert down" in got.reason and got.n_steps == 0
 
 
@@ -551,3 +555,188 @@ def test_evidence_is_bounded_and_deterministic() -> None:
     assert "evidence truncated" in small.text and len(small.text) <= 400
     assert dz.task_goal([long]) == "put x in b"
     assert dz.task_goal([]) == ""
+
+
+# ------------------------------------------------------------------ phase 2.1: issues 1 to 3
+ACTION_GATE = """
+class _Rules(Rules):
+    DOSE = __DOSE__
+
+    def filter_action(self, action, env_state):
+        if self.DOSE > 0.5 and action.kwargs.get("text") == "take x from a":
+            return Blocked(reason="gated")
+        return action
+"""
+
+
+def _long_trace(n: int) -> Trace:
+    """A failure whose every step carries a full-length observation and reasoning."""
+    t = _trace(False, n)
+    for i, st in enumerate(t.steps):
+        st.raw_observation = Observation(text=f"Task: put x in b\n\n{'x' * 400} {i}")
+        st.filtered_observation = st.raw_observation
+        st.policy_raw_response = f"<think>{'y' * 400}</think><action>look</action>"
+    return t
+
+
+def _guard_events(run: Path) -> list[Any]:
+    return [e for e in _events(run) if e.kind == "solvable"]
+
+
+def test_issue1_a_llm_declared_o_axis_does_not_grant_by_construction(tmp_path: Path) -> None:
+    """A: an llm_v1 O-axis proposal goes through the real guard (witness replay here)."""
+    _, _outcomes, _designer, _sub = _run(tmp_path, {"7": "footer"}, HIGH_OK)
+    guards = _guard_events(tmp_path / "run")
+    assert len(guards) == 1 and guards[0].payload["family"] == "case_flip"
+    assert guards[0].payload["source"] == "policy_replay" and guards[0].payload["ok"]
+    assert guards[0].payload["detail"] == {"n_steps": 4}  # the witness was actually replayed
+
+
+def test_issue1_b_contradictory_axis_label_cannot_bypass_the_guard(tmp_path: Path) -> None:
+    """B: axis = O declared, but the code gates an action (filter_action). The label is
+    metadata; the guard runs, the witness is blocked, the oracle is consulted."""
+    lying = (
+        "propose_interventions",
+        {
+            "families": [
+                {
+                    "name": "gate",
+                    "axis": "O",
+                    "mechanism_summary": "declared O, actually blocks the pickup",
+                    "rules_code": ACTION_GATE,
+                }
+            ]
+        },
+    )
+    _, outcomes, _designer, _sub = _run(tmp_path, {"2": "expert"}, lying)
+    guards = _guard_events(tmp_path / "run")
+    assert len(guards) == 1 and guards[0].payload["source"] != "by_construction"
+    assert guards[0].payload["source"] == "uncertified" and not guards[0].payload["ok"]
+    assert "policy_replay" in guards[0].payload["detail"]  # replay tried and blocked
+    assert any(k.startswith("oracle_") for k in guards[0].payload["detail"])  # oracle tried
+    o = outcomes[0]
+    assert o.outcome == "dropped" and o.reason == "no_leverage"  # skipped as uncertified
+    assert not any(e.kind in ("bracket", "no_leverage") for e in _events(tmp_path / "run"))
+
+
+def test_issue1_c_v04_o_axis_family_keeps_by_construction(tmp_path: Path) -> None:
+    """C: the trusted v0.4 path is unchanged (the golden pins it too): a proposer O-axis family
+    is solvable by construction there."""
+    designer = ScriptedDesigner(("propose_families", HIGH_OK[1]))
+    sub = FakeSubstrate({"7": "footer"}, seed=3, with_designer=True, designer_fn=designer)
+    ctrl = Controller(AEAConfig(), sub, tmp_path / "run", "r1", arm="A", use_proposer=True)
+    ctrl.run([TaskRef("7", 7)])
+    src = {e.payload["family"]: e.payload["source"] for e in _guard_events(tmp_path / "run")}
+    assert src["case_flip"] == "by_construction" and src["footer_mask"] == "by_construction"
+
+
+def test_issue2_reference_survives_worst_case_truncation() -> None:
+    """Three very long failures plus a reference under the default bound: the reference block
+    is intact and precedes the failures; ``reference_used`` is read from the bounded text."""
+    long = [_long_trace(400) for _ in range(3)]
+    ref = Reference(True, "pass", tuple(PLAN))
+    unbounded = serialize_low(long, 0.0, 16, ref, dz.EvidenceBounds(total_chars=10**7))
+    assert len(unbounded.text) > dz.BOUNDS.total_chars  # the default bound really cuts
+    ev = serialize_low(long, 0.0, 16, ref)
+    assert len(ev.text) == dz.BOUNDS.total_chars and "evidence truncated" in ev.text
+    block_start = ev.text.index("PRIVILEGED REFERENCE")
+    fails_start = ev.text.index("FAILED CURRENT-POLICY TRAJECTORIES")
+    assert block_start < fails_start
+    for i, a in enumerate(PLAN):
+        assert f"step {i + 1}: {a}" in ev.text[block_start:fails_start]
+    assert ev.reference_used
+    assert "Trajectory F1 - FAILURE (400 steps)" in ev.text  # failures are what got cut
+    kept = ev.redacted[ev.redacted.index("PRIVILEGED") : ev.redacted.index("FAILED CURRENT")]
+    assert "[content withheld]" in kept and "move x to b" not in kept  # metadata only
+    # metadata matches presence in every case
+    assert not serialize_low(long, 0.0, 16, None).reference_used
+    assert not serialize_low(long, 0.0, 16, Reference(False, "expert_stuck")).reference_used
+    tiny = dz.EvidenceBounds(total_chars=60)  # nothing but the header fits
+    cut = serialize_low(long, 0.0, 16, ref, tiny)
+    assert "PRIVILEGED REFERENCE (" not in cut.text and not cut.reference_used
+
+
+def test_issue2_low_run_metadata_matches_the_designer_prompt(tmp_path: Path) -> None:
+    _, _o, designer, _sub = _run(tmp_path, {"9": "random"}, LOW_BOTH)
+    prompt = designer.requests[0].messages[1].content
+    rec = json.loads((tmp_path / "run" / "designer_calls.jsonl").read_text().splitlines()[0])
+    assert rec["reference_used"] and "PRIVILEGED REFERENCE (" in prompt
+    assert prompt.index("PRIVILEGED REFERENCE") < prompt.index("FAILED CURRENT-POLICY")
+
+
+def test_issue3_production_wiring_injects_the_expert_only_under_llm_v1(tmp_path: Path) -> None:
+    """The substrate-level wiring the drivers call: None for v0.4 (never requested); under
+    llm_v1 a lazy ExpertReference over the substrate's own sessions that runs only on zero."""
+    from aea.substrate import reference_provider
+
+    opened: list[str] = []
+    designer = ScriptedDesigner(LOW_BOTH)
+    sub = FakeSubstrate(
+        {"9": "random", "7": "footer"}, seed=3, with_designer=True, designer_fn=designer
+    )
+    original = sub.open_session
+
+    def counting(task: TaskRef, cand: Candidate | None, ro: dict[str, Any] | None) -> Session:
+        if cand is None and ro is None:  # a reset-state session with no candidate: the expert
+            opened.append(task.task_id)
+        return original(task, cand, ro)
+
+    sub.open_session = counting  # type: ignore[method-assign, assignment]
+    assert reference_provider(AEAConfig(), sub.open_session) is None  # v0.4: nothing to inject
+    provider = reference_provider(LLM, sub.open_session)
+    assert isinstance(provider, ExpertReference) and opened == []  # constructing runs nothing
+    ctrl = Controller(LLM, sub, tmp_path / "run", "r1", arm="L", reference=provider)
+    ctrl.run([TaskRef("7", 7), TaskRef("9", 9)])  # saturated first, then zero
+    assert opened == ["9"]  # the expert ran once, on the zero task only
+    ev = _events(tmp_path / "run")
+    refs = [e for e in ev if e.kind == "reference"]
+    assert [e.payload["task_id"] for e in refs] == ["9"]
+    assert refs[0].payload["requested"] and refs[0].payload["available"]
+    assert refs[0].payload["n_steps"] == len(PLAN)
+    de = next(e for e in ev if e.kind == "designer_evidence" and e.payload["task_id"] == "9")
+    assert de.payload["reference_used"]
+    low = next(r for r in designer.requests if r.tools == (DESIGN_LOW_TOOL,))
+    assert "step 1: go to a" in low.messages[1].content
+    # v0.4 on the same substrate: the wiring gives None and the run never emits a reference
+    v04 = FakeSubstrate({"9": "random"}, seed=3)
+    Controller(
+        AEAConfig(),
+        v04,
+        tmp_path / "v04",
+        "r2",
+        arm="A",
+        reference=reference_provider(AEAConfig(), v04.open_session),
+    ).run([TaskRef("9", 9)])
+    assert not any(e.kind in ("reference", "designer_evidence") for e in _events(tmp_path / "v04"))
+
+
+def test_issue3_driver_site_wires_the_provider() -> None:
+    """The E3 driver's Controller construction passes ``sub.reference_provider(cfg)``."""
+    src = (ROOT / "scripts" / "e3.py").read_text(encoding="utf-8")
+    assert "reference=sub.reference_provider(cfg)" in src
+    assert "def reference_provider(self, config: AEAConfig)" in (
+        ROOT / "src" / "aea" / "substrate.py"
+    ).read_text(encoding="utf-8")
+
+
+def test_leakage_reference_prefix_before_the_cut_only(tmp_path: Path) -> None:
+    """Reference cut at k = 2: actions[:2] shape the Setup state (learner-visible by
+    construction); actions[2:] appear nowhere the learner or E3-SL reads."""
+    _, outcomes, designer, sub = _run(
+        tmp_path, {"9": "staged"}, ("select_stages", {"stages": [REF_STAGE]})
+    )
+    run = tmp_path / "run"
+    assert outcomes[0].outcome == "accepted"
+    before, after = PLAN[:2], PLAN[2:]
+    for line in (run / "traces.jsonl").read_text().splitlines():
+        r = json.loads(line)
+        prefix = [a["kwargs"]["text"] for a in r["candidate"]["in_env_actions"]]
+        assert not set(prefix) & set(after)  # the Setup prefix stops at the cut
+        if not r["success"]:  # a failed staged rollout never received an action past the cut
+            assert not {s["raw_action"]["kwargs"]["text"] for s in r["steps"]} & set(after)
+    entry = read_corpus(run / "corpus.jsonl")[0]
+    assert not {x["kwargs"]["text"] for x in entry.in_env_actions} & set(after)
+    assert [x["kwargs"]["text"] for x in entry.in_env_actions][:2] == before
+    # the substrate's rollouts only ever saw the compiled prefix as the candidate
+    assert all(ph in ("estimate", "probe") for _, ph, _ in sub.calls)
+    assert designer.calls == 1

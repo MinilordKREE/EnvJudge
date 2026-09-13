@@ -55,25 +55,36 @@ class Reference:
         return len(self.actions)
 
 
+class TaskLike(Protocol):
+    """What a provider needs of the controller's ``TaskRef`` (no import cycle)."""
+
+    @property
+    def task_id(self) -> str: ...
+    @property
+    def seed(self) -> int: ...
+
+
 class ReferenceProvider(Protocol):
     """Privileged reference for one task: a successful action list from the reset state, or
-    ``ok=False`` with the reason (expert error, stuck, timeout, no success). Never charged."""
+    ``ok=False`` with the reason (expert error, stuck, timeout, no success). Never charged.
+    Constructing a provider runs nothing; the expert runs only when the controller calls it
+    (``llm_v1`` and regime ``zero``)."""
 
-    def __call__(self, task_id: str) -> Reference: ...
+    def __call__(self, task: TaskLike) -> Reference: ...
 
 
 @dataclass
 class ExpertReference:
     """The benchmark expert from reset, through a locked in-process session (``run_expert``)."""
 
-    open_fn: Callable[[str], Session]
+    open_fn: Callable[[TaskLike], Session]
     max_steps: int
 
-    def __call__(self, task_id: str) -> Reference:
+    def __call__(self, task: TaskLike) -> Reference:
         with SESSION_LOCK:
             sess: Session | None = None
             try:
-                sess = self.open_fn(task_id)
+                sess = self.open_fn(task)
                 r = run_expert(sess, max_steps=self.max_steps)
             except Exception as exc:  # the expert must never take the task down
                 return Reference(False, f"{type(exc).__name__}: {exc}")
@@ -223,15 +234,20 @@ def serialize_low(
     reference: Reference | None,
     b: EvidenceBounds = BOUNDS,
 ) -> Evidence:
+    """The reference block comes BEFORE the failures, so the size bound (which truncates from
+    the end) can only ever cut failure steps, never the reference; ``reference_used`` is read
+    from the bounded text itself, so the metadata cannot claim a reference the designer did not
+    receive."""
     ids = {f"F{i + 1}": t.episode_id for i, t in enumerate(failures)}
-    parts = [
+    head = [
         f"TASK GOAL: {task_goal(failures)}",
         f"REGIME: LOW (zero)\np_hat: {p_hat:.3f}\nn: {n}",
+    ]
+    fails = [
         "FAILED CURRENT-POLICY TRAJECTORIES (selectable: trajectory_id F1.., step 1..length)",
         *[trajectory_text(label, t, b) for label, t in zip(ids, failures, strict=True)],
     ]
-    used = reference is not None and reference.ok
-    if used and reference is not None:
+    if reference is not None and reference.ok:
         block = "PRIVILEGED REFERENCE (a successful action sequence from reset; selectable: "
         block += f"trajectory_id {REFERENCE_ID}, step 1..{reference.n_steps})\n"
         block += "\n".join(f"step {i + 1}: {a}" for i, a in enumerate(reference.actions))
@@ -239,11 +255,12 @@ def serialize_low(
             f"PRIVILEGED REFERENCE: {reference.n_steps} actions, "
             f"sha256 {_sha(json.dumps(list(reference.actions)))[:16]} [content withheld]"
         )
-        text = _bounded([*parts, block], b.total_chars)
-        redacted = _bounded([*parts, meta], b.total_chars)
+        text = _bounded([*head, block, *fails], b.total_chars)
+        redacted = _bounded([*head, meta, *fails], b.total_chars)
+        used = block in text
     else:
-        text = _bounded(parts, b.total_chars)
-        redacted = text
+        text = _bounded([*head, *fails], b.total_chars)
+        redacted, used = text, False
     return Evidence(text, redacted, _sha(text), len(failures), used, ids)
 
 

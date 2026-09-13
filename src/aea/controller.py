@@ -457,7 +457,9 @@ class Controller:
                 self.config,
                 policy_success=witness,
                 oracle=self.substrate.has_oracle(),
-                by_construction=fam.axis == "O",
+                # v0.4: a trusted O-axis family is solvable by construction. llm_v1: the axis
+                # is a self-declared label and certifies nothing; the guard always runs.
+                by_construction=fam.axis == "O" and self.config.method_version != "llm_v1",
             )
         self._ev(
             "solvable",
@@ -776,7 +778,7 @@ class Controller:
         if self.reference is None:
             self._ev("reference", task, requested=True, available=False, reason="no_provider")
             return None
-        ref = self.reference(task.task_id)
+        ref = self.reference(task)
         self._ev(
             "reference",
             task,

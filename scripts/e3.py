@@ -479,13 +479,16 @@ def stage_a(task_concurrency: int) -> None:
         },
     )
     os.environ.setdefault("ALFWORLD_DATA", str(Path.home() / "eh_alfworld_data"))
+    cfg = AEAConfig()
+    sub = substrate(ctx.out_dir, ctx.run_id, with_designer=True, concurrency=ROLLOUT_CONCURRENCY)
     ctrl = Controller(
-        AEAConfig(),
-        substrate(ctx.out_dir, ctx.run_id, with_designer=True, concurrency=ROLLOUT_CONCURRENCY),
+        cfg,
+        sub,
         ctx.out_dir,
         ctx.run_id,
         arm="A",
         use_proposer=True,
+        reference=sub.reference_provider(cfg),  # None under v0.4; the expert under llm_v1
     )
     stop = start_watchdog("A", ctx.out_dir / "events.jsonl")
     outcomes = ctrl.run(order, concurrency=task_concurrency)
