@@ -7,9 +7,10 @@ new families per task under the dose contract, validated before any rollout (loa
 released ``code_loader``, references DOSE, passes an LLM-free smoke at d = 1). The proposer never
 decides acceptance. ``LeverageTable`` keeps one counter per family — the rate, over the tasks where
 it was evaluated at d = 1, of not returning ``no_effect`` — orders families by it (proposer order
-until a family has been seen) and keeps the population bracket seed ``[lo_pop, hi_pop]`` per
-family (the highest dose seen ``too_easy`` below 1 and the lowest seen ``too_hard`` on any task;
-docs/spec/AEA_v0.3.md).
+until a family has been seen) and keeps each family's frontier history: one estimate per previous
+task (its accepted dose, else (lo_t + hi_t) / 2 of its final local interval); the median of >=
+``impl.warm_start_min_history`` of them is a new task's first interior probe
+(docs/spec/AEA_v0.4.md).
 
 References: ``harness_agent.py:124-198`` (the released ``propose_candidate`` tool schema; ours
 mirrors its field names), ``rules.py:93-104`` (hook signatures), ``code_loader.py:68-107``.
@@ -335,10 +336,9 @@ def propose_families(
 class FamilyStats:
     tested: int = 0
     with_leverage: int = 0
-    lo_pop: float = 0.0
-    """Highest dose (< 1) observed ``too_easy`` on any task."""
-    hi_pop: float = 1.0
-    """Lowest dose observed ``too_hard`` on any task."""
+    frontiers: list[float] = field(default_factory=list)
+    """One frontier estimate per previous task: its accepted dose, else (lo_t + hi_t) / 2 of its
+    final local interval."""
 
     @property
     def rate(self) -> float | None:
@@ -347,8 +347,8 @@ class FamilyStats:
 
 class LeverageTable:
     """One record per family, shared across the tasks of a run (thread-safe): the leverage rate
-    (family ordering) and the population bracket seed ``[lo_pop, hi_pop]``
-    (docs/spec/AEA_v0.3.md, "Families and leverage")."""
+    (family ordering) and the frontier history behind the soft warm start
+    (docs/spec/AEA_v0.4.md, "Families and leverage")."""
 
     def __init__(self) -> None:
         self._stats: dict[str, FamilyStats] = {}
@@ -364,15 +364,13 @@ class LeverageTable:
             s.tested += 1
             s.with_leverage += int(has_leverage)
 
-    def record_dose(self, family: str, dose: float, verdict: str) -> None:
-        """A bracket observation on any task: ``too_easy`` below d = 1 raises ``lo_pop``,
-        ``too_hard`` lowers ``hi_pop``; ``in_band`` leaves the seed alone."""
+    def record_frontier(self, family: str, frontier: float) -> None:
+        """A finished task-local search contributes one frontier estimate: the accepted dose when
+        the task accepted, else the midpoint ``(lo + hi) / 2`` of its final local interval
+        (exhausted or censored by the cap)."""
         s = self.stats(family)
         with self._lock:
-            if verdict == "too_easy" and dose < 1.0:
-                s.lo_pop = max(s.lo_pop, dose)
-            elif verdict == "too_hard":
-                s.hi_pop = min(s.hi_pop, dose)
+            s.frontiers.append(frontier)
 
     def order(self, families: Sequence[Family]) -> list[Family]:
         """By leverage rate, descending; unseen families keep their given (proposer) order."""
@@ -385,14 +383,18 @@ class LeverageTable:
 
         return [f for _, f in sorted(enumerate(families), key=key)]
 
-    def bracket_seed(self, family: str) -> tuple[float, float]:
-        """``[lo_pop, hi_pop]`` for a new task's bracket; ``[0, 1]`` when the family has no
-        population data or its observations are inconsistent (``lo_pop >= hi_pop``)."""
+    def warm_start(self, family: str, min_history: int) -> float:
+        """The first interior probe of a new task's bracket: the median of the family's previous
+        frontier estimates when at least ``min_history`` exist, else the midpoint 0.5. It never
+        narrows the task-local interval, which always starts at [0, 1]."""
         s = self.stats(family)
         with self._lock:
-            if s.lo_pop < s.hi_pop:
-                return (s.lo_pop, s.hi_pop)
-            return (0.0, 1.0)
+            hist = sorted(s.frontiers)
+        if len(hist) < min_history:
+            return 0.5
+        n = len(hist)
+        med = hist[n // 2] if n % 2 else (hist[n // 2 - 1] + hist[n // 2]) / 2
+        return min(max(med, 1e-6), 1 - 1e-6)
 
     def snapshot(self) -> dict[str, dict[str, object]]:
         with self._lock:
@@ -401,8 +403,7 @@ class LeverageTable:
                     "tested": v.tested,
                     "with_leverage": v.with_leverage,
                     "rate": v.rate,
-                    "lo_pop": v.lo_pop,
-                    "hi_pop": v.hi_pop,
+                    "frontiers": list(v.frontiers),
                 }
                 for k, v in self._stats.items()
             }

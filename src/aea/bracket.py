@@ -1,17 +1,16 @@
-"""Dose bracketing for the harden operator (docs/spec/AEA_v0.3.md, "Families and leverage").
+"""Dose bracketing for the harden operator (docs/spec/AEA_v0.4.md, "Families and leverage").
 
 The d = 1 leverage test is always run by the caller. ``bracket``: ``lo`` = the largest dose known
-too easy, ``hi`` = the smallest dose known too hard; they start at the family's population seed
-``[lo_pop, hi_pop]`` (the highest dose ever seen too easy and the lowest ever seen too hard on any
-task; ``[0, 1]`` when the family has no population data) and the failed leverage test may lower
-``hi`` to 1. Each bisection evaluates the midpoint with the 4 -> 8 rule: ``too_easy`` -> lo = d,
-``too_hard`` -> hi = d, ``in_band`` -> accept. At most ``impl.max_bisections``, then
-``exhausted``: a non-monotone family shows up as a bracket that does not converge. An order
-violation (a higher dose with a success rate more than ``impl.order_tolerance`` above a lower
-dose's) is recorded as a diagnostic and never stops the search. The cap arithmetic
-10 + 4 + 8 + 8 = 30 leaves at most two bisections after a full leverage test, which is why the
-seed matters: a family whose band lies in (0.875, 1] is unreachable from [0, 1] but one bisection
-away from [0.875, 1].
+too easy (starts at 0), ``hi`` = the smallest dose known too hard (starts at 1, the failed leverage
+test); each bisection evaluates one dose with the 4 -> 8 rule: ``too_easy`` -> lo = d,
+``too_hard`` -> hi = d, ``in_band`` -> accept. The first interior dose is ``start`` (the soft warm
+start: the family's historical frontier median, else 0.5); every later dose is the midpoint of the
+task-local interval, which starts at [0, 1] whatever the history: a wrong warm start costs one
+probe and nothing else. At most ``impl.max_bisections``, then ``exhausted``: a non-monotone family
+shows up as a bracket that does not converge. An order violation (a higher dose with a success
+rate more than ``impl.order_tolerance`` above a lower dose's) is recorded as a diagnostic and never
+stops the search. The cap arithmetic 10 + 4 + 8 + 8 = 30 leaves at most two bisections after a
+full leverage test.
 """
 
 from __future__ import annotations
@@ -57,17 +56,13 @@ def bracket(
     config: AEAConfig,
     *,
     leverage: DoseEval,
-    lo: float = 0.0,
-    hi: float = 1.0,
+    start: float | None = None,
 ) -> BracketResult:
-    """Bisect on the population-seeded ``[lo, hi]`` after a failed (``too_hard``) leverage test
-    at d = 1; an invalid seed (``lo >= hi``) falls back to ``[0, 1]``."""
+    """Bisect on the task-local [0, 1] after a failed (``too_hard``) leverage test at d = 1;
+    ``start`` is only the first interior probe (clipped into the open interval)."""
     history = [leverage]
-    if not 0.0 <= lo < hi <= 1.0:
-        lo, hi = 0.0, 1.0
-    if leverage.eval.verdict == "too_hard":
-        hi = min(hi, 1.0)
-    d = (lo + hi) / 2
+    lo, hi = 0.0, 1.0
+    d = start if start is not None and lo < start < hi else 0.5
     try:
         for _ in range(config.impl.max_bisections):
             ev = DoseEval(round(d, 6), evaluate_at(round(d, 6)))

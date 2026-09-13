@@ -1,5 +1,5 @@
-"""evaluate() (the one 4 -> 8 rule, stage-side top-up) and the population-seeded dose bracket
-(docs/spec/AEA_v0.3.md)."""
+"""evaluate() (the one 4 -> 8 rule) and the dose bracket with the soft warm start
+(docs/spec/AEA_v0.4.md)."""
 
 from __future__ import annotations
 
@@ -80,80 +80,62 @@ def test_bracket_bisects_and_accepts() -> None:
     assert seen == [0.5, 0.75, 0.625] and [h.d for h in r.history] == [1.0, 0.5, 0.75, 0.625]
 
 
-def test_bracket_population_seed_sets_the_first_bisection() -> None:
-    table = {0.9375: [1, 0, 1, 0, 1, 1, 0, 0], 0.5: [1, 0, 1, 0, 1, 1, 0, 0]}
+def _oracle(lo_true: float, hi_true: float) -> tuple[list[float], Callable[[float], Eval]]:
+    """A task whose band is (lo_true, hi_true): too easy (4/4) at or below lo_true, too hard
+    (0/4) at or above hi_true, in band (4/8) strictly inside. Returns the probe log."""
     seen: list[float] = []
 
     def at(d: float) -> Eval:
         seen.append(d)
-        _, run = scripted(table[d])
+        if d <= lo_true:
+            script = [1, 1, 1, 1]
+        elif d >= hi_true:
+            script = [0, 0, 0, 0]
+        else:
+            script = [1, 0, 1, 0, 1, 1, 0, 0]
+        _, run = scripted(script)
         return evaluate(run, CFG)
 
-    r = bracket(at, CFG, leverage=DoseEval(1.0, Eval(0, 4, "too_hard")), lo=0.875, hi=1.0)
-    assert r.status == "accepted" and seen == [0.9375]
-    seen.clear()
-    bracket(at, CFG, leverage=DoseEval(1.0, Eval(0, 4, "too_hard")))  # no population data
-    assert seen == [0.5]
-    seen.clear()
-    bracket(at, CFG, leverage=DoseEval(1.0, Eval(0, 4, "too_hard")), lo=0.9, hi=0.9)  # invalid
-    assert seen == [0.5]
+    return seen, at
 
 
-def _footer_like(lo: float, hi: float) -> tuple[str, int]:
-    """A scripted family whose band lies in (0.875, 1.0]: too_easy (4/4) at every dose <= 0.875,
-    in band at any dose strictly inside (0.875, 1), too_hard (0/4) at d = 1. Charged against the
-    cap of 30 after a 10-rollout estimate; returns (status, rollouts spent)."""
-    spent = {"n": 10}
-
-    def charged_run(script: list[int]) -> Callable[[int], list[Trace]]:
-        pos = [0]
-
-        def run(n: int) -> list[Trace]:
-            if spent["n"] + n > CFG.cap:
-                raise BudgetExhausted(
-                    "cap", budget="search", cap=CFG.cap, spent=spent["n"], task_id="t"
-                )
-            spent["n"] += n
-            got = script[pos[0] : pos[0] + n]
-            pos[0] += n
-            return [_trace(bool(x)) for x in got]
-
-        return run
-
-    def at(d: float) -> Eval:
-        if d <= 0.875:
-            return evaluate(charged_run([1, 1, 1, 1]), CFG)
-        if d >= 1.0:
-            return evaluate(charged_run([0, 0, 0, 0]), CFG)
-        return evaluate(charged_run([1, 0, 1, 0, 1, 1, 0, 0]), CFG)
-
-    lev = at(1.0)  # the d = 1 leverage test always runs first (4 rollouts)
-    r = bracket(at, CFG, leverage=DoseEval(1.0, lev), lo=lo, hi=hi)
-    return r.status, spent["n"]
+def test_warm_start_is_only_the_first_probe_local_interval_stays_0_1() -> None:
+    """Tests A and E: a warm start near a narrow high band is probed first; whatever the start,
+    the task-local interval is [0, 1] before that probe — the next dose after a too-easy warm
+    start is (start + 1) / 2 and after a too-hard one start / 2."""
+    seen, at = _oracle(0.875, 1.0)  # the E3 footer-mask band
+    r = bracket(at, CFG, leverage=DoseEval(1.0, Eval(0, 4, "too_hard")), start=0.9375)
+    assert r.status == "accepted" and seen == [0.9375]  # Test A: first probe >> 0.5, accepted
+    seen, at = _oracle(0.95, 1.0)
+    bracket(at, CFG, leverage=DoseEval(1.0, Eval(0, 4, "too_hard")), start=0.9)
+    assert seen[:2] == [0.9, 0.95]  # too easy at 0.9 -> hi was still 1: next = (0.9 + 1) / 2
+    seen, at = _oracle(0.3, 0.5)
+    bracket(at, CFG, leverage=DoseEval(1.0, Eval(0, 4, "too_hard")), start=0.9)
+    assert seen[:2] == [0.9, 0.45]  # too hard at 0.9 -> lo was still 0: next = 0.9 / 2
 
 
-def test_population_seed_reaches_a_late_band_within_the_cap() -> None:
-    """The E3 footer-mask case: seeded at [0.875, 1] the band is one bisection away
-    (10 + 4 + 8 = 22 <= 30); seeded at [0, 1] the walk 0.5 -> 0.75 -> 0.875 exhausts the cap."""
-    assert _footer_like(0.875, 1.0) == ("accepted", 22)
-    status, spent = _footer_like(0.0, 1.0)
-    # 10 + 4 + 4 + 4 + 4 = 26, then the first batch at 0.9375 fits (30) and its top-up cannot
-    assert status == "budget" and spent == 30
+def test_wrong_warm_start_costs_one_probe_and_recovers() -> None:
+    """Test C: history says 0.9, the task's band is (0.3, 0.5): after the warm probe is too hard
+    the task-local search moves down and accepts inside the true band."""
+    seen, at = _oracle(0.3, 0.5)
+    r = bracket(at, CFG, leverage=DoseEval(1.0, Eval(0, 4, "too_hard")), start=0.9)
+    assert r.status == "accepted" and r.accepted is not None
+    assert 0.3 < r.accepted.d < 0.5 and seen == [0.9, 0.45]
+    # and the same task from the midpoint (no history): one probe fewer
+    seen, at = _oracle(0.3, 0.5)
+    r = bracket(at, CFG, leverage=DoseEval(1.0, Eval(0, 4, "too_hard")))
+    assert r.status == "accepted" and seen == [0.5, 0.25, 0.375]
 
 
-def test_evaluate_tops_up_a_full_first_batch_on_the_stage_side() -> None:
-    spent, run = scripted([1, 1, 1, 1, 1, 1, 1, 0])
-    ev = evaluate(run, CFG, top_up_full=True)
-    assert (ev.successes, ev.n, ev.verdict) == (7, 8, "too_easy") and spent[0] == 8
-    spent, run = scripted([1, 1, 1, 1, 0, 1, 0, 0])
-    ev = evaluate(run, CFG, top_up_full=True)
-    assert (ev.successes, ev.n, ev.verdict) == (5, 8, "in_band") and spent[0] == 8
-    spent, run = scripted([1, 1, 1, 1])  # harden side unchanged: 4/4 decides at 4
-    ev = evaluate(run, CFG)
-    assert (ev.successes, ev.n, ev.verdict) == (4, 4, "too_easy") and spent[0] == 4
-    spent, run = scripted([0, 0, 0, 0])  # 0/4 still decides at 4 on both sides
-    ev = evaluate(run, CFG, top_up_full=True)
-    assert (ev.successes, ev.n, ev.verdict) == (0, 4, "too_hard") and spent[0] == 4
+def test_no_history_reduces_to_v02_midpoint() -> None:
+    """Test D: without a warm start the first probe is 0.5; a start on the boundary is clipped
+    back to the midpoint."""
+    seen, at = _oracle(0.875, 1.0)
+    bracket(at, CFG, leverage=DoseEval(1.0, Eval(0, 4, "too_hard")))
+    assert seen[0] == 0.5
+    seen, at = _oracle(0.875, 1.0)
+    bracket(at, CFG, leverage=DoseEval(1.0, Eval(0, 4, "too_hard")), start=1.0)
+    assert seen[0] == 0.5
 
 
 def test_cap_arithmetic_10_4_8_8() -> None:

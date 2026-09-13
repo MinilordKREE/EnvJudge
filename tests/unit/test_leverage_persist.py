@@ -77,26 +77,22 @@ def test_interrupted_attempts_do_not_count(tmp_path: Path) -> None:
     ev.write("task_start", {"task_id": "7"})
     ev.write("leverage", {"task_id": "7", "family": "footer_mask", "has_leverage": False})
     ev.write(
-        "leverage", {"task_id": "7", "family": "footer_mask", "dose": 1.0, "verdict": "too_hard"}
+        "leverage",
+        {"task_id": "7", "family": "footer_mask", "frontier": 0.9375, "lo": 0.875, "hi": 1.0},
     )
-    ev.write(
-        "leverage", {"task_id": "7", "family": "footer_mask", "dose": 0.875, "verdict": "too_easy"}
+    ev.write(  # v0.3 population event: ignored
+        "leverage", {"task_id": "7", "family": "footer_mask", "dose": 0.5, "verdict": "too_hard"}
     )
     ev.write("leverage", {"task_id": "7", "family": "footer_mask", "accepted_dose": 0.5})  # v0.2
     ev.write("task_done", {"task_id": "7", "outcome": "accepted"})
     ev.write("task_start", {"task_id": "8"})
     ev.write("leverage", {"task_id": "8", "family": "footer_mask", "has_leverage": True})
     ev.write(
-        "leverage", {"task_id": "8", "family": "footer_mask", "dose": 0.5, "verdict": "too_hard"}
+        "leverage",
+        {"task_id": "8", "family": "footer_mask", "frontier": 0.25, "lo": 0.0, "hi": 0.5},
     )
     ev.close()
     ctrl, _ = _controller(tmp_path, "run")
     snap = ctrl.leverage.snapshot()["footer_mask"]
-    assert snap == {
-        "tested": 1,
-        "with_leverage": 0,
-        "rate": 0.0,
-        "lo_pop": 0.875,
-        "hi_pop": 1.0,
-    }  # task 8's attempt (not done) and the v0.2 accepted_dose event do not count
-    assert ctrl.leverage.bracket_seed("footer_mask") == (0.875, 1.0)
+    assert snap == {"tested": 1, "with_leverage": 0, "rate": 0.0, "frontiers": [0.9375]}
+    # task 8's attempt (not done) and the v0.2 / v0.3 legacy events do not count

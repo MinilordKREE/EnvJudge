@@ -1,4 +1,4 @@
-"""The box (docs/spec/AEA_v0.3.md): estimate -> keep | harden | stage; three outcomes.
+"""The box (docs/spec/AEA_v0.4.md): estimate -> keep | harden | stage; three outcomes.
 
 Every policy rollout is charged to the one budget (``aea.budget``) before it runs; the cap is a
 hard stop and ends the task with ``dropped: budget``. Proposer calls, replays and oracle sessions
@@ -21,9 +21,10 @@ written in the run's task order, so the pooled run's files equal the sequential 
 byte. The pool size is recorded in ``events.jsonl`` (``run_start``) and by the driver in the
 manifest.
 
-The leverage table (leverage rates and the population bracket seeds) is persistent: every
-``record_leverage`` / ``record_dose`` is written as a ``leverage`` event, and a new controller on
-an existing run directory rebuilds the table from the events of the tasks that completed (a task's
+The leverage table (leverage rates and the frontier history behind the soft warm start) is
+persistent: every ``record_leverage`` / ``record_frontier`` is written as a ``leverage`` event, and
+a new controller on an existing run directory rebuilds the table from the events of the tasks that
+completed (a task's
 events count once its ``task_done`` is not ``infra_error``; an interrupted attempt's events are
 discarded with the attempt), so a resumed run and a later extension of the task set continue the
 same table the uninterrupted run would have.
@@ -199,9 +200,12 @@ class Controller:
         self.leverage.record_leverage(family, has_leverage)
         self._ev("leverage", task, family=family, tested=True, has_leverage=has_leverage)
 
-    def _record_dose(self, task: TaskRef, family: str, dose: float, verdict: str) -> None:
-        self.leverage.record_dose(family, dose, verdict)
-        self._ev("leverage", task, family=family, dose=dose, verdict=verdict)
+    def _record_frontier(
+        self, task: TaskRef, family: str, lo: float, hi: float, accepted: float | None
+    ) -> None:
+        frontier = accepted if accepted is not None else (lo + hi) / 2
+        self.leverage.record_frontier(family, frontier)
+        self._ev("leverage", task, family=family, frontier=frontier, lo=lo, hi=hi)
 
     def _restore_leverage(self) -> None:
         """Replay the ``leverage`` events of every completed task, in order, into the table."""
@@ -220,10 +224,10 @@ class Controller:
                 committed.extend(pending.pop(t, []))
         for p in committed:
             family = str(p["family"])
-            if "dose" in p:
-                self.leverage.record_dose(family, float(p["dose"]), str(p.get("verdict")))
-            elif "accepted_dose" in p:
-                continue  # v0.2 event (last accepted dose); no longer part of the table
+            if "frontier" in p:
+                self.leverage.record_frontier(family, float(p["frontier"]))
+            elif "dose" in p or "accepted_dose" in p:
+                continue  # v0.3 population / v0.2 last-accepted-dose events: not part of the table
             else:
                 self.leverage.record_leverage(family, bool(p.get("has_leverage")))
         if committed:
@@ -465,21 +469,26 @@ class Controller:
         if not has_leverage:
             self._ev("no_leverage", task, family=fam.name, successes=lev.successes, n=lev.n)
             return None
-        lo, hi = self.leverage.bracket_seed(fam.name)
+        start = self.leverage.warm_start(fam.name, self.config.impl.warm_start_min_history)
         try:
             result: BracketResult = bracket(
-                evaluate_at, self.config, leverage=DoseEval(1.0, lev), lo=lo, hi=hi
+                evaluate_at, self.config, leverage=DoseEval(1.0, lev), start=start
             )
         except _InfeasibleError as why:
             self._ev("family_skipped", task, family=fam.name, reason=str(why))
             return None
-        for h in result.history:  # the population seed learns from every dose, on every task
-            self._record_dose(task, fam.name, h.d, h.eval.verdict)
+        # one frontier estimate per finished search: the accepted dose, else the midpoint of the
+        # task's final local interval (exhausted or censored searches count too)
+        lo = max([0.0] + [h.d for h in result.history if h.eval.verdict == "too_easy"])
+        hi = min([1.0] + [h.d for h in result.history if h.eval.verdict == "too_hard"])
+        acc_d = result.accepted.d if result.accepted is not None else None
+        self._record_frontier(task, fam.name, lo, hi, acc_d)
         self._ev(
             "bracket",
             task,
             family=fam.name,
-            seed=[lo, hi],
+            start=start,
+            local=[lo, hi],
             status=result.status,
             history=[
                 {"d": h.d, "s": h.eval.successes, "n": h.eval.n, "verdict": h.eval.verdict}
@@ -579,7 +588,7 @@ class Controller:
                 def run(n: int, c: StagedCandidate = c) -> list[Trace]:
                     return self._rollouts(task, c.candidate, n, "probe", reset_options=opts)
 
-                ev = evaluate(run, self.config, top_up_full=True)  # a 4/4 staged state tops up
+                ev = evaluate(run, self.config)
                 profile.append(
                     {
                         "id": c.id,

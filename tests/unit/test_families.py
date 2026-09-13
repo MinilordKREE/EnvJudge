@@ -67,7 +67,7 @@ def test_validate_and_parse_proposals() -> None:
     assert isinstance(families[0], ProposedFamily) and families[0].source == "llm"
 
 
-def test_leverage_table_orders_and_seeds_the_bracket() -> None:
+def test_leverage_table_orders_and_warm_starts() -> None:
     lt = LeverageTable()
     fams: list[Any] = [FooterMask(), HorizonSqueeze()]
     assert [f.name for f in lt.order(fams)] == ["footer_mask", "horizon_squeeze"]  # cold start
@@ -75,17 +75,21 @@ def test_leverage_table_orders_and_seeds_the_bracket() -> None:
         lt.record_leverage("footer_mask", False)  # no effect on 5 tasks
         lt.record_leverage("horizon_squeeze", True)
     assert [f.name for f in lt.order(fams)] == ["horizon_squeeze", "footer_mask"]
-    assert lt.bracket_seed("horizon_squeeze") == (0.0, 1.0)  # no population data
-    # the E3 footer-mask walk on one task: 1.0 too_hard, 0.5 / 0.75 / 0.875 too_easy
-    for d, v in ((1.0, "too_hard"), (0.5, "too_easy"), (0.75, "too_easy"), (0.875, "too_easy")):
-        lt.record_dose("footer_mask", d, v)
-    assert lt.bracket_seed("footer_mask") == (0.875, 1.0)
-    lt.record_dose("footer_mask", 0.9375, "in_band")  # in band leaves the seed alone
-    assert lt.bracket_seed("footer_mask") == (0.875, 1.0)
-    lt.record_dose("footer_mask", 1.0, "too_easy")  # a no-effect d = 1 test is not a lo_pop
-    assert lt.bracket_seed("footer_mask") == (0.875, 1.0)
-    lt.record_dose("footer_mask", 0.8, "too_hard")  # inconsistent population: back to [0, 1]
-    assert lt.bracket_seed("footer_mask") == (0.0, 1.0)
+    # Test D: no history -> 0.5; fewer than min_history -> 0.5
+    assert lt.warm_start("footer_mask", 3) == 0.5
+    lt.record_frontier("footer_mask", 0.9375)  # the E3 walk [0.875, 1] censored: (lo + hi) / 2
+    lt.record_frontier("footer_mask", 0.9375)
+    assert lt.warm_start("footer_mask", 3) == 0.5
+    # Test A: three homogeneous high-band tasks -> the median, well above 0.5
+    lt.record_frontier("footer_mask", 0.95)  # an accepted dose counts as the frontier itself
+    assert lt.warm_start("footer_mask", 3) == 0.9375
+    # Test B: one poisoned task (a 0/4 at 0.5 read as too hard -> frontier 0.25) does not move
+    # the median away from the majority; a hard population bracket would have collapsed to 0.5
+    lt.record_frontier("footer_mask", 0.25)
+    assert lt.warm_start("footer_mask", 3) == 0.9375
+    lt.record_frontier("footer_mask", 0.875)
+    assert abs(lt.warm_start("footer_mask", 3) - 0.9375) < 1e-9
     snap = lt.snapshot()
     assert snap["horizon_squeeze"]["rate"] == 1.0 and snap["footer_mask"]["rate"] == 0.0
-    assert snap["footer_mask"]["lo_pop"] == 0.875 and snap["footer_mask"]["hi_pop"] == 0.8
+    assert snap["footer_mask"]["frontiers"] == [0.9375, 0.9375, 0.95, 0.25, 0.875]
+    assert lt.warm_start("footer_mask", 10) == 0.5  # a larger minimum switches it off

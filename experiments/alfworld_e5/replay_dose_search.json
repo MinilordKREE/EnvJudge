@@ -1,0 +1,660 @@
+{
+ "footer_mask": {
+  "tasks": 8,
+  "rows": [
+   {
+    "task": "3",
+    "lo_t": 0.875,
+    "hi_t": 1.0,
+    "budget_left": 12,
+    "v0.2": {
+     "start": 0.5,
+     "reached": false,
+     "probes": 3,
+     "rollouts": 12,
+     "final": [
+      0.875,
+      1.0
+     ],
+     "accepted_d": null,
+     "censored": false
+    },
+    "v0.3": {
+     "start": 0.5,
+     "reached": false,
+     "probes": 3,
+     "rollouts": 12,
+     "final": [
+      0.875,
+      1.0
+     ],
+     "accepted_d": null,
+     "censored": false
+    },
+    "v0.4": {
+     "start": 0.5,
+     "reached": false,
+     "probes": 3,
+     "rollouts": 12,
+     "final": [
+      0.875,
+      1.0
+     ],
+     "accepted_d": null,
+     "censored": false
+    }
+   },
+   {
+    "task": "7",
+    "lo_t": 0.75,
+    "hi_t": 1.0,
+    "budget_left": 8,
+    "v0.2": {
+     "start": 0.5,
+     "reached": false,
+     "probes": 2,
+     "rollouts": 8,
+     "final": [
+      0.75,
+      1.0
+     ],
+     "accepted_d": null,
+     "censored": false
+    },
+    "v0.3": {
+     "start": 0.9375,
+     "reached": true,
+     "probes": 1,
+     "rollouts": 8,
+     "final": [
+      0.875,
+      1.0
+     ],
+     "accepted_d": 0.9375,
+     "censored": false
+    },
+    "v0.4": {
+     "start": 0.5,
+     "reached": false,
+     "probes": 2,
+     "rollouts": 8,
+     "final": [
+      0.75,
+      1.0
+     ],
+     "accepted_d": null,
+     "censored": false
+    }
+   },
+   {
+    "task": "12",
+    "lo_t": 0.875,
+    "hi_t": 1.0,
+    "budget_left": 12,
+    "v0.2": {
+     "start": 0.5,
+     "reached": false,
+     "probes": 3,
+     "rollouts": 12,
+     "final": [
+      0.875,
+      1.0
+     ],
+     "accepted_d": null,
+     "censored": false
+    },
+    "v0.3": {
+     "start": 0.9375,
+     "reached": true,
+     "probes": 1,
+     "rollouts": 8,
+     "final": [
+      0.875,
+      1.0
+     ],
+     "accepted_d": 0.9375,
+     "censored": false
+    },
+    "v0.4": {
+     "start": 0.5,
+     "reached": false,
+     "probes": 3,
+     "rollouts": 12,
+     "final": [
+      0.875,
+      1.0
+     ],
+     "accepted_d": null,
+     "censored": false
+    }
+   },
+   {
+    "task": "13",
+    "lo_t": 0.75,
+    "hi_t": 1.0,
+    "budget_left": 16,
+    "v0.2": {
+     "start": 0.5,
+     "reached": true,
+     "probes": 3,
+     "rollouts": 16,
+     "final": [
+      0.75,
+      1.0
+     ],
+     "accepted_d": 0.875,
+     "censored": false
+    },
+    "v0.3": {
+     "start": 0.9375,
+     "reached": true,
+     "probes": 1,
+     "rollouts": 8,
+     "final": [
+      0.875,
+      1.0
+     ],
+     "accepted_d": 0.9375,
+     "censored": false
+    },
+    "v0.4": {
+     "start": 0.9375,
+     "reached": true,
+     "probes": 1,
+     "rollouts": 8,
+     "final": [
+      0.0,
+      1.0
+     ],
+     "accepted_d": 0.9375,
+     "censored": false
+    }
+   },
+   {
+    "task": "15",
+    "lo_t": 0.25,
+    "hi_t": 0.5,
+    "budget_left": 16,
+    "v0.2": {
+     "start": 0.5,
+     "reached": true,
+     "probes": 3,
+     "rollouts": 16,
+     "final": [
+      0.25,
+      0.5
+     ],
+     "accepted_d": 0.375,
+     "censored": false
+    },
+    "v0.3": {
+     "start": 0.9375,
+     "reached": false,
+     "probes": 4,
+     "rollouts": 16,
+     "final": [
+      0.875,
+      0.8828125
+     ],
+     "accepted_d": null,
+     "censored": true
+    },
+    "v0.4": {
+     "start": 0.9375,
+     "reached": true,
+     "probes": 2,
+     "rollouts": 12,
+     "final": [
+      0.0,
+      0.9375
+     ],
+     "accepted_d": 0.46875,
+     "censored": false
+    }
+   },
+   {
+    "task": "22",
+    "lo_t": 0.75,
+    "hi_t": 1.0,
+    "budget_left": 8,
+    "v0.2": {
+     "start": 0.5,
+     "reached": false,
+     "probes": 2,
+     "rollouts": 8,
+     "final": [
+      0.75,
+      1.0
+     ],
+     "accepted_d": null,
+     "censored": false
+    },
+    "v0.3": {
+     "start": 0.87890625,
+     "reached": true,
+     "probes": 1,
+     "rollouts": 8,
+     "final": [
+      0.875,
+      0.8828125
+     ],
+     "accepted_d": 0.87890625,
+     "censored": false
+    },
+    "v0.4": {
+     "start": 0.9375,
+     "reached": true,
+     "probes": 1,
+     "rollouts": 8,
+     "final": [
+      0.0,
+      1.0
+     ],
+     "accepted_d": 0.9375,
+     "censored": false
+    }
+   },
+   {
+    "task": "25",
+    "lo_t": 0.5,
+    "hi_t": 1.0,
+    "budget_left": 8,
+    "v0.2": {
+     "start": 0.5,
+     "reached": false,
+     "probes": 2,
+     "rollouts": 8,
+     "final": [
+      0.5,
+      1.0
+     ],
+     "accepted_d": null,
+     "censored": false
+    },
+    "v0.3": {
+     "start": 0.87890625,
+     "reached": true,
+     "probes": 1,
+     "rollouts": 8,
+     "final": [
+      0.875,
+      0.8828125
+     ],
+     "accepted_d": 0.87890625,
+     "censored": false
+    },
+    "v0.4": {
+     "start": 0.9375,
+     "reached": true,
+     "probes": 1,
+     "rollouts": 8,
+     "final": [
+      0.0,
+      1.0
+     ],
+     "accepted_d": 0.9375,
+     "censored": false
+    }
+   },
+   {
+    "task": "29",
+    "lo_t": 0.875,
+    "hi_t": 1.0,
+    "budget_left": 12,
+    "v0.2": {
+     "start": 0.5,
+     "reached": false,
+     "probes": 3,
+     "rollouts": 12,
+     "final": [
+      0.875,
+      1.0
+     ],
+     "accepted_d": null,
+     "censored": false
+    },
+    "v0.3": {
+     "start": 0.87890625,
+     "reached": true,
+     "probes": 1,
+     "rollouts": 8,
+     "final": [
+      0.875,
+      0.8828125
+     ],
+     "accepted_d": 0.87890625,
+     "censored": false
+    },
+    "v0.4": {
+     "start": 0.9375,
+     "reached": true,
+     "probes": 1,
+     "rollouts": 8,
+     "final": [
+      0.0,
+      1.0
+     ],
+     "accepted_d": 0.9375,
+     "censored": false
+    }
+   }
+  ],
+  "summary": {
+   "v0.2": {
+    "reachable": 8,
+    "censored": 0,
+    "reached_band": 2,
+    "probes": 21,
+    "rollouts": 92
+   },
+   "v0.3": {
+    "reachable": 7,
+    "censored": 1,
+    "reached_band": 6,
+    "probes": 13,
+    "rollouts": 76
+   },
+   "v0.4": {
+    "reachable": 8,
+    "censored": 0,
+    "reached_band": 5,
+    "probes": 14,
+    "rollouts": 76
+   }
+  }
+ },
+ "observation_noise": {
+  "tasks": 3,
+  "rows": [
+   {
+    "task": "28",
+    "lo_t": 0.125,
+    "hi_t": 0.25,
+    "budget_left": 16,
+    "v0.2": {
+     "start": 0.5,
+     "reached": false,
+     "probes": 4,
+     "rollouts": 16,
+     "final": [
+      0.125,
+      0.25
+     ],
+     "accepted_d": null,
+     "censored": false
+    },
+    "v0.3": {
+     "start": 0.5,
+     "reached": false,
+     "probes": 4,
+     "rollouts": 16,
+     "final": [
+      0.125,
+      0.25
+     ],
+     "accepted_d": null,
+     "censored": false
+    },
+    "v0.4": {
+     "start": 0.5,
+     "reached": false,
+     "probes": 4,
+     "rollouts": 16,
+     "final": [
+      0.125,
+      0.25
+     ],
+     "accepted_d": null,
+     "censored": false
+    }
+   },
+   {
+    "task": "21",
+    "lo_t": 0.0,
+    "hi_t": 1.0,
+    "budget_left": 2,
+    "v0.2": {
+     "start": 0.5,
+     "reached": false,
+     "probes": 0,
+     "rollouts": 0,
+     "final": [
+      0.0,
+      1.0
+     ],
+     "accepted_d": null,
+     "censored": false
+    },
+    "v0.3": {
+     "start": 0.1875,
+     "reached": false,
+     "probes": 0,
+     "rollouts": 0,
+     "final": [
+      0.125,
+      0.25
+     ],
+     "accepted_d": null,
+     "censored": false
+    },
+    "v0.4": {
+     "start": 0.5,
+     "reached": false,
+     "probes": 0,
+     "rollouts": 0,
+     "final": [
+      0.0,
+      1.0
+     ],
+     "accepted_d": null,
+     "censored": false
+    }
+   },
+   {
+    "task": "1",
+    "lo_t": 0.5,
+    "hi_t": 1.0,
+    "budget_left": 16,
+    "v0.2": {
+     "start": 0.5,
+     "reached": true,
+     "probes": 2,
+     "rollouts": 12,
+     "final": [
+      0.5,
+      1.0
+     ],
+     "accepted_d": 0.75,
+     "censored": false
+    },
+    "v0.3": {
+     "start": 0.1875,
+     "reached": false,
+     "probes": 4,
+     "rollouts": 16,
+     "final": [
+      0.2421875,
+      0.25
+     ],
+     "accepted_d": null,
+     "censored": true
+    },
+    "v0.4": {
+     "start": 0.5,
+     "reached": true,
+     "probes": 2,
+     "rollouts": 12,
+     "final": [
+      0.5,
+      1.0
+     ],
+     "accepted_d": 0.75,
+     "censored": false
+    }
+   }
+  ],
+  "summary": {
+   "v0.2": {
+    "reachable": 3,
+    "censored": 0,
+    "reached_band": 1,
+    "probes": 6,
+    "rollouts": 28
+   },
+   "v0.3": {
+    "reachable": 2,
+    "censored": 1,
+    "reached_band": 0,
+    "probes": 8,
+    "rollouts": 32
+   },
+   "v0.4": {
+    "reachable": 3,
+    "censored": 0,
+    "reached_band": 1,
+    "probes": 6,
+    "rollouts": 28
+   }
+  }
+ },
+ "observation_noise_insertion": {
+  "tasks": 1,
+  "rows": [
+   {
+    "task": "2",
+    "lo_t": 0.5,
+    "hi_t": 0.75,
+    "budget_left": 16,
+    "v0.2": {
+     "start": 0.5,
+     "reached": true,
+     "probes": 3,
+     "rollouts": 16,
+     "final": [
+      0.5,
+      0.75
+     ],
+     "accepted_d": 0.625,
+     "censored": false
+    },
+    "v0.3": {
+     "start": 0.5,
+     "reached": true,
+     "probes": 3,
+     "rollouts": 16,
+     "final": [
+      0.5,
+      0.75
+     ],
+     "accepted_d": 0.625,
+     "censored": false
+    },
+    "v0.4": {
+     "start": 0.5,
+     "reached": true,
+     "probes": 3,
+     "rollouts": 16,
+     "final": [
+      0.5,
+      0.75
+     ],
+     "accepted_d": 0.625,
+     "censored": false
+    }
+   }
+  ],
+  "summary": {
+   "v0.2": {
+    "reachable": 1,
+    "censored": 0,
+    "reached_band": 1,
+    "probes": 3,
+    "rollouts": 16
+   },
+   "v0.3": {
+    "reachable": 1,
+    "censored": 0,
+    "reached_band": 1,
+    "probes": 3,
+    "rollouts": 16
+   },
+   "v0.4": {
+    "reachable": 1,
+    "censored": 0,
+    "reached_band": 1,
+    "probes": 3,
+    "rollouts": 16
+   }
+  }
+ },
+ "command_swap": {
+  "tasks": 1,
+  "rows": [
+   {
+    "task": "23",
+    "lo_t": 0.0,
+    "hi_t": 1.0,
+    "budget_left": 10,
+    "v0.2": {
+     "start": 0.5,
+     "reached": true,
+     "probes": 1,
+     "rollouts": 8,
+     "final": [
+      0.0,
+      1.0
+     ],
+     "accepted_d": 0.5,
+     "censored": false
+    },
+    "v0.3": {
+     "start": 0.5,
+     "reached": true,
+     "probes": 1,
+     "rollouts": 8,
+     "final": [
+      0.0,
+      1.0
+     ],
+     "accepted_d": 0.5,
+     "censored": false
+    },
+    "v0.4": {
+     "start": 0.5,
+     "reached": true,
+     "probes": 1,
+     "rollouts": 8,
+     "final": [
+      0.0,
+      1.0
+     ],
+     "accepted_d": 0.5,
+     "censored": false
+    }
+   }
+  ],
+  "summary": {
+   "v0.2": {
+    "reachable": 1,
+    "censored": 0,
+    "reached_band": 1,
+    "probes": 1,
+    "rollouts": 8
+   },
+   "v0.3": {
+    "reachable": 1,
+    "censored": 0,
+    "reached_band": 1,
+    "probes": 1,
+    "rollouts": 8
+   },
+   "v0.4": {
+    "reachable": 1,
+    "censored": 0,
+    "reached_band": 1,
+    "probes": 1,
+    "rollouts": 8
+   }
+  }
+ }
+}
