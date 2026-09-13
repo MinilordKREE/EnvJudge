@@ -25,8 +25,8 @@ Source: the frozen original-environment K = 16 shared measurements, copied byte 
 
 | file | from | sha256 (first 16) |
 | --- | --- | --- |
-| `e2-shared_confirm_summary.json` | `runs/e2-shared/confirm_summary.json` (E2 shared K16, 10 tasks) | `0a95bc61d6932043` |
-| `e3-shared_confirm_summary.json` | `runs/e3-shared/confirm_summary.json` (E3 shared K16, 20 tasks) | `da42c9269b90ff62` |
+| `e2-shared_confirm_summary.json` | `runs/e2-shared/confirm_summary.json` (E2 shared K16, 10 tasks) | source `0a95bc61d6932043`; committed copy `9a093e81d41f5d47` (the pre-commit end-of-file hook appended one newline; content identical) |
+| `e3-shared_confirm_summary.json` | `runs/e3-shared/confirm_summary.json` (E3 shared K16, 20 tasks) | source `da42c9269b90ff62`; committed copy `95a23a41d204fa71` (same) |
 
 (The underlying `confirm.jsonl` files are `7f6467970b29053a` and `7548c67f9171edcf`.)
 

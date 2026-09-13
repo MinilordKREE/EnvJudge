@@ -5,3 +5,4 @@
   da42c9269b90ff62). Selection rule applied: HIGH 1, 7, 12; LOW 8, 9, 10. PREREG_SMOKE.md,
   scripts/e6_smoke.py, scripts/make_tables_e6_smoke.py and tests/unit/test_e6_smoke_driver.py
   written; 137 unit tests pass; no paid call made yet.
+- 2026-09-13T18:36:17Z PREREG_SMOKE.md committed as dd0d914; SHA recorded in scripts/e6_smoke.py; the committed frozen copies carry one trailing newline added by the end-of-file hook (their sha256 noted in the prereg beside the source sha256). Still no paid call.
