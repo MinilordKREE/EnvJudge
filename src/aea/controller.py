@@ -47,6 +47,15 @@ from aea.config import AEAConfig
 from aea.core.io import append_jsonl
 from aea.core.trace import TraceWriter as EventWriter
 from aea.core.trace import read_trace
+from aea.designer import (
+    Evidence,
+    Reference,
+    ReferenceProvider,
+    design_high,
+    design_low,
+    serialize_high,
+    serialize_low,
+)
 from aea.errors import BudgetExhausted, InfraError
 from aea.estimate import EstimateResult, estimate
 from aea.evaluate import Eval, evaluate
@@ -61,7 +70,15 @@ from aea.io import (
 )
 from aea.llm.types import Attribution, BudgetName, ChatRequest, ChatResponse
 from aea.session import SESSION_LOCK, Session
-from aea.stage import StagedCandidate, build_stage_candidates, seeded_failures
+from aea.stage import (
+    StagedCandidate,
+    build_stage_candidates,
+    candidate_id,
+    compile_prefix,
+    seeded_failures,
+    stage_candidate,
+    trace_actions,
+)
 from aea.witness import policy_shortest_success, solvable
 
 type Outcome = Literal["accepted", "kept", "dropped", "infra_error"]
@@ -124,8 +141,11 @@ class Controller:
         arm: str = "A",
         use_proposer: bool = True,
         leverage: LeverageTable | None = None,
+        reference: ReferenceProvider | None = None,
     ) -> None:
         self.config = config
+        self.reference = reference
+        """``llm_v1`` LOW only: the privileged reference provider (None = failure-only mode)."""
         self.substrate = substrate
         self.run_dir = run_dir
         self.run_id = run_id
@@ -380,6 +400,8 @@ class Controller:
             append_jsonl(path, record)
 
     def _harden(self, task: TaskRef, est: EstimateResult) -> TaskOutcome:
+        if self.config.method_version == "llm_v1":
+            return self._harden_llm(task, est)
         self._await_predecessors(task)  # the leverage prior is a sequential dependency
         successes = [t for t in est.traces if t.success]
         lengths = tuple(t.duration_steps or len(t.steps) for t in successes)
@@ -469,7 +491,7 @@ class Controller:
         if not has_leverage:
             self._ev("no_leverage", task, family=fam.name, successes=lev.successes, n=lev.n)
             return None
-        start = self.leverage.warm_start(fam.name, self.config.impl.warm_start_min_history)
+        start = self._start_dose(fam)
         try:
             result: BracketResult = bracket(
                 evaluate_at, self.config, leverage=DoseEval(1.0, lev), start=start
@@ -515,6 +537,14 @@ class Controller:
             detail={"family": fam.name, "status": result.status},
         )
 
+    def _start_dose(self, fam: Family) -> float:
+        """The first interior probe of the bracket. v0.4: the family's soft warm start. llm_v1:
+        always the midpoint — a generated family's name is a per-task identity, so no
+        cross-task frontier history is trusted for it (docs/spec/AEA_llm_v1.md, "Warm start")."""
+        if self.config.method_version == "llm_v1":
+            return 0.5
+        return self.leverage.warm_start(fam.name, self.config.impl.warm_start_min_history)
+
     def _accept_knob(
         self,
         task: TaskRef,
@@ -549,6 +579,8 @@ class Controller:
 
     # ------------------------------------------------------------------ stage
     def _stage(self, task: TaskRef, est: EstimateResult) -> TaskOutcome:
+        if self.config.method_version == "llm_v1":
+            return self._stage_llm(task, est)
         failures = seeded_failures(est.traces, self.config.impl.n_failed_rollouts, seed=task.seed)
         if not failures:
             return TaskOutcome(task, "dropped", "no_failed_rollout", "zero", est.p_hat)
@@ -639,6 +671,272 @@ class Controller:
                     "profile": profile,
                     "skipped": [c.id for c in staged.candidates if c not in walked],
                 },
+            )
+        self._ev("probe", task, profile=profile, accepted=None)
+        reason = "too_easy" if any(p["verdict"] == "too_easy" for p in profile) else "dead"
+        return TaskOutcome(task, "dropped", reason, "zero", est.p_hat, detail={"profile": profile})
+
+    # ------------------------------------------------------------------ llm_v1
+    def _designer(self) -> Callable[[ChatRequest], ChatResponse]:
+        designer = self.substrate.designer()
+        if designer is None:
+            raise InfraError("method llm_v1 needs a designer (none configured)", kind="config")
+        return designer
+
+    def _record_designer(
+        self, task: TaskRef, regime: str, evidence: Evidence, **payload: Any
+    ) -> None:
+        """One row per designer call in ``designer_calls.jsonl`` (the redacted evidence: on LOW
+        the reference block is replaced by its metadata) and a ``designer_evidence`` event."""
+        self._append(
+            self.run_dir / "designer_calls.jsonl",
+            {
+                "task_id": task.task_id,
+                "regime": regime,
+                "method_version": "llm_v1",
+                "evidence_sha256": evidence.sha256,
+                "evidence": evidence.redacted,
+                "reference_used": evidence.reference_used,
+                **payload,
+            },
+        )
+        self._ev(
+            "designer_evidence",
+            task,
+            regime=regime,
+            sha256=evidence.sha256,
+            chars=len(evidence.text),
+            n_traces=evidence.n_traces,
+            reference_used=evidence.reference_used,
+        )
+
+    def _harden_llm(self, task: TaskRef, est: EstimateResult) -> TaskOutcome:
+        """HIGH under llm_v1: one designer call proposes the families; the existing empirical
+        control (`_try_family`: guard, leverage test, bracket, cap) decides. The library is not
+        executed; the designer is never called again."""
+        successes = [t for t in est.traces if t.success]
+        lengths = tuple(t.duration_steps or len(t.steps) for t in successes)
+        ctx = FamilyContext(task_id=task.task_id, success_lengths=lengths)
+        witness = policy_shortest_success(est.traces)
+        evidence = serialize_high(est.traces, est.p_hat, est.n)
+        design = design_high(
+            self._designer(),
+            model=self.substrate.designer_model(),
+            evidence=evidence,
+            attribution=self._attr(task, "design_high", "designer"),
+            seed=task.seed,
+        )
+        self._record_designer(
+            task,
+            "saturated",
+            evidence,
+            arguments=design.arguments,
+            accepted=[f.name for f in design.families],
+            mechanisms=design.mechanisms,
+            rejected=design.rejected,
+        )
+        self._ev(
+            "proposer",
+            task,
+            proposed=[f.name for f in design.families],
+            rejected=design.rejected,
+            mechanisms=design.mechanisms,
+        )
+        if not design.families:
+            return TaskOutcome(
+                task,
+                "dropped",
+                "no_valid_proposal",
+                "saturated",
+                est.p_hat,
+                detail={"rejected": design.rejected},
+            )
+        families: list[Family] = list(design.families)  # designer order; the library is absent
+        self._ev("families", task, order=[f.name for f in families], source="designer")
+        tried = 0
+        for fam in families:
+            result = self._try_family(task, fam, ctx, witness, est)
+            if result is None:
+                continue
+            tried += 1
+            if result.outcome == "accepted":
+                return result
+        reason = "exhausted" if tried else "no_leverage"
+        return TaskOutcome(
+            task,
+            "dropped",
+            reason,
+            "saturated",
+            est.p_hat,
+            detail={"families": [f.name for f in families]},
+        )
+
+    def _lazy_reference(self, task: TaskRef) -> Reference | None:
+        """LOW under llm_v1 only: the privileged reference, requested here and nowhere else."""
+        if self.reference is None:
+            self._ev("reference", task, requested=True, available=False, reason="no_provider")
+            return None
+        ref = self.reference(task.task_id)
+        self._ev(
+            "reference",
+            task,
+            requested=True,
+            available=ref.ok,
+            n_steps=ref.n_steps,
+            reason=ref.reason,
+        )
+        return ref if ref.ok else None
+
+    def _stage_llm(self, task: TaskRef, est: EstimateResult) -> TaskOutcome:
+        """LOW under llm_v1: failures (+ lazy reference) -> one designer call -> up to two
+        grounded Stage cuts, compiled and guarded by the existing stage machinery, accepted only
+        by the current policy's 4 -> 8 probe. No end/midpoint heuristic, no repair, no fallback."""
+        failures = seeded_failures(est.traces, self.config.impl.n_failed_rollouts, seed=task.seed)
+        if not failures:
+            return TaskOutcome(task, "dropped", "no_failed_rollout", "zero", est.p_hat)
+        reference = self._lazy_reference(task)
+        evidence = serialize_low(failures, est.p_hat, est.n, reference)
+        design = design_low(
+            self._designer(),
+            model=self.substrate.designer_model(),
+            evidence=evidence,
+            failures=failures,
+            reference=reference,
+            attribution=self._attr(task, "design_low", "designer"),
+            seed=task.seed,
+        )
+        proposals = [
+            {"source": p.source, "trajectory_id": p.trajectory_id, "step": p.step}
+            for p in design.stages
+        ]
+        self._record_designer(
+            task,
+            "zero",
+            evidence,
+            arguments=design.arguments,
+            accepted=proposals,
+            mechanisms=[p.mechanism_summary for p in design.stages],
+            rejected=design.rejected,
+            reference_steps=reference.n_steps if reference else None,
+        )
+        self._ev("llm_stage_proposals", task, accepted=proposals, rejected=design.rejected)
+        if not design.stages:
+            return TaskOutcome(
+                task,
+                "dropped",
+                "no_valid_proposal",
+                "zero",
+                est.p_hat,
+                detail={"rejected": design.rejected},
+            )
+        opts = self.substrate.stage_reset_options(task)
+        by_id = {t.episode_id: t for t in failures}
+        staged: list[StagedCandidate] = []
+        rejected: list[dict[str, Any]] = []
+        with SESSION_LOCK:  # prefix compilation and the oracle guard: in-process sessions
+            for p in design.stages:
+                prefix = (
+                    list(reference.actions[: p.step])
+                    if p.source == "reference" and reference is not None
+                    else trace_actions(by_id[str(p.episode_id)])[: p.step]
+                )
+                compiled = compile_prefix(
+                    lambda c, ro: self.substrate.open_session(task, c, ro), prefix, opts
+                )
+                cid = candidate_id(task.task_id, compiled)
+                if any(c.id == cid for c in staged):
+                    rejected.append({"id": cid, "t": p.step, "reason": "duplicate state"})
+                    continue
+                cand = stage_candidate(compiled)
+                guard = solvable(
+                    cand,
+                    lambda c: self.substrate.open_session(task, c, opts),
+                    self.config,
+                    oracle=self.substrate.has_oracle(),
+                )
+                c = StagedCandidate(
+                    cid, p.episode_id or "reference", p.step, p.source, compiled, cand, guard
+                )
+                if guard.ok:
+                    staged.append(c)
+                else:
+                    rejected.append({"id": cid, "t": p.step, "reason": guard.detail})
+        self._ev(
+            "stage_candidates",
+            task,
+            certified=[c.id for c in staged],
+            kinds={c.id: c.kind for c in staged},
+            rejected=rejected,
+            source="designer",
+        )
+        if not staged:
+            return TaskOutcome(
+                task, "dropped", "uncertified", "zero", est.p_hat, detail={"rejected": rejected}
+            )
+        return self._probe_stages(task, est, staged, opts)
+
+    def _probe_stages(
+        self,
+        task: TaskRef,
+        est: EstimateResult,
+        staged: list[StagedCandidate],
+        opts: dict[str, Any],
+    ) -> TaskOutcome:
+        """Walk the candidates in the given (designer) order; the current policy's probe is the
+        only acceptance (llm_v1 copy of the v0.4 walk, kept separate so v0.4 stays untouched)."""
+        profile: list[dict[str, Any]] = []
+        walked: list[StagedCandidate] = []
+        try:
+            for c in staged:
+                walked.append(c)
+
+                def run(n: int, c: StagedCandidate = c) -> list[Trace]:
+                    return self._rollouts(task, c.candidate, n, "probe", reset_options=opts)
+
+                ev = evaluate(run, self.config)
+                profile.append(
+                    {
+                        "id": c.id,
+                        "t": c.t,
+                        "source": c.kind,
+                        "successes": ev.successes,
+                        "n": ev.n,
+                        "verdict": ev.verdict,
+                    }
+                )
+                if ev.verdict == "in_band":
+                    meta = AeaMeta(
+                        kind="stage",
+                        task_id=task.task_id,
+                        seed=task.seed,
+                        regime="zero",
+                        t=c.t,
+                        state_hash=c.state_hash,
+                        profile=profile,
+                        stage_budget=self.config.impl.stage_budget,
+                        candidate_id=c.id,
+                        p_hat=ev.p_hat,
+                    )
+                    self._write_corpus(task, c.candidate, meta)
+                    self._ev("probe", task, profile=profile, accepted=c.id)
+                    return TaskOutcome(
+                        task,
+                        "accepted",
+                        "",
+                        "zero",
+                        est.p_hat,
+                        detail={"t": c.t, "profile": profile},
+                    )
+        except BudgetExhausted:
+            skipped = [c.id for c in staged if c not in walked]
+            self._ev("probe", task, profile=profile, accepted=None, skipped=skipped)
+            return TaskOutcome(
+                task,
+                "dropped",
+                "budget",
+                "zero",
+                est.p_hat,
+                detail={"profile": profile, "skipped": skipped},
             )
         self._ev("probe", task, profile=profile, accepted=None)
         reason = "too_easy" if any(p["verdict"] == "too_easy" for p in profile) else "dead"

@@ -16,6 +16,7 @@ import sys
 from pathlib import Path
 from typing import Any, cast
 
+import pytest
 import yaml
 
 from aea.config import AEAConfig, load_aea_config
@@ -119,3 +120,48 @@ def test_e5_driver_configs_resolve_to_v04() -> None:
         assert cfg.impl.warm_start_min_history == e5.ARMS[arm]
     e3 = _load_script("e3")
     assert AEAConfig().model_dump() == e3.AEAConfig().model_dump()
+
+
+# ------------------------------------------------------------------ brief tests 33 to 36
+def test_explicit_v04_never_enters_the_llm_v1_paths(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Every llm_v1 entry point (HIGH evidence + design, LOW reference + evidence + design) is
+    replaced by a trap; the v0.4 golden still reproduces byte for byte with and without a
+    designer, so v0.4 never reaches them."""
+    import aea.controller as ctl
+
+    def trap(*args: Any, **kwargs: Any) -> Any:
+        raise AssertionError("llm_v1 path entered under v0.4")
+
+    for name in ("serialize_high", "design_high", "serialize_low", "design_low"):
+        monkeypatch.setattr(ctl, name, trap)
+    monkeypatch.setattr(ctl.Controller, "_lazy_reference", trap)
+    golden = _golden()
+    for name, with_designer in (("library", False), ("proposer", True)):
+        got = observables(
+            tmp_path / name, AEAConfig(method_version="v0.4"), with_designer=with_designer
+        )
+        assert got == golden[name], name
+
+
+def test_v04_families_and_candidate_states_are_unchanged(tmp_path: Path) -> None:
+    """35: ``_families`` = proposer families ahead of the library, leverage-ordered; 36: the
+    stage candidates are the end / mid states of the seeded failures."""
+    from aea.stage import candidate_states
+
+    golden = _golden()
+    fam = [e for e in golden["proposer"]["events"] if e["kind"] == "families"]
+    assert [e["order"] for e in fam if e["task_id"] == "2"] == [
+        ["case_flip", "footer_mask", "horizon_squeeze"]
+    ]
+    assert all("source" not in e for e in fam)  # the llm_v1 marker never appears
+    stage = [e for e in golden["library"]["events"] if e["kind"] == "stage_candidates"]
+    assert stage and all(set(e["kinds"].values()) <= {"end", "mid"} for e in stage)
+    assert all("source" not in e for e in stage)
+    assert candidate_states({"a": 10, "b": 7}, 6) == [
+        ("a", 10, "end"),
+        ("b", 7, "end"),
+        ("a", 5, "mid"),
+        ("b", 3, "mid"),
+    ]

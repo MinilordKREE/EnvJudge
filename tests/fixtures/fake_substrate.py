@@ -20,7 +20,9 @@ PLAN = ["go to a", "take x from a", "go to b", "move x to b"]
 
 type PolicyKind = str
 """'expert' follows the plan; 'coin' succeeds with probability p; 'random' never picks a plan
-action; 'footer' follows the plan only while the admissible footer is visible."""
+action; 'footer' follows the plan only while the admissible footer is visible; 'staged' is
+random from reset and, once staged past the second plan step, follows the plan on every other
+episode (exactly 4 of 8: in band by construction, for the llm_v1 LOW tests)."""
 
 
 class FakeSubstrate:
@@ -42,6 +44,7 @@ class FakeSubstrate:
         # before or alongside it (the task pool must reproduce the sequential run)
         self._rngs: dict[str, random.Random] = {}
         self.calls: list[tuple[str, str, int]] = []
+        self._staged_episodes: dict[str, int] = {}
         self._open: Callable[..., Session] = make_open(PLAN)
         self._designer = designer_fn if with_designer else None
         # concurrency probes (docs/changelog_v0.2.md, task pool): guard / staging sessions opened
@@ -129,13 +132,19 @@ class FakeSubstrate:
         rng = self.rng(task)
         steps: list[Step] = []
         plan = list(PLAN)
+        follow_plan = kind == "expert"
+        if kind == "staged" and sess.bridge.state.progress >= 2:
+            with self._probe_lock:
+                k = self._staged_episodes.get(task.task_id, 0)
+                self._staged_episodes[task.task_id] = k + 1
+            follow_plan = k % 2 == 0
         for _ in range(50):
             if sess.done or sess.won:
                 break
             adm = sess.admissible()
             obs_now = sess.stack.observe()
             footer_visible = "Admissible commands" in obs_now.text
-            if kind == "expert" or (kind == "footer" and footer_visible):
+            if follow_plan or (kind == "footer" and footer_visible):
                 nxt = next((a for a in plan if a in adm), None)
                 if nxt is None:
                     nxt = "look"
