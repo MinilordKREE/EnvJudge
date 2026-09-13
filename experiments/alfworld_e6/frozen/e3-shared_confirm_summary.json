@@ -1,0 +1,222 @@
+{
+ "1:orig": {
+  "task": "1",
+  "successes": 16,
+  "n": 16,
+  "errors": 0,
+  "p16": 1.0,
+  "learnable": false,
+  "kind": "orig",
+  "t": null,
+  "shared": true
+ },
+ "2:orig": {
+  "task": "2",
+  "successes": 15,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.9375,
+  "learnable": false,
+  "kind": "orig",
+  "t": null,
+  "shared": true
+ },
+ "3:orig": {
+  "task": "3",
+  "successes": 13,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.8125,
+  "learnable": false,
+  "kind": "orig",
+  "t": null,
+  "shared": true
+ },
+ "4:orig": {
+  "task": "4",
+  "successes": 8,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.5,
+  "learnable": true,
+  "kind": "orig",
+  "t": null,
+  "shared": true
+ },
+ "5:orig": {
+  "task": "5",
+  "successes": 12,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.75,
+  "learnable": true,
+  "kind": "orig",
+  "t": null,
+  "shared": true
+ },
+ "6:orig": {
+  "task": "6",
+  "successes": 7,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.4375,
+  "learnable": true,
+  "kind": "orig",
+  "t": null,
+  "shared": true
+ },
+ "7:orig": {
+  "task": "7",
+  "successes": 16,
+  "n": 16,
+  "errors": 0,
+  "p16": 1.0,
+  "learnable": false,
+  "kind": "orig",
+  "t": null,
+  "shared": true
+ },
+ "12:orig": {
+  "task": "12",
+  "successes": 16,
+  "n": 16,
+  "errors": 0,
+  "p16": 1.0,
+  "learnable": false,
+  "kind": "orig",
+  "t": null,
+  "shared": true
+ },
+ "13:orig": {
+  "task": "13",
+  "successes": 16,
+  "n": 16,
+  "errors": 0,
+  "p16": 1.0,
+  "learnable": false,
+  "kind": "orig",
+  "t": null,
+  "shared": true
+ },
+ "15:orig": {
+  "task": "15",
+  "successes": 16,
+  "n": 16,
+  "errors": 0,
+  "p16": 1.0,
+  "learnable": false,
+  "kind": "orig",
+  "t": null,
+  "shared": true
+ },
+ "16:orig": {
+  "task": "16",
+  "successes": 8,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.5,
+  "learnable": true,
+  "kind": "orig",
+  "t": null,
+  "shared": true
+ },
+ "19:orig": {
+  "task": "19",
+  "successes": 10,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.625,
+  "learnable": true,
+  "kind": "orig",
+  "t": null,
+  "shared": true
+ },
+ "21:orig": {
+  "task": "21",
+  "successes": 15,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.9375,
+  "learnable": false,
+  "kind": "orig",
+  "t": null,
+  "shared": true
+ },
+ "22:orig": {
+  "task": "22",
+  "successes": 16,
+  "n": 16,
+  "errors": 0,
+  "p16": 1.0,
+  "learnable": false,
+  "kind": "orig",
+  "t": null,
+  "shared": true
+ },
+ "23:orig": {
+  "task": "23",
+  "successes": 16,
+  "n": 16,
+  "errors": 0,
+  "p16": 1.0,
+  "learnable": false,
+  "kind": "orig",
+  "t": null,
+  "shared": true
+ },
+ "24:orig": {
+  "task": "24",
+  "successes": 16,
+  "n": 16,
+  "errors": 0,
+  "p16": 1.0,
+  "learnable": false,
+  "kind": "orig",
+  "t": null,
+  "shared": true
+ },
+ "25:orig": {
+  "task": "25",
+  "successes": 16,
+  "n": 16,
+  "errors": 0,
+  "p16": 1.0,
+  "learnable": false,
+  "kind": "orig",
+  "t": null,
+  "shared": true
+ },
+ "26:orig": {
+  "task": "26",
+  "successes": 10,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.625,
+  "learnable": true,
+  "kind": "orig",
+  "t": null,
+  "shared": true
+ },
+ "28:orig": {
+  "task": "28",
+  "successes": 14,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.875,
+  "learnable": false,
+  "kind": "orig",
+  "t": null,
+  "shared": true
+ },
+ "29:orig": {
+  "task": "29",
+  "successes": 16,
+  "n": 16,
+  "errors": 0,
+  "p16": 1.0,
+  "learnable": false,
+  "kind": "orig",
+  "t": null,
+  "shared": true
+ }
+}
