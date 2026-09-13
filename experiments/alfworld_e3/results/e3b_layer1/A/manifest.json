@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "run_id": "e3b-A",
+  "created_at": "2026-09-12T20:43:30.531176Z",
+  "seed": 0,
+  "config_sha256": "236618d1cf8c868b0e35deb31c294fe5b25fbf9ad03ab05a8eac45584ad06796",
+  "config_schema_version": 1,
+  "aea_config_sha256": "faec819825a0639e2e9f51c17b924fcf16bd4e252b2f9ab3f42defc390823e68",
+  "config_path": null,
+  "git_sha": "4841fa1898d39f666d7c093aa0d9b5206ee900c2",
+  "git_dirty": true,
+  "envharness_sha": "fab7d57441f06b75c73a900e04561d4d7600f361",
+  "aea_version": "0.1.0",
+  "python_version": "3.12.9",
+  "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+  "out_dir": "/home/kree/work/EnvJudge/runs/e3b-A",
+  "extra": {
+    "experiment": "E3b (aea v0.3, PREREG10)",
+    "arm": "A",
+    "prereg_sha": "6d48728",
+    "aea_config_schema": 3,
+    "tasks": [
+      8,
+      9,
+      10,
+      11,
+      14,
+      17,
+      20,
+      27,
+      18,
+      0,
+      6,
+      4,
+      16,
+      19,
+      26,
+      5,
+      3,
+      28,
+      2,
+      21,
+      1,
+      7,
+      12,
+      13,
+      15,
+      22,
+      23,
+      24,
+      25,
+      29
+    ],
+    "task_order": "zero first (ascending shared p16, ties by id)",
+    "policy_endpoint_pin": "alibaba",
+    "designer": "deepseek-v4-pro",
+    "thinking": {
+      "policy": false,
+      "designer": false
+    },
+    "proposer": "on",
+    "priors": "persistent (leverage events)",
+    "aea_config": {
+      "schema_version": 3,
+      "band_t": [
+        0.4,
+        0.6
+      ],
+      "band_l": [
+        0.2,
+        0.8
+      ],
+      "k": 16,
+      "accept": [
+        3,
+        5
+      ],
+      "probe": [
+        4,
+        8
+      ],
+      "cap": 30,
+      "impl": {
+        "batch_first": 4,
+        "batch_next": 2,
+        "confidence": 0.9,
+        "max_bisections": 4,
+        "order_tolerance": 0.375,
+        "proposer_cap": 2,
+        "n_failed_rollouts": 3,
+        "max_candidates": 6,
+        "stage_budget": 100,
+        "oracle_attempts": 3,
+        "oracle_max_steps": 50,
+        "policy_max_steps": 50
+      }
+    },
+    "concurrency": {
+      "tasks": 4,
+      "rollouts": 4,
+      "inflight_episodes": 16
+    }
+  }
+}

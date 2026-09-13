@@ -1,0 +1,337 @@
+{
+ "1:f6bfb14d444ca56f": {
+  "task": "1",
+  "successes": 9,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.5625,
+  "learnable": true,
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "G"
+  ],
+  "reused": "e3-confirm"
+ },
+ "4:235a1defc7002a27": {
+  "task": "4",
+  "successes": 9,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.5625,
+  "learnable": true,
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "G"
+  ],
+  "reused": "e3-confirm"
+ },
+ "4:dc0ae181c7f957d8": {
+  "task": "4",
+  "kind": "kept",
+  "t": null,
+  "arms": [
+   "A"
+  ],
+  "successes": 8,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.5,
+  "learnable": true,
+  "reused": "e3-confirm"
+ },
+ "5:61659058f271a927": {
+  "task": "5",
+  "successes": 10,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.625,
+  "learnable": true,
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "G"
+  ],
+  "reused": "e3-confirm"
+ },
+ "5:dc0ae181c7f957d8": {
+  "task": "5",
+  "kind": "kept",
+  "t": null,
+  "arms": [
+   "A"
+  ],
+  "successes": 12,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.75,
+  "learnable": true,
+  "reused": "e3-confirm"
+ },
+ "6:0c340222b8d60154": {
+  "task": "6",
+  "successes": 6,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.375,
+  "learnable": true,
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "G"
+  ],
+  "reused": "e3-confirm"
+ },
+ "6:c4bbfb75a9e9050c": {
+  "task": "6",
+  "successes": 7,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.4375,
+  "learnable": true,
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "R"
+  ],
+  "reused": "e3-confirm"
+ },
+ "6:dc0ae181c7f957d8": {
+  "task": "6",
+  "kind": "kept",
+  "t": null,
+  "arms": [
+   "A"
+  ],
+  "successes": 7,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.4375,
+  "learnable": true,
+  "reused": "e3-confirm"
+ },
+ "8:f0329533e3beaaa8": {
+  "task": "8",
+  "successes": 6,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.375,
+  "learnable": true,
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "G"
+  ],
+  "reused": "e3-confirm"
+ },
+ "9:7aa3298cde8679a5": {
+  "task": "9",
+  "successes": 11,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.6875,
+  "learnable": true,
+  "kind": "stage",
+  "t": 50,
+  "arms": [
+   "A"
+  ]
+ },
+ "12:a95f1c9977683e99": {
+  "task": "12",
+  "successes": 16,
+  "n": 16,
+  "errors": 0,
+  "p16": 1.0,
+  "learnable": false,
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "G"
+  ],
+  "reused": "e3-confirm"
+ },
+ "16:a95f1c9977683e99": {
+  "task": "16",
+  "successes": 7,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.4375,
+  "learnable": true,
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "G"
+  ],
+  "reused": "e3-confirm"
+ },
+ "16:dc0ae181c7f957d8": {
+  "task": "16",
+  "kind": "kept",
+  "t": null,
+  "arms": [
+   "A"
+  ],
+  "successes": 8,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.5,
+  "learnable": true,
+  "reused": "e3-confirm"
+ },
+ "16:ffb7557736d75f9a": {
+  "task": "16",
+  "successes": 8,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.5,
+  "learnable": true,
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "R"
+  ],
+  "reused": "e3-confirm"
+ },
+ "17:449f6f0a4e2e7984": {
+  "task": "17",
+  "successes": 1,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.0625,
+  "learnable": false,
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "R"
+  ],
+  "reused": "e3-confirm"
+ },
+ "18:a670c5de2004910a": {
+  "task": "18",
+  "successes": 12,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.75,
+  "learnable": true,
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "R"
+  ],
+  "reused": "e3-confirm"
+ },
+ "18:dd368f9a71343d3a": {
+  "task": "18",
+  "successes": 10,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.625,
+  "learnable": true,
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "G"
+  ],
+  "reused": "e3-confirm"
+ },
+ "19:52b2ad350563aa5a": {
+  "task": "19",
+  "successes": 13,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.8125,
+  "learnable": false,
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "G"
+  ],
+  "reused": "e3-confirm"
+ },
+ "21:a166ce1aef7f8444": {
+  "task": "21",
+  "successes": 6,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.375,
+  "learnable": true,
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "G"
+  ],
+  "reused": "e3-confirm"
+ },
+ "25:6f0b9dbcd788564a": {
+  "task": "25",
+  "successes": 3,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.1875,
+  "learnable": false,
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "G"
+  ],
+  "reused": "e3-confirm"
+ },
+ "26:a1ef279b09f61ddf": {
+  "task": "26",
+  "successes": 7,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.4375,
+  "learnable": true,
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "G"
+  ],
+  "reused": "e3-confirm"
+ },
+ "26:dc0ae181c7f957d8": {
+  "task": "26",
+  "kind": "kept",
+  "t": null,
+  "arms": [
+   "A"
+  ],
+  "successes": 10,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.625,
+  "learnable": true,
+  "reused": "e3-confirm"
+ },
+ "27:cf3a8bf8ea8a0e40": {
+  "task": "27",
+  "successes": 15,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.9375,
+  "learnable": false,
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "G"
+  ],
+  "reused": "e3-confirm"
+ },
+ "28:f2d046a86e624384": {
+  "task": "28",
+  "successes": 11,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.6875,
+  "learnable": true,
+  "kind": "accepted",
+  "t": null,
+  "arms": [
+   "G"
+  ],
+  "reused": "e3-confirm"
+ }
+}

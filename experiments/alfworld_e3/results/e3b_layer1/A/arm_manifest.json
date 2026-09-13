@@ -1,0 +1,254 @@
+{
+ "experiment": "E3b (aea v0.3, PREREG10)",
+ "arm": "A",
+ "prereg": "experiments/alfworld_e3/PREREG10.md",
+ "prereg_sha": "6d48728",
+ "aea_config_schema": 3,
+ "tasks": [
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+  14,
+  15,
+  16,
+  17,
+  18,
+  19,
+  20,
+  21,
+  22,
+  23,
+  24,
+  25,
+  26,
+  27,
+  28,
+  29
+ ],
+ "policy": {
+  "provider": "openrouter",
+  "model": "qwen/qwen3-8b",
+  "base_url": "https://openrouter.ai/api/v1",
+  "api_key_env": "OPENROUTER_API_KEY",
+  "provider_pin": "alibaba",
+  "temperature": 0.5,
+  "max_tokens": 2048,
+  "thinking": false,
+  "reasoning_effort": null,
+  "timeout_s": 120.0,
+  "cost_tolerance": 1e-06,
+  "retry": {
+   "max_attempts": 10,
+   "initial_delay_s": 2.0,
+   "max_delay_s": 90.0,
+   "multiplier": 2.0,
+   "jitter_s": 1.0,
+   "total_timeout_s": 900.0,
+   "retry_status_codes": [
+    408,
+    409,
+    425,
+    429
+   ]
+  }
+ },
+ "designer": {
+  "provider": "deepseek",
+  "model": "deepseek-v4-pro",
+  "base_url": "https://api.deepseek.com",
+  "api_key_env": "DEEPSEEK_API_KEY",
+  "provider_pin": null,
+  "temperature": 0.7,
+  "max_tokens": 4096,
+  "thinking": false,
+  "reasoning_effort": null,
+  "timeout_s": 120.0,
+  "cost_tolerance": 1e-06,
+  "retry": {
+   "max_attempts": 5,
+   "initial_delay_s": 1.0,
+   "max_delay_s": 30.0,
+   "multiplier": 2.0,
+   "jitter_s": 1.0,
+   "total_timeout_s": 300.0,
+   "retry_status_codes": [
+    408,
+    409,
+    425,
+    429
+   ]
+  }
+ },
+ "aea_config_sha256": "faec819825a0639e2e9f51c17b924fcf16bd4e252b2f9ab3f42defc390823e68",
+ "envharness_sha": "fab7d57441f06b75c73a900e04561d4d7600f361",
+ "created_at": "2026-09-13T00:18:47Z",
+ "run_id": "e3b-A",
+ "leverage_table": {
+  "action_alias_permute": {
+   "tested": 1,
+   "with_leverage": 0,
+   "rate": 0.0,
+   "lo_pop": 0.0,
+   "hi_pop": 1.0
+  },
+  "reward_noise_scale": {
+   "tested": 1,
+   "with_leverage": 0,
+   "rate": 0.0,
+   "lo_pop": 0.0,
+   "hi_pop": 1.0
+  },
+  "footer_mask": {
+   "tested": 10,
+   "with_leverage": 10,
+   "rate": 1.0,
+   "lo_pop": 0.499999,
+   "hi_pop": 0.5
+  },
+  "command_permute": {
+   "tested": 1,
+   "with_leverage": 0,
+   "rate": 0.0,
+   "lo_pop": 0.0,
+   "hi_pop": 1.0
+  },
+  "reward_delay": {
+   "tested": 1,
+   "with_leverage": 0,
+   "rate": 0.0,
+   "lo_pop": 0.0,
+   "hi_pop": 1.0
+  },
+  "footer_shuffle": {
+   "tested": 1,
+   "with_leverage": 1,
+   "rate": 1.0,
+   "lo_pop": 0.0,
+   "hi_pop": 0.5
+  },
+  "command_scramble": {
+   "tested": 1,
+   "with_leverage": 0,
+   "rate": 0.0,
+   "lo_pop": 0.0,
+   "hi_pop": 1.0
+  },
+  "reward_noise": {
+   "tested": 1,
+   "with_leverage": 0,
+   "rate": 0.0,
+   "lo_pop": 0.0,
+   "hi_pop": 1.0
+  },
+  "reward_perturb": {
+   "tested": 1,
+   "with_leverage": 0,
+   "rate": 0.0,
+   "lo_pop": 0.0,
+   "hi_pop": 1.0
+  },
+  "goal_obfuscation": {
+   "tested": 1,
+   "with_leverage": 1,
+   "rate": 1.0,
+   "lo_pop": 0.25,
+   "hi_pop": 0.3125
+  },
+  "command_typo": {
+   "tested": 1,
+   "with_leverage": 1,
+   "rate": 1.0,
+   "lo_pop": 0.4375,
+   "hi_pop": 0.5
+  },
+  "action_dropout": {
+   "tested": 1,
+   "with_leverage": 0,
+   "rate": 0.0,
+   "lo_pop": 0.0,
+   "hi_pop": 1.0
+  },
+  "action_typo": {
+   "tested": 1,
+   "with_leverage": 0,
+   "rate": 0.0,
+   "lo_pop": 0.0,
+   "hi_pop": 1.0
+  },
+  "command_alias_swap": {
+   "tested": 1,
+   "with_leverage": 1,
+   "rate": 1.0,
+   "lo_pop": 0.125,
+   "hi_pop": 0.25
+  },
+  "action_delay": {
+   "tested": 1,
+   "with_leverage": 0,
+   "rate": 0.0,
+   "lo_pop": 0.0,
+   "hi_pop": 1.0
+  },
+  "command_obfuscation": {
+   "tested": 1,
+   "with_leverage": 0,
+   "rate": 0.0,
+   "lo_pop": 0.0,
+   "hi_pop": 1.0
+  },
+  "command_alias_obfuscation": {
+   "tested": 1,
+   "with_leverage": 0,
+   "rate": 0.0,
+   "lo_pop": 0.0,
+   "hi_pop": 1.0
+  },
+  "command_alias_shift": {
+   "tested": 1,
+   "with_leverage": 0,
+   "rate": 0.0,
+   "lo_pop": 0.0,
+   "hi_pop": 1.0
+  },
+  "success_label_noise": {
+   "tested": 1,
+   "with_leverage": 0,
+   "rate": 0.0,
+   "lo_pop": 0.0,
+   "hi_pop": 1.0
+  },
+  "action_alias_shift": {
+   "tested": 1,
+   "with_leverage": 0,
+   "rate": 0.0,
+   "lo_pop": 0.0,
+   "hi_pop": 1.0
+  },
+  "observation_noise_typos": {
+   "tested": 1,
+   "with_leverage": 1,
+   "rate": 1.0,
+   "lo_pop": 0.5,
+   "hi_pop": 0.75
+  },
+  "observation_noise": {
+   "tested": 1,
+   "with_leverage": 0,
+   "rate": 0.0,
+   "lo_pop": 0.0,
+   "hi_pop": 1.0
+  }
+ },
+ "proposer": "on"
+}
