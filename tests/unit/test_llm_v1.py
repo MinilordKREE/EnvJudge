@@ -740,3 +740,64 @@ def test_leakage_reference_prefix_before_the_cut_only(tmp_path: Path) -> None:
     # the substrate's rollouts only ever saw the compiled prefix as the candidate
     assert all(ph in ("estimate", "probe") for _, ph, _ in sub.calls)
     assert designer.calls == 1
+
+
+# ------------------------------------------------------------------ phase 3.1: issues A, B, C
+def test_issue_b_high_contract_documents_the_environment_surface() -> None:
+    """Static interface facts the HIGH designer must be told (no task-specific content)."""
+    ev = serialize_high([_trace(True, 4)], 1.0, 10)
+    system = dz.high_messages(ev)[0].content
+    for fact in (
+        'Action(name="do", kwargs={"text": "<command>"})',  # action representation
+        'action.kwargs.get("text")',
+        'data["admissible_commands"]',  # where admissible commands live; the policy reads them
+        "normalises its chosen command against that list",
+        "Rewriting `text` alone",
+        "filter_action(self, action, env_state) -> Action | Blocked",  # A hook semantics
+        "Blocked(reason=...)",
+        "modify_transition(self, action, raw_response, env_state) -> EnvResponse",  # T hook
+        "filter_observation(self, obs, env_state) -> Observation",  # O hook
+        "runs on the reset observation and after every step",
+        "step_count",
+        "extras",
+    ):
+        assert fact in system, fact
+    assert "egg" not in system and "statue" not in system and "alarmclock" not in system
+
+
+def test_issue_c_reasoning_only_from_a_genuine_think_block() -> None:
+    t = _trace(False, 2)
+    t.steps[
+        0
+    ].policy_raw_response = "<think>I should look around first</think><action>look</action>"
+    act = str(t.steps[1].raw_action.kwargs["text"])
+    t.steps[1].policy_raw_response = f"<action>{act}</action>"
+    text = dz.trajectory_text("F1", t, dz.BOUNDS)
+    step1, step2 = text.split("step 2:")
+    assert "reasoning: I should look around first" in step1
+    assert "reasoning:" not in step2  # action-only output is not presented as reasoning
+    assert step2.count(act) == 1  # the action appears once, on its action line
+    t.steps[1].policy_raw_response = f"<think>  </think><action>{act}</action>"
+    assert "reasoning:" not in dz.trajectory_text("F1", t, dz.BOUNDS).split("step 2:")[1]
+    t.steps[1].policy_raw_response = None
+    assert "reasoning:" not in dz.trajectory_text("F1", t, dz.BOUNDS).split("step 2:")[1]
+
+
+def test_issue_a_reference_provenance_is_recorded_and_privileged(tmp_path: Path) -> None:
+    _run(tmp_path, {"9": "random"}, LOW_BOTH)
+    run = tmp_path / "run"
+    rows = [
+        json.loads(line) for line in (run / "privileged_references.jsonl").read_text().splitlines()
+    ]
+    assert len(rows) == 1 and rows[0]["task_id"] == "9"
+    assert rows[0]["actions"] == list(PLAN) and rows[0]["n_steps"] == len(PLAN)
+    assert rows[0]["reference_id"] == dz.reference_id(PLAN)
+    ref_ev = next(e for e in _events(run) if e.kind == "reference")
+    assert ref_ev.payload["reference_id"] == rows[0]["reference_id"]
+    rec = json.loads((run / "designer_calls.jsonl").read_text().splitlines()[0])
+    assert rows[0]["reference_id"] in rec["evidence"]  # the redacted record names the same hash
+    # nothing learner-facing or downstream reads the privileged file
+    for script in ("e3sl.py", "make_tables_e3sl.py", "e3.py"):
+        assert "privileged_references" not in (ROOT / "scripts" / script).read_text()
+    for mod in ("io.py", "substrate.py", "runner.py", "policy_skills.py", "evalhook.py"):
+        assert "privileged_references" not in (ROOT / "src" / "aea" / mod).read_text()

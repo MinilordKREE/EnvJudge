@@ -73,7 +73,8 @@ proposals -> `dropped: no_valid_proposal`.
    compiled into a Stage.
 5. Records: `reference` event (`requested`, `available`, `n_steps`, `reason`),
    `designer_evidence` (`reference_used`), `designer_calls.jsonl` with the reference block
-   replaced by its length and hash. No privileged file is written.
+   replaced by its length and hash; the exact instance goes to `privileged_references.jsonl`
+   (phase 3.1: audit-side only, so the auditor never re-runs the non-deterministic expert).
 
 ## 6. Trust boundaries
 
@@ -100,6 +101,7 @@ witness and defeats the oracle is `uncertified` and skipped (issue-1 test B).
 | --- | --- | --- |
 | LOW designer prompt | yes (the block) | `serialize_low` |
 | `designer_calls.jsonl` | metadata only (length, hash, `[content withheld]`) | `Evidence.redacted` |
+| `privileged_references.jsonl` | the exact reference instance (audit-side only; never read by policy, corpus, traces, induction, E3-SL) | `_lazy_reference`; the smoke auditor reads it instead of re-running the expert |
 | `events.jsonl` | metadata only (`n_steps`, reason, selected cut) | `_lazy_reference`, `llm_stage_proposals` |
 | `corpus.jsonl` | the compiled prefix `actions[:k]` (learner-visible by construction) | `_probe_stages` writes the candidate only |
 | `traces.jsonl` | policy rollouts only; the candidate carries the prefix only | sessions are never traces |

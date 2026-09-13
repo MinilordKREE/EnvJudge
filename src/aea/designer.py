@@ -149,11 +149,16 @@ def _clip(text: str, n: int) -> str:
 
 
 def _think(step: Any, n: int) -> str | None:
+    """The policy's own reasoning, only when the response carries a separate ``<think>`` block;
+    an action-only response (thinking off) yields nothing rather than its action echoed back as
+    'reasoning'."""
     raw = step.policy_raw_response
     if not raw:
         return None
     m = re.search(r"<think>(.*?)</think>", raw, re.S)
-    return _clip(m.group(1) if m else raw, n)
+    if not m or not m.group(1).strip():
+        return None
+    return _clip(m.group(1), n)
 
 
 def _step_lines(step: Any, i: int, b: EvidenceBounds) -> list[str]:
@@ -197,6 +202,13 @@ def _bounded(parts: list[str], total: int) -> str:
 
 def _sha(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def reference_id(actions: Sequence[str]) -> str:
+    """The identity of one exact reference instance: sha256 of its action list (16 hex). Shown
+    in the redacted evidence and written to ``privileged_references.jsonl`` so a post-run audit
+    can check the exact reference used without running the expert again."""
+    return _sha(json.dumps(list(actions)))[:16]
 
 
 def representative(traces: Sequence[Trace], b: EvidenceBounds) -> tuple[list[Trace], list[Trace]]:
@@ -253,7 +265,7 @@ def serialize_low(
         block += "\n".join(f"step {i + 1}: {a}" for i, a in enumerate(reference.actions))
         meta = (
             f"PRIVILEGED REFERENCE: {reference.n_steps} actions, "
-            f"sha256 {_sha(json.dumps(list(reference.actions)))[:16]} [content withheld]"
+            f"sha256 {reference_id(reference.actions)} [content withheld]"
         )
         text = _bounded([*head, block, *fails], b.total_chars)
         redacted = _bounded([*head, meta, *fails], b.total_chars)
@@ -307,6 +319,36 @@ DESIGN_HIGH_TOOL: dict[str, Any] = {
     },
 }
 
+ENVIRONMENT_SURFACE = (
+    "Environment surface (released envharness ALFWorld bridge; what your code actually sees):\n"
+    '- Action: every policy action is `Action(name="do", kwargs={"text": "<command>"})`; '
+    "the command text is a TextWorld command such as `go to shelf 1`, `take mug 1 from shelf 1`, "
+    "`clean mug 1 with sinkbasin 1`, `use desklamp 1`. There are no per-verb action names: "
+    'inspect `action.kwargs.get("text")`, never `action.name`.\n'
+    "- Observation: `Observation(text, data)`. `text` is rendered as `Task: <goal>\\n\\n<room "
+    'text>\\n\\nAdmissible commands: a, b, c`; `data["admissible_commands"]` holds the same '
+    'list as structured data. The policy reads BOTH: it appends `data["admissible_commands"]` '
+    "to its prompt and normalises its chosen command against that list. Rewriting `text` alone "
+    "therefore does not remove an action hint; to hide or alter admissible commands, change "
+    '`data["admissible_commands"]` as well (return a new Observation with both fields).\n'
+    "- env_state (read-only view passed to every hook): `goal_text`, `obs_text`, "
+    "`admissible_commands: list[str]`, `won`, `done`, `step_count` (1-based after the first "
+    "step), `last_action_was_effective`, `extras: dict` (free-form per-episode storage for your "
+    "own counters or RNG state). No engine handles, no object graph, no locations.\n"
+    "- Hooks (override any subset): `filter_action(self, action, env_state) -> Action | Blocked` "
+    "runs BEFORE the world step; return the (possibly rewritten) Action, or `Blocked(reason=...)` "
+    "(an instance) to reject it: the world is unchanged and the policy sees `[blocked] <reason>` "
+    "plus the current observation. `modify_transition(self, action, raw_response, env_state) -> "
+    "EnvResponse` runs AFTER the world step on `EnvResponse(observation, reward, terminated, "
+    "truncated, info)` (e.g. set `truncated=True` to end the episode; leave `reward` alone). "
+    "`filter_observation(self, obs, env_state) -> Observation` runs on the reset observation and "
+    "after every step (also after a block) and is the only hook that changes what the policy "
+    "sees. Rules cannot move objects or edit the world: only actions, transitions and "
+    "observations.\n"
+    "- Success is checked by the unchanged verifier on the world state, so an observation "
+    "rewrite never changes whether the goal is achieved."
+)
+
 HIGH_CONTRACT = (
     "Rules contract: emit `class _Rules(Rules)` with a class attribute `DOSE = __DOSE__` "
     "(d in [0, 1]); larger DOSE must increase the challenge and DOSE = 0 must leave the "
@@ -334,7 +376,9 @@ def high_messages(evidence: Evidence) -> tuple[ChatMessage, ...]:
         ChatMessage(
             role="system",
             content="You design environment interventions under a strict contract.\n"
-            + HIGH_CONTRACT,
+            + HIGH_CONTRACT
+            + "\n\n"
+            + ENVIRONMENT_SURFACE,
         ),
         ChatMessage(
             role="user",

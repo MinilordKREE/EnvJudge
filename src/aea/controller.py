@@ -36,6 +36,7 @@ import concurrent.futures as cf
 import threading
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Literal, Protocol
 
@@ -53,6 +54,7 @@ from aea.designer import (
     ReferenceProvider,
     design_high,
     design_low,
+    reference_id,
     serialize_high,
     serialize_low,
 )
@@ -779,6 +781,7 @@ class Controller:
             self._ev("reference", task, requested=True, available=False, reason="no_provider")
             return None
         ref = self.reference(task)
+        rid = reference_id(ref.actions) if ref.ok else None
         self._ev(
             "reference",
             task,
@@ -786,7 +789,20 @@ class Controller:
             available=ref.ok,
             n_steps=ref.n_steps,
             reason=ref.reason,
+            reference_id=rid,
         )
+        if ref.ok:  # the exact instance the designer will see: privileged, audit-side only
+            self._append(
+                self.run_dir / "privileged_references.jsonl",
+                {
+                    "task_id": task.task_id,
+                    "reference_id": rid,
+                    "actions": list(ref.actions),
+                    "n_steps": ref.n_steps,
+                    "event_seq": self.events.seq,
+                    "ts": datetime.now(UTC).isoformat(),
+                },
+            )
         return ref if ref.ok else None
 
     def _stage_llm(self, task: TaskRef, est: EstimateResult) -> TaskOutcome:

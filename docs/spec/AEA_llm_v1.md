@@ -108,7 +108,12 @@ the same locked in-process session the guards use; never charged). It reaches ex
 the LOW designer prompt and the selected prefix. It never reaches `traces.jsonl`, `corpus.jsonl`
 (beyond the selected prefix, which is learner-visible by construction), the policy prompt, or
 skill induction. `designer_calls.jsonl` keeps the evidence with the reference block replaced by
-its metadata (length, hash); the full evidence is hashed (`evidence_sha256`). If no provider is
+its metadata (length, hash); the full evidence is hashed (`evidence_sha256`). The exact reference
+instance is written to `privileged_references.jsonl` (task, `reference_id` = sha256 of the action
+list, actions, length, event sequence, time): a designer/audit-side artifact so a post-run leakage
+audit can check the exact reference used without running the expert again (the ALFWorld expert
+is not deterministic across sessions). Nothing learner-facing reads it: not the policy, the
+corpus writer, the trace writer, skill induction or E3-SL. If no provider is
 configured or the expert fails (error, stuck, timeout, no success), the designer works from the
 failures alone; there is no midpoint/end fallback.
 

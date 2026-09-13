@@ -31,7 +31,7 @@ from aea.controller import Controller, TaskRef
 from aea.core.config import RunConfig
 from aea.core.context import create_run_context
 from aea.core.manifest import load_run_context, write_manifest
-from aea.designer import ExpertReference
+from aea.designer import ExpertReference, reference_id
 from aea.errors import ConfigError
 from aea.io import TraceWriter, read_corpus
 from aea.substrate import AeaSubstrate
@@ -44,10 +44,31 @@ RUNS = e3.RUNS
 EXP = ROOT / "experiments" / "alfworld_e6"
 FROZEN = EXP / "frozen"
 RESULTS = EXP / "results"
-RUN_ID = "e6-smoke-llm-v1"
-CONFIRM_RUN_ID = "e6-smoke-confirm"
-METHOD_SHA = "47a0091"  # the frozen llm_v1 implementation (src/aea at this commit)
-PREREG_SHA: str | None = "dd0d914"  # PREREG_SMOKE.md commit, recorded before the first paid call
+SMOKE = 2  # which pre-registered smoke this driver runs (smoke 1's artifacts are immutable)
+SMOKES: dict[int, dict[str, Any]] = {
+    1: {
+        "run_id": "e6-smoke-llm-v1",
+        "confirm_id": "e6-smoke-confirm",
+        "prereg": "PREREG_SMOKE.md",
+        "prereg_sha": "dd0d914",
+        "method_sha": "47a0091",
+        "exclude": (),
+        "report": "e6_smoke",
+    },
+    2: {
+        "run_id": "e6-smoke2-llm-v1",
+        "confirm_id": "e6-smoke2-confirm",
+        "prereg": "PREREG_SMOKE2.md",
+        "prereg_sha": None,  # recorded before the first paid call of smoke 2
+        "method_sha": None,  # the phase-3.1 correctness commit, recorded before smoke 2
+        "exclude": (1, 7, 12, 8, 9, 10),  # smoke 1's tasks: outcomes already known
+        "report": "e6_smoke2",
+    },
+}
+RUN_ID: str = SMOKES[SMOKE]["run_id"]
+CONFIRM_RUN_ID: str = SMOKES[SMOKE]["confirm_id"]
+METHOD_SHA: str | None = SMOKES[SMOKE]["method_sha"]
+PREREG_SHA: str | None = SMOKES[SMOKE]["prereg_sha"]
 CAP_USD = 30.0
 CONFIRM_K = 16
 LIBRARY = ("footer_mask", "horizon_squeeze")
@@ -69,10 +90,17 @@ def frozen_k16() -> dict[str, dict[str, Any]]:
     return out
 
 
-def select_tasks(records: dict[str, dict[str, Any]], n: int = 3) -> tuple[list[int], list[int]]:
-    """HIGH pool: 16/16 with 0 errors; LOW pool: 0/16 with 0 errors; the n smallest ids of each.
-    Fewer than n in a pool -> ConfigError (STOP; no other rule)."""
-    clean = {int(t): r for t, r in records.items() if r["n"] == 16 and r["errors"] == 0}
+def select_tasks(
+    records: dict[str, dict[str, Any]], n: int = 3, exclude: tuple[int, ...] = ()
+) -> tuple[list[int], list[int]]:
+    """HIGH pool: 16/16 with 0 errors; LOW pool: 0/16 with 0 errors; the n smallest ids of each
+    after removing ``exclude`` (an earlier smoke's tasks). Fewer than n in a pool -> ConfigError
+    (STOP; no other rule)."""
+    clean = {
+        int(t): r
+        for t, r in records.items()
+        if r["n"] == 16 and r["errors"] == 0 and int(t) not in exclude
+    }
     high = sorted(t for t, r in clean.items() if r["successes"] == 16)
     low = sorted(t for t, r in clean.items() if r["successes"] == 0)
     if len(high) < n or len(low) < n:
@@ -80,7 +108,7 @@ def select_tasks(records: dict[str, dict[str, Any]], n: int = 3) -> tuple[list[i
     return high[:n], low[:n]
 
 
-HIGH_TASKS, LOW_TASKS = select_tasks(frozen_k16())
+HIGH_TASKS, LOW_TASKS = select_tasks(frozen_k16(), exclude=SMOKES[SMOKE]["exclude"])
 ORDER: tuple[int, ...] = (*HIGH_TASKS, *LOW_TASKS)  # HIGH ascending, then LOW ascending
 EXPECTED = {**{str(t): "saturated" for t in HIGH_TASKS}, **{str(t): "zero" for t in LOW_TASKS}}
 
@@ -134,7 +162,7 @@ def _src_sha() -> str:
         check=False,
     ).stdout
     dirty = subprocess.run(
-        ["git", "-C", str(ROOT), "diff", "--quiet", METHOD_SHA, "--", "src/aea"],
+        ["git", "-C", str(ROOT), "diff", "--quiet", str(METHOD_SHA), "--", "src/aea"],
         check=False,
     ).returncode
     return hashlib.sha256(out.encode()).hexdigest()[:16] + ("" if dirty == 0 else "+DIRTY")
@@ -142,8 +170,8 @@ def _src_sha() -> str:
 
 # ---------------------------------------------------------------------------- search
 def stage_search(concurrency: int) -> None:
-    if PREREG_SHA is None:
-        raise ConfigError("PREREG_SHA not recorded: commit PREREG_SMOKE.md first")
+    if PREREG_SHA is None or METHOD_SHA is None:
+        raise ConfigError("PREREG_SHA / METHOD_SHA not recorded: commit the prereg first")
     e3.guard("search")
     cfg = config()
     policy = e3.policy_qwen()
@@ -174,7 +202,8 @@ def stage_search(concurrency: int) -> None:
         envharness_sha=e3._git_sha(e3.ENVHARNESS),
         extra={
             "experiment": e3.EXPERIMENT,
-            "prereg": "experiments/alfworld_e6/PREREG_SMOKE.md",
+            "prereg": f"experiments/alfworld_e6/{SMOKES[SMOKE]['prereg']}",
+            "smoke": SMOKE,
             "prereg_sha": PREREG_SHA,
             "method_sha": METHOD_SHA,
             "src_aea_tree": _src_sha(),
@@ -191,7 +220,7 @@ def stage_search(concurrency: int) -> None:
         },
     )
     os.environ.setdefault("ALFWORLD_DATA", str(Path.home() / "eh_alfworld_data"))
-    sub, ctrl = build(cfg, ctx.out_dir, ctx.run_id, concurrency=concurrency)
+    _sub, ctrl = build(cfg, ctx.out_dir, ctx.run_id, concurrency=concurrency)
     stop = e3.start_watchdog("search", ctx.out_dir / "events.jsonl")
     outcomes = ctrl.run([TaskRef(str(t), t) for t in ORDER], concurrency=1)
     stop.set()
@@ -210,7 +239,7 @@ def stage_search(concurrency: int) -> None:
             ),
             flush=True,
         )
-    audit = leakage_audit(sub, ctx.out_dir)
+    audit = leakage_audit(ctx.out_dir)
     (ctx.out_dir / "leakage_audit.json").write_text(json.dumps(audit, indent=1), encoding="utf-8")
     gates = correctness_gates(ctx.out_dir, audit)
     (ctx.out_dir / "gates.json").write_text(json.dumps(gates, indent=1), encoding="utf-8")
@@ -229,40 +258,58 @@ def _by_kind(events: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
     return out
 
 
-def _ref_hash(actions: list[str]) -> str:
-    return hashlib.sha256(json.dumps(actions).encode("utf-8")).hexdigest()[:16]
+def recorded_references(d: Path) -> dict[str, dict[str, Any]]:
+    """The exact reference instances the designer saw, from the privileged run artifact
+    ``privileged_references.jsonl`` (task -> last record). Audit-side only: never read by the
+    policy, the corpus writer, the trace writer, skill induction or E3-SL."""
+    out: dict[str, dict[str, Any]] = {}
+    for r in e3.jsonl(d / "privileged_references.jsonl"):
+        out[str(r["task_id"])] = r
+    return out
 
 
-def leakage_audit(sub: AeaSubstrate, d: Path) -> dict[str, Any]:
-    """Per LOW task with an available reference: recompute the expert's action list (free,
-    in-process, under the session lock), check it against the hash the run kept, then check that
-    ``reference[k:]`` (past every selected cut) is never carried by a candidate prefix in
-    traces.jsonl / corpus.jsonl and that the reference block itself is absent from every kept
-    file. Policy-emitted actions are recorded by provenance (``independent_overlap``), never
-    flagged."""
+def leakage_audit(d: Path) -> dict[str, Any]:
+    """Per LOW task with an available reference, against the EXACT recorded reference (never a
+    second expert session): (1) provenance integrity - the recorded hash equals the hash of the
+    recorded actions, the hash in the ``reference`` event and the hash in the redacted designer
+    record; (2) no candidate prefix in traces.jsonl / corpus.jsonl carries an action from
+    ``reference[k:]`` past any selected reference cut (the only channel a reference action can be
+    COPIED through; a failure-source cut has no reference content at all); (3) the reference block
+    is absent from every kept file and the designer record is redacted; (4) post-cut actions the
+    policy emitted itself are counted by provenance (``independent_overlap``), never flagged."""
     ev = _by_kind(_events(d))
     calls = e3.jsonl(d / "designer_calls.jsonl")
     traces = e3.jsonl(d / "traces.jsonl")
     corpus = e3.jsonl(d / "corpus.jsonl")
+    recorded = recorded_references(d)
     kept_text = {
         name: (d / name).read_text(encoding="utf-8", errors="replace")
         for name in ("events.jsonl", "designer_calls.jsonl", "traces.jsonl", "corpus.jsonl")
         if (d / name).exists()
     }
-    out: dict[str, Any] = {"tasks": {}, "ok": True}
+    out: dict[str, Any] = {"tasks": {}, "ok": True, "expert_recomputed": False}
     for r in ev.get("reference", []):
         task = str(r["task_id"])
         rec: dict[str, Any] = {"available": bool(r.get("available")), "reason": r.get("reason")}
         if not r.get("available"):
             out["tasks"][task] = rec
             continue
-        provider = sub.reference_provider(config())
-        assert provider is not None
-        ref = provider(TaskRef(task, int(task)))
         row = next((c for c in calls if str(c["task_id"]) == task and c["regime"] == "zero"), {})
         kept_hash = str(row.get("evidence", "")).split("sha256 ")[1][:16] if row else ""
-        rec["recomputed_ok"] = ref.ok
-        rec["hash_match"] = ref.ok and _ref_hash(list(ref.actions)) == kept_hash
+        prov = recorded.get(task)
+        leaks: list[str] = []
+        if prov is None:
+            leaks.append("no privileged_references.jsonl record for this task")
+            actions: list[str] = []
+        else:
+            actions = [str(a) for a in prov.get("actions", [])]
+            rid = str(prov.get("reference_id"))
+            rec["reference_id"] = rid
+            rec["provenance_intact"] = (
+                rid == reference_id(actions) == str(r.get("reference_id")) == kept_hash
+            )
+            if not rec["provenance_intact"]:
+                leaks.append("recorded reference hash does not match the record / event / evidence")
         cuts = [
             int(p["step"])
             for p in next(
@@ -271,11 +318,9 @@ def leakage_audit(sub: AeaSubstrate, d: Path) -> dict[str, Any]:
             if p.get("source") == "reference"
         ]
         rec["reference_cuts"] = cuts
-        rec["reference_steps"] = len(ref.actions)
-        k = min(cuts) if cuts else len(ref.actions)
-        future = set(ref.actions[k:])
-        leaks: list[str] = []
-        # 1. candidate prefixes (the only channel a reference action can be COPIED through)
+        rec["reference_steps"] = len(actions)
+        k = min(cuts) if cuts else len(actions)
+        future = set(actions[k:])
         prefixes = [
             [str(a.get("kwargs", {}).get("text", "")) for a in t["candidate"]["in_env_actions"]]
             for t in traces
@@ -288,24 +333,22 @@ def leakage_audit(sub: AeaSubstrate, d: Path) -> dict[str, Any]:
         for pre in prefixes:
             if set(pre) & future:
                 leaks.append(f"candidate prefix carries a post-cut reference action: {pre}")
-        # 2. the reference block never appears in a kept file
         for name, text in kept_text.items():
             if "PRIVILEGED REFERENCE (a successful" in text:
                 leaks.append(f"{name}: reference block present")
         if row and "[content withheld]" not in str(row.get("evidence", "")):
             leaks.append("designer_calls.jsonl: reference not redacted")
-        # 3. provenance: post-cut actions the POLICY emitted itself (informational)
         indep = 0
         for t in traces:
             if str(t.get("rollout_seed")) != task:
                 continue
-            for s in t.get("steps", []):
-                if str(s.get("raw_action", {}).get("kwargs", {}).get("text", "")) in future:
+            for st in t.get("steps", []):
+                if str(st.get("raw_action", {}).get("kwargs", {}).get("text", "")) in future:
                     indep += 1
         rec["independent_overlap"] = indep
         rec["leaks"] = leaks
         out["tasks"][task] = rec
-        if leaks or not rec["hash_match"]:
+        if leaks:
             out["ok"] = False
     return out
 
@@ -341,7 +384,7 @@ def correctness_gates(d: Path, audit: dict[str, Any]) -> dict[str, Any]:
         "reference_only_on_zero": all(
             regime.get(str(r["task_id"])) == "zero" for r in ev.get("reference", [])
         ),
-        "reference_leakage": audit.get("ok", False),
+        "reference_leakage": audit.get("ok", False) and not audit.get("expert_recomputed", False),
         "tasks_preregistered": [str(t) for t in ORDER] == [str(t) for t in extra.get("tasks", [])]
         and set(done) <= {str(t) for t in ORDER},
         "method_unmodified": not str(extra.get("src_aea_tree", "")).endswith("+DIRTY")

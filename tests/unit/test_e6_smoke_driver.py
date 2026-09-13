@@ -5,6 +5,7 @@ controller config == llm_v1, reference provider non-None) on a recording fake su
 from __future__ import annotations
 
 import importlib.util
+import json
 import sys
 from pathlib import Path
 from typing import Any
@@ -32,9 +33,8 @@ def test_frozen_selection_is_deterministic() -> None:
     e6 = _load()
     records = e6.frozen_k16()
     assert len(records) == 30
-    high, low = e6.select_tasks(records)
-    assert high == [1, 7, 12] and low == [8, 9, 10]
-    assert e6.ORDER == (1, 7, 12, 8, 9, 10)
+    high, low = e6.select_tasks(records, exclude=())
+    assert high == [1, 7, 12] and low == [8, 9, 10]  # smoke 1's selection, unchanged
     for t in high:
         assert records[str(t)]["successes"] == 16 and records[str(t)]["errors"] == 0
     for t in low:
@@ -80,4 +80,68 @@ def test_reused_models_and_cap() -> None:
     assert e3.policy_qwen().model == "qwen/qwen3-8b" and e3.policy_qwen().provider_pin == "alibaba"
     assert e3.designer_deepseek().model == "deepseek-v4-pro"
     assert e6.CAP_USD == 30.0 and e3.CAP_USD == 30.0 and e3.SPEND_GLOB == "e6-*"
-    assert e6.METHOD_SHA == "47a0091"
+    assert e6.SMOKES[1]["method_sha"] == "47a0091" and e6.SMOKES[1]["prereg_sha"] == "dd0d914"
+
+
+def test_smoke2_selection_excludes_smoke1_tasks() -> None:
+    e6 = _load()
+    records = e6.frozen_k16()
+    assert e6.select_tasks(records, exclude=()) == ([1, 7, 12], [8, 9, 10])  # smoke 1, unchanged
+    high, low = e6.select_tasks(records, exclude=(1, 7, 12, 8, 9, 10))
+    assert high == [13, 15, 22] and low == [11, 14, 17]
+    assert e6.SMOKE == 2 and e6.ORDER == (13, 15, 22, 11, 14, 17)
+    assert e6.RUN_ID == "e6-smoke2-llm-v1" and e6.SMOKES[1]["run_id"] == "e6-smoke-llm-v1"
+
+
+def test_audit_uses_the_recorded_reference_and_never_recomputes(tmp_path: Path) -> None:
+    """The task-9 failure mode of smoke 1: the expert returns a different valid solution on a
+    second call. The LOW task used reference A; the audit must use the recorded A and pass."""
+    from aea.controller import Controller, TaskRef
+    from aea.designer import Reference
+    from tests.fixtures.fake_designer import ScriptedDesigner
+    from tests.fixtures.fake_substrate import PLAN
+
+    e6 = _load()
+    calls: list[int] = []
+    variant_a = tuple(PLAN)
+    variant_b = ("look", *PLAN)  # a different, equally valid solution
+
+    def flaky_expert(task: Any) -> Reference:
+        calls.append(1)
+        if len(calls) > 1:
+            raise AssertionError("the auditor recomputed the expert")
+        return Reference(True, "pass", variant_a)
+
+    designer = ScriptedDesigner(
+        (
+            "select_stages",
+            {
+                "stages": [
+                    {
+                        "source": "reference",
+                        "trajectory_id": "reference",
+                        "step": 2,
+                        "mechanism_summary": "m",
+                    }
+                ]
+            },
+        )
+    )
+    sub = FakeSubstrate({"9": "staged"}, seed=3, with_designer=True, designer_fn=designer)
+    cfg = AEAConfig(method_version="llm_v1")
+    ctrl = Controller(cfg, sub, tmp_path / "run", "r1", arm="L", reference=flaky_expert)
+    o = ctrl.run([TaskRef("9", 9)])[0]
+    assert o.outcome == "accepted" and calls == [1]
+    audit = e6.leakage_audit(tmp_path / "run")
+    assert calls == [1]  # no second expert session
+    rec = audit["tasks"]["9"]
+    assert audit["ok"] and rec["leaks"] == [] and rec["provenance_intact"]
+    assert rec["reference_id"] == e6.reference_id(variant_a) != e6.reference_id(variant_b)
+    assert rec["reference_cuts"] == [2] and rec["reference_steps"] == len(variant_a)
+    # a tampered record is caught by the integrity check
+    p = tmp_path / "run" / "privileged_references.jsonl"
+    row = json.loads(p.read_text().splitlines()[0])
+    row["actions"] = list(variant_b)
+    p.write_text(json.dumps(row) + "\n")
+    tampered = e6.leakage_audit(tmp_path / "run")
+    assert not tampered["ok"] and not tampered["tasks"]["9"]["provenance_intact"]
