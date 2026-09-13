@@ -255,7 +255,7 @@ def main(argv: list[str] | None = None) -> int:
         )
     lines.append("\n## Leakage audit (LOW tasks)\n")
     lines.append(
-        "| task | reference available | recomputed hash match | reference steps | "
+        "| task | reference available | recorded provenance intact | reference steps | "
         "reference cuts | post-cut actions independently emitted by the policy | leaks |"
     )
     lines.append("|---|---|---|---|---|---|---|")
@@ -263,7 +263,7 @@ def main(argv: list[str] | None = None) -> int:
         cells = [
             str(t),
             fmt(a.get("available")),
-            fmt(a.get("hash_match")),
+            fmt(a.get("provenance_intact", a.get("hash_match"))),
             str(a.get("reference_steps", "-")),
             str(a.get("reference_cuts", "-")),
             str(a.get("independent_overlap", "-")),

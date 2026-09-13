@@ -1,0 +1,517 @@
+{
+ "rows": {
+  "13": {
+   "task": "13",
+   "expected": "saturated",
+   "regime": "saturated",
+   "p_hat": 1.0,
+   "n_est": 10,
+   "outcome": "dropped",
+   "reason": "exhausted",
+   "n_search": 30,
+   "branch_reached": true,
+   "designer_called": true,
+   "raw_proposals": 1,
+   "valid_proposals": 1,
+   "rejected": [],
+   "mechanisms": {
+    "object_identity_swap": "The policy relies on reading the exact object identity (mug 1, mug 2) from the observation text and admissible commands to track which mug it picked up. This intervention rewrites the displayed object labels in observations and admissible commands so that the mug the policy is actually carrying is relabeled, forcing it to re-derive identity rather than trust the literal label."
+   },
+   "reference_used": false,
+   "evidence_chars": 13721,
+   "proposed": [
+    "object_identity_swap"
+   ],
+   "axes": {
+    "object_identity_swap": "O"
+   },
+   "guards": [
+    {
+     "family": "object_identity_swap",
+     "ok": true,
+     "source": "policy_replay"
+    }
+   ],
+   "leverage": {
+    "object_identity_swap": true
+   },
+   "measurable_leverage": true,
+   "brackets": [
+    {
+     "family": "object_identity_swap",
+     "start": 0.5,
+     "status": "exhausted",
+     "history": [
+      {
+       "d": 1.0,
+       "s": 0,
+       "n": 4,
+       "verdict": "too_hard"
+      },
+      {
+       "d": 0.5,
+       "s": 0,
+       "n": 4,
+       "verdict": "too_hard"
+      },
+      {
+       "d": 0.25,
+       "s": 4,
+       "n": 4,
+       "verdict": "too_easy"
+      },
+      {
+       "d": 0.375,
+       "s": 4,
+       "n": 4,
+       "verdict": "too_easy"
+      },
+      {
+       "d": 0.4375,
+       "s": 4,
+       "n": 4,
+       "verdict": "too_easy"
+      }
+     ]
+    }
+   ],
+   "no_leverage": []
+  },
+  "15": {
+   "task": "15",
+   "expected": "saturated",
+   "regime": "saturated",
+   "p_hat": 1.0,
+   "n_est": 10,
+   "outcome": "accepted",
+   "reason": "",
+   "n_search": 18,
+   "branch_reached": true,
+   "designer_called": true,
+   "raw_proposals": 2,
+   "valid_proposals": 2,
+   "rejected": [],
+   "mechanisms": {
+    "fridge_distractor_objects": "The policy relies on the fridge being a clean, unambiguous cooling target: it opens the fridge, sees only cup/plate/potato/tomato, and immediately knows 'cool mug with fridge' is available. This intervention injects distractor objects into the fridge observation so the fridge contents are crowded with irrelevant items, forcing the policy to reason about which object is the mug and whether the fridge is still the right cooler.",
+    "fridge_open_requires_cooling_check": "The policy depends on the direct affordance 'cool mug 1 with fridge 1' appearing immediately once the mug is held and the fridge is open. This intervention delays/blocks that affordance until the policy has re-examined the fridge, breaking the shortcut of going straight from 'take mug' to 'cool mug with fridge' without confirming the fridge is still the correct cooler."
+   },
+   "reference_used": false,
+   "evidence_chars": 13688,
+   "proposed": [
+    "fridge_distractor_objects",
+    "fridge_open_requires_cooling_check"
+   ],
+   "axes": {
+    "fridge_distractor_objects": "O",
+    "fridge_open_requires_cooling_check": "A"
+   },
+   "guards": [
+    {
+     "family": "fridge_distractor_objects",
+     "ok": true,
+     "source": "policy_replay"
+    }
+   ],
+   "leverage": {
+    "fridge_distractor_objects": true
+   },
+   "measurable_leverage": true,
+   "brackets": [],
+   "no_leverage": [],
+   "accepted": {
+    "id": "15:fridge_distractor_objects:1.0",
+    "kind": "knob",
+    "family": "fridge_distractor_objects",
+    "d": 1.0,
+    "t": null,
+    "p_hat": 0.5
+   },
+   "confirm": {
+    "task": "15",
+    "successes": 11,
+    "n": 16,
+    "errors": 0,
+    "p16": 0.6875,
+    "learnable": true,
+    "kind": "knob",
+    "family": "fridge_distractor_objects",
+    "d": 1.0,
+    "t": null,
+    "in_band_l": true,
+    "in_band_t": false
+   }
+  },
+  "22": {
+   "task": "22",
+   "expected": "saturated",
+   "regime": "saturated",
+   "p_hat": 1.0,
+   "n_est": 10,
+   "outcome": "accepted",
+   "reason": "",
+   "n_search": 22,
+   "branch_reached": true,
+   "designer_called": true,
+   "raw_proposals": 2,
+   "valid_proposals": 2,
+   "rejected": [],
+   "mechanisms": {
+    "command_verb_gate": "The policy's success rests on the take/move command verbs being available and effective. This intervention rejects (blocks) a deterministic fraction of take/move actions before the world step, forcing the policy to recover by retrying or re-planning, while the world and verifier remain unchanged.",
+    "object_label_scramble": "The policy depends on reading the exact object labels (watch 1, watch 2) and their locations in the observation text to issue take/move commands. This intervention deterministically rewrites the object names shown in observations (both text and admissible commands) so the policy can no longer map its memorized label strings to the correct objects, while leaving the world untouched."
+   },
+   "reference_used": false,
+   "evidence_chars": 9961,
+   "proposed": [
+    "object_label_scramble",
+    "command_verb_gate"
+   ],
+   "axes": {
+    "object_label_scramble": "O",
+    "command_verb_gate": "A"
+   },
+   "guards": [
+    {
+     "family": "object_label_scramble",
+     "ok": true,
+     "source": "policy_replay"
+    }
+   ],
+   "leverage": {
+    "object_label_scramble": true
+   },
+   "measurable_leverage": true,
+   "brackets": [
+    {
+     "family": "object_label_scramble",
+     "start": 0.5,
+     "status": "accepted",
+     "history": [
+      {
+       "d": 1.0,
+       "s": 0,
+       "n": 4,
+       "verdict": "too_hard"
+      },
+      {
+       "d": 0.5,
+       "s": 3,
+       "n": 8,
+       "verdict": "in_band"
+      }
+     ]
+    }
+   ],
+   "no_leverage": [],
+   "accepted": {
+    "id": "22:object_label_scramble:0.5",
+    "kind": "knob",
+    "family": "object_label_scramble",
+    "d": 0.5,
+    "t": null,
+    "p_hat": 0.375
+   },
+   "confirm": {
+    "task": "22",
+    "successes": 10,
+    "n": 16,
+    "errors": 0,
+    "p16": 0.625,
+    "learnable": true,
+    "kind": "knob",
+    "family": "object_label_scramble",
+    "d": 0.5,
+    "t": null,
+    "in_band_l": true,
+    "in_band_t": false
+   }
+  },
+  "11": {
+   "task": "11",
+   "expected": "zero",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "outcome": "dropped",
+   "reason": "dead",
+   "n_search": 14,
+   "branch_reached": true,
+   "designer_called": true,
+   "raw_proposals": 2,
+   "valid_proposals": 2,
+   "rejected": [],
+   "mechanisms": [
+    "The policy repeatedly picks up the mug from countertop 1, which is not a cup, so the 'cool cup' subgoal is never satisfiable. Restarting after the initial look/navigation isolates acquiring the correct cup object (cup 2 in microwave 1) as the learnable subproblem.",
+    "After cooling the wrong object (mug) and placing it in cabinet 1, the policy has already committed to the wrong item and can no longer reach a cool cup. Restarting at the point where it has successfully navigated/cooled isolates the final 'cool then place the correct cup in cabinet' subproblem, but the mug already blocks progress."
+   ],
+   "reference_used": true,
+   "evidence_chars": 20713,
+   "guards": [],
+   "leverage": {},
+   "measurable_leverage": false,
+   "brackets": [],
+   "no_leverage": [],
+   "reference": {
+    "requested": true,
+    "available": true,
+    "n_steps": 16,
+    "reason": "pass"
+   },
+   "stage_proposals": [
+    {
+     "source": "failure",
+     "trajectory_id": "F1",
+     "step": 1
+    },
+    {
+     "source": "failure",
+     "trajectory_id": "F1",
+     "step": 8
+    }
+   ],
+   "stage_rejected": [],
+   "certified": [
+    "11:728054bc5eead409"
+   ],
+   "uncertified": [
+    {
+     "id": "11:0af7354150d0fb55",
+     "t": 8,
+     "reason": {
+      "oracle_1": "verifier_fail",
+      "oracle_2": "verifier_fail",
+      "oracle_3": "verifier_fail"
+     }
+    }
+   ],
+   "probe": [
+    {
+     "id": "11:728054bc5eead409",
+     "t": 1,
+     "source": "failure",
+     "successes": 0,
+     "n": 4,
+     "verdict": "too_hard"
+    }
+   ],
+   "policy_unlock": false
+  },
+  "14": {
+   "task": "14",
+   "expected": "zero",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "outcome": "dropped",
+   "reason": "dead",
+   "n_search": 18,
+   "branch_reached": true,
+   "designer_called": true,
+   "raw_proposals": 2,
+   "valid_proposals": 2,
+   "rejected": [],
+   "mechanisms": [
+    "The drawer-opening subproblem is correctly executed (open drawer 1 reveals its contents), but the policy then abandons the drawers and loops on desk/shelf. Restarting right after opening drawer 1 isolates the 'locate the book by progressing through drawers' subproblem before the policy can fall back into examining the desk.",
+    "At the dresser with the desklamp in view, the policy can examine the dresser but never takes the book (which the reference obtains from the bed) nor applies the desklamp to the book. Restarting here isolates the final 'take book and use desklamp at dresser' subproblem."
+   ],
+   "reference_used": true,
+   "evidence_chars": 20279,
+   "guards": [],
+   "leverage": {},
+   "measurable_leverage": false,
+   "brackets": [],
+   "no_leverage": [],
+   "reference": {
+    "requested": true,
+    "available": true,
+    "n_steps": 23,
+    "reason": "pass"
+   },
+   "stage_proposals": [
+    {
+     "source": "failure",
+     "trajectory_id": "F1",
+     "step": 6
+    },
+    {
+     "source": "failure",
+     "trajectory_id": "F3",
+     "step": 49
+    }
+   ],
+   "stage_rejected": [],
+   "certified": [
+    "14:4a4be3a2ddeff170",
+    "14:f40af888ba69fa9f"
+   ],
+   "uncertified": [],
+   "probe": [
+    {
+     "id": "14:4a4be3a2ddeff170",
+     "t": 6,
+     "source": "failure",
+     "successes": 0,
+     "n": 4,
+     "verdict": "too_hard"
+    },
+    {
+     "id": "14:f40af888ba69fa9f",
+     "t": 49,
+     "source": "failure",
+     "successes": 0,
+     "n": 4,
+     "verdict": "too_hard"
+    }
+   ],
+   "policy_unlock": false
+  },
+  "17": {
+   "task": "17",
+   "expected": "zero",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "outcome": "dropped",
+   "reason": "dead",
+   "n_search": 18,
+   "branch_reached": true,
+   "designer_called": true,
+   "raw_proposals": 2,
+   "valid_proposals": 2,
+   "rejected": [],
+   "mechanisms": [
+    "The policy correctly obtains plate 1 from cabinet 1 but then skips the cleaning step, moving the (still dirty/normal) plate directly to shelf 1. Restarting after taking the plate isolates the missing 'clean plate at sinkbasin' subproblem before the plate is irreversibly placed on the shelf.",
+    "The policy takes plate 1 while standing at cabinet 1 but never performs the cleaning action, instead moving the plate straight to shelf 1. Restarting after picking up the plate isolates the learnable clean-then-place subproblem, giving a state where the plate is in hand and cleaning is still accessible."
+   ],
+   "reference_used": true,
+   "evidence_chars": 20596,
+   "guards": [],
+   "leverage": {},
+   "measurable_leverage": false,
+   "brackets": [],
+   "no_leverage": [],
+   "reference": {
+    "requested": true,
+    "available": true,
+    "n_steps": 29,
+    "reason": "pass"
+   },
+   "stage_proposals": [
+    {
+     "source": "failure",
+     "trajectory_id": "F1",
+     "step": 3
+    },
+    {
+     "source": "failure",
+     "trajectory_id": "F2",
+     "step": 8
+    }
+   ],
+   "stage_rejected": [],
+   "certified": [
+    "17:6fe51b753fc7f02a",
+    "17:aac52bab9172b950"
+   ],
+   "uncertified": [],
+   "probe": [
+    {
+     "id": "17:6fe51b753fc7f02a",
+     "t": 3,
+     "source": "failure",
+     "successes": 0,
+     "n": 4,
+     "verdict": "too_hard"
+    },
+    {
+     "id": "17:aac52bab9172b950",
+     "t": 8,
+     "source": "failure",
+     "successes": 0,
+     "n": 4,
+     "verdict": "too_hard"
+    }
+   ],
+   "policy_unlock": false
+  }
+ },
+ "gates": {
+  "method_version_runtime": true,
+  "no_fixed_fallback": true,
+  "designer_calls_le_1": true,
+  "designer_ledger_calls_per_task": {
+   "13": 1,
+   "15": 1,
+   "22": 1,
+   "11": 1,
+   "14": 1,
+   "17": 1
+  },
+  "proposals_le_2": true,
+  "search_le_cap": true,
+  "no_axis_bypass": true,
+  "reference_only_on_zero": true,
+  "reference_leakage": true,
+  "tasks_preregistered": true,
+  "method_unmodified": true,
+  "invalid_env_accepted": [],
+  "all_pass": true
+ },
+ "audit": {
+  "tasks": {
+   "11": {
+    "available": true,
+    "reason": "pass",
+    "reference_id": "fe921eb486a98a94",
+    "provenance_intact": true,
+    "reference_cuts": [],
+    "reference_steps": 16,
+    "independent_overlap": 0,
+    "leaks": []
+   },
+   "14": {
+    "available": true,
+    "reason": "pass",
+    "reference_id": "54376cab0bbca537",
+    "provenance_intact": true,
+    "reference_cuts": [],
+    "reference_steps": 23,
+    "independent_overlap": 0,
+    "leaks": []
+   },
+   "17": {
+    "available": true,
+    "reason": "pass",
+    "reference_id": "7df7ed08c6c6db86",
+    "provenance_intact": true,
+    "reference_cuts": [],
+    "reference_steps": 29,
+    "independent_overlap": 0,
+    "leaks": []
+   }
+  },
+  "ok": true,
+  "expert_recomputed": false
+ },
+ "spend": {
+  "e6-smoke-confirm": 0,
+  "e6-smoke-llm-v1": 4.32,
+  "e6-smoke2-confirm": 1.24,
+  "e6-smoke2-llm-v1": 6.14
+ },
+ "verdicts": {
+  "high_reached": 3,
+  "low_reached": 3,
+  "high_valid_tasks": 3,
+  "high_leverage_tasks": 3,
+  "high": "PASS",
+  "low_valid_tasks": 3,
+  "low_unlock_tasks": 0,
+  "low": "FAIL",
+  "high_accepted_over_reached": "2/3",
+  "low_accepted_over_reached": "0/3",
+  "high_leveraged_not_accepted": 1,
+  "low_unlocked_too_easy": 0,
+  "low_dead": 3,
+  "overall": "NO-GO"
+ }
+}

@@ -1,0 +1,22 @@
+{
+ "method_version_runtime": true,
+ "no_fixed_fallback": true,
+ "designer_calls_le_1": true,
+ "designer_ledger_calls_per_task": {
+  "13": 1,
+  "15": 1,
+  "22": 1,
+  "11": 1,
+  "14": 1,
+  "17": 1
+ },
+ "proposals_le_2": true,
+ "search_le_cap": true,
+ "no_axis_bypass": true,
+ "reference_only_on_zero": true,
+ "reference_leakage": true,
+ "tasks_preregistered": true,
+ "method_unmodified": true,
+ "invalid_env_accepted": [],
+ "all_pass": true
+}

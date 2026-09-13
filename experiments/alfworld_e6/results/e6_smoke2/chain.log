@@ -1,0 +1,39 @@
+search start 2026-09-13T20:40:37Z
+{"spend_check": "search", "usd": 4.32, "ts": "2026-09-13T20:40:39Z"}
+Initializing AlfredTWEnv...
+  0%|          | 0/8810 [00:00<?, ?it/s]  5%|▌         | 442/8810 [00:00<00:01, 4401.10it/s] 10%|█         | 893/8810 [00:00<00:01, 4457.88it/s] 15%|█▌        | 1339/8810 [00:00<00:02, 3031.33it/s] 20%|██        | 1778/8810 [00:00<00:02, 3442.09it/s] 25%|██▍       | 2197/8810 [00:00<00:01, 3666.17it/s] 29%|██▉       | 2592/8810 [00:00<00:02, 2975.33it/s] 34%|███▍      | 2998/8810 [00:00<00:01, 3250.50it/s] 39%|███▊      | 3394/8810 [00:00<00:01, 3434.56it/s] 44%|████▎     | 3835/8810 [00:01<00:01, 3701.68it/s] 48%|████▊     | 4226/8810 [00:01<00:01, 3041.26it/s] 53%|█████▎    | 4666/8810 [00:01<00:01, 3371.71it/s] 57%|█████▋    | 5033/8810 [00:01<00:01, 3428.60it/s] 61%|██████▏   | 5398/8810 [00:01<00:01, 2840.30it/s] 66%|██████▋   | 5851/8810 [00:01<00:00, 3240.85it/s] 71%|███████   | 6223/8810 [00:01<00:00, 3355.26it/s] 76%|███████▌  | 6674/8810 [00:01<00:00, 3660.01it/s] 80%|████████  | 7061/8810 [00:02<00:00, 3056.42it/s] 85%|████████▍ | 7465/8810 [00:02<00:00, 3295.62it/s] 89%|████████▉ | 7833/8810 [00:02<00:00, 3394.67it/s] 93%|█████████▎| 8197/8810 [00:02<00:00, 3459.03it/s] 97%|█████████▋| 8558/8810 [00:02<00:00, 2625.81it/s]100%|██████████| 8810/8810 [00:02<00:00, 3229.42it/s]
+Overall we have 3553 games in split=train
+Training with 3553 games
+{"spend_interim": "search", "usd": 4.88, "tasks_done": 0, "ts": "2026-09-13T20:50:39Z"}
+{"spend_interim": "search", "usd": 5.52, "tasks_done": 1, "ts": "2026-09-13T21:00:39Z"}
+{"spend_interim": "search", "usd": 5.93, "tasks_done": 1, "ts": "2026-09-13T21:10:40Z"}
+{"spend_interim": "search", "usd": 6.57, "tasks_done": 2, "ts": "2026-09-13T21:20:40Z"}
+{"spend_interim": "search", "usd": 7.22, "tasks_done": 3, "ts": "2026-09-13T21:30:40Z"}
+Initializing AlfredTWEnv...
+  0%|          | 0/8810 [00:00<?, ?it/s]  0%|          | 4/8810 [00:00<06:26, 22.78it/s]  5%|▍         | 429/8810 [00:00<00:04, 1916.30it/s]  9%|▉         | 832/8810 [00:00<00:02, 2738.88it/s] 14%|█▍        | 1238/8810 [00:00<00:02, 3210.73it/s] 19%|█▊        | 1634/8810 [00:00<00:02, 3459.93it/s] 23%|██▎       | 2003/8810 [00:00<00:02, 2298.24it/s] 28%|██▊       | 2456/8810 [00:00<00:02, 2816.23it/s] 33%|███▎      | 2889/8810 [00:01<00:01, 3191.16it/s] 37%|███▋      | 3261/8810 [00:01<00:01, 3315.39it/s] 42%|████▏     | 3687/8810 [00:01<00:01, 3570.38it/s] 46%|████▌     | 4074/8810 [00:01<00:01, 2635.33it/s] 51%|█████▏    | 4516/8810 [00:01<00:01, 3033.63it/s] 55%|█████▌    | 4872/8810 [00:01<00:01, 3151.45it/s] 60%|█████▉    | 5261/8810 [00:01<00:01, 3340.02it/s] 64%|██████▍   | 5626/8810 [00:02<00:01, 2431.40it/s] 68%|██████▊   | 5994/8810 [00:02<00:01, 2695.77it/s] 73%|███████▎  | 6400/8810 [00:02<00:00, 3012.73it/s] 78%|███████▊  | 6851/8810 [00:02<00:00, 3383.48it/s] 82%|████████▏ | 7228/8810 [00:02<00:00, 2472.69it/s] 87%|████████▋ | 7639/8810 [00:02<00:00, 2816.52it/s] 91%|█████████ | 7998/8810 [00:02<00:00, 2993.20it/s] 95%|█████████▍| 8343/8810 [00:02<00:00, 3104.29it/s] 99%|█████████▊| 8688/8810 [00:03<00:00, 2352.15it/s]100%|██████████| 8810/8810 [00:03<00:00, 2786.92it/s]
+Overall we have 3553 games in split=train
+Training with 3553 games
+{"spend_interim": "search", "usd": 7.76, "tasks_done": 3, "ts": "2026-09-13T21:40:41Z"}
+{"spend_interim": "search", "usd": 8.34, "tasks_done": 4, "ts": "2026-09-13T21:50:41Z"}
+{"spend_interim": "search", "usd": 8.9, "tasks_done": 4, "ts": "2026-09-13T22:00:42Z"}
+{"spend_interim": "search", "usd": 9.59, "tasks_done": 5, "ts": "2026-09-13T22:10:42Z"}
+{"spend_interim": "search", "usd": 10.17, "tasks_done": 5, "ts": "2026-09-13T22:20:44Z"}
+{"task": "13", "expected": "saturated", "regime": "saturated", "outcome": "dropped", "reason": "exhausted", "n_search": 30}
+{"task": "15", "expected": "saturated", "regime": "saturated", "outcome": "accepted", "reason": "", "n_search": 18}
+{"task": "22", "expected": "saturated", "regime": "saturated", "outcome": "accepted", "reason": "", "n_search": 22}
+{"task": "11", "expected": "zero", "regime": "zero", "outcome": "dropped", "reason": "dead", "n_search": 14}
+{"task": "14", "expected": "zero", "regime": "zero", "outcome": "dropped", "reason": "dead", "n_search": 18}
+{"task": "17", "expected": "zero", "regime": "zero", "outcome": "dropped", "reason": "dead", "n_search": 18}
+{"stage": "search", "usd": 6.14, "method_version_runtime": true, "no_fixed_fallback": true, "designer_calls_le_1": true, "designer_ledger_calls_per_task": {"13": 1, "15": 1, "22": 1, "11": 1, "14": 1, "17": 1}, "proposals_le_2": true, "search_le_cap": true, "no_axis_bypass": true, "reference_only_on_zero": true, "reference_leakage": true, "tasks_preregistered": true, "method_unmodified": true, "invalid_env_accepted": [], "all_pass": true}
+search exit 0 2026-09-13T22:23:13Z
+{"spend_check": "confirm", "usd": 10.46, "ts": "2026-09-13T22:23:14Z"}
+{"spend_check": "confirm 15:fridge_distractor_objects:1.0", "usd": 10.46, "ts": "2026-09-13T22:23:14Z"}
+{"confirm": "15:fridge_distractor_objects:1.0", "task": "15", "successes": 11, "n": 16, "errors": 0, "p16": 0.6875, "learnable": true}
+{"spend_check": "confirm 22:object_label_scramble:0.5", "usd": 11.0, "ts": "2026-09-13T22:32:43Z"}
+{"confirm": "22:object_label_scramble:0.5", "task": "22", "successes": 10, "n": 16, "errors": 0, "p16": 0.625, "learnable": true}
+{"stage": "confirm", "envs": 2, "usd": 1.24}
+confirm exit 0 2026-09-13T22:42:34Z
+{"high_reached": 3, "low_reached": 3, "high_valid_tasks": 3, "high_leverage_tasks": 3, "high": "PASS", "low_valid_tasks": 3, "low_unlock_tasks": 0, "low": "FAIL", "high_accepted_over_reached": "2/3", "low_accepted_over_reached": "0/3", "high_leveraged_not_accepted": 1, "low_unlocked_too_easy": 0, "low_dead": 3, "overall": "NO-GO"}
+tables exit 0 2026-09-13T22:42:36Z
+{"usd": 11.69, "cap": 30.0, "by_run": {"e6-smoke-confirm": 0, "e6-smoke-llm-v1": 4.32, "e6-smoke2-confirm": 1.24, "e6-smoke2-llm-v1": 6.14}, "ts": "2026-09-13T22:42:38Z"}
+E6 smoke done 2026-09-13T22:42:39Z

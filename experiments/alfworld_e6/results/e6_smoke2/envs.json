@@ -1,0 +1,26 @@
+[
+ {
+  "id": "15:fridge_distractor_objects:1.0",
+  "task": "15",
+  "kind": "knob",
+  "family": "fridge_distractor_objects",
+  "d": 1.0,
+  "t": null,
+  "candidate": {
+   "rules_code": "class _Rules(Rules):\n    DOSE = 1.0\n\n    def filter_observation(self, obs, env_state):\n        if self.DOSE <= 0:\n            return obs\n        text = obs.text\n        # Only rewrite the fridge scene, after it has been opened.\n        if 'fridge 1 is open' not in text and 'In it, you see' not in text:\n            return obs\n        if 'fridge' not in text:\n            return obs\n        # Inject distractor objects into the fridge contents at DOSE-controlled count.\n        n = int(self.DOSE * 6)\n        distractors = ['a apple 1', 'a bread 1', 'a lettuce 1', 'a egg 1', 'a butterknife 1', 'a pan 1'][:n]\n        if not distractors:\n            return obs\n        marker = 'In it, you see '\n        idx = text.find(marker)\n        if idx < 0:\n            return obs\n        end = text.find('.', idx)\n        if end < 0:\n            return obs\n        inject = ', ' + ', '.join(distractors)\n        text = text[:end] + inject + text[end:]\n        return Observation(text=text, data=obs.data)",
+   "in_env_actions": []
+  }
+ },
+ {
+  "id": "22:object_label_scramble:0.5",
+  "task": "22",
+  "kind": "knob",
+  "family": "object_label_scramble",
+  "d": 0.5,
+  "t": null,
+  "candidate": {
+   "rules_code": "import hashlib\n\n\nclass _Rules(Rules):\n    \"\"\"ObjectLabelScramble (O axis, harder with DOSE): deterministically remap object tokens\n    (e.g. 'watch 1' -> 'timepiece 7') in the observation text and admissible commands at a\n    fraction DOSE of steps. The world is untouched, so the task remains solvable; the policy\n    merely loses its memorized string mapping.\"\"\"\n\n    DOSE = 0.5\n    TASK_ID = '22'\n\n    _MAP = {\n        'watch 1': 'timepiece 7',\n        'watch 2': 'timepiece 8',\n        'shelf 1': 'plank 3',\n        'diningtable 1': 'board 2',\n    }\n\n    def _scramble(self, text):\n        for src, dst in self._MAP.items():\n            text = text.replace(src, dst)\n        return text\n\n    def _scrambled(self, env_state):\n        step = int(getattr(env_state, 'step_count', 0) or 0)\n        digest = hashlib.sha256(f'{self.TASK_ID}:{step}'.encode('utf-8')).hexdigest()\n        return (int(digest[:8], 16) % 10000) < int(self.DOSE * 10000)\n\n    def filter_observation(self, obs, env_state):\n        if not self._scrambled(env_state):\n            return obs\n        text = self._scramble(obs.text)\n        data = dict(obs.data or {})\n        if 'admissible_commands' in data:\n            data['admissible_commands'] = [self._scramble(c) for c in data['admissible_commands']]\n        return Observation(text=text, data=data)\n",
+   "in_env_actions": []
+  }
+ }
+]

@@ -1,0 +1,36 @@
+{
+ "tasks": {
+  "11": {
+   "available": true,
+   "reason": "pass",
+   "reference_id": "fe921eb486a98a94",
+   "provenance_intact": true,
+   "reference_cuts": [],
+   "reference_steps": 16,
+   "independent_overlap": 0,
+   "leaks": []
+  },
+  "14": {
+   "available": true,
+   "reason": "pass",
+   "reference_id": "54376cab0bbca537",
+   "provenance_intact": true,
+   "reference_cuts": [],
+   "reference_steps": 23,
+   "independent_overlap": 0,
+   "leaks": []
+  },
+  "17": {
+   "available": true,
+   "reason": "pass",
+   "reference_id": "7df7ed08c6c6db86",
+   "provenance_intact": true,
+   "reference_cuts": [],
+   "reference_steps": 29,
+   "independent_overlap": 0,
+   "leaks": []
+  }
+ },
+ "ok": true,
+ "expert_recomputed": false
+}
