@@ -1,0 +1,472 @@
+{
+ "rows": {
+  "1": {
+   "task": "1",
+   "expected": "saturated",
+   "regime": "saturated",
+   "p_hat": 1.0,
+   "n_est": 10,
+   "outcome": "dropped",
+   "reason": "no_leverage",
+   "n_search": 18,
+   "branch_reached": true,
+   "designer_called": true,
+   "raw_proposals": 2,
+   "valid_proposals": 2,
+   "rejected": [],
+   "mechanisms": {
+    "egg_identity_swap": "The policy always picks the first egg it sees (egg 1) by name. This intervention relabels/renumbers the eggs in the observation so that the intended cleanable egg is no longer trivially 'egg 1', forcing the policy to actually disambiguate which egg to pick rather than relying on the index shortcut.",
+    "sink_dislocate": "The policy depends on the reliable affordance 'clean egg 1 with sinkbasin 1' being present at sinkbasin 1. This intervention removes/blocks that cleaning affordance at a DOSE-scaled fraction of visits, forcing the policy to seek an alternative cleaning location or re-examine the sink before the clean action is offered."
+   },
+   "reference_used": false,
+   "evidence_chars": 7862,
+   "proposed": [
+    "egg_identity_swap",
+    "sink_dislocate"
+   ],
+   "axes": {
+    "egg_identity_swap": "O",
+    "sink_dislocate": "A"
+   },
+   "guards": [
+    {
+     "family": "egg_identity_swap",
+     "ok": true,
+     "source": "policy_replay"
+    },
+    {
+     "family": "sink_dislocate",
+     "ok": true,
+     "source": "policy_replay"
+    }
+   ],
+   "leverage": {
+    "egg_identity_swap": false,
+    "sink_dislocate": false
+   },
+   "measurable_leverage": false,
+   "brackets": [],
+   "no_leverage": [
+    "egg_identity_swap",
+    "sink_dislocate"
+   ]
+  },
+  "7": {
+   "task": "7",
+   "expected": "saturated",
+   "regime": "saturated",
+   "p_hat": 1.0,
+   "n_est": 10,
+   "outcome": "dropped",
+   "reason": "no_leverage",
+   "n_search": 18,
+   "branch_reached": true,
+   "designer_called": true,
+   "raw_proposals": 2,
+   "valid_proposals": 2,
+   "rejected": [],
+   "mechanisms": {
+    "obscure_statue_location": "The policy relies on the observation text directly naming the statue's location ('On the shelf 2, you see a statue 3') to find and take it. This intervention hides the statue's name from surface descriptions and 'look' results, forcing the policy to infer it via examine/exploration rather than reading the room text.",
+    "scramble_room_labels": "The policy navigates by matching the exact destination string 'sidetable 1' and 'shelf 2' from the admissible-commands list. This intervention swaps/masks the numeric labels of containers so the policy cannot directly see which shelf holds the statue and which sidetable is the target, requiring it to infer locations from examine results."
+   },
+   "reference_used": false,
+   "evidence_chars": 9662,
+   "proposed": [
+    "obscure_statue_location",
+    "scramble_room_labels"
+   ],
+   "axes": {
+    "obscure_statue_location": "O",
+    "scramble_room_labels": "O"
+   },
+   "guards": [
+    {
+     "family": "obscure_statue_location",
+     "ok": true,
+     "source": "policy_replay"
+    },
+    {
+     "family": "scramble_room_labels",
+     "ok": true,
+     "source": "policy_replay"
+    }
+   ],
+   "leverage": {
+    "obscure_statue_location": false,
+    "scramble_room_labels": false
+   },
+   "measurable_leverage": false,
+   "brackets": [],
+   "no_leverage": [
+    "obscure_statue_location",
+    "scramble_room_labels"
+   ]
+  },
+  "12": {
+   "task": "12",
+   "expected": "saturated",
+   "regime": "saturated",
+   "p_hat": 1.0,
+   "n_est": 10,
+   "outcome": "dropped",
+   "reason": "budget",
+   "n_search": 30,
+   "branch_reached": true,
+   "designer_called": true,
+   "raw_proposals": 2,
+   "valid_proposals": 2,
+   "rejected": [],
+   "mechanisms": {
+    "distractor_alarmclocks": "The policy finds the two target alarmclocks by their object type name on shelf 1 and moves them to desk 1. This intervention injects additional decoy alarmclock objects onto other containers, requiring the agent to disambiguate by identity/location and resist picking the wrong ones.",
+    "relocate_target_alarmclocks": "The policy hard-codes the affordance of going to shelf 1 to take alarmclocks. This intervention relocates the two target alarmclocks to different containers (e.g. drawer 2 and bed 1), removing the reliable 'go to shelf 1' shortcut and forcing exploration of other locations."
+   },
+   "reference_used": false,
+   "evidence_chars": 8737,
+   "proposed": [
+    "distractor_alarmclocks",
+    "relocate_target_alarmclocks"
+   ],
+   "axes": {
+    "distractor_alarmclocks": "O",
+    "relocate_target_alarmclocks": "A"
+   },
+   "guards": [
+    {
+     "family": "distractor_alarmclocks",
+     "ok": true,
+     "source": "policy_replay"
+    },
+    {
+     "family": "relocate_target_alarmclocks",
+     "ok": true,
+     "source": "policy_replay"
+    }
+   ],
+   "leverage": {
+    "distractor_alarmclocks": true
+   },
+   "measurable_leverage": true,
+   "brackets": [
+    {
+     "family": "distractor_alarmclocks",
+     "start": 0.5,
+     "status": "exhausted",
+     "history": [
+      {
+       "d": 1.0,
+       "s": 0,
+       "n": 4,
+       "verdict": "too_hard"
+      },
+      {
+       "d": 0.5,
+       "s": 0,
+       "n": 4,
+       "verdict": "too_hard"
+      },
+      {
+       "d": 0.25,
+       "s": 4,
+       "n": 4,
+       "verdict": "too_easy"
+      },
+      {
+       "d": 0.375,
+       "s": 0,
+       "n": 4,
+       "verdict": "too_hard"
+      },
+      {
+       "d": 0.3125,
+       "s": 4,
+       "n": 4,
+       "verdict": "too_easy"
+      }
+     ]
+    }
+   ],
+   "no_leverage": []
+  },
+  "8": {
+   "task": "8",
+   "expected": "zero",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "outcome": "dropped",
+   "reason": "dead",
+   "n_search": 18,
+   "branch_reached": true,
+   "designer_called": true,
+   "raw_proposals": 2,
+   "valid_proposals": 2,
+   "rejected": [],
+   "mechanisms": [
+    "The policy starts by going to sinkbasin 1 and then wanders among empty locations, never acquiring the soapbar from toilet 1. Restarting after the first action isolates the subproblem of locating and taking the soapbar, since the soapbar is never in the agent's inventory in this trajectory.",
+    "At step 46 the agent finally picks up a soapbar from shelf 1, but it is not the clean soapbar from toilet 1 and it never performs the cleaning step. Restarting here isolates the subproblem of cleaning the acquired soapbar and placing it on a shelf, but the soapbar is unverified and unwashed."
+   ],
+   "reference_used": true,
+   "evidence_chars": 23247,
+   "guards": [],
+   "leverage": {},
+   "measurable_leverage": false,
+   "brackets": [],
+   "no_leverage": [],
+   "reference": {
+    "requested": true,
+    "available": true,
+    "n_steps": 7,
+    "reason": "pass"
+   },
+   "stage_proposals": [
+    {
+     "source": "failure",
+     "trajectory_id": "F1",
+     "step": 1
+    },
+    {
+     "source": "failure",
+     "trajectory_id": "F1",
+     "step": 45
+    }
+   ],
+   "stage_rejected": [],
+   "certified": [
+    "8:8e6d96113acebdad",
+    "8:720f1c155abd4626"
+   ],
+   "uncertified": [],
+   "probe": [
+    {
+     "id": "8:8e6d96113acebdad",
+     "t": 1,
+     "source": "failure",
+     "successes": 0,
+     "n": 4,
+     "verdict": "too_hard"
+    },
+    {
+     "id": "8:720f1c155abd4626",
+     "t": 45,
+     "source": "failure",
+     "successes": 0,
+     "n": 4,
+     "verdict": "too_hard"
+    }
+   ],
+   "policy_unlock": false
+  },
+  "9": {
+   "task": "9",
+   "expected": "zero",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "outcome": "dropped",
+   "reason": "too_easy",
+   "n_search": 22,
+   "branch_reached": true,
+   "designer_called": true,
+   "raw_proposals": 2,
+   "valid_proposals": 2,
+   "rejected": [],
+   "mechanisms": [
+    "At shelf 2 the policy sees both alarmclocks and the desklamp but never takes an alarmclock, instead looping on use/look/examine. Restarting here isolates the missing 'take alarmclock 2 from shelf 2' subproblem that the reference performs next.",
+    "The reference's final step is 'use desklamp 1', showing the correct completion is to take the alarmclock first then use the lamp. Restarting after taking the alarmclock isolates the final 'use desklamp 1' completion step."
+   ],
+   "reference_used": true,
+   "evidence_chars": 22337,
+   "guards": [],
+   "leverage": {},
+   "measurable_leverage": false,
+   "brackets": [],
+   "no_leverage": [],
+   "reference": {
+    "requested": true,
+    "available": true,
+    "n_steps": 5,
+    "reason": "pass"
+   },
+   "stage_proposals": [
+    {
+     "source": "failure",
+     "trajectory_id": "F1",
+     "step": 6
+    },
+    {
+     "source": "reference",
+     "trajectory_id": "reference",
+     "step": 4
+    }
+   ],
+   "stage_rejected": [],
+   "certified": [
+    "9:8273be6685307365",
+    "9:d213cd72c1ea5001"
+   ],
+   "uncertified": [],
+   "probe": [
+    {
+     "id": "9:8273be6685307365",
+     "t": 6,
+     "source": "failure",
+     "successes": 7,
+     "n": 8,
+     "verdict": "too_easy"
+    },
+    {
+     "id": "9:d213cd72c1ea5001",
+     "t": 4,
+     "source": "reference",
+     "successes": 4,
+     "n": 4,
+     "verdict": "too_easy"
+    }
+   ],
+   "policy_unlock": true
+  },
+  "10": {
+   "task": "10",
+   "expected": "zero",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "outcome": "dropped",
+   "reason": "dead",
+   "n_search": 18,
+   "branch_reached": true,
+   "designer_called": true,
+   "raw_proposals": 2,
+   "valid_proposals": 2,
+   "rejected": [],
+   "mechanisms": [
+    "The policy successfully picks up cup 1 from countertop 2, the critical object for the task. Restarting here isolates the subproblem of heating the cup and delivering it to the cabinet, which is the learnable portion the policy never reached.",
+    "After picking up cup 1, the policy wanders and never heats it. Restarting here isolates the heating-then-cabinet subproblem while the cup is already in hand."
+   ],
+   "reference_used": true,
+   "evidence_chars": 23365,
+   "guards": [],
+   "leverage": {},
+   "measurable_leverage": false,
+   "brackets": [],
+   "no_leverage": [],
+   "reference": {
+    "requested": true,
+    "available": true,
+    "n_steps": 39,
+    "reason": "pass"
+   },
+   "stage_proposals": [
+    {
+     "source": "failure",
+     "trajectory_id": "F2",
+     "step": 8
+    },
+    {
+     "source": "failure",
+     "trajectory_id": "F3",
+     "step": 12
+    }
+   ],
+   "stage_rejected": [],
+   "certified": [
+    "10:d9589cf4a6cd2f8e",
+    "10:0fd19b95dbfa12f0"
+   ],
+   "uncertified": [],
+   "probe": [
+    {
+     "id": "10:d9589cf4a6cd2f8e",
+     "t": 8,
+     "source": "failure",
+     "successes": 0,
+     "n": 4,
+     "verdict": "too_hard"
+    },
+    {
+     "id": "10:0fd19b95dbfa12f0",
+     "t": 12,
+     "source": "failure",
+     "successes": 0,
+     "n": 4,
+     "verdict": "too_hard"
+    }
+   ],
+   "policy_unlock": false
+  }
+ },
+ "gates": {
+  "method_version_runtime": true,
+  "no_fixed_fallback": true,
+  "designer_calls_le_1": true,
+  "designer_ledger_calls_per_task": {
+   "1": 1,
+   "7": 1,
+   "12": 1,
+   "8": 1,
+   "9": 1,
+   "10": 1
+  },
+  "proposals_le_2": true,
+  "search_le_cap": true,
+  "no_axis_bypass": true,
+  "reference_only_on_zero": true,
+  "reference_leakage": false,
+  "tasks_preregistered": true,
+  "method_unmodified": true,
+  "invalid_env_accepted": [],
+  "all_pass": false
+ },
+ "audit": {
+  "tasks": {
+   "8": {
+    "available": true,
+    "reason": "pass",
+    "recomputed_ok": true,
+    "hash_match": true,
+    "reference_cuts": [],
+    "reference_steps": 7,
+    "independent_overlap": 0,
+    "leaks": []
+   },
+   "9": {
+    "available": true,
+    "reason": "pass",
+    "recomputed_ok": true,
+    "hash_match": false,
+    "reference_cuts": [
+     4
+    ],
+    "reference_steps": 5,
+    "independent_overlap": 94,
+    "leaks": []
+   },
+   "10": {
+    "available": true,
+    "reason": "pass",
+    "recomputed_ok": true,
+    "hash_match": true,
+    "reference_cuts": [],
+    "reference_steps": 39,
+    "independent_overlap": 0,
+    "leaks": []
+   }
+  },
+  "ok": false
+ },
+ "spend": {
+  "e6-smoke-confirm": 0,
+  "e6-smoke-llm-v1": 4.32
+ },
+ "verdicts": {
+  "high_reached": 3,
+  "low_reached": 3,
+  "high_valid_tasks": 3,
+  "high_leverage_tasks": 1,
+  "high": "PASS",
+  "low_valid_tasks": 3,
+  "low_unlock_tasks": 1,
+  "low": "PASS",
+  "overall": "NO-GO"
+ }
+}

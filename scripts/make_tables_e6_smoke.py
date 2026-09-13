@@ -328,6 +328,9 @@ def main(argv: list[str] | None = None) -> int:
         if not r.get("stage_proposals") and not r.get("stage_rejected"):
             why = f"designer not called or no proposal ({r.get('regime')})"
             lines.append(f"| {t} | {avail} | - | - | {why} | - | - | - |")
+    narrative = e6.RESULTS / "e6_smoke_narrative.md"
+    if narrative.exists():  # hand-written interpretation, kept verbatim below the generated tables
+        lines.append("\n" + narrative.read_text(encoding="utf-8").rstrip())
     (e6.RESULTS / "e6_smoke.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     print(json.dumps(v))
     return 0

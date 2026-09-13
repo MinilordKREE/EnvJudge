@@ -1,0 +1,37 @@
+{
+ "tasks": {
+  "8": {
+   "available": true,
+   "reason": "pass",
+   "recomputed_ok": true,
+   "hash_match": true,
+   "reference_cuts": [],
+   "reference_steps": 7,
+   "independent_overlap": 0,
+   "leaks": []
+  },
+  "9": {
+   "available": true,
+   "reason": "pass",
+   "recomputed_ok": true,
+   "hash_match": false,
+   "reference_cuts": [
+    4
+   ],
+   "reference_steps": 5,
+   "independent_overlap": 94,
+   "leaks": []
+  },
+  "10": {
+   "available": true,
+   "reason": "pass",
+   "recomputed_ok": true,
+   "hash_match": true,
+   "reference_cuts": [],
+   "reference_steps": 39,
+   "independent_overlap": 0,
+   "leaks": []
+  }
+ },
+ "ok": false
+}

@@ -1,0 +1,15 @@
+task_id,budget,phase,n,refunded
+1,search,dose:egg_identity_swap,4,0
+1,search,dose:sink_dislocate,4,0
+1,search,estimate,10,0
+7,search,dose:obscure_statue_location,4,0
+7,search,dose:scramble_room_labels,4,0
+7,search,estimate,10,0
+12,search,dose:distractor_alarmclocks,20,0
+12,search,estimate,10,0
+8,search,estimate,10,0
+8,search,probe,8,0
+9,search,estimate,10,0
+9,search,probe,12,0
+10,search,estimate,10,0
+10,search,probe,8,0

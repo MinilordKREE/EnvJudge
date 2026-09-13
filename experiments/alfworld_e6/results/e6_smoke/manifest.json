@@ -1,0 +1,138 @@
+{
+  "schema_version": 1,
+  "run_id": "e6-smoke-llm-v1",
+  "created_at": "2026-09-13T18:36:52.806953Z",
+  "seed": 0,
+  "config_sha256": "e59f22588942152e10a1d759e0aa0a8e881055c94ca0920a32cbb0c548c267a7",
+  "config_schema_version": 1,
+  "aea_config_sha256": "d5cbecdfa8b2f6bf1fa4ac4ac8d1bf10457028bc5d3adfce66bbdc95cd09b77b",
+  "config_path": null,
+  "git_sha": "d3a90dc719d8df7d4dadc420beb4230bbdd8fbab",
+  "git_dirty": true,
+  "envharness_sha": "d3a90dc719d8df7d4dadc420beb4230bbdd8fbab",
+  "aea_version": "0.1.0",
+  "python_version": "3.12.9",
+  "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+  "out_dir": "/home/kree/work/EnvJudge-aea-llm/runs/e6-smoke-llm-v1",
+  "extra": {
+    "experiment": "E6 smoke (llm_v1 mechanism smoke, PREREG_SMOKE)",
+    "prereg": "experiments/alfworld_e6/PREREG_SMOKE.md",
+    "prereg_sha": "dd0d914",
+    "method_sha": "47a0091",
+    "src_aea_tree": "2bce079b6a660ee4",
+    "method_version": "llm_v1",
+    "aea_config": {
+      "schema_version": 4,
+      "method_version": "llm_v1",
+      "band_t": [
+        0.4,
+        0.6
+      ],
+      "band_l": [
+        0.2,
+        0.8
+      ],
+      "k": 16,
+      "accept": [
+        3,
+        5
+      ],
+      "probe": [
+        4,
+        8
+      ],
+      "cap": 30,
+      "impl": {
+        "batch_first": 4,
+        "batch_next": 2,
+        "confidence": 0.9,
+        "max_bisections": 4,
+        "order_tolerance": 0.375,
+        "warm_start_min_history": 3,
+        "proposer_cap": 2,
+        "n_failed_rollouts": 3,
+        "max_candidates": 6,
+        "stage_budget": 100,
+        "oracle_attempts": 3,
+        "oracle_max_steps": 50,
+        "policy_max_steps": 50
+      }
+    },
+    "tasks": [
+      1,
+      7,
+      12,
+      8,
+      9,
+      10
+    ],
+    "expected_regime": {
+      "1": "saturated",
+      "7": "saturated",
+      "12": "saturated",
+      "8": "zero",
+      "9": "zero",
+      "10": "zero"
+    },
+    "task_order": "HIGH ascending then LOW ascending (pre-registered)",
+    "policy": {
+      "provider": "openrouter",
+      "model": "qwen/qwen3-8b",
+      "base_url": "https://openrouter.ai/api/v1",
+      "provider_pin": "alibaba",
+      "temperature": 0.5,
+      "max_tokens": 2048,
+      "thinking": false,
+      "reasoning_effort": null,
+      "timeout_s": 120.0,
+      "cost_tolerance": 1e-6,
+      "retry": {
+        "max_attempts": 10,
+        "initial_delay_s": 2.0,
+        "max_delay_s": 90.0,
+        "multiplier": 2.0,
+        "jitter_s": 1.0,
+        "total_timeout_s": 900.0,
+        "retry_status_codes": [
+          408,
+          409,
+          425,
+          429
+        ]
+      }
+    },
+    "designer": {
+      "provider": "deepseek",
+      "model": "deepseek-v4-pro",
+      "base_url": "https://api.deepseek.com",
+      "provider_pin": null,
+      "temperature": 0.7,
+      "max_tokens": 4096,
+      "thinking": false,
+      "reasoning_effort": null,
+      "timeout_s": 120.0,
+      "cost_tolerance": 1e-6,
+      "retry": {
+        "max_attempts": 5,
+        "initial_delay_s": 1.0,
+        "max_delay_s": 30.0,
+        "multiplier": 2.0,
+        "jitter_s": 1.0,
+        "total_timeout_s": 300.0,
+        "retry_status_codes": [
+          408,
+          409,
+          425,
+          429
+        ]
+      }
+    },
+    "policy_endpoint_pin": "alibaba",
+    "cap_usd": 30.0,
+    "concurrency": {
+      "tasks": 1,
+      "rollouts": 4,
+      "inflight_episodes": 4
+    }
+  }
+}
