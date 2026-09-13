@@ -1,0 +1,577 @@
+{
+ "groups": {
+  "M": [
+   "0",
+   "18"
+  ],
+  "B": [
+   "4",
+   "5",
+   "6",
+   "16",
+   "19",
+   "26"
+  ],
+  "S": [
+   "1",
+   "2",
+   "3",
+   "7",
+   "12",
+   "13",
+   "15",
+   "21",
+   "22",
+   "23",
+   "24",
+   "25",
+   "28",
+   "29"
+  ],
+  "MB": [
+   "0",
+   "18",
+   "4",
+   "5",
+   "6",
+   "16",
+   "19",
+   "26"
+  ]
+ },
+ "M_i1": {
+  "arm": "M",
+  "items": 6,
+  "tasks": [
+   "0",
+   "18"
+  ],
+  "trajectories": {
+   "0": 3,
+   "18": 2
+  },
+  "induction": {
+   "single_succ": 6
+  },
+  "seed_label": 20260930,
+  "extractor": "deepseek-v4-pro",
+  "note": "released single-success induction (temperature 0), shortest success per task"
+ },
+ "M_i2": {
+  "arm": "M",
+  "items": 4,
+  "tasks": [
+   "0",
+   "18"
+  ],
+  "trajectories": {
+   "0": 3,
+   "18": 2
+  },
+  "induction": {
+   "single_succ": 4
+  },
+  "seed_label": 20260931,
+  "extractor": "deepseek-v4-pro",
+  "note": "released single-success induction (temperature 0), shortest success per task"
+ },
+ "B_i1": {
+  "arm": "B",
+  "items": 18,
+  "tasks": [
+   "4",
+   "5",
+   "6",
+   "16",
+   "19",
+   "26"
+  ],
+  "trajectories": {
+   "4": 8,
+   "5": 12,
+   "6": 7,
+   "16": 8,
+   "19": 10,
+   "26": 10
+  },
+  "induction": {
+   "single_succ": 18
+  },
+  "seed_label": 20260930,
+  "extractor": "deepseek-v4-pro",
+  "note": "released single-success induction (temperature 0), shortest success per task"
+ },
+ "B_i2": {
+  "arm": "B",
+  "items": 18,
+  "tasks": [
+   "4",
+   "5",
+   "6",
+   "16",
+   "19",
+   "26"
+  ],
+  "trajectories": {
+   "4": 8,
+   "5": 12,
+   "6": 7,
+   "16": 8,
+   "19": 10,
+   "26": 10
+  },
+  "induction": {
+   "single_succ": 18
+  },
+  "seed_label": 20260931,
+  "extractor": "deepseek-v4-pro",
+  "note": "released single-success induction (temperature 0), shortest success per task"
+ },
+ "S_i1": {
+  "arm": "S",
+  "items": 40,
+  "tasks": [
+   "1",
+   "2",
+   "3",
+   "7",
+   "12",
+   "13",
+   "15",
+   "21",
+   "22",
+   "23",
+   "24",
+   "25",
+   "28",
+   "29"
+  ],
+  "trajectories": {
+   "1": 16,
+   "2": 15,
+   "3": 13,
+   "7": 16,
+   "12": 16,
+   "13": 16,
+   "15": 16,
+   "21": 15,
+   "22": 16,
+   "23": 16,
+   "24": 16,
+   "25": 16,
+   "28": 14,
+   "29": 16
+  },
+  "induction": {
+   "single_succ": 40
+  },
+  "seed_label": 20260930,
+  "extractor": "deepseek-v4-pro",
+  "note": "released single-success induction (temperature 0), shortest success per task"
+ },
+ "S_i2": {
+  "arm": "S",
+  "items": 42,
+  "tasks": [
+   "1",
+   "2",
+   "3",
+   "7",
+   "12",
+   "13",
+   "15",
+   "21",
+   "22",
+   "23",
+   "24",
+   "25",
+   "28",
+   "29"
+  ],
+  "trajectories": {
+   "1": 16,
+   "2": 15,
+   "3": 13,
+   "7": 16,
+   "12": 16,
+   "13": 16,
+   "15": 16,
+   "21": 15,
+   "22": 16,
+   "23": 16,
+   "24": 16,
+   "25": 16,
+   "28": 14,
+   "29": 16
+  },
+  "induction": {
+   "single_succ": 42
+  },
+  "seed_label": 20260931,
+  "extractor": "deepseek-v4-pro",
+  "note": "released single-success induction (temperature 0), shortest success per task"
+ },
+ "MB_i1": {
+  "arm": "MB",
+  "items": 22,
+  "tasks": [
+   "0",
+   "4",
+   "5",
+   "6",
+   "16",
+   "18",
+   "19",
+   "26"
+  ],
+  "trajectories": {
+   "0": 3,
+   "18": 2,
+   "4": 8,
+   "5": 12,
+   "6": 7,
+   "16": 8,
+   "19": 10,
+   "26": 10
+  },
+  "induction": {
+   "single_succ": 22
+  },
+  "seed_label": 20260930,
+  "extractor": "deepseek-v4-pro",
+  "note": "released single-success induction (temperature 0), shortest success per task"
+ },
+ "MB_i2": {
+  "arm": "MB",
+  "items": 24,
+  "tasks": [
+   "0",
+   "4",
+   "5",
+   "6",
+   "16",
+   "18",
+   "19",
+   "26"
+  ],
+  "trajectories": {
+   "0": 3,
+   "18": 2,
+   "4": 8,
+   "5": 12,
+   "6": 7,
+   "16": 8,
+   "19": 10,
+   "26": 10
+  },
+  "induction": {
+   "single_succ": 24
+  },
+  "seed_label": 20260931,
+  "extractor": "deepseek-v4-pro",
+  "note": "released single-success induction (temperature 0), shortest success per task"
+ },
+ "count_groups": {
+  "g1": {
+   "B": [
+    "4",
+    "6"
+   ],
+   "S": [
+    "13",
+    "23"
+   ]
+  },
+  "g2": {
+   "B": [
+    "4",
+    "6"
+   ],
+   "S": [
+    "22",
+    "28"
+   ]
+  },
+  "g3": {
+   "B": [
+    "16",
+    "19"
+   ],
+   "S": [
+    "1",
+    "13"
+   ]
+  }
+ },
+ "B2_g1_i1": {
+  "arm": "B2",
+  "items": 6,
+  "tasks": [
+   "4",
+   "6"
+  ],
+  "trajectories": {
+   "4": 8,
+   "6": 7
+  },
+  "induction": {
+   "single_succ": 6
+  },
+  "seed_label": 20260930,
+  "extractor": "deepseek-v4-pro",
+  "note": "released single-success induction (temperature 0), shortest success per task"
+ },
+ "B2_g1_i2": {
+  "arm": "B2",
+  "items": 6,
+  "tasks": [
+   "4",
+   "6"
+  ],
+  "trajectories": {
+   "4": 8,
+   "6": 7
+  },
+  "induction": {
+   "single_succ": 6
+  },
+  "seed_label": 20260931,
+  "extractor": "deepseek-v4-pro",
+  "note": "released single-success induction (temperature 0), shortest success per task"
+ },
+ "S2_g1_i1": {
+  "arm": "S2",
+  "items": 6,
+  "tasks": [
+   "13",
+   "23"
+  ],
+  "trajectories": {
+   "13": 16,
+   "23": 16
+  },
+  "induction": {
+   "single_succ": 6
+  },
+  "seed_label": 20260930,
+  "extractor": "deepseek-v4-pro",
+  "note": "released single-success induction (temperature 0), shortest success per task"
+ },
+ "S2_g1_i2": {
+  "arm": "S2",
+  "items": 6,
+  "tasks": [
+   "13",
+   "23"
+  ],
+  "trajectories": {
+   "13": 16,
+   "23": 16
+  },
+  "induction": {
+   "single_succ": 6
+  },
+  "seed_label": 20260931,
+  "extractor": "deepseek-v4-pro",
+  "note": "released single-success induction (temperature 0), shortest success per task"
+ },
+ "B2_g2_i1": {
+  "arm": "B2",
+  "items": 6,
+  "tasks": [
+   "4",
+   "6"
+  ],
+  "trajectories": {
+   "4": 8,
+   "6": 7
+  },
+  "induction": {
+   "single_succ": 6
+  },
+  "seed_label": 20260930,
+  "extractor": "deepseek-v4-pro",
+  "note": "released single-success induction (temperature 0), shortest success per task"
+ },
+ "B2_g2_i2": {
+  "arm": "B2",
+  "items": 6,
+  "tasks": [
+   "4",
+   "6"
+  ],
+  "trajectories": {
+   "4": 8,
+   "6": 7
+  },
+  "induction": {
+   "single_succ": 6
+  },
+  "seed_label": 20260931,
+  "extractor": "deepseek-v4-pro",
+  "note": "released single-success induction (temperature 0), shortest success per task"
+ },
+ "S2_g2_i1": {
+  "arm": "S2",
+  "items": 6,
+  "tasks": [
+   "22",
+   "28"
+  ],
+  "trajectories": {
+   "22": 16,
+   "28": 14
+  },
+  "induction": {
+   "single_succ": 6
+  },
+  "seed_label": 20260930,
+  "extractor": "deepseek-v4-pro",
+  "note": "released single-success induction (temperature 0), shortest success per task"
+ },
+ "S2_g2_i2": {
+  "arm": "S2",
+  "items": 6,
+  "tasks": [
+   "22",
+   "28"
+  ],
+  "trajectories": {
+   "22": 16,
+   "28": 14
+  },
+  "induction": {
+   "single_succ": 6
+  },
+  "seed_label": 20260931,
+  "extractor": "deepseek-v4-pro",
+  "note": "released single-success induction (temperature 0), shortest success per task"
+ },
+ "B2_g3_i1": {
+  "arm": "B2",
+  "items": 6,
+  "tasks": [
+   "16",
+   "19"
+  ],
+  "trajectories": {
+   "16": 8,
+   "19": 10
+  },
+  "induction": {
+   "single_succ": 6
+  },
+  "seed_label": 20260930,
+  "extractor": "deepseek-v4-pro",
+  "note": "released single-success induction (temperature 0), shortest success per task"
+ },
+ "B2_g3_i2": {
+  "arm": "B2",
+  "items": 6,
+  "tasks": [
+   "16",
+   "19"
+  ],
+  "trajectories": {
+   "16": 8,
+   "19": 10
+  },
+  "induction": {
+   "single_succ": 6
+  },
+  "seed_label": 20260931,
+  "extractor": "deepseek-v4-pro",
+  "note": "released single-success induction (temperature 0), shortest success per task"
+ },
+ "S2_g3_i1": {
+  "arm": "S2",
+  "items": 6,
+  "tasks": [
+   "1",
+   "13"
+  ],
+  "trajectories": {
+   "1": 16,
+   "13": 16
+  },
+  "induction": {
+   "single_succ": 6
+  },
+  "seed_label": 20260930,
+  "extractor": "deepseek-v4-pro",
+  "note": "released single-success induction (temperature 0), shortest success per task"
+ },
+ "S2_g3_i2": {
+  "arm": "S2",
+  "items": 6,
+  "tasks": [
+   "1",
+   "13"
+  ],
+  "trajectories": {
+   "1": 16,
+   "13": 16
+  },
+  "induction": {
+   "single_succ": 6
+  },
+  "seed_label": 20260931,
+  "extractor": "deepseek-v4-pro",
+  "note": "released single-success induction (temperature 0), shortest success per task"
+ },
+ "matched": {
+  "k": 4,
+  "sizes": {
+   "M_i1": 6,
+   "M_i2": 4,
+   "B_i1": 18,
+   "B_i2": 18,
+   "S_i1": 40,
+   "S_i2": 42
+  },
+  "drained": [],
+  "seed": 20260932,
+  "banks": {
+   "M_i1_m": {
+    "items": 4,
+    "of": 6,
+    "full_row_is_matched_row": false
+   },
+   "M_i2_m": {
+    "items": 4,
+    "of": 4,
+    "full_row_is_matched_row": true
+   },
+   "B_i1_m": {
+    "items": 4,
+    "of": 18,
+    "full_row_is_matched_row": false
+   },
+   "B_i2_m": {
+    "items": 4,
+    "of": 18,
+    "full_row_is_matched_row": false
+   },
+   "S_i1_m": {
+    "items": 4,
+    "of": 40,
+    "full_row_is_matched_row": false
+   },
+   "S_i2_m": {
+    "items": 4,
+    "of": 42,
+    "full_row_is_matched_row": false
+   },
+   "MB_i1_m": {
+    "items": 4,
+    "of": 22,
+    "full_row_is_matched_row": false
+   },
+   "MB_i2_m": {
+    "items": 4,
+    "of": 24,
+    "full_row_is_matched_row": false
+   }
+  }
+ }
+}
