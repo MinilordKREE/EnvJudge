@@ -1,0 +1,118 @@
+{
+ "reference_id": "ac093f26f8a95933",
+ "success": true,
+ "reason": "pass",
+ "actions": [
+  "look",
+  "go to shelf 1",
+  "go to shelf 2",
+  "take alarmclock 1 from shelf 2",
+  "use desklamp 1"
+ ],
+ "n_steps": 5,
+ "steps": [
+  {
+   "step": 1,
+   "observation": "Task: Your task is to: look at alarmclock under the desklamp.\n\n-= Welcome to TextWorld, ALFRED! =-\n\nYou are in the middle of a room. Looking quickly around you, you see a bed 1, a desk 2, a desk 1, a garbagecan 1, a shelf 5, a shelf 4, a shelf 3, a shelf 2, and a shelf 1.\n\nYour task is to: look at alarmclock under the desklamp.\n\nAdmissible commands: go to bed 1, go to desk 1, go to desk 2, go to garbagecan 1, go to shelf 1, go to shelf 2, go to shelf 3, go to shelf 4, go to shelf 5, help, inventory, look",
+   "admissible": [
+    "go to bed 1",
+    "go to desk 1",
+    "go to desk 2",
+    "go to garbagecan 1",
+    "go to shelf 1",
+    "go to shelf 2",
+    "go to shelf 3",
+    "go to shelf 4",
+    "go to shelf 5",
+    "help",
+    "inventory",
+    "look"
+   ],
+   "action": "look"
+  },
+  {
+   "step": 2,
+   "observation": "Task: Your task is to: look at alarmclock under the desklamp.\n\nYou are in the middle of a room. Looking quickly around you, you see nothing.\n\nAdmissible commands: go to bed 1, go to desk 1, go to desk 2, go to garbagecan 1, go to shelf 1, go to shelf 2, go to shelf 3, go to shelf 4, go to shelf 5, help, inventory, look",
+   "admissible": [
+    "go to bed 1",
+    "go to desk 1",
+    "go to desk 2",
+    "go to garbagecan 1",
+    "go to shelf 1",
+    "go to shelf 2",
+    "go to shelf 3",
+    "go to shelf 4",
+    "go to shelf 5",
+    "help",
+    "inventory",
+    "look"
+   ],
+   "action": "go to shelf 1"
+  },
+  {
+   "step": 3,
+   "observation": "Task: Your task is to: look at alarmclock under the desklamp.\n\nYou arrive at shelf 1. On the shelf 1, you see a cd 1, and a cellphone 1.\n\nAdmissible commands: examine shelf 1, go to bed 1, go to desk 1, go to desk 2, go to garbagecan 1, go to shelf 2, go to shelf 3, go to shelf 4, go to shelf 5, help, inventory, look, take cd 1 from shelf 1, take cellphone 1 from shelf 1",
+   "admissible": [
+    "examine shelf 1",
+    "go to bed 1",
+    "go to desk 1",
+    "go to desk 2",
+    "go to garbagecan 1",
+    "go to shelf 2",
+    "go to shelf 3",
+    "go to shelf 4",
+    "go to shelf 5",
+    "help",
+    "inventory",
+    "look",
+    "take cd 1 from shelf 1",
+    "take cellphone 1 from shelf 1"
+   ],
+   "action": "go to shelf 2"
+  },
+  {
+   "step": 4,
+   "observation": "Task: Your task is to: look at alarmclock under the desklamp.\n\nYou arrive at shelf 2. On the shelf 2, you see a alarmclock 2, a alarmclock 1, and a desklamp 1.\n\nAdmissible commands: examine shelf 2, go to bed 1, go to desk 1, go to desk 2, go to garbagecan 1, go to shelf 1, go to shelf 3, go to shelf 4, go to shelf 5, help, inventory, look, take alarmclock 1 from shelf 2, take alarmclock 2 from shelf 2, use desklamp 1",
+   "admissible": [
+    "examine shelf 2",
+    "go to bed 1",
+    "go to desk 1",
+    "go to desk 2",
+    "go to garbagecan 1",
+    "go to shelf 1",
+    "go to shelf 3",
+    "go to shelf 4",
+    "go to shelf 5",
+    "help",
+    "inventory",
+    "look",
+    "take alarmclock 1 from shelf 2",
+    "take alarmclock 2 from shelf 2",
+    "use desklamp 1"
+   ],
+   "action": "take alarmclock 1 from shelf 2"
+  },
+  {
+   "step": 5,
+   "observation": "Task: Your task is to: look at alarmclock under the desklamp.\n\nYou pick up the alarmclock 1 from the shelf 2.\n\nAdmissible commands: examine alarmclock 1, examine shelf 2, go to bed 1, go to desk 1, go to desk 2, go to garbagecan 1, go to shelf 1, go to shelf 3, go to shelf 4, go to shelf 5, help, inventory, look, move alarmclock 1 to shelf 2, use desklamp 1",
+   "admissible": [
+    "examine alarmclock 1",
+    "examine shelf 2",
+    "go to bed 1",
+    "go to desk 1",
+    "go to desk 2",
+    "go to garbagecan 1",
+    "go to shelf 1",
+    "go to shelf 3",
+    "go to shelf 4",
+    "go to shelf 5",
+    "help",
+    "inventory",
+    "look",
+    "move alarmclock 1 to shelf 2",
+    "use desklamp 1"
+   ],
+   "action": "use desklamp 1"
+  }
+ ]
+}

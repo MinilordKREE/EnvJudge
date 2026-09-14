@@ -91,6 +91,33 @@ def config(arm: str) -> AEAConfig:
     return AEAConfig.model_validate({"method_version": ARM_VERSIONS[arm]})
 
 
+def build(
+    cfg: AEAConfig, d: Path, run_id: str, *, concurrency: int, with_designer: bool = True
+) -> tuple[AeaSubstrate, Controller]:
+    """Like ``e6_smoke.build`` (same models, corpus, stage config, pricing) for either LLM
+    method version; the same ``cfg`` goes to the substrate and the controller, and the
+    controller gets the substrate's reference provider. Asserted, not assumed."""
+    if cfg.method_version not in ARM_VERSIONS.values():
+        raise ConfigError(f"driver config is {cfg.method_version}, not an llm_v1 variant")
+    sub = AeaSubstrate(
+        corpus_yaml=ROOT / "configs" / "corpus_aea.yaml",
+        run_dir=d,
+        run_id=run_id,
+        policy_llm=e3.policy_qwen(),
+        designer_llm=e3.designer_deepseek() if with_designer else None,
+        aea_config=cfg,
+        stage_config_path=e3.STAGE_CONFIG,
+        pricing_path=e3.PRICING,
+        rollout_concurrency=concurrency,
+        subprocess_timeout_s=600.0,
+    )
+    provider = sub.reference_provider(cfg)
+    ctrl = Controller(cfg, sub, d, run_id, arm="LLM", use_proposer=True, reference=provider)
+    if ctrl.config is not cfg or provider is None or (with_designer and sub.designer() is None):
+        raise ConfigError("wiring: config / reference provider / designer not as required")
+    return sub, ctrl
+
+
 # ---------------------------------------------------------------------------- frozen evidence
 def shared_dir() -> Path:
     return RUNS / SHARED_ID
@@ -260,7 +287,7 @@ def stage_shared(concurrency: int) -> None:
     d = shared_dir()
     d.mkdir(parents=True, exist_ok=True)
     _manifest(d, SHARED_ID, cfg, {"stage": "shared evidence"})
-    sub, _ = e6.build(cfg, d, SHARED_ID, concurrency=concurrency, with_designer=False)
+    sub, _ = build(cfg, d, SHARED_ID, concurrency=concurrency, with_designer=False)
     provider = sub.reference_provider(cfg)
     assert provider is not None
     writer = TraceWriter(d / "traces.jsonl")
@@ -327,7 +354,7 @@ def stage_arms(concurrency: int) -> None:
             ctx = _manifest(
                 d, ARM_IDS[arm], cfg, {"arm": arm, "stage": "arms", "shared_run": SHARED_ID}
             )
-            real, _ = e6.build(cfg, d, ARM_IDS[arm], concurrency=concurrency)
+            real, _ = build(cfg, d, ARM_IDS[arm], concurrency=concurrency)
             frozen = FrozenSubstrate(real, task_id)
             ctrl = Controller(
                 cfg,
@@ -390,7 +417,7 @@ def stage_confirm(concurrency: int) -> None:
     d.mkdir(parents=True, exist_ok=True)
     envs = accepted_envs("A") + accepted_envs("B")
     (d / "envs.json").write_text(json.dumps(envs, indent=1), encoding="utf-8")
-    sub, _ = e6.build(config("A"), d, CONFIRM_ID, concurrency=concurrency, with_designer=False)
+    sub, _ = build(config("A"), d, CONFIRM_ID, concurrency=concurrency, with_designer=False)
     summary_path = d / "confirm_summary.json"
     summary: dict[str, Any] = (
         json.loads(summary_path.read_text(encoding="utf-8")) if summary_path.exists() else {}

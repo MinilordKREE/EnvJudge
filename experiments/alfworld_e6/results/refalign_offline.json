@@ -1,0 +1,562 @@
+[
+ {
+  "task": "8",
+  "source_run": "e6-smoke-llm-v1",
+  "n_failures": 3,
+  "reference_ok": true,
+  "reference_reason": "pass",
+  "reference_steps": 7,
+  "reference_id": "ad28f5ddcadf43a4",
+  "evidence_chars": 23364,
+  "reference_used": true,
+  "goal": "TASK GOAL: put a clean soapbar in shelf",
+  "failure_lengths": [
+   50,
+   50,
+   50
+  ],
+  "diagnoses": [
+   {
+    "failure_id": "F1",
+    "episode_id": "2ad0b9f220",
+    "failure_step": 1,
+    "reference_step": 2,
+    "error_cause": "The policy starts by wandering to sinkbasin/bathtubbasin/shelf instead of first locating the soapbar. It never finds the soapbar (soapbar 3 on toilet 1) that the reference locates via 'look' then 'go to toilet 1'. It only stumbles onto an already-present soapbar 1 on a shelf much later and never cleans it.",
+    "fix_hint": "Missing capability: search for the target object (soapbar) before cleaning. The policy does not use 'look' to enumerate objects and never visits the toilet where the relevant soapbar 3 sits.",
+    "evidence": "F1 step1 goes to sinkbasin (nothing), step2 bathtubbasin (cloths), steps 3-12 loop among sink/bath/shelf with no soapbar; only at step46 does it pick up a soapbar 1 from shelf and never cleans it."
+   },
+   {
+    "failure_id": "F2",
+    "episode_id": "6e8f39bc2c",
+    "failure_step": 1,
+    "reference_step": 2,
+    "error_cause": "Same as F1: the policy never locates the soapbar 3 on toilet 1. It wanders to sink/bath/shelf and later grabs a soapbar 1 from shelf 2, then 'move soapbar 1 to shelf 1' fails because it is not carrying it / wrong target, and it never cleans any soapbar.",
+    "fix_hint": "Missing capability: find the soapbar (via look/toilet) and clean it at the sink before placing it on a shelf.",
+    "evidence": "F2 step1-11 loop sink/bath/shelf; step45 takes soapbar 1 from shelf 2, step46 'move to shelf 1' no effect, step47 moves to shelf 2, never cleans a soapbar."
+   },
+   {
+    "failure_id": "F3",
+    "episode_id": "a97622500c",
+    "failure_step": 1,
+    "reference_step": 2,
+    "error_cause": "Same as F1/F2: policy never finds the soapbar 3 on toilet 1. It wanders and then repeatedly issues 'done' without having cleaned or placed any soapbar.",
+    "fix_hint": "Missing capability: locate the soapbar and perform clean-then-place; policy lacks the search step and the clean action entirely.",
+    "evidence": "F3 step1-11 loop sink/bath/shelf/towelholder, then steps 45-50 are all 'done' with no effect and no soapbar handled."
+   }
+  ],
+  "stages": [
+   {
+    "reference_step": 3,
+    "diagnosis": 1,
+    "why": "Restart after the reference has located and picked up the soapbar 3 (post 'take soapbar 3 from toilet 1'). The policy then only needs to learn the clean-then-place chain (go to sink, clean, go to shelf, move), which is the missing progress."
+   },
+   {
+    "reference_step": 2,
+    "diagnosis": 1,
+    "why": "Restart after the reference has performed 'look' and navigated to the toilet where soapbar 3 is visible. This teaches the missing search/locate step (go to toilet to find the soapbar), leaving the policy to learn take, clean, and place."
+   }
+  ],
+  "rejected": [],
+  "arguments": {
+   "diagnoses": [
+    {
+     "failure_id": "F1",
+     "failure_step": 1,
+     "reference_step": 2,
+     "error_cause": "The policy starts by wandering to sinkbasin/bathtubbasin/shelf instead of first locating the soapbar. It never finds the soapbar (soapbar 3 on toilet 1) that the reference locates via 'look' then 'go to toilet 1'. It only stumbles onto an already-present soapbar 1 on a shelf much later and never cleans it.",
+     "fix_hint": "Missing capability: search for the target object (soapbar) before cleaning. The policy does not use 'look' to enumerate objects and never visits the toilet where the relevant soapbar 3 sits.",
+     "evidence": "F1 step1 goes to sinkbasin (nothing), step2 bathtubbasin (cloths), steps 3-12 loop among sink/bath/shelf with no soapbar; only at step46 does it pick up a soapbar 1 from shelf and never cleans it."
+    },
+    {
+     "failure_id": "F2",
+     "failure_step": 1,
+     "reference_step": 2,
+     "error_cause": "Same as F1: the policy never locates the soapbar 3 on toilet 1. It wanders to sink/bath/shelf and later grabs a soapbar 1 from shelf 2, then 'move soapbar 1 to shelf 1' fails because it is not carrying it / wrong target, and it never cleans any soapbar.",
+     "fix_hint": "Missing capability: find the soapbar (via look/toilet) and clean it at the sink before placing it on a shelf.",
+     "evidence": "F2 step1-11 loop sink/bath/shelf; step45 takes soapbar 1 from shelf 2, step46 'move to shelf 1' no effect, step47 moves to shelf 2, never cleans a soapbar."
+    },
+    {
+     "failure_id": "F3",
+     "failure_step": 1,
+     "reference_step": 2,
+     "error_cause": "Same as F1/F2: policy never finds the soapbar 3 on toilet 1. It wanders and then repeatedly issues 'done' without having cleaned or placed any soapbar.",
+     "fix_hint": "Missing capability: locate the soapbar and perform clean-then-place; policy lacks the search step and the clean action entirely.",
+     "evidence": "F3 step1-11 loop sink/bath/shelf/towelholder, then steps 45-50 are all 'done' with no effect and no soapbar handled."
+    }
+   ],
+   "stages": [
+    {
+     "reference_step": 3,
+     "diagnosis": 1,
+     "mechanism_summary": "Restart after the reference has located and picked up the soapbar 3 (post 'take soapbar 3 from toilet 1'). The policy then only needs to learn the clean-then-place chain (go to sink, clean, go to shelf, move), which is the missing progress."
+    },
+    {
+     "reference_step": 2,
+     "diagnosis": 1,
+     "mechanism_summary": "Restart after the reference has performed 'look' and navigated to the toilet where soapbar 3 is visible. This teaches the missing search/locate step (go to toilet to find the soapbar), leaving the policy to learn take, clean, and place."
+    }
+   ]
+  }
+ },
+ {
+  "task": "9",
+  "source_run": "e6-smoke-llm-v1",
+  "n_failures": 3,
+  "reference_ok": true,
+  "reference_reason": "pass",
+  "reference_steps": 5,
+  "reference_id": "ac093f26f8a95933",
+  "evidence_chars": 22084,
+  "reference_used": true,
+  "goal": "TASK GOAL: look at alarmclock under the desklamp",
+  "failure_lengths": [
+   50,
+   50,
+   50
+  ],
+  "diagnoses": [
+   {
+    "failure_id": "F1",
+    "episode_id": "ced949ecb7",
+    "failure_step": 7,
+    "reference_step": 4,
+    "error_cause": "The policy reaches shelf 2 (which holds alarmclock 1, alarmclock 2, and desklamp 1) but instead of taking the alarmclock, it 'uses desklamp 1' first and then loops on look/examine/use without ever picking up the alarmclock.",
+    "fix_hint": "Missing the capability to pick up the target object (take alarmclock 1 from shelf 2) before/while using the desklamp; it never holds the alarmclock so it can never complete 'look at alarmclock under the desklamp'.",
+    "evidence": "F1 step 6 arrives at shelf 2 with alarmclock 1 and desklamp 1 visible; step 7 'use desklamp 1' then steps 8-50 repeat look/examine/use without any 'take alarmclock 1'."
+   },
+   {
+    "failure_id": "F2",
+    "episode_id": "b3f372c424",
+    "failure_step": 7,
+    "reference_step": 4,
+    "error_cause": "Same as F1: at shelf 2 the policy turns on the desklamp instead of taking the alarmclock, then loops on look/examine/use and never acquires the alarmclock.",
+    "fix_hint": "Missing the take action to hold the alarmclock so it can be examined under the desklamp.",
+    "evidence": "F2 step 6 arrives at shelf 2; step 7 'use desklamp 1'; steps 8-50 loop without any 'take alarmclock 1'."
+   },
+   {
+    "failure_id": "F3",
+    "episode_id": "f1ac22eb1d",
+    "failure_step": 7,
+    "reference_step": 4,
+    "error_cause": "Same pattern: at shelf 2 the policy uses the desklamp rather than taking the alarmclock, then repeats look/examine/use and never picks up alarmclock 1.",
+    "fix_hint": "Missing the take action to acquire alarmclock 1 from shelf 2.",
+    "evidence": "F3 step 6 arrives at shelf 2; step 7 'use desklamp 1'; steps 8-50 loop without 'take alarmclock 1'."
+   }
+  ],
+  "stages": [
+   {
+    "reference_step": 4,
+    "diagnosis": 1,
+    "why": "Restart after the reference has reached shelf 2 (state where alarmclock 1 and desklamp 1 are both visible), so the policy must learn to take alarmclock 1 then use desklamp 1."
+   },
+   {
+    "reference_step": 5,
+    "diagnosis": 1,
+    "why": "Restart after the reference has already taken alarmclock 1, leaving only the desklamp use step to learn (narrower, isolates the final 'use desklamp 1' capability)."
+   }
+  ],
+  "rejected": [],
+  "arguments": {
+   "diagnoses": [
+    {
+     "failure_id": "F1",
+     "failure_step": 7,
+     "reference_step": 4,
+     "error_cause": "The policy reaches shelf 2 (which holds alarmclock 1, alarmclock 2, and desklamp 1) but instead of taking the alarmclock, it 'uses desklamp 1' first and then loops on look/examine/use without ever picking up the alarmclock.",
+     "fix_hint": "Missing the capability to pick up the target object (take alarmclock 1 from shelf 2) before/while using the desklamp; it never holds the alarmclock so it can never complete 'look at alarmclock under the desklamp'.",
+     "evidence": "F1 step 6 arrives at shelf 2 with alarmclock 1 and desklamp 1 visible; step 7 'use desklamp 1' then steps 8-50 repeat look/examine/use without any 'take alarmclock 1'."
+    },
+    {
+     "failure_id": "F2",
+     "failure_step": 7,
+     "reference_step": 4,
+     "error_cause": "Same as F1: at shelf 2 the policy turns on the desklamp instead of taking the alarmclock, then loops on look/examine/use and never acquires the alarmclock.",
+     "fix_hint": "Missing the take action to hold the alarmclock so it can be examined under the desklamp.",
+     "evidence": "F2 step 6 arrives at shelf 2; step 7 'use desklamp 1'; steps 8-50 loop without any 'take alarmclock 1'."
+    },
+    {
+     "failure_id": "F3",
+     "failure_step": 7,
+     "reference_step": 4,
+     "error_cause": "Same pattern: at shelf 2 the policy uses the desklamp rather than taking the alarmclock, then repeats look/examine/use and never picks up alarmclock 1.",
+     "fix_hint": "Missing the take action to acquire alarmclock 1 from shelf 2.",
+     "evidence": "F3 step 6 arrives at shelf 2; step 7 'use desklamp 1'; steps 8-50 loop without 'take alarmclock 1'."
+    }
+   ],
+   "stages": [
+    {
+     "reference_step": 4,
+     "diagnosis": 1,
+     "mechanism_summary": "Restart after the reference has reached shelf 2 (state where alarmclock 1 and desklamp 1 are both visible), so the policy must learn to take alarmclock 1 then use desklamp 1."
+    },
+    {
+     "reference_step": 5,
+     "diagnosis": 1,
+     "mechanism_summary": "Restart after the reference has already taken alarmclock 1, leaving only the desklamp use step to learn (narrower, isolates the final 'use desklamp 1' capability)."
+    }
+   ]
+  }
+ },
+ {
+  "task": "10",
+  "source_run": "e6-smoke-llm-v1",
+  "n_failures": 3,
+  "reference_ok": true,
+  "reference_reason": "pass",
+  "reference_steps": 39,
+  "reference_id": "b5aec94e8f17b846",
+  "evidence_chars": 24000,
+  "reference_used": true,
+  "goal": "TASK GOAL: put a hot cup in cabinet",
+  "failure_lengths": [
+   50,
+   50,
+   50
+  ],
+  "diagnoses": [
+   {
+    "failure_id": "F1",
+    "episode_id": "728a495d80",
+    "failure_step": 8,
+    "reference_step": 34,
+    "error_cause": "The policy wanders among stoveburners and countertops examining kettles, soapbottles and a countertop cup, but never locates the actual target cup on diningtable 1 and never picks it up. It fixates on countertop 2's cup 1/mug 2 and never reaches the diningtable where cup 2 (the correct hot-cup source) sits.",
+    "fix_hint": "Must find and take a cup (cup 2 on diningtable 1) before heating it; the policy lacks the exploration to reach diningtable 1 and the object-selection to pick the correct cup.",
+    "evidence": "F1 steps 1-6 repeatedly examine stoveburner 1's kettle; step 8 reaches countertop 2 and sees 'cup 1'/'mug 2' but only examines cup 1 (no effect); later steps 46-50 return to countertop 2 and find cup 1 already gone, still no diningtable visit."
+   },
+   {
+    "failure_id": "F2",
+    "episode_id": "369bc882a1",
+    "failure_step": 4,
+    "reference_step": 34,
+    "error_cause": "The policy gets stuck examining a kettle on stoveburner 1 and trying invalid 'examine kettle 1' actions, then drifts to countertop/sinkbasin, never progressing toward the diningtable where the cup (cup 2) is located.",
+    "fix_hint": "Missing the capability to navigate to diningtable 1 and identify/take cup 2 as the object to heat.",
+    "evidence": "F2 steps 1-4 examine stoveburner 1 and attempt 'examine kettle 1' (no effect); step 5 go to countertop 1 (soapbottle 2), step 6 sinkbasin 1 (spatula/tomato), never reaching diningtable 1."
+   }
+  ],
+  "stages": [
+   {
+    "reference_step": 34,
+    "diagnosis": 1,
+    "why": "Restart after the reference has located the cup (diningtable 1 observation listing cup 2). The policy then must learn to take cup 2, heat it, and place it in a cabinet."
+   },
+   {
+    "reference_step": 33,
+    "diagnosis": 2,
+    "why": "Restart at the diningtable 1 navigation step so the policy can learn to reach the correct container and pick up the cup."
+   }
+  ],
+  "rejected": [],
+  "arguments": {
+   "diagnoses": [
+    {
+     "failure_id": "F1",
+     "failure_step": 8,
+     "reference_step": 34,
+     "error_cause": "The policy wanders among stoveburners and countertops examining kettles, soapbottles and a countertop cup, but never locates the actual target cup on diningtable 1 and never picks it up. It fixates on countertop 2's cup 1/mug 2 and never reaches the diningtable where cup 2 (the correct hot-cup source) sits.",
+     "fix_hint": "Must find and take a cup (cup 2 on diningtable 1) before heating it; the policy lacks the exploration to reach diningtable 1 and the object-selection to pick the correct cup.",
+     "evidence": "F1 steps 1-6 repeatedly examine stoveburner 1's kettle; step 8 reaches countertop 2 and sees 'cup 1'/'mug 2' but only examines cup 1 (no effect); later steps 46-50 return to countertop 2 and find cup 1 already gone, still no diningtable visit."
+    },
+    {
+     "failure_id": "F2",
+     "failure_step": 4,
+     "reference_step": 34,
+     "error_cause": "The policy gets stuck examining a kettle on stoveburner 1 and trying invalid 'examine kettle 1' actions, then drifts to countertop/sinkbasin, never progressing toward the diningtable where the cup (cup 2) is located.",
+     "fix_hint": "Missing the capability to navigate to diningtable 1 and identify/take cup 2 as the object to heat.",
+     "evidence": "F2 steps 1-4 examine stoveburner 1 and attempt 'examine kettle 1' (no effect); step 5 go to countertop 1 (soapbottle 2), step 6 sinkbasin 1 (spatula/tomato), never reaching diningtable 1."
+    }
+   ],
+   "stages": [
+    {
+     "reference_step": 34,
+     "diagnosis": 1,
+     "mechanism_summary": "Restart after the reference has located the cup (diningtable 1 observation listing cup 2). The policy then must learn to take cup 2, heat it, and place it in a cabinet."
+    },
+    {
+     "reference_step": 33,
+     "diagnosis": 2,
+     "mechanism_summary": "Restart at the diningtable 1 navigation step so the policy can learn to reach the correct container and pick up the cup."
+    }
+   ]
+  }
+ },
+ {
+  "task": "11",
+  "source_run": "e6-smoke2-llm-v1",
+  "n_failures": 3,
+  "reference_ok": true,
+  "reference_reason": "pass",
+  "reference_steps": 16,
+  "reference_id": "fe921eb486a98a94",
+  "evidence_chars": 24000,
+  "reference_used": true,
+  "goal": "TASK GOAL: put a cool cup in cabinet",
+  "failure_lengths": [
+   50,
+   50,
+   50
+  ],
+  "diagnoses": [
+   {
+    "failure_id": "F1",
+    "episode_id": "67789dd336",
+    "failure_step": 2,
+    "reference_step": 10,
+    "error_cause": "The policy targets the wrong object: it takes mug 1 from the countertop instead of locating the cup. The task requires a cup, and the only cup (cup 2) is inside the closed microwave 1. The policy never opens the microwave to find the cup, so it can never obtain the correct object.",
+    "fix_hint": "The missing capability is locating the correct 'cup' object (opening the microwave and taking cup 2) rather than grabbing a similarly-named 'mug' from the countertop.",
+    "evidence": "Step 1-2: takes mug 1 from countertop 1; reference instead opens microwave 1 (steps 9-10) and takes cup 2."
+   },
+   {
+    "failure_id": "F2",
+    "episode_id": "1ce5d196a3",
+    "failure_step": 2,
+    "reference_step": 10,
+    "error_cause": "Same as F1: policy takes mug 1 instead of the required cup 2 (located inside microwave 1). It never finds the cup, so the goal 'put a cool cup in cabinet' is never satisfiable.",
+    "fix_hint": "Missing capability: discovering and retrieving the correct 'cup' object from the microwave rather than the countertop mug.",
+    "evidence": "Step 1-2 takes mug 1 from countertop 1; later moves mug 1 to cabinet 1 (steps 45-47) but no cup is ever acquired."
+   },
+   {
+    "failure_id": "F3",
+    "episode_id": "c892f4ae67",
+    "failure_step": 2,
+    "reference_step": 10,
+    "error_cause": "Same as F1/F2: policy grabs mug 1 from the countertop, never opening the microwave to obtain the required cup 2.",
+    "fix_hint": "Missing capability: locating and taking the correct 'cup' object (cup 2 in microwave 1) instead of the mug.",
+    "evidence": "Step 1-2 takes mug 1 from countertop 1, mirroring F1/F2's wrong-object selection."
+   }
+  ],
+  "stages": [
+   {
+    "reference_step": 10,
+    "diagnosis": 1,
+    "why": "Restart after the reference has opened microwave 1 and revealed cup 2 inside. From here the policy must learn to take cup 2 from microwave 1 (the correct 'cup' object), then cool it and place it in a cabinet."
+   },
+   {
+    "reference_step": 11,
+    "diagnosis": 1,
+    "why": "Restart after the reference has taken cup 2. From here the policy holds the correct cup and must learn the cooling + placement sequence (cool with fridge 1, then move to cabinet 1)."
+   }
+  ],
+  "rejected": [],
+  "arguments": {
+   "diagnoses": [
+    {
+     "failure_id": "F1",
+     "failure_step": 2,
+     "reference_step": 10,
+     "error_cause": "The policy targets the wrong object: it takes mug 1 from the countertop instead of locating the cup. The task requires a cup, and the only cup (cup 2) is inside the closed microwave 1. The policy never opens the microwave to find the cup, so it can never obtain the correct object.",
+     "fix_hint": "The missing capability is locating the correct 'cup' object (opening the microwave and taking cup 2) rather than grabbing a similarly-named 'mug' from the countertop.",
+     "evidence": "Step 1-2: takes mug 1 from countertop 1; reference instead opens microwave 1 (steps 9-10) and takes cup 2."
+    },
+    {
+     "failure_id": "F2",
+     "failure_step": 2,
+     "reference_step": 10,
+     "error_cause": "Same as F1: policy takes mug 1 instead of the required cup 2 (located inside microwave 1). It never finds the cup, so the goal 'put a cool cup in cabinet' is never satisfiable.",
+     "fix_hint": "Missing capability: discovering and retrieving the correct 'cup' object from the microwave rather than the countertop mug.",
+     "evidence": "Step 1-2 takes mug 1 from countertop 1; later moves mug 1 to cabinet 1 (steps 45-47) but no cup is ever acquired."
+    },
+    {
+     "failure_id": "F3",
+     "failure_step": 2,
+     "reference_step": 10,
+     "error_cause": "Same as F1/F2: policy grabs mug 1 from the countertop, never opening the microwave to obtain the required cup 2.",
+     "fix_hint": "Missing capability: locating and taking the correct 'cup' object (cup 2 in microwave 1) instead of the mug.",
+     "evidence": "Step 1-2 takes mug 1 from countertop 1, mirroring F1/F2's wrong-object selection."
+    }
+   ],
+   "stages": [
+    {
+     "reference_step": 10,
+     "diagnosis": 1,
+     "mechanism_summary": "Restart after the reference has opened microwave 1 and revealed cup 2 inside. From here the policy must learn to take cup 2 from microwave 1 (the correct 'cup' object), then cool it and place it in a cabinet."
+    },
+    {
+     "reference_step": 11,
+     "diagnosis": 1,
+     "mechanism_summary": "Restart after the reference has taken cup 2. From here the policy holds the correct cup and must learn the cooling + placement sequence (cool with fridge 1, then move to cabinet 1)."
+    }
+   ]
+  }
+ },
+ {
+  "task": "14",
+  "source_run": "e6-smoke2-llm-v1",
+  "n_failures": 3,
+  "reference_ok": true,
+  "reference_reason": "pass",
+  "reference_steps": 23,
+  "reference_id": "c49fe6b2c92dcbf6",
+  "evidence_chars": 24000,
+  "reference_used": true,
+  "goal": "TASK GOAL: look at book under the desklamp",
+  "failure_lengths": [
+   50,
+   50,
+   50
+  ],
+  "diagnoses": [
+   {
+    "failure_id": "F1",
+    "episode_id": "a7978a2521",
+    "failure_step": 1,
+    "reference_step": 21,
+    "error_cause": "The policy fixates on the desk and dresser/drawers, repeatedly examining the desk and never discovering that the book is on bed 1. It never searches the bed, so it never acquires book 1, which is the prerequisite for 'look at book under the desklamp'.",
+    "fix_hint": "The policy must learn to explore/search other receptacles (especially bed 1) to locate the book, rather than looping over the desk and dresser.",
+    "evidence": "F1 steps 1-12 cycle between desk 1 and shelf 1 examining the desk, then later turns on the desklamp and examines the dresser/desk without ever visiting bed 1; book 1 is never taken."
+   },
+   {
+    "failure_id": "F2",
+    "episode_id": "3382c20611",
+    "failure_step": 1,
+    "reference_step": 21,
+    "error_cause": "Same as F1: the policy never visits bed 1 to find book 1. It examines the desk repeatedly and ends examining the dresser, where it sees the desklamp but has no book to look at.",
+    "fix_hint": "The policy needs to learn to locate the book on bed 1 and take it before going to the desklamp.",
+    "evidence": "F2 repeatedly examines desk 1, then ends examining dresser 1 (where desklamp 1 is) without ever having taken book 1."
+   },
+   {
+    "failure_id": "F3",
+    "episode_id": "e99a960ee3",
+    "failure_step": 1,
+    "reference_step": 21,
+    "error_cause": "The policy goes straight to desk 1 and examines it, diverging from the successful search that ultimately finds book 1 on bed 1; it never locates the book.",
+    "fix_hint": "The policy must search receptacles (bed 1) to find and take book 1, the object required for the task.",
+    "evidence": "F3 begins at desk 1 and examines it, with no subsequent acquisition of book 1."
+   }
+  ],
+  "stages": [
+   {
+    "reference_step": 21,
+    "diagnosis": 1,
+    "why": "Restart after the reference has found book 1 on bed 1 (and after the take action at step 21, policy is at bed 1 seeing book 1). This grounds the missing capability: the policy must learn from this state to take book 1 and then use the desklamp to look at it."
+   },
+   {
+    "reference_step": 22,
+    "diagnosis": 1,
+    "why": "Restart after book 1 has been picked up (step 22). The policy then only needs to learn to go to the dresser and use desklamp 1 to complete 'look at book under the desklamp'."
+   }
+  ],
+  "rejected": [],
+  "arguments": {
+   "diagnoses": [
+    {
+     "failure_id": "F1",
+     "failure_step": 1,
+     "reference_step": 21,
+     "error_cause": "The policy fixates on the desk and dresser/drawers, repeatedly examining the desk and never discovering that the book is on bed 1. It never searches the bed, so it never acquires book 1, which is the prerequisite for 'look at book under the desklamp'.",
+     "fix_hint": "The policy must learn to explore/search other receptacles (especially bed 1) to locate the book, rather than looping over the desk and dresser.",
+     "evidence": "F1 steps 1-12 cycle between desk 1 and shelf 1 examining the desk, then later turns on the desklamp and examines the dresser/desk without ever visiting bed 1; book 1 is never taken."
+    },
+    {
+     "failure_id": "F2",
+     "failure_step": 1,
+     "reference_step": 21,
+     "error_cause": "Same as F1: the policy never visits bed 1 to find book 1. It examines the desk repeatedly and ends examining the dresser, where it sees the desklamp but has no book to look at.",
+     "fix_hint": "The policy needs to learn to locate the book on bed 1 and take it before going to the desklamp.",
+     "evidence": "F2 repeatedly examines desk 1, then ends examining dresser 1 (where desklamp 1 is) without ever having taken book 1."
+    },
+    {
+     "failure_id": "F3",
+     "failure_step": 1,
+     "reference_step": 21,
+     "error_cause": "The policy goes straight to desk 1 and examines it, diverging from the successful search that ultimately finds book 1 on bed 1; it never locates the book.",
+     "fix_hint": "The policy must search receptacles (bed 1) to find and take book 1, the object required for the task.",
+     "evidence": "F3 begins at desk 1 and examines it, with no subsequent acquisition of book 1."
+    }
+   ],
+   "stages": [
+    {
+     "reference_step": 21,
+     "diagnosis": 1,
+     "mechanism_summary": "Restart after the reference has found book 1 on bed 1 (and after the take action at step 21, policy is at bed 1 seeing book 1). This grounds the missing capability: the policy must learn from this state to take book 1 and then use the desklamp to look at it."
+    },
+    {
+     "reference_step": 22,
+     "diagnosis": 1,
+     "mechanism_summary": "Restart after book 1 has been picked up (step 22). The policy then only needs to learn to go to the dresser and use desklamp 1 to complete 'look at book under the desklamp'."
+    }
+   ]
+  }
+ },
+ {
+  "task": "17",
+  "source_run": "e6-smoke2-llm-v1",
+  "n_failures": 3,
+  "reference_ok": true,
+  "reference_reason": "pass",
+  "reference_steps": 29,
+  "reference_id": "7df7ed08c6c6db86",
+  "evidence_chars": 24000,
+  "reference_used": true,
+  "goal": "TASK GOAL: put a clean plate in shelf",
+  "failure_lengths": [
+   50,
+   50,
+   50
+  ],
+  "diagnoses": [
+   {
+    "failure_id": "F1",
+    "episode_id": "4955e6ba0c",
+    "failure_step": 6,
+    "reference_step": 26,
+    "error_cause": "The policy never cleaned the plate before placing it on the shelf. It took plate 1 from cabinet 1, went straight to shelf 1, and moved the plate there without ever using the sinkbasin. The plate is a 'normal plate', not a 'clean plate', so the goal is not satisfied.",
+    "fix_hint": "Missing capability: recognizing that a plate must be cleaned with sinkbasin before being placed on the shelf. The policy needs to perform clean plate 1 with sinkbasin 1 (after taking the plate and going to sinkbasin) before moving it to the shelf.",
+    "evidence": "F1 step 4 'examine plate 1' shows 'a normal plate 1'; step 5 goes to shelf 1; step 6 'move plate 1 to shelf 1' succeeds but plate is not clean. Reference instead goes to sinkbasin 1 and 'clean plate 1 with sinkbasin 1' at step 26."
+   },
+   {
+    "failure_id": "F2",
+    "episode_id": "925bce2e9a",
+    "failure_step": 10,
+    "reference_step": 26,
+    "error_cause": "Same root cause: the plate is moved to the shelf without ever being cleaned. F2 takes plate 1, goes to shelf 1, and moves it there (step 10) with no cleaning, so the task remains incomplete. It then wanders and grabs plate 2, also never cleaning it.",
+    "fix_hint": "Missing capability: cleaning the plate with the sinkbasin before placing it on the shelf. The policy must insert 'clean plate 1 with sinkbasin 1' before 'move plate 1 to shelf 1'.",
+    "evidence": "F2 step 8 takes plate 1; step 9 goes to shelf 1; step 10 moves plate 1 to shelf 1 with no clean action. Reference cleans at step 26 before moving at step 29."
+   }
+  ],
+  "stages": [
+   {
+    "reference_step": 25,
+    "diagnosis": 1,
+    "why": "Restart after the reference has taken plate 1 from cabinet 1 (and it is in hand). The policy must then learn to go to sinkbasin 1 and clean the plate before placing it on the shelf, which is the missing capability in both failures."
+   },
+   {
+    "reference_step": 26,
+    "diagnosis": 2,
+    "why": "Restart after the reference has cleaned plate 1 with sinkbasin 1. This grounds the policy at the post-cleaning state so it only needs to learn to move the now-clean plate to the shelf, isolating the cleaning step as the learned missing piece."
+   }
+  ],
+  "rejected": [],
+  "arguments": {
+   "diagnoses": [
+    {
+     "failure_id": "F1",
+     "failure_step": 6,
+     "reference_step": 26,
+     "error_cause": "The policy never cleaned the plate before placing it on the shelf. It took plate 1 from cabinet 1, went straight to shelf 1, and moved the plate there without ever using the sinkbasin. The plate is a 'normal plate', not a 'clean plate', so the goal is not satisfied.",
+     "fix_hint": "Missing capability: recognizing that a plate must be cleaned with sinkbasin before being placed on the shelf. The policy needs to perform clean plate 1 with sinkbasin 1 (after taking the plate and going to sinkbasin) before moving it to the shelf.",
+     "evidence": "F1 step 4 'examine plate 1' shows 'a normal plate 1'; step 5 goes to shelf 1; step 6 'move plate 1 to shelf 1' succeeds but plate is not clean. Reference instead goes to sinkbasin 1 and 'clean plate 1 with sinkbasin 1' at step 26."
+    },
+    {
+     "failure_id": "F2",
+     "failure_step": 10,
+     "reference_step": 26,
+     "error_cause": "Same root cause: the plate is moved to the shelf without ever being cleaned. F2 takes plate 1, goes to shelf 1, and moves it there (step 10) with no cleaning, so the task remains incomplete. It then wanders and grabs plate 2, also never cleaning it.",
+     "fix_hint": "Missing capability: cleaning the plate with the sinkbasin before placing it on the shelf. The policy must insert 'clean plate 1 with sinkbasin 1' before 'move plate 1 to shelf 1'.",
+     "evidence": "F2 step 8 takes plate 1; step 9 goes to shelf 1; step 10 moves plate 1 to shelf 1 with no clean action. Reference cleans at step 26 before moving at step 29."
+    }
+   ],
+   "stages": [
+    {
+     "reference_step": 25,
+     "diagnosis": 1,
+     "mechanism_summary": "Restart after the reference has taken plate 1 from cabinet 1 (and it is in hand). The policy must then learn to go to sinkbasin 1 and clean the plate before placing it on the shelf, which is the missing capability in both failures."
+    },
+    {
+     "reference_step": 26,
+     "diagnosis": 2,
+     "mechanism_summary": "Restart after the reference has cleaned plate 1 with sinkbasin 1. This grounds the policy at the post-cleaning state so it only needs to learn to move the now-clean plate to the shelf, isolating the cleaning step as the learned missing piece."
+    }
+   ]
+  }
+ }
+]

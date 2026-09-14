@@ -28,6 +28,7 @@ from aea.stage import seeded_failures
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import e3
+import e6_refalign as er
 import e6_smoke as e6
 
 RUN_ID = "e6-refalign-offline"
@@ -60,7 +61,7 @@ def main(argv: list[str] | None = None) -> int:
     cfg = AEAConfig(method_version="llm_v1_refalign")
     d = e6.RUNS / RUN_ID
     d.mkdir(parents=True, exist_ok=True)
-    sub, _ = e6.build(cfg, d, RUN_ID, concurrency=1)
+    sub, _ = er.build(cfg, d, RUN_ID, concurrency=1)
     designer = sub.designer()
     provider = sub.reference_provider(cfg)
     assert designer is not None and provider is not None

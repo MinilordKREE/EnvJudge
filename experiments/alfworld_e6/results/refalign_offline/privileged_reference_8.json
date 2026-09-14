@@ -1,0 +1,170 @@
+{
+ "reference_id": "ad28f5ddcadf43a4",
+ "success": true,
+ "reason": "pass",
+ "actions": [
+  "look",
+  "go to toilet 1",
+  "take soapbar 3 from toilet 1",
+  "go to sinkbasin 1",
+  "clean soapbar 3 with sinkbasin 1",
+  "go to shelf 1",
+  "move soapbar 3 to shelf 1"
+ ],
+ "n_steps": 7,
+ "steps": [
+  {
+   "step": 1,
+   "observation": "Task: Your task is to: put a clean soapbar in shelf.\n\n-= Welcome to TextWorld, ALFRED! =-\n\nYou are in the middle of a room. Looking quickly around you, you see a bathtubbasin 1, a garbagecan 1, a handtowelholder 1, a shelf 3, a shelf 2, a shelf 1, a sinkbasin 1, a toilet 1, a toiletpaperhanger 1, and a towelholder 1.\n\nYour task is to: put a clean soapbar in shelf.\n\nAdmissible commands: go to bathtubbasin 1, go to garbagecan 1, go to handtowelholder 1, go to shelf 1, go to shelf 2, go to shelf 3, go to sinkbasin 1, go to toilet 1, go to toiletpaperhanger 1, go to towelholder 1, help, inventory, look",
+   "admissible": [
+    "go to bathtubbasin 1",
+    "go to garbagecan 1",
+    "go to handtowelholder 1",
+    "go to shelf 1",
+    "go to shelf 2",
+    "go to shelf 3",
+    "go to sinkbasin 1",
+    "go to toilet 1",
+    "go to toiletpaperhanger 1",
+    "go to towelholder 1",
+    "help",
+    "inventory",
+    "look"
+   ],
+   "action": "look"
+  },
+  {
+   "step": 2,
+   "observation": "Task: Your task is to: put a clean soapbar in shelf.\n\nYou are in the middle of a room. Looking quickly around you, you see nothing.\n\nAdmissible commands: go to bathtubbasin 1, go to garbagecan 1, go to handtowelholder 1, go to shelf 1, go to shelf 2, go to shelf 3, go to sinkbasin 1, go to toilet 1, go to toiletpaperhanger 1, go to towelholder 1, help, inventory, look",
+   "admissible": [
+    "go to bathtubbasin 1",
+    "go to garbagecan 1",
+    "go to handtowelholder 1",
+    "go to shelf 1",
+    "go to shelf 2",
+    "go to shelf 3",
+    "go to sinkbasin 1",
+    "go to toilet 1",
+    "go to toiletpaperhanger 1",
+    "go to towelholder 1",
+    "help",
+    "inventory",
+    "look"
+   ],
+   "action": "go to toilet 1"
+  },
+  {
+   "step": 3,
+   "observation": "Task: Your task is to: put a clean soapbar in shelf.\n\nYou arrive at toilet 1. On the toilet 1, you see a candle 1, a soapbar 3, and a spraybottle 2.\n\nAdmissible commands: examine toilet 1, go to bathtubbasin 1, go to garbagecan 1, go to handtowelholder 1, go to shelf 1, go to shelf 2, go to shelf 3, go to sinkbasin 1, go to toiletpaperhanger 1, go to towelholder 1, help, inventory, look, take candle 1 from toilet 1, take soapbar 3 from toilet 1, take spraybottle 2 from toilet 1",
+   "admissible": [
+    "examine toilet 1",
+    "go to bathtubbasin 1",
+    "go to garbagecan 1",
+    "go to handtowelholder 1",
+    "go to shelf 1",
+    "go to shelf 2",
+    "go to shelf 3",
+    "go to sinkbasin 1",
+    "go to toiletpaperhanger 1",
+    "go to towelholder 1",
+    "help",
+    "inventory",
+    "look",
+    "take candle 1 from toilet 1",
+    "take soapbar 3 from toilet 1",
+    "take spraybottle 2 from toilet 1"
+   ],
+   "action": "take soapbar 3 from toilet 1"
+  },
+  {
+   "step": 4,
+   "observation": "Task: Your task is to: put a clean soapbar in shelf.\n\nYou pick up the soapbar 3 from the toilet 1.\n\nAdmissible commands: examine soapbar 3, examine toilet 1, go to bathtubbasin 1, go to garbagecan 1, go to handtowelholder 1, go to shelf 1, go to shelf 2, go to shelf 3, go to sinkbasin 1, go to toiletpaperhanger 1, go to towelholder 1, help, inventory, look, move soapbar 3 to toilet 1",
+   "admissible": [
+    "examine soapbar 3",
+    "examine toilet 1",
+    "go to bathtubbasin 1",
+    "go to garbagecan 1",
+    "go to handtowelholder 1",
+    "go to shelf 1",
+    "go to shelf 2",
+    "go to shelf 3",
+    "go to sinkbasin 1",
+    "go to toiletpaperhanger 1",
+    "go to towelholder 1",
+    "help",
+    "inventory",
+    "look",
+    "move soapbar 3 to toilet 1"
+   ],
+   "action": "go to sinkbasin 1"
+  },
+  {
+   "step": 5,
+   "observation": "Task: Your task is to: put a clean soapbar in shelf.\n\nYou arrive at sinkbasin 1. On the sinkbasin 1, you see nothing.\n\nAdmissible commands: clean soapbar 3 with sinkbasin 1, examine sinkbasin 1, examine soapbar 3, go to bathtubbasin 1, go to garbagecan 1, go to handtowelholder 1, go to shelf 1, go to shelf 2, go to shelf 3, go to toilet 1, go to toiletpaperhanger 1, go to towelholder 1, help, inventory, look, move soapbar 3 to sinkbasin 1",
+   "admissible": [
+    "clean soapbar 3 with sinkbasin 1",
+    "examine sinkbasin 1",
+    "examine soapbar 3",
+    "go to bathtubbasin 1",
+    "go to garbagecan 1",
+    "go to handtowelholder 1",
+    "go to shelf 1",
+    "go to shelf 2",
+    "go to shelf 3",
+    "go to toilet 1",
+    "go to toiletpaperhanger 1",
+    "go to towelholder 1",
+    "help",
+    "inventory",
+    "look",
+    "move soapbar 3 to sinkbasin 1"
+   ],
+   "action": "clean soapbar 3 with sinkbasin 1"
+  },
+  {
+   "step": 6,
+   "observation": "Task: Your task is to: put a clean soapbar in shelf.\n\nYou clean the soapbar 3 using the sinkbasin 1.\n\nAdmissible commands: clean soapbar 3 with sinkbasin 1, examine sinkbasin 1, examine soapbar 3, go to bathtubbasin 1, go to garbagecan 1, go to handtowelholder 1, go to shelf 1, go to shelf 2, go to shelf 3, go to toilet 1, go to toiletpaperhanger 1, go to towelholder 1, help, inventory, look, move soapbar 3 to sinkbasin 1",
+   "admissible": [
+    "clean soapbar 3 with sinkbasin 1",
+    "examine sinkbasin 1",
+    "examine soapbar 3",
+    "go to bathtubbasin 1",
+    "go to garbagecan 1",
+    "go to handtowelholder 1",
+    "go to shelf 1",
+    "go to shelf 2",
+    "go to shelf 3",
+    "go to toilet 1",
+    "go to toiletpaperhanger 1",
+    "go to towelholder 1",
+    "help",
+    "inventory",
+    "look",
+    "move soapbar 3 to sinkbasin 1"
+   ],
+   "action": "go to shelf 1"
+  },
+  {
+   "step": 7,
+   "observation": "Task: Your task is to: put a clean soapbar in shelf.\n\nYou arrive at shelf 1. On the shelf 1, you see a tissuebox 1.\n\nAdmissible commands: examine shelf 1, examine soapbar 3, go to bathtubbasin 1, go to garbagecan 1, go to handtowelholder 1, go to shelf 2, go to shelf 3, go to sinkbasin 1, go to toilet 1, go to toiletpaperhanger 1, go to towelholder 1, help, inventory, look, move soapbar 3 to shelf 1",
+   "admissible": [
+    "examine shelf 1",
+    "examine soapbar 3",
+    "go to bathtubbasin 1",
+    "go to garbagecan 1",
+    "go to handtowelholder 1",
+    "go to shelf 2",
+    "go to shelf 3",
+    "go to sinkbasin 1",
+    "go to toilet 1",
+    "go to toiletpaperhanger 1",
+    "go to towelholder 1",
+    "help",
+    "inventory",
+    "look",
+    "move soapbar 3 to shelf 1"
+   ],
+   "action": "move soapbar 3 to shelf 1"
+  }
+ ]
+}
