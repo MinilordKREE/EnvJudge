@@ -225,8 +225,15 @@ def replay_actions(sess: Session, actions: list[str]) -> ReplayResult:
     )
 
 
-def run_expert(sess: Session, max_steps: int, retry_blocked: int = 3) -> ReplayResult:
-    """Closed-loop handcoded expert from the session's current state until won / done / cap."""
+def run_expert(
+    sess: Session,
+    max_steps: int,
+    retry_blocked: int = 3,
+    on_step: Callable[[str, list[str], str], None] | None = None,
+) -> ReplayResult:
+    """Closed-loop handcoded expert from the session's current state until won / done / cap.
+    ``on_step(observation_before, admissible_before, action)`` (optional, read-only) sees the
+    simulator-visible state the expert acted on; it never changes the loop."""
     start = len(sess.actions)
     consecutive_blocked = 0
     last_pair: tuple[str, str] | None = None
@@ -239,6 +246,8 @@ def run_expert(sess: Session, max_steps: int, retry_blocked: int = 3) -> ReplayR
             return ReplayResult(
                 False, "expert_error", start + i, len(sess.actions) - start, sess.actions[start:]
             )
+        if on_step is not None:
+            on_step(str(sess.stack.observe().text), sess.admissible(), nxt)
         try:
             r = sess.step_text(nxt)
         except Exception as exc:

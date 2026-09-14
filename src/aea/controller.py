@@ -54,6 +54,7 @@ from aea.designer import (
     ReferenceProvider,
     design_high,
     design_low,
+    design_low_refalign,
     reference_id,
     serialize_high,
     serialize_low,
@@ -401,8 +402,13 @@ class Controller:
         with self._io_lock:
             append_jsonl(path, record)
 
+    @property
+    def _llm(self) -> bool:
+        """llm_v1 and llm_v1_refalign share every path except the LOW designer input/contract."""
+        return self.config.method_version in ("llm_v1", "llm_v1_refalign")
+
     def _harden(self, task: TaskRef, est: EstimateResult) -> TaskOutcome:
-        if self.config.method_version == "llm_v1":
+        if self._llm:
             return self._harden_llm(task, est)
         self._await_predecessors(task)  # the leverage prior is a sequential dependency
         successes = [t for t in est.traces if t.success]
@@ -461,7 +467,7 @@ class Controller:
                 oracle=self.substrate.has_oracle(),
                 # v0.4: a trusted O-axis family is solvable by construction. llm_v1: the axis
                 # is a self-declared label and certifies nothing; the guard always runs.
-                by_construction=fam.axis == "O" and self.config.method_version != "llm_v1",
+                by_construction=fam.axis == "O" and not self._llm,
             )
         self._ev(
             "solvable",
@@ -545,7 +551,7 @@ class Controller:
         """The first interior probe of the bracket. v0.4: the family's soft warm start. llm_v1:
         always the midpoint — a generated family's name is a per-task identity, so no
         cross-task frontier history is trusted for it (docs/spec/AEA_llm_v1.md, "Warm start")."""
-        if self.config.method_version == "llm_v1":
+        if self._llm:
             return 0.5
         return self.leverage.warm_start(fam.name, self.config.impl.warm_start_min_history)
 
@@ -583,7 +589,7 @@ class Controller:
 
     # ------------------------------------------------------------------ stage
     def _stage(self, task: TaskRef, est: EstimateResult) -> TaskOutcome:
-        if self.config.method_version == "llm_v1":
+        if self._llm:
             return self._stage_llm(task, est)
         failures = seeded_failures(est.traces, self.config.impl.n_failed_rollouts, seed=task.seed)
         if not failures:
@@ -697,7 +703,7 @@ class Controller:
             {
                 "task_id": task.task_id,
                 "regime": regime,
-                "method_version": "llm_v1",
+                "method_version": self.config.method_version,
                 "evidence_sha256": evidence.sha256,
                 "evidence": evidence.redacted,
                 "reference_used": evidence.reference_used,
@@ -796,9 +802,7 @@ class Controller:
                 self.run_dir / "privileged_references.jsonl",
                 {
                     "task_id": task.task_id,
-                    "reference_id": rid,
-                    "actions": list(ref.actions),
-                    "n_steps": ref.n_steps,
+                    **ref.as_record(),
                     "event_seq": self.events.seq,
                     "ts": datetime.now(UTC).isoformat(),
                 },
@@ -813,31 +817,67 @@ class Controller:
         if not failures:
             return TaskOutcome(task, "dropped", "no_failed_rollout", "zero", est.p_hat)
         reference = self._lazy_reference(task)
-        evidence = serialize_low(failures, est.p_hat, est.n, reference)
-        design = design_low(
-            self._designer(),
-            model=self.substrate.designer_model(),
-            evidence=evidence,
-            failures=failures,
-            reference=reference,
-            attribution=self._attr(task, "design_low", "designer"),
-            seed=task.seed,
-        )
+        refalign = self.config.method_version == "llm_v1_refalign" and reference is not None
+        evidence = serialize_low(failures, est.p_hat, est.n, reference, rich=refalign)
+        mode = "refalign" if refalign else ("direct" if reference is not None else "failure_only")
+        diagnoses: list[dict[str, Any]] = []
+        if refalign and reference is not None:
+            rdesign = design_low_refalign(
+                self._designer(),
+                model=self.substrate.designer_model(),
+                evidence=evidence,
+                failures=failures,
+                reference=reference,
+                attribution=self._attr(task, "design_low", "designer"),
+                seed=task.seed,
+            )
+            diagnoses = [
+                {
+                    "failure_id": d.failure_id,
+                    "failure_step": d.failure_step,
+                    "reference_step": d.reference_step,
+                    "error_cause": d.error_cause,
+                    "fix_hint": d.fix_hint,
+                    "evidence": d.evidence,
+                }
+                for d in rdesign.diagnoses
+            ]
+            self._ev("llm_diagnosis", task, diagnoses=diagnoses, rejected=rdesign.rejected)
+            design: Any = rdesign
+        else:
+            design = design_low(
+                self._designer(),
+                model=self.substrate.designer_model(),
+                evidence=evidence,
+                failures=failures,
+                reference=reference,
+                attribution=self._attr(task, "design_low", "designer"),
+                seed=task.seed,
+            )
         proposals = [
-            {"source": p.source, "trajectory_id": p.trajectory_id, "step": p.step}
+            {
+                "source": p.source,
+                "trajectory_id": p.trajectory_id,
+                "step": p.step,
+                **({"diagnosis": p.diagnosis} if refalign else {}),  # llm_v1 records unchanged
+            }
             for p in design.stages
         ]
         self._record_designer(
             task,
             "zero",
             evidence,
+            mode=mode,
             arguments=design.arguments,
             accepted=proposals,
             mechanisms=[p.mechanism_summary for p in design.stages],
+            diagnoses=diagnoses,
             rejected=design.rejected,
             reference_steps=reference.n_steps if reference else None,
         )
-        self._ev("llm_stage_proposals", task, accepted=proposals, rejected=design.rejected)
+        self._ev(
+            "llm_stage_proposals", task, mode=mode, accepted=proposals, rejected=design.rejected
+        )
         if not design.stages:
             return TaskOutcome(
                 task,

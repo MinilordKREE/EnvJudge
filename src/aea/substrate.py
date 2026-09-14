@@ -190,7 +190,7 @@ def reference_provider(
 ) -> ReferenceProvider | None:
     """``open_session(task, candidate, reset_options)`` is the substrate's own (any task type
     with ``task_id`` / ``seed``)."""
-    if config.method_version != "llm_v1":
+    if config.method_version not in ("llm_v1", "llm_v1_refalign"):
         return None
     return ExpertReference(
         lambda task: open_session(task, None, None), max_steps=config.impl.oracle_max_steps

@@ -1,0 +1,471 @@
+"""E6 LOW refalign (experiments/alfworld_e6/PREREG_LOW_REFALIGN.md): paired LOW-only comparison
+of the frozen ``llm_v1`` LOW (arm A, action-only projection of the reference) against
+``llm_v1_refalign`` (arm B, rich observation/action reference + explicit diagnosis) on fresh
+frozen-LOW tasks, with SHARED evidence per task.
+
+Protocol per task (stages ``shared`` then ``arms``):
+1. ``shared``: one normal current-policy regime estimation (the controller's own estimator
+   schedule on the real substrate; every rollout charged and ledgered under
+   runs/e6-refalign-shared) and, if the task enters ``zero``, ONE rich expert reference recorded
+   in one session (privileged; runs/e6-refalign-shared/privileged_references.jsonl). Both are
+   frozen to disk.
+2. ``arms``: arm A = ``Controller(llm_v1)`` and arm B = ``Controller(llm_v1_refalign)``, each on
+   its own run directory, over a :class:`FrozenSubstrate` that REPLAYS the frozen estimate
+   rollouts for the ``estimate`` phase (no API call, still charged by the controller so the
+   30-rollout cap is identical) and delegates every other rollout (the Stage probes) to the real
+   substrate; the reference provider returns the frozen reference (arm A's serializer projects
+   it to the action list, arm B's shows observations). One designer call per arm per task, the
+   same designer model and settings, the same 4 -> 8 probe rule and cap.
+3. ``confirm``: K = 16 on every accepted Stage of either arm (evaluation-only).
+4. ``tables``: scripts/make_tables_e6_refalign.py -> experiments/alfworld_e6/results/
+   e6_low_refalign.md; leakage audit per arm against the exact recorded reference.
+"""
+
+from __future__ import annotations
+
+import argparse
+import copy
+import importlib
+import json
+import os
+import sys
+import time
+from pathlib import Path
+from typing import Any
+
+from envharness.core.types import Candidate, Trace
+
+from aea.config import AEAConfig, aea_config_sha256
+from aea.controller import Controller, TaskRef
+from aea.core.config import RunConfig
+from aea.core.context import create_run_context
+from aea.core.manifest import load_run_context, write_manifest
+from aea.core.trace import TraceWriter as EventWriter
+from aea.designer import Reference, ReferenceStep
+from aea.errors import ConfigError
+from aea.estimate import estimate
+from aea.io import TraceWriter
+from aea.llm.types import Attribution
+from aea.substrate import AeaSubstrate
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import e3
+import e6_smoke as e6
+
+ROOT = e6.ROOT
+RUNS = e6.RUNS
+EXP = e6.EXP
+RESULTS = e6.RESULTS
+SHARED_ID = "e6-refalign-shared"
+ARM_IDS = {"A": "e6-refalign-A", "B": "e6-refalign-B"}
+ARM_VERSIONS = {"A": "llm_v1", "B": "llm_v1_refalign"}
+CONFIRM_ID = "e6-refalign-confirm"
+PREREG = "PREREG_LOW_REFALIGN.md"
+PREREG_SHA: str | None = None  # recorded before the first paid call
+METHOD_SHA: str | None = None  # the phase-3.2 implementation commit (src/aea frozen)
+CAP_USD = 15.0
+EXCLUDE: tuple[int, ...] = (8, 9, 10, 11, 14, 17)  # every previous LOW smoke task
+N_TASKS = 6
+
+e3.SPEND_GLOB = "e6-refalign-*"
+e3.CAP_USD = CAP_USD
+e3.EXPERIMENT = "E6 LOW refalign (paired shared-evidence comparison, PREREG_LOW_REFALIGN)"
+
+
+def select_low(records: dict[str, dict[str, Any]]) -> list[int]:
+    """The next ``N_TASKS`` smallest frozen-LOW ids after the exclusions, or all remaining."""
+    _, low = e6.select_tasks(records, n=1, exclude=EXCLUDE)  # only the LOW pool matters here
+    pool = sorted(
+        int(t)
+        for t, r in records.items()
+        if r["n"] == 16 and r["errors"] == 0 and r["successes"] == 0 and int(t) not in EXCLUDE
+    )
+    assert low[0] == pool[0]
+    return pool[:N_TASKS]
+
+
+TASKS: list[int] = select_low(e6.frozen_k16())
+
+
+def config(arm: str) -> AEAConfig:
+    return AEAConfig.model_validate({"method_version": ARM_VERSIONS[arm]})
+
+
+# ---------------------------------------------------------------------------- frozen evidence
+def shared_dir() -> Path:
+    return RUNS / SHARED_ID
+
+
+def frozen_traces(task: str) -> list[Trace]:
+    p = shared_dir() / "traces.jsonl"
+    return [
+        Trace.model_validate(r)
+        for r in e3.jsonl(p)
+        if str(r.get("rollout_seed")) == task
+        and str(r.get("iteration_id", "")).startswith("estimate-")
+    ]
+
+
+def frozen_reference(task: str) -> Reference | None:
+    for r in e3.jsonl(shared_dir() / "privileged_references.jsonl"):
+        if str(r["task_id"]) == task:
+            if not r.get("success"):
+                return Reference(False, str(r.get("reason", "unavailable")))
+            steps = tuple(
+                ReferenceStep(
+                    int(s["step"]), str(s["observation"]), tuple(s["admissible"]), str(s["action"])
+                )
+                for s in r.get("steps", [])
+            )
+            return Reference(True, "pass", tuple(r["actions"]), steps)
+    return None
+
+
+def shared_estimate(task: str) -> dict[str, Any] | None:
+    for r in e3.jsonl(shared_dir() / "shared.jsonl"):
+        if str(r["task_id"]) == task:
+            return r
+    return None
+
+
+class FrozenSubstrate:
+    """The real substrate, except that ``estimate`` rollouts are replayed from the shared
+    evidence (deep copies of the frozen traces, in order, no API call) and the reference is the
+    frozen instance. Everything else (probes, sessions, guards, game files) is real."""
+
+    def __init__(self, real: AeaSubstrate, task: str) -> None:
+        self.real = real
+        self.task = task
+        self._pending = [copy.deepcopy(t) for t in frozen_traces(task)]
+        self.replayed = 0
+        self.ref = frozen_reference(task)
+
+    def rollouts(
+        self,
+        task: TaskRef,
+        candidate: Candidate,
+        n: int,
+        *,
+        attribution: Attribution,
+        reset_options: dict[str, Any] | None = None,
+    ) -> list[Trace]:
+        if attribution.phase == "estimate":
+            if task.task_id != self.task or len(self._pending) < n:
+                raise ConfigError(f"frozen estimate exhausted for task {task.task_id}")
+            out, self._pending = self._pending[:n], self._pending[n:]
+            self.replayed += n
+            return out
+        return self.real.rollouts(
+            task, candidate, n, attribution=attribution, reset_options=reset_options
+        )
+
+    def reference_provider(self, config: AEAConfig) -> Any:
+        ref = self.ref
+
+        def provider(task: Any) -> Reference:
+            if ref is None:
+                return Reference(False, "no_shared_reference")
+            return ref
+
+        return provider
+
+    def __getattr__(self, name: str) -> Any:  # open_session, game_file, designer, ...
+        return getattr(self.real, name)
+
+
+# ---------------------------------------------------------------------------- stages
+def _manifest(d: Path, run_id: str, cfg: AEAConfig, extra: dict[str, Any]) -> Any:
+    policy, designer = e3.policy_qwen(), e3.designer_deepseek()
+    run_config = RunConfig(
+        schema_version=1,
+        name=run_id,
+        kind="exploratory",
+        require_clean_tree=False,
+        policy=policy,
+        designer=designer,
+        runs_root=RUNS,
+    )
+    if (d / "manifest.json").exists():
+        ctx, _ = load_run_context(d)
+    else:
+        ctx = create_run_context(
+            run_config,
+            runs_root=RUNS,
+            run_id=run_id,
+            repo_dir=ROOT,
+            aea_config_sha256=aea_config_sha256(cfg),
+        )
+    write_manifest(
+        ctx,
+        run_config,
+        envharness_sha=e3._git_sha(e3.ENVHARNESS),
+        extra={
+            "experiment": e3.EXPERIMENT,
+            "prereg": f"experiments/alfworld_e6/{PREREG}",
+            "prereg_sha": PREREG_SHA,
+            "method_sha": METHOD_SHA,
+            "src_aea_tree": e6._src_sha(),
+            "method_version": cfg.method_version,
+            "aea_config": cfg.model_dump(mode="json"),
+            "tasks": list(TASKS),
+            "cap_usd": CAP_USD,
+            "policy_endpoint_pin": policy.provider_pin,
+            **extra,
+        },
+    )
+    return ctx
+
+
+def _ready() -> None:
+    if PREREG_SHA is None or METHOD_SHA is None:
+        raise ConfigError("PREREG_SHA / METHOD_SHA not recorded: commit the prereg first")
+    os.environ.setdefault("ALFWORLD_DATA", str(Path.home() / "eh_alfworld_data"))
+
+
+def _estimate_task(
+    sub: AeaSubstrate, cfg: AEAConfig, task: TaskRef, writer: TraceWriter
+) -> tuple[Any, int]:
+    """The controller's estimator schedule (``Controller._estimate``) on the real substrate;
+    every rollout written to the shared traces file. Returns (estimate, charged rollouts)."""
+    pending: list[Trace] = []
+    charged = 0
+
+    def rollout(i: int) -> Trace:
+        nonlocal charged
+        if not pending:
+            n = cfg.impl.batch_first if i == 0 else cfg.impl.batch_next
+            got = sub.rollouts(
+                task,
+                Candidate(),
+                n,
+                attribution=Attribution(
+                    phase="estimate", budget="search", arm="shared", task_id=task.task_id
+                ),
+            )
+            charged += n
+            for tr in got:
+                writer.add(tr)
+            pending.extend(got)
+        return pending.pop(0)
+
+    return estimate(rollout, cfg), charged
+
+
+def stage_shared(concurrency: int) -> None:
+    """Per task: the controller's estimator schedule on the real substrate (charged, ledgered),
+    then ONE rich expert reference if the task is ``zero``. Resumable per task."""
+    _ready()
+    e3.guard("shared")
+    cfg = config("A")
+    d = shared_dir()
+    d.mkdir(parents=True, exist_ok=True)
+    _manifest(d, SHARED_ID, cfg, {"stage": "shared evidence"})
+    sub, _ = e6.build(cfg, d, SHARED_ID, concurrency=concurrency, with_designer=False)
+    provider = sub.reference_provider(cfg)
+    assert provider is not None
+    writer = TraceWriter(d / "traces.jsonl")
+    events = EventWriter(d / "events.jsonl", SHARED_ID)
+    done = {str(r["task_id"]) for r in e3.jsonl(d / "shared.jsonl")}
+    for t in TASKS:
+        task = TaskRef(str(t), t)
+        if task.task_id in done:
+            continue
+        e3.guard(f"shared task {t}")
+        est, charged = _estimate_task(sub, cfg, task, writer)
+        rec: dict[str, Any] = {
+            "task_id": task.task_id,
+            "regime": est.regime,
+            "p_hat": est.p_hat,
+            "n": est.n,
+            "charged": charged,
+            "probabilities": est.probabilities,
+            "reference": None,
+        }
+        events.write(
+            "estimate",
+            {"task_id": task.task_id, "regime": est.regime, "p_hat": est.p_hat, "n": est.n},
+        )
+        if est.regime == "zero":
+            ref = provider(task)
+            row = {
+                "task_id": task.task_id,
+                **ref.as_record(),
+                "ts": time.strftime("%FT%TZ", time.gmtime()),
+            }
+            with (d / "privileged_references.jsonl").open("a", encoding="utf-8") as fh:
+                fh.write(json.dumps(row) + "\n")
+            rec["reference"] = {k: row[k] for k in ("reference_id", "success", "reason", "n_steps")}
+            events.write(
+                "reference",
+                {
+                    "task_id": task.task_id,
+                    "available": ref.ok,
+                    "n_steps": ref.n_steps,
+                    "reason": ref.reason,
+                    "reference_id": row["reference_id"],
+                },
+            )
+        with (d / "shared.jsonl").open("a", encoding="utf-8") as fh:
+            fh.write(json.dumps(rec) + "\n")
+        print(json.dumps(rec), flush=True)
+        e3.merge(d)
+
+
+def stage_arms(concurrency: int) -> None:
+    """Both arms on every task whose shared evidence exists; resumable per (arm, task)."""
+    _ready()
+    e3.guard("arms")
+    for t in TASKS:
+        task_id = str(t)
+        shared = shared_estimate(task_id)
+        if shared is None:
+            raise ConfigError(f"no shared evidence for task {t}: run --stage shared first")
+        for arm in ("A", "B"):
+            cfg = config(arm)
+            d = RUNS / ARM_IDS[arm]
+            d.mkdir(parents=True, exist_ok=True)
+            ctx = _manifest(
+                d, ARM_IDS[arm], cfg, {"arm": arm, "stage": "arms", "shared_run": SHARED_ID}
+            )
+            real, _ = e6.build(cfg, d, ARM_IDS[arm], concurrency=concurrency)
+            frozen = FrozenSubstrate(real, task_id)
+            ctrl = Controller(
+                cfg,
+                frozen,
+                d,
+                ARM_IDS[arm],
+                arm=arm,
+                use_proposer=True,
+                reference=frozen.reference_provider(cfg),
+            )
+            if task_id in ctrl.completed_tasks():
+                continue
+            e3.guard(f"arm {arm} task {t}")
+            out = ctrl.run([TaskRef(task_id, t)], concurrency=1)[0]
+            e3.merge(d)
+            print(
+                json.dumps(
+                    {
+                        "arm": arm,
+                        "task": task_id,
+                        "shared_regime": shared["regime"],
+                        "regime": out.regime,
+                        "outcome": out.outcome,
+                        "reason": out.reason,
+                        "n_search": out.n_search,
+                        "replayed_estimate": frozen.replayed,
+                    }
+                ),
+                flush=True,
+            )
+            del ctx
+
+
+def accepted_envs(arm: str) -> list[dict[str, Any]]:
+    p = RUNS / ARM_IDS[arm] / "corpus.jsonl"
+    out = []
+    for c in e3.jsonl(p):
+        a = c["aea"]
+        if a["kind"] == "stage":
+            out.append(
+                {
+                    "id": f"{arm}:{a['candidate_id']}",
+                    "arm": arm,
+                    "task": a["task_id"],
+                    "kind": "stage",
+                    "t": a.get("t"),
+                    "candidate": {
+                        "rules_code": c.get("rules_code", ""),
+                        "in_env_actions": c.get("in_env_actions", []),
+                    },
+                }
+            )
+    return out
+
+
+def stage_confirm(concurrency: int) -> None:
+    _ready()
+    e3.guard("confirm")
+    d = RUNS / CONFIRM_ID
+    d.mkdir(parents=True, exist_ok=True)
+    envs = accepted_envs("A") + accepted_envs("B")
+    (d / "envs.json").write_text(json.dumps(envs, indent=1), encoding="utf-8")
+    sub, _ = e6.build(config("A"), d, CONFIRM_ID, concurrency=concurrency, with_designer=False)
+    summary_path = d / "confirm_summary.json"
+    summary: dict[str, Any] = (
+        json.loads(summary_path.read_text(encoding="utf-8")) if summary_path.exists() else {}
+    )
+    writer = TraceWriter(d / "confirm.jsonl")
+    cfg = config("A")
+    for env in envs:
+        if env["id"] in summary:
+            continue
+        e3.guard(f"confirm {env['id']}")
+        task = TaskRef(env["task"], int(env["task"]))
+        rec = e3._k16(
+            sub,
+            writer,
+            env["id"],
+            task,
+            e3.to_candidate(env["candidate"]),
+            arm=f"confirm-{env['arm']}",
+            n=e6.CONFIRM_K,
+            reset_options=sub.stage_reset_options(task),
+        )
+        p16 = rec["p16"]
+        summary[env["id"]] = {
+            **rec,
+            "arm": env["arm"],
+            "t": env["t"],
+            "in_band_l": p16 is not None and cfg.band_l[0] <= p16 <= cfg.band_l[1],
+            "in_band_t": p16 is not None and cfg.band_t[0] <= p16 <= cfg.band_t[1],
+        }
+        summary_path.write_text(json.dumps(summary, indent=1), encoding="utf-8")
+        print(json.dumps({"confirm": env["id"], **rec}), flush=True)
+    summary_path.write_text(json.dumps(summary, indent=1), encoding="utf-8")
+    e3.merge(d)
+    print(json.dumps({"stage": "confirm", "envs": len(envs), "usd": round(e3.dir_spend(d), 2)}))
+
+
+def main(argv: list[str] | None = None) -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument(
+        "--stage", required=True, choices=["probe", "shared", "arms", "confirm", "tables", "spend"]
+    )
+    ap.add_argument("--concurrency", type=int, default=e3.ROLLOUT_CONCURRENCY)
+    args = ap.parse_args(argv)
+    try:
+        if args.stage == "probe":
+            return e3.stage_probe()
+        if args.stage == "shared":
+            stage_shared(args.concurrency)
+        elif args.stage == "arms":
+            stage_arms(args.concurrency)
+        elif args.stage == "confirm":
+            stage_confirm(args.concurrency)
+        elif args.stage == "tables":
+            mt = importlib.import_module("make_tables_e6_refalign")
+            return int(mt.main([]))
+        else:
+            print(
+                json.dumps(
+                    {
+                        "usd": round(e3.e3_spend(), 2),
+                        "cap": CAP_USD,
+                        "by_run": {
+                            p.name: round(e3.dir_spend(p), 2)
+                            for p in sorted(RUNS.glob("e6-refalign-*"))
+                            if p.is_dir()
+                        },
+                        "ts": time.strftime("%FT%TZ", time.gmtime()),
+                    }
+                )
+            )
+    except ConfigError as exc:
+        print(f"STOP: {exc}", file=sys.stderr)
+        return 3
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

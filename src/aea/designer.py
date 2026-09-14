@@ -45,14 +45,50 @@ REFERENCE_ID = "reference"
 
 # ---------------------------------------------------------------------------- reference
 @dataclass(frozen=True)
+class ReferenceStep:
+    """One simulator-visible step of the expert's successful trajectory: what it saw, what it
+    could do, what it did. No reasoning of any kind is recorded (the expert has none)."""
+
+    step: int
+    observation: str
+    admissible: tuple[str, ...]
+    action: str
+
+
+@dataclass(frozen=True)
 class Reference:
     ok: bool
     reason: str
     actions: tuple[str, ...] = ()
+    steps: tuple[ReferenceStep, ...] = ()
+    """The rich trajectory (phase 3.2); empty when only the action list was captured."""
 
     @property
     def n_steps(self) -> int:
         return len(self.actions)
+
+    @property
+    def success(self) -> bool:
+        return self.ok
+
+    def as_record(self) -> dict[str, Any]:
+        """The exact instance for ``privileged_references.jsonl`` (audit-side only)."""
+        return {
+            "reference_id": reference_id(self.actions) if self.ok else None,
+            "success": self.ok,
+            "reason": self.reason,
+            "actions": list(self.actions),
+            "n_steps": self.n_steps,
+            "steps": [
+                {
+                    "step": s.step,
+                    "observation": s.observation,
+                    "admissible": list(s.admissible),
+                    "action": s.action,
+                }
+                for s in self.steps
+            ],
+        }
 
 
 class TaskLike(Protocol):
@@ -81,17 +117,28 @@ class ExpertReference:
     max_steps: int
 
     def __call__(self, task: TaskLike) -> Reference:
+        steps: list[ReferenceStep] = []
+
+        def record(obs: str, admissible: list[str], action: str) -> None:
+            steps.append(ReferenceStep(len(steps) + 1, obs, tuple(admissible), action))
+
         with SESSION_LOCK:
             sess: Session | None = None
             try:
                 sess = self.open_fn(task)
-                r = run_expert(sess, max_steps=self.max_steps)
+                r = run_expert(sess, max_steps=self.max_steps, on_step=record)
             except Exception as exc:  # the expert must never take the task down
                 return Reference(False, f"{type(exc).__name__}: {exc}")
             finally:
                 if sess is not None:
                     sess.close()
-        return Reference(r.ok, r.reason, tuple(r.actions) if r.ok else ())
+        if not r.ok:
+            return Reference(False, r.reason)
+        actions = tuple(r.actions)
+        rich = tuple(steps[: len(actions)])  # one recorded step per executed action
+        if tuple(s.action for s in rich) != actions:
+            rich = ()  # never keep a trajectory that does not match the executed actions
+        return Reference(True, r.reason, actions, rich)
 
 
 # ---------------------------------------------------------------------------- evidence
@@ -239,17 +286,40 @@ def serialize_high(
     return Evidence(text, text, _sha(text), len(ok) + len(bad), False)
 
 
+def reference_text(reference: Reference, b: EvidenceBounds, *, rich: bool) -> str:
+    """The reference block: the action list (llm_v1) or, when ``rich`` and the trajectory was
+    captured, every step's observation and action (llm_v1_refalign). Rich steps are never
+    head/tail-truncated (the designer must be able to align against any step); only each
+    observation is clipped."""
+    if rich and reference.steps:
+        block = (
+            "PRIVILEGED REFERENCE TRAJECTORY (a verified successful trajectory from reset, "
+            f"observation then action at each step; selectable: trajectory_id {REFERENCE_ID}, "
+            f"step 1..{reference.n_steps})"
+        )
+        for s in reference.steps:
+            block += f"\nstep {s.step}:\n  observation: {_clip(s.observation, b.obs_chars)}"
+            block += f"\n  action: {s.action}"
+        return block
+    block = "PRIVILEGED REFERENCE (a successful action sequence from reset; selectable: "
+    block += f"trajectory_id {REFERENCE_ID}, step 1..{reference.n_steps})\n"
+    block += "\n".join(f"step {i + 1}: {a}" for i, a in enumerate(reference.actions))
+    return block
+
+
 def serialize_low(
     failures: Sequence[Trace],
     p_hat: float,
     n: int,
     reference: Reference | None,
     b: EvidenceBounds = BOUNDS,
+    *,
+    rich: bool = False,
 ) -> Evidence:
     """The reference block comes BEFORE the failures, so the size bound (which truncates from
     the end) can only ever cut failure steps, never the reference; ``reference_used`` is read
     from the bounded text itself, so the metadata cannot claim a reference the designer did not
-    receive."""
+    receive. ``rich``: the observation/action trajectory instead of the action list."""
     ids = {f"F{i + 1}": t.episode_id for i, t in enumerate(failures)}
     head = [
         f"TASK GOAL: {task_goal(failures)}",
@@ -260,12 +330,11 @@ def serialize_low(
         *[trajectory_text(label, t, b) for label, t in zip(ids, failures, strict=True)],
     ]
     if reference is not None and reference.ok:
-        block = "PRIVILEGED REFERENCE (a successful action sequence from reset; selectable: "
-        block += f"trajectory_id {REFERENCE_ID}, step 1..{reference.n_steps})\n"
-        block += "\n".join(f"step {i + 1}: {a}" for i, a in enumerate(reference.actions))
+        block = reference_text(reference, b, rich=rich)
         meta = (
-            f"PRIVILEGED REFERENCE: {reference.n_steps} actions, "
-            f"sha256 {reference_id(reference.actions)} [content withheld]"
+            f"PRIVILEGED REFERENCE: {reference.n_steps} actions"
+            + (" with observations" if rich and reference.steps else "")
+            + f", sha256 {reference_id(reference.actions)} [content withheld]"
         )
         text = _bounded([*head, block, *fails], b.total_chars)
         redacted = _bounded([*head, meta, *fails], b.total_chars)
@@ -510,6 +579,8 @@ class StageProposal:
     episode_id: str | None
     step: int
     mechanism_summary: str
+    diagnosis: int | None = None
+    """llm_v1_refalign: 1-based index of the diagnosis this cut answers (None = unlinked)."""
 
 
 @dataclass
@@ -564,6 +635,256 @@ def parse_low(
             continue
         out.stages.append(StageProposal(source, tid, eid, step, summary))  # type: ignore[arg-type]
     return out
+
+
+# ---------------------------------------------------------------------------- LOW refalign
+DIAGNOSE_TOOL: dict[str, Any] = {
+    "type": "function",
+    "function": {
+        "name": "diagnose_and_select_stages",
+        "description": (
+            "First diagnose where and why the failed trajectories consequentially diverge from "
+            "the verified successful reference, then select up to two reference-grounded "
+            "restart points."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "diagnoses": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "failure_id": {"type": "string", "description": "F1.."},
+                            "failure_step": {
+                                "type": "integer",
+                                "description": (
+                                    "the failed trajectory's first CONSEQUENTIAL divergence: "
+                                    "the earliest step after which it can no longer be "
+                                    "completing the task the way the reference does"
+                                ),
+                            },
+                            "reference_step": {
+                                "type": "integer",
+                                "description": (
+                                    "the reference step whose state the failure should have "
+                                    "reached instead (the successful counterfactual)"
+                                ),
+                            },
+                            "error_cause": {"type": "string"},
+                            "fix_hint": {
+                                "type": "string",
+                                "description": "what capability or progress is missing",
+                            },
+                            "evidence": {
+                                "type": "string",
+                                "description": "observations / actions that show it (short)",
+                            },
+                        },
+                        "required": [
+                            "failure_id",
+                            "failure_step",
+                            "reference_step",
+                            "error_cause",
+                            "fix_hint",
+                        ],
+                    },
+                },
+                "stages": {
+                    "type": "array",
+                    "maxItems": MAX_PROPOSALS,
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "reference_step": {
+                                "type": "integer",
+                                "description": (
+                                    "restart AFTER this many reference actions (1-based)"
+                                ),
+                            },
+                            "diagnosis": {
+                                "type": "integer",
+                                "description": "1-based index of the diagnosis this cut answers",
+                            },
+                            "mechanism_summary": {"type": "string"},
+                        },
+                        "required": ["reference_step", "diagnosis", "mechanism_summary"],
+                    },
+                },
+            },
+            "required": ["diagnoses", "stages"],
+        },
+    },
+}
+
+REFALIGN_OBJECTIVE = (
+    "The current policy cannot obtain positive experience from reset. You are given its failed "
+    "trajectories and a VERIFIED successful reference trajectory (observation and action at "
+    "every step). First perform credit assignment: for at least one failed trajectory, find the "
+    "first CONSEQUENTIAL divergence from the reference - the earliest step after which the "
+    "failure has entered a state or course that materially departs from successful completion. "
+    "A different action at the same step is NOT by itself a divergence: ALFWorld admits many "
+    "valid action orders, so compare states and progress, not action strings. Report the failure "
+    "step, the reference step that holds the successful counterfactual state, the error cause "
+    "and a fix hint (which capability or progress is missing). Then select up to two "
+    "reference-grounded restart points (a reference step count), most promising first, each "
+    "linked to one diagnosis: the policy will be restarted after those reference actions and "
+    "must be able to learn the missing piece from there. You may only select reference steps; "
+    "do not invent states. The policy will never see the reference or any action beyond the "
+    "selected step. Do not predict whether a restart works: rollout measurements decide."
+)
+
+
+def refalign_messages(evidence: Evidence) -> tuple[ChatMessage, ...]:
+    return (
+        ChatMessage(
+            role="system",
+            content=(
+                "You diagnose a failing policy against a verified successful reference and "
+                "design grounded restart interventions."
+            ),
+        ),
+        ChatMessage(
+            role="user",
+            content=f"{REFALIGN_OBJECTIVE}\n\n{evidence.text}\n\nCall diagnose_and_select_stages.",
+        ),
+    )
+
+
+@dataclass(frozen=True)
+class Diagnosis:
+    failure_id: str
+    episode_id: str | None
+    failure_step: int
+    reference_step: int
+    error_cause: str
+    fix_hint: str
+    evidence: str = ""
+
+
+@dataclass
+class RefalignDesign:
+    diagnoses: list[Diagnosis]
+    stages: list[StageProposal]
+    rejected: list[str]
+    arguments: dict[str, Any]
+
+
+def parse_refalign(
+    arguments: dict[str, Any],
+    *,
+    failures: Sequence[Trace],
+    trajectory_ids: dict[str, str],
+    reference: Reference,
+) -> RefalignDesign:
+    """Validate a ``diagnose_and_select_stages`` call. Diagnoses must name a supplied failure
+    with a step in its range and a reference step in range (invalid ones are dropped and
+    reported; they never block the stages). Stages must be reference-grounded (1 <= step <=
+    len(reference)); the diagnosis link is checked and kept (an unlinked stage is still a valid
+    grounded cut, reported as unlinked). At most two stages; nothing is repaired."""
+    out = RefalignDesign([], [], [], dict(arguments))
+    by_id = {t.episode_id: t for t in failures}
+    for raw in list(arguments.get("diagnoses") or []):
+        if not isinstance(raw, dict):
+            out.rejected.append("diagnosis entry is not an object")
+            continue
+        fid = str(raw.get("failure_id") or "")
+        eid = trajectory_ids.get(fid)
+        try:
+            fstep, rstep = int(raw.get("failure_step")), int(raw.get("reference_step"))  # type: ignore[arg-type]
+        except (TypeError, ValueError):
+            out.rejected.append(f"diagnosis {fid}: steps are not integers")
+            continue
+        if eid is None or eid not in by_id:
+            out.rejected.append(f"diagnosis {fid}: not a supplied failure trajectory")
+            continue
+        if not 1 <= fstep <= len(by_id[eid].steps):
+            out.rejected.append(
+                f"diagnosis {fid}: failure_step {fstep} outside 1..{len(by_id[eid].steps)}"
+            )
+            continue
+        if not 1 <= rstep <= reference.n_steps:
+            out.rejected.append(
+                f"diagnosis {fid}: reference_step {rstep} outside 1..{reference.n_steps}"
+            )
+            continue
+        out.diagnoses.append(
+            Diagnosis(
+                fid,
+                eid,
+                fstep,
+                rstep,
+                str(raw.get("error_cause") or "").strip(),
+                str(raw.get("fix_hint") or "").strip(),
+                str(raw.get("evidence") or "").strip(),
+            )
+        )
+    for raw in list(arguments.get("stages") or [])[:MAX_PROPOSALS]:
+        if not isinstance(raw, dict):
+            out.rejected.append("stage entry is not an object")
+            continue
+        try:
+            step = int(raw.get("reference_step"))  # type: ignore[arg-type]
+        except (TypeError, ValueError):
+            out.rejected.append("stage: reference_step is not an integer")
+            continue
+        if not 1 <= step <= reference.n_steps:
+            out.rejected.append(f"stage: reference_step {step} outside 1..{reference.n_steps}")
+            continue
+        if any(p.step == step for p in out.stages):
+            out.rejected.append(f"stage: duplicate reference_step {step}")
+            continue
+        link: int | None
+        try:
+            link = int(raw.get("diagnosis"))  # type: ignore[arg-type]
+        except (TypeError, ValueError):
+            link = None
+        if link is not None and not 1 <= link <= len(out.diagnoses):
+            link = None
+        out.stages.append(
+            StageProposal(
+                "reference",
+                REFERENCE_ID,
+                None,
+                step,
+                str(raw.get("mechanism_summary") or "").strip(),
+                link,
+            )
+        )
+    return out
+
+
+def design_low_refalign(
+    complete: Callable[[ChatRequest], Any],
+    *,
+    model: str,
+    evidence: Evidence,
+    failures: Sequence[Trace],
+    reference: Reference,
+    attribution: Any,
+    seed: int,
+) -> RefalignDesign:
+    """One LOW designer call under llm_v1_refalign: diagnosis and reference-grounded stages in
+    the same tool response (ledgered as budget=designer, never charged to the cap)."""
+    response = complete(
+        ChatRequest(
+            model=model,
+            messages=refalign_messages(evidence),
+            temperature=0.7,
+            seed=seed,
+            max_tokens=3072,
+            attribution=attribution,
+            tools=(DIAGNOSE_TOOL,),
+            tool_choice={"type": "function", "function": {"name": "diagnose_and_select_stages"}},
+        )
+    )
+    args = _tool_arguments(response)
+    if args is None:
+        return RefalignDesign([], [], ["designer returned no tool call"], {})
+    return parse_refalign(
+        args, failures=failures, trajectory_ids=evidence.trajectory_ids, reference=reference
+    )
 
 
 # ---------------------------------------------------------------------------- the calls
