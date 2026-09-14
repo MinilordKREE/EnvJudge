@@ -1,0 +1,66 @@
+k16 start 2026-09-14T04:28:50Z
+{"spend_check": "pool2", "usd": 0, "ts": "2026-09-14T04:28:53Z"}
+{"task": "30", "successes": 16, "n": 16, "errors": 0, "p16": 1.0, "learnable": false, "class": "saturated"}
+{"task": "31", "successes": 12, "n": 16, "errors": 0, "p16": 0.75, "learnable": true, "class": "middle"}
+{"task": "32", "successes": 1, "n": 16, "errors": 0, "p16": 0.0625, "learnable": false, "class": "middle"}
+{"task": "33", "successes": 0, "n": 16, "errors": 0, "p16": 0.0, "learnable": false, "class": "zero"}
+{"task": "34", "successes": 16, "n": 16, "errors": 0, "p16": 1.0, "learnable": false, "class": "saturated"}
+{"spend_check": "pool2 after 5 tasks", "usd": 2.23, "ts": "2026-09-14T04:46:17Z"}
+{"task": "35", "successes": 15, "n": 16, "errors": 0, "p16": 0.9375, "learnable": false, "class": "middle"}
+{"task": "36", "successes": 16, "n": 16, "errors": 0, "p16": 1.0, "learnable": false, "class": "saturated"}
+{"task": "37", "successes": 16, "n": 16, "errors": 0, "p16": 1.0, "learnable": false, "class": "saturated"}
+{"task": "38", "successes": 3, "n": 16, "errors": 0, "p16": 0.1875, "learnable": false, "class": "middle"}
+{"task": "39", "successes": 8, "n": 16, "errors": 0, "p16": 0.5, "learnable": true, "class": "middle"}
+{"spend_check": "pool2 after 10 tasks", "usd": 4.24, "ts": "2026-09-14T04:57:49Z"}
+{"task": "40", "successes": 16, "n": 16, "errors": 0, "p16": 1.0, "learnable": false, "class": "saturated"}
+{"task": "41", "successes": 7, "n": 16, "errors": 0, "p16": 0.4375, "learnable": true, "class": "middle"}
+{"task": "42", "successes": 12, "n": 16, "errors": 0, "p16": 0.75, "learnable": true, "class": "middle"}
+{"task": "43", "successes": 0, "n": 16, "errors": 0, "p16": 0.0, "learnable": false, "class": "zero"}
+{"task": "44", "successes": 16, "n": 16, "errors": 0, "p16": 1.0, "learnable": false, "class": "saturated"}
+{"spend_check": "pool2 after 15 tasks", "usd": 8.44, "ts": "2026-09-14T05:13:53Z"}
+{"task": "45", "successes": 16, "n": 16, "errors": 0, "p16": 1.0, "learnable": false, "class": "saturated"}
+{"task": "46", "successes": 13, "n": 16, "errors": 0, "p16": 0.8125, "learnable": false, "class": "middle"}
+{"task": "47", "successes": 16, "n": 16, "errors": 0, "p16": 1.0, "learnable": false, "class": "saturated"}
+{"task": "48", "successes": 13, "n": 16, "errors": 0, "p16": 0.8125, "learnable": false, "class": "middle"}
+{"task": "49", "successes": 7, "n": 16, "errors": 0, "p16": 0.4375, "learnable": true, "class": "middle"}
+{"spend_check": "pool2 after 20 tasks", "usd": 11.38, "ts": "2026-09-14T05:26:03Z"}
+{"task": "50", "successes": 16, "n": 16, "errors": 0, "p16": 1.0, "learnable": false, "class": "saturated"}
+{"task": "51", "successes": 16, "n": 16, "errors": 0, "p16": 1.0, "learnable": false, "class": "saturated"}
+{"task": "52", "successes": 2, "n": 16, "errors": 0, "p16": 0.125, "learnable": false, "class": "middle"}
+{"task": "53", "successes": 0, "n": 16, "errors": 0, "p16": 0.0, "learnable": false, "class": "zero"}
+{"task": "54", "successes": 0, "n": 16, "errors": 0, "p16": 0.0, "learnable": false, "class": "zero"}
+{"spend_check": "pool2 after 25 tasks", "usd": 15.42, "ts": "2026-09-14T05:38:05Z"}
+{"task": "55", "successes": 16, "n": 16, "errors": 0, "p16": 1.0, "learnable": false, "class": "saturated"}
+{"task": "56", "successes": 0, "n": 16, "errors": 0, "p16": 0.0, "learnable": false, "class": "zero"}
+{"task": "57", "successes": 16, "n": 16, "errors": 0, "p16": 1.0, "learnable": false, "class": "saturated"}
+{"task": "58", "successes": 0, "n": 16, "errors": 0, "p16": 0.0, "learnable": false, "class": "zero"}
+{"task": "59", "successes": 16, "n": 16, "errors": 0, "p16": 1.0, "learnable": false, "class": "saturated"}
+{"spend_check": "pool2 after 30 tasks", "usd": 17.79, "ts": "2026-09-14T05:46:14Z"}
+{"task": "60", "successes": 4, "n": 16, "errors": 0, "p16": 0.25, "learnable": true, "class": "middle"}
+{"task": "61", "successes": 5, "n": 16, "errors": 0, "p16": 0.3125, "learnable": true, "class": "middle"}
+{"task": "62", "successes": 0, "n": 16, "errors": 0, "p16": 0.0, "learnable": false, "class": "zero"}
+{"task": "63", "successes": 2, "n": 16, "errors": 0, "p16": 0.125, "learnable": false, "class": "middle"}
+{"task": "64", "successes": 16, "n": 16, "errors": 0, "p16": 1.0, "learnable": false, "class": "saturated"}
+{"spend_check": "pool2 after 35 tasks", "usd": 23.39, "ts": "2026-09-14T06:04:55Z"}
+{"task": "65", "successes": 1, "n": 16, "errors": 0, "p16": 0.0625, "learnable": false, "class": "middle"}
+{"task": "66", "successes": 0, "n": 16, "errors": 0, "p16": 0.0, "learnable": false, "class": "zero"}
+{"task": "67", "successes": 0, "n": 16, "errors": 0, "p16": 0.0, "learnable": false, "class": "zero"}
+{"task": "68", "successes": 15, "n": 16, "errors": 0, "p16": 0.9375, "learnable": false, "class": "middle"}
+{"task": "69", "successes": 16, "n": 16, "errors": 0, "p16": 1.0, "learnable": false, "class": "saturated"}
+{"spend_check": "pool2 after 40 tasks", "usd": 28.31, "ts": "2026-09-14T06:23:14Z"}
+{"task": "70", "successes": 0, "n": 16, "errors": 0, "p16": 0.0, "learnable": false, "class": "zero"}
+{"task": "71", "successes": 0, "n": 16, "errors": 0, "p16": 0.0, "learnable": false, "class": "zero"}
+{"task": "72", "successes": 15, "n": 16, "errors": 0, "p16": 0.9375, "learnable": false, "class": "middle"}
+{"task": "73", "successes": 0, "n": 16, "errors": 0, "p16": 0.0, "learnable": false, "class": "zero"}
+{"task": "74", "successes": 16, "n": 16, "errors": 0, "p16": 1.0, "learnable": false, "class": "saturated"}
+{"spend_check": "pool2 after 45 tasks", "usd": 33.2, "ts": "2026-09-14T06:42:08Z"}
+{"task": "75", "successes": 2, "n": 16, "errors": 0, "p16": 0.125, "learnable": false, "class": "middle"}
+{"task": "76", "successes": 16, "n": 16, "errors": 0, "p16": 1.0, "learnable": false, "class": "saturated"}
+{"task": "77", "successes": 10, "n": 16, "errors": 0, "p16": 0.625, "learnable": true, "class": "middle"}
+{"task": "78", "successes": 0, "n": 16, "errors": 0, "p16": 0.0, "learnable": false, "class": "zero"}
+{"task": "79", "successes": 0, "n": 16, "errors": 0, "p16": 0.0, "learnable": false, "class": "zero"}
+{"spend_check": "pool2 after 50 tasks", "usd": 38.13, "ts": "2026-09-14T06:54:53Z"}
+{"stage": "pool2", "tasks": 50, "usd": 38.13}
+k16 exit 0 2026-09-14T06:54:54Z
+{"distribution": {"zero": 14, "middle": 19, "saturated": 17, "invalid": 0, "measured": 50}, "low_pool2": [33, 43, 53, 54, 56, 58, 62, 66, 67, 70, 71, 73, 78, 79]}
+pool2 done 2026-09-14T06:54:57Z
