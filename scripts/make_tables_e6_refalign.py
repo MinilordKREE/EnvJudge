@@ -168,7 +168,7 @@ def gates(rows_a: dict[str, dict[str, Any]], rows_b: dict[str, dict[str, Any]]) 
             == "zero"
             for e in ev.get("reference", [])
         )
-        audit = e6.leakage_audit(d)
+        audit = er.leakage_audit(d)
         g[f"{arm}_reference_leakage"] = audit.get("ok", False) and not audit.get(
             "expert_recomputed"
         )
@@ -183,7 +183,7 @@ def gates(rows_a: dict[str, dict[str, Any]], rows_b: dict[str, dict[str, Any]]) 
         for r in rows_a.values()
         if r.get("regime") == "zero" and (r.get("reference") or {}).get("available")
     )
-    g["method_unmodified"] = not e6._src_sha().endswith("+DIRTY")
+    g["method_unmodified"] = er.src_unmodified()
     g["all_pass"] = all(
         v is True for k, v in g.items() if not k.endswith("_audit") and k != "all_pass"
     )

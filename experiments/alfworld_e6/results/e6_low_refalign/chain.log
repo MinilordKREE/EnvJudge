@@ -1,0 +1,36 @@
+shared start 2026-09-14T03:15:44Z
+{"spend_check": "shared", "usd": 0.08, "ts": "2026-09-14T03:15:46Z"}
+{"spend_check": "shared task 20", "usd": 0.08, "ts": "2026-09-14T03:15:46Z"}
+Initializing AlfredTWEnv...
+  0%|          | 0/8810 [00:00<?, ?it/s]  2%|▏         | 178/8810 [00:00<00:06, 1359.52it/s]  8%|▊         | 667/8810 [00:00<00:02, 3199.99it/s] 12%|█▏        | 1078/8810 [00:00<00:02, 3588.25it/s] 17%|█▋        | 1497/8810 [00:00<00:01, 3812.92it/s] 21%|██▏       | 1889/8810 [00:00<00:02, 2997.48it/s] 27%|██▋       | 2338/8810 [00:00<00:01, 3413.39it/s] 31%|███       | 2707/8810 [00:00<00:02, 2833.69it/s] 36%|███▌      | 3132/8810 [00:00<00:01, 3184.11it/s] 40%|████      | 3526/8810 [00:01<00:01, 3377.01it/s] 44%|████▍     | 3889/8810 [00:01<00:01, 2860.72it/s] 49%|████▉     | 4355/8810 [00:01<00:01, 3298.81it/s] 54%|█████▍    | 4759/8810 [00:01<00:01, 3488.11it/s] 58%|█████▊    | 5133/8810 [00:01<00:01, 2845.89it/s] 63%|██████▎   | 5579/8810 [00:01<00:01, 3224.29it/s] 68%|██████▊   | 5969/8810 [00:01<00:00, 3394.30it/s] 72%|███████▏  | 6337/8810 [00:02<00:00, 2838.62it/s] 77%|███████▋  | 6791/8810 [00:02<00:00, 3239.81it/s] 82%|████████▏ | 7201/8810 [00:02<00:00, 3454.77it/s] 87%|████████▋ | 7636/8810 [00:02<00:00, 3687.37it/s] 91%|█████████ | 8028/8810 [00:02<00:00, 2987.15it/s] 95%|█████████▌| 8372/8810 [00:02<00:00, 3090.34it/s] 99%|█████████▉| 8753/8810 [00:02<00:00, 2666.01it/s]100%|██████████| 8810/8810 [00:02<00:00, 3098.50it/s]
+Overall we have 3553 games in split=train
+Training with 3553 games
+{"task_id": "20", "regime": "zero", "p_hat": 0.0, "n": 10, "charged": 10, "probabilities": {"zero": 0.9141006540799997, "band": 0.08589932544000023, "saturated": 2.048000002918826e-08}, "reference": {"reference_id": "2e8f9811365fd5dd", "success": true, "reason": "pass", "n_steps": 8}}
+{"spend_check": "shared task 27", "usd": 0.71, "ts": "2026-09-14T03:27:00Z"}
+{"task_id": "27", "regime": "zero", "p_hat": 0.0, "n": 10, "charged": 10, "probabilities": {"zero": 0.9141006540799997, "band": 0.08589932544000023, "saturated": 2.048000002918826e-08}, "reference": {"reference_id": "c3616e71136ccfd2", "success": true, "reason": "pass", "n_steps": 8}}
+shared exit 0 2026-09-14T03:34:42Z
+arms start 2026-09-14T03:34:42Z
+{"spend_check": "arms", "usd": 1.97, "ts": "2026-09-14T03:34:45Z"}
+{"spend_check": "arm A task 20", "usd": 1.97, "ts": "2026-09-14T03:34:45Z"}
+Initializing AlfredTWEnv...
+  0%|          | 0/8810 [00:00<?, ?it/s]  5%|▌         | 449/8810 [00:00<00:01, 4488.13it/s] 10%|█         | 898/8810 [00:00<00:02, 2683.41it/s] 15%|█▌        | 1328/8810 [00:00<00:02, 3223.41it/s] 20%|█▉        | 1752/8810 [00:00<00:01, 3547.49it/s] 24%|██▍       | 2155/8810 [00:00<00:02, 2805.75it/s] 30%|██▉       | 2614/8810 [00:00<00:01, 3258.20it/s] 34%|███▍      | 3004/8810 [00:00<00:01, 3425.98it/s] 39%|███▊      | 3396/8810 [00:01<00:01, 3559.45it/s] 43%|████▎     | 3776/8810 [00:01<00:01, 2854.08it/s] 48%|████▊     | 4224/8810 [00:01<00:01, 3244.77it/s] 53%|█████▎    | 4643/8810 [00:01<00:01, 3485.64it/s] 57%|█████▋    | 5022/8810 [00:01<00:01, 3529.14it/s] 61%|██████    | 5396/8810 [00:01<00:01, 2793.08it/s] 66%|██████▋   | 5837/8810 [00:01<00:00, 3166.77it/s] 70%|███████   | 6191/8810 [00:01<00:00, 3253.39it/s] 74%|███████▍  | 6544/8810 [00:02<00:00, 2681.12it/s] 80%|███████▉  | 7018/8810 [00:02<00:00, 3156.87it/s] 84%|████████▍ | 7442/8810 [00:02<00:00, 3422.44it/s] 89%|████████▊ | 7816/8810 [00:02<00:00, 3454.33it/s] 93%|█████████▎| 8184/8810 [00:02<00:00, 2725.84it/s] 97%|█████████▋| 8584/8810 [00:02<00:00, 3018.06it/s]100%|██████████| 8810/8810 [00:02<00:00, 3163.04it/s]
+Overall we have 3553 games in split=train
+Training with 3553 games
+{"arm": "A", "task": "20", "shared_regime": "zero", "regime": "zero", "outcome": "dropped", "reason": "dead", "n_search": 18, "replayed_estimate": 10}
+{"spend_check": "arm B task 20", "usd": 2.48, "ts": "2026-09-14T03:41:33Z"}
+{"arm": "B", "task": "20", "shared_regime": "zero", "regime": "zero", "outcome": "dropped", "reason": "too_easy", "n_search": 18, "replayed_estimate": 10}
+{"spend_check": "arm A task 27", "usd": 2.75, "ts": "2026-09-14T03:45:11Z"}
+{"arm": "A", "task": "27", "shared_regime": "zero", "regime": "zero", "outcome": "accepted", "reason": "", "n_search": 18, "replayed_estimate": 10}
+{"spend_check": "arm B task 27", "usd": 3.64, "ts": "2026-09-14T03:51:50Z"}
+{"arm": "B", "task": "27", "shared_regime": "zero", "regime": "zero", "outcome": "dropped", "reason": "too_easy", "n_search": 18, "replayed_estimate": 10}
+arms exit 0 2026-09-14T03:53:30Z
+confirm start 2026-09-14T03:53:30Z
+{"spend_check": "confirm", "usd": 3.68, "ts": "2026-09-14T03:53:34Z"}
+{"spend_check": "confirm A:27:ccc07ab357b42118", "usd": 3.68, "ts": "2026-09-14T03:53:34Z"}
+{"confirm": "A:27:ccc07ab357b42118", "task": "27", "successes": 14, "n": 16, "errors": 0, "p16": 0.875, "learnable": false}
+{"stage": "confirm", "envs": 1, "usd": 1.63}
+confirm exit 0 2026-09-14T04:05:14Z
+{"zero_tasks": ["20", "27"], "n_zero": 2, "A_accepted": 1, "A_unlock": 1, "A_overshoot": 0, "A_dead": 1, "A_valid_proposal_tasks": 2, "A_certified_tasks": 2, "A_probe_rollouts": 16, "A_rollouts_per_accepted": 16.0, "B_accepted": 0, "B_unlock": 2, "B_overshoot": 2, "B_dead": 0, "B_valid_proposal_tasks": 2, "B_certified_tasks": 2, "B_probe_rollouts": 16, "B_rollouts_per_accepted": null, "paired": {"A": 1, "tie": 0, "B": 1}, "conclusion": "INCONCLUSIVE", "conclusion_reason": "a correctness gate failed (infrastructure / protocol)"}
+tables exit 0 2026-09-14T04:05:19Z
+{"usd": 5.31, "cap": 15.0, "by_run": {"e6-refalign-A": 1.4, "e6-refalign-B": 0.31, "e6-refalign-confirm": 1.63, "e6-refalign-offline": 0.08, "e6-refalign-shared": 1.89}, "ts": "2026-09-14T04:05:23Z"}
+E6 refalign done 2026-09-14T04:05:24Z

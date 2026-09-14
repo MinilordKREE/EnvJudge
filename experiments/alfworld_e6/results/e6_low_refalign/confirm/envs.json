@@ -1,0 +1,26 @@
+[
+ {
+  "id": "A:27:ccc07ab357b42118",
+  "arm": "A",
+  "task": "27",
+  "kind": "stage",
+  "t": 1,
+  "candidate": {
+   "rules_code": "",
+   "in_env_actions": [
+    {
+     "kwargs": {
+      "text": "go to fridge 1"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "look"
+     },
+     "name": "do"
+    }
+   ]
+  }
+ }
+]

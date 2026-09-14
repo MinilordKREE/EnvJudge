@@ -1,0 +1,4 @@
+{"schema_version": 1, "seq": 1, "ts": "2026-09-14T03:26:55.503842Z", "run_id": "e6-refalign-shared", "kind": "estimate", "payload": {"task_id": "20", "regime": "zero", "p_hat": 0.0, "n": 10}}
+{"schema_version": 1, "seq": 2, "ts": "2026-09-14T03:27:00.086219Z", "run_id": "e6-refalign-shared", "kind": "reference", "payload": {"task_id": "20", "available": true, "n_steps": 8, "reason": "pass", "reference_id": "2e8f9811365fd5dd"}}
+{"schema_version": 1, "seq": 3, "ts": "2026-09-14T03:34:38.912032Z", "run_id": "e6-refalign-shared", "kind": "estimate", "payload": {"task_id": "27", "regime": "zero", "p_hat": 0.0, "n": 10}}
+{"schema_version": 1, "seq": 4, "ts": "2026-09-14T03:34:42.230313Z", "run_id": "e6-refalign-shared", "kind": "reference", "payload": {"task_id": "27", "available": true, "n_steps": 8, "reason": "pass", "reference_id": "c3616e71136ccfd2"}}

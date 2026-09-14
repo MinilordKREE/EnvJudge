@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "run_id": "e6-refalign-A",
+  "created_at": "2026-09-14T03:34:45.610953Z",
+  "seed": 0,
+  "config_sha256": "1c0d8ca1fb5cd339dd9a6dd254a8dd587f0d3eba172e98b0e6959361e3b16f97",
+  "config_schema_version": 1,
+  "aea_config_sha256": "d5cbecdfa8b2f6bf1fa4ac4ac8d1bf10457028bc5d3adfce66bbdc95cd09b77b",
+  "config_path": null,
+  "git_sha": "574edb0ee72e38c516b19d7c8e07809ce7b8cf13",
+  "git_dirty": false,
+  "envharness_sha": "574edb0ee72e38c516b19d7c8e07809ce7b8cf13",
+  "aea_version": "0.1.0",
+  "python_version": "3.12.9",
+  "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+  "out_dir": "/home/kree/work/EnvJudge-aea-llm/runs/e6-refalign-A",
+  "extra": {
+    "experiment": "E6 LOW refalign (paired shared-evidence comparison, PREREG_LOW_REFALIGN)",
+    "prereg": "experiments/alfworld_e6/PREREG_LOW_REFALIGN.md",
+    "prereg_sha": "c073fcd",
+    "method_sha": "48dc028",
+    "src_aea_tree": "c28e0125dd6479bd+DIRTY",
+    "method_version": "llm_v1",
+    "aea_config": {
+      "schema_version": 4,
+      "method_version": "llm_v1",
+      "band_t": [
+        0.4,
+        0.6
+      ],
+      "band_l": [
+        0.2,
+        0.8
+      ],
+      "k": 16,
+      "accept": [
+        3,
+        5
+      ],
+      "probe": [
+        4,
+        8
+      ],
+      "cap": 30,
+      "impl": {
+        "batch_first": 4,
+        "batch_next": 2,
+        "confidence": 0.9,
+        "max_bisections": 4,
+        "order_tolerance": 0.375,
+        "warm_start_min_history": 3,
+        "proposer_cap": 2,
+        "n_failed_rollouts": 3,
+        "max_candidates": 6,
+        "stage_budget": 100,
+        "oracle_attempts": 3,
+        "oracle_max_steps": 50,
+        "policy_max_steps": 50
+      }
+    },
+    "tasks": [
+      20,
+      27
+    ],
+    "cap_usd": 15.0,
+    "policy_endpoint_pin": "alibaba",
+    "arm": "A",
+    "stage": "arms",
+    "shared_run": "e6-refalign-shared"
+  }
+}

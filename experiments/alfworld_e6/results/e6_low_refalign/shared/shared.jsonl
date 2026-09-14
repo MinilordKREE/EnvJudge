@@ -1,0 +1,2 @@
+{"task_id": "20", "regime": "zero", "p_hat": 0.0, "n": 10, "charged": 10, "probabilities": {"zero": 0.9141006540799997, "band": 0.08589932544000023, "saturated": 2.048000002918826e-08}, "reference": {"reference_id": "2e8f9811365fd5dd", "success": true, "reason": "pass", "n_steps": 8}}
+{"task_id": "27", "regime": "zero", "p_hat": 0.0, "n": 10, "charged": 10, "probabilities": {"zero": 0.9141006540799997, "band": 0.08589932544000023, "saturated": 2.048000002918826e-08}, "reference": {"reference_id": "c3616e71136ccfd2", "success": true, "reason": "pass", "n_steps": 8}}

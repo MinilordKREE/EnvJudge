@@ -145,3 +145,63 @@ def test_audit_uses_the_recorded_reference_and_never_recomputes(tmp_path: Path) 
     p.write_text(json.dumps(row) + "\n")
     tampered = e6.leakage_audit(tmp_path / "run")
     assert not tampered["ok"] and not tampered["tasks"]["9"]["provenance_intact"]
+
+
+def test_refalign_audit_uses_provenance_not_string_overlap(tmp_path: Path) -> None:
+    """The phase-3.2 false positives: the compiler's trailing ``look`` and a failure prefix that
+    shares an action with the reference's future are NOT leaks; a reference prefix past its own
+    cut IS; two reference cuts are each checked against their own cut."""
+    from aea.controller import Controller, TaskRef
+    from aea.designer import Reference
+    from tests.fixtures.fake_designer import ScriptedDesigner
+    from tests.fixtures.fake_substrate import PLAN
+
+    sys.path.insert(0, str(ROOT / "scripts"))
+    spec = importlib.util.spec_from_file_location(
+        "e6_refalign", ROOT / "scripts" / "e6_refalign.py"
+    )
+    assert spec and spec.loader
+    er = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(er)
+    # reference = PLAN plus a trailing look (so 'look' is a post-cut reference action)
+    ref_actions = (*PLAN, "look")
+
+    def provider(task: Any) -> Reference:
+        return Reference(True, "pass", ref_actions)
+
+    reply = (
+        "select_stages",
+        {
+            "stages": [
+                {"source": "failure", "trajectory_id": "F1", "step": 3, "mechanism_summary": "m"},
+                {
+                    "source": "reference",
+                    "trajectory_id": "reference",
+                    "step": 2,
+                    "mechanism_summary": "m",
+                },
+            ]
+        },
+    )
+    designer = ScriptedDesigner(reply)
+    sub = FakeSubstrate({"9": "random"}, seed=3, with_designer=True, designer_fn=designer)
+    cfg = AEAConfig(method_version="llm_v1")
+    ctrl = Controller(cfg, sub, tmp_path / "run", "r1", arm="L", reference=provider)
+    ctrl.run([TaskRef("9", 9)])
+    audit = er.leakage_audit(tmp_path / "run")
+    rec = audit["tasks"]["9"]
+    assert audit["ok"] and rec["leaks"] == [], rec
+    assert rec["prefixes_by_provenance"]["failure"] >= 1
+    assert rec["prefixes_by_provenance"]["reference"] >= 1 and rec["reference_cuts"] == [2]
+    # tamper: make the reference prefix carry an action past its cut -> leak
+    p = tmp_path / "run" / "traces.jsonl"
+    rows = [json.loads(x) for x in p.read_text().splitlines()]
+    for r in rows:
+        pre = [a["kwargs"]["text"] for a in r["candidate"]["in_env_actions"]]
+        if pre[:2] == list(PLAN[:2]):
+            r["candidate"]["in_env_actions"].insert(2, {"name": "do", "kwargs": {"text": PLAN[2]}})
+    p.write_text("\n".join(json.dumps(r) for r in rows) + "\n")
+    tampered = er.leakage_audit(tmp_path / "run")
+    assert not tampered["ok"] and any(
+        "exceeds its cut" in x or "unattributed" in x for x in tampered["tasks"]["9"]["leaks"]
+    )
