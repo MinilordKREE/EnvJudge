@@ -26,8 +26,10 @@ import e6_refalign as er
 from aea.errors import ConfigError
 
 TASKS: list[int] = [62, 66, 67, 70, 71, 73, 78, 79]  # the untouched LOW_POOL_2 tasks
-PREREG_SHA: str | None = None  # PREREG_LOW_STAGE_CONTROL.md commit (before the first paid call)
-METHOD_SHA: str | None = None  # the phase-3.3b implementation commit (src/aea frozen)
+PREREG_SHA: str | None = (
+    "d66fb60"  # PREREG_LOW_STAGE_CONTROL.md commit (before the first paid call)
+)
+METHOD_SHA: str | None = "423011c"  # the phase-3.3b implementation commit (src/aea frozen)
 CAP_USD = 50.0
 
 er.SHARED_ID = "e6-sc-shared"
