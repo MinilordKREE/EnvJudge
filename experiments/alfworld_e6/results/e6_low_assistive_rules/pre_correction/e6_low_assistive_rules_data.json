@@ -1,0 +1,1736 @@
+{
+ "A": {
+  "85": {
+   "task": "85",
+   "arm": "A",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "outcome": "accepted",
+   "reason": "",
+   "n_search": 30,
+   "reference": {
+    "available": true,
+    "n_steps": 15,
+    "reference_id": "dfd8a9f55d7edf28"
+   },
+   "certified": [
+    "85:102dccd2bf31dac8"
+   ],
+   "uncertified": [],
+   "probe": [
+    {
+     "id": "85:102dccd2bf31dac8",
+     "t": 14,
+     "source": "control",
+     "successes": 4,
+     "n": 4,
+     "verdict": "too_easy"
+    },
+    {
+     "id": "85:f8af74ee3a6c56a0",
+     "t": 7,
+     "source": "control",
+     "successes": 1,
+     "n": 8,
+     "verdict": "too_hard"
+    },
+    {
+     "id": "85:274dc33b05f8cd99",
+     "t": 10,
+     "source": "control",
+     "successes": 3,
+     "n": 8,
+     "verdict": "in_band"
+    }
+   ],
+   "designer_called": false,
+   "probe_rollouts": 20,
+   "category": "accepted",
+   "accepted": {
+    "id": "85:274dc33b05f8cd99",
+    "t": 10,
+    "p_hat": 0.375
+   },
+   "confirm": {
+    "task": "85",
+    "successes": 3,
+    "n": 16,
+    "errors": 0,
+    "p16": 0.1875,
+    "learnable": false,
+    "arm": "A",
+    "t": 10,
+    "in_band_l": false,
+    "in_band_t": false
+   },
+   "stage_family": {
+    "T": 15,
+    "t_max": 14,
+    "rejected": [
+     {
+      "t": 15,
+      "reason": "terminal"
+     }
+    ]
+   },
+   "stage_control": {
+    "T": 15,
+    "t_max": 14,
+    "t_max_verdict": "too_easy",
+    "history": [
+     {
+      "t": 14,
+      "s": 4,
+      "n": 4,
+      "verdict": "too_easy"
+     },
+     {
+      "t": 7,
+      "s": 1,
+      "n": 8,
+      "verdict": "too_hard"
+     },
+     {
+      "t": 10,
+      "s": 3,
+      "n": 8,
+      "verdict": "in_band"
+     }
+    ],
+    "lo": 7,
+    "hi": 14,
+    "status": "accepted",
+    "unique_cuts": 3,
+    "accepted_t": 10,
+    "accepted_d": 0.7142857142857143
+   },
+   "leverage": true,
+   "cls": "search_accepted_k16_failed",
+   "resolution": {
+    "probes": 3,
+    "dead": true,
+    "easy": true,
+    "in_band": true,
+    "intermediate_probes": 2,
+    "regimes": [
+     "in_band",
+     "too_easy",
+     "too_hard"
+    ]
+   }
+  },
+  "86": {
+   "task": "86",
+   "arm": "A",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "outcome": "dropped",
+   "reason": "budget",
+   "n_search": 30,
+   "reference": {
+    "available": true,
+    "n_steps": 48,
+    "reference_id": "ee9795388eadfd8f"
+   },
+   "certified": [
+    "86:d0aec4a933f41a39"
+   ],
+   "uncertified": [],
+   "probe": [
+    {
+     "id": "86:d0aec4a933f41a39",
+     "t": 47,
+     "source": "control",
+     "successes": 6,
+     "n": 8,
+     "verdict": "too_easy"
+    },
+    {
+     "id": "86:18a0e06ef440f953",
+     "t": 23,
+     "source": "control",
+     "successes": 0,
+     "n": 4,
+     "verdict": "too_hard"
+    },
+    {
+     "id": "86:d2a69f5be8e6cc70",
+     "t": 35,
+     "source": "control",
+     "successes": 0,
+     "n": 4,
+     "verdict": "too_hard"
+    },
+    {
+     "id": "86:84cfc97907dece06",
+     "t": 41,
+     "source": "control",
+     "successes": 0,
+     "n": 4,
+     "verdict": "too_hard"
+    }
+   ],
+   "designer_called": false,
+   "probe_rollouts": 20,
+   "category": "leveraged_outside_target",
+   "stage_family": {
+    "T": 48,
+    "t_max": 47,
+    "rejected": [
+     {
+      "t": 48,
+      "reason": "terminal"
+     }
+    ]
+   },
+   "stage_control": {
+    "T": 48,
+    "t_max": 47,
+    "t_max_verdict": "too_easy",
+    "history": [
+     {
+      "t": 47,
+      "s": 6,
+      "n": 8,
+      "verdict": "too_easy"
+     },
+     {
+      "t": 23,
+      "s": 0,
+      "n": 4,
+      "verdict": "too_hard"
+     },
+     {
+      "t": 35,
+      "s": 0,
+      "n": 4,
+      "verdict": "too_hard"
+     },
+     {
+      "t": 41,
+      "s": 0,
+      "n": 4,
+      "verdict": "too_hard"
+     }
+    ],
+    "lo": 41,
+    "hi": 47,
+    "status": "budget",
+    "unique_cuts": 4,
+    "accepted_t": null,
+    "accepted_d": null
+   },
+   "leverage": true,
+   "cls": "leveraged_unresolved",
+   "resolution": {
+    "probes": 4,
+    "dead": true,
+    "easy": true,
+    "in_band": false,
+    "intermediate_probes": 1,
+    "regimes": [
+     "too_easy",
+     "too_hard"
+    ]
+   }
+  },
+  "87": {
+   "task": "87",
+   "arm": "A",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "outcome": "dropped",
+   "reason": "reference_unavailable",
+   "n_search": 10,
+   "reference": {
+    "available": false,
+    "n_steps": 0,
+    "reference_id": null
+   },
+   "designer_called": false,
+   "probe_rollouts": 0,
+   "category": "dead",
+   "leverage": false,
+   "cls": "reference_unavailable",
+   "resolution": {
+    "probes": 0,
+    "dead": false,
+    "easy": false,
+    "in_band": false,
+    "intermediate_probes": 0,
+    "regimes": []
+   }
+  },
+  "92": {
+   "task": "92",
+   "arm": "A",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "outcome": "dropped",
+   "reason": "budget",
+   "n_search": 30,
+   "reference": {
+    "available": true,
+    "n_steps": 48,
+    "reference_id": "f262be947e751751"
+   },
+   "certified": [
+    "92:79dcf8ecc39d4b93"
+   ],
+   "uncertified": [],
+   "probe": [
+    {
+     "id": "92:79dcf8ecc39d4b93",
+     "t": 47,
+     "source": "control",
+     "successes": 4,
+     "n": 4,
+     "verdict": "too_easy"
+    },
+    {
+     "id": "92:49e46d8733116d82",
+     "t": 23,
+     "source": "control",
+     "successes": 0,
+     "n": 4,
+     "verdict": "too_hard"
+    },
+    {
+     "id": "92:7315b920ed9ec391",
+     "t": 35,
+     "source": "control",
+     "successes": 0,
+     "n": 4,
+     "verdict": "too_hard"
+    },
+    {
+     "id": "92:d43e1be75b502ba6",
+     "t": 41,
+     "source": "control",
+     "successes": 0,
+     "n": 4,
+     "verdict": "too_hard"
+    },
+    {
+     "id": "92:9892c3f003be39bc",
+     "t": 44,
+     "source": "control",
+     "successes": 0,
+     "n": 4,
+     "verdict": "too_hard"
+    }
+   ],
+   "designer_called": false,
+   "probe_rollouts": 20,
+   "category": "leveraged_outside_target",
+   "stage_family": {
+    "T": 48,
+    "t_max": 47,
+    "rejected": [
+     {
+      "t": 48,
+      "reason": "terminal"
+     }
+    ]
+   },
+   "stage_control": {
+    "T": 48,
+    "t_max": 47,
+    "t_max_verdict": "too_easy",
+    "history": [
+     {
+      "t": 47,
+      "s": 4,
+      "n": 4,
+      "verdict": "too_easy"
+     },
+     {
+      "t": 23,
+      "s": 0,
+      "n": 4,
+      "verdict": "too_hard"
+     },
+     {
+      "t": 35,
+      "s": 0,
+      "n": 4,
+      "verdict": "too_hard"
+     },
+     {
+      "t": 41,
+      "s": 0,
+      "n": 4,
+      "verdict": "too_hard"
+     },
+     {
+      "t": 44,
+      "s": 0,
+      "n": 4,
+      "verdict": "too_hard"
+     }
+    ],
+    "lo": 44,
+    "hi": 47,
+    "status": "budget",
+    "unique_cuts": 5,
+    "accepted_t": null,
+    "accepted_d": null
+   },
+   "leverage": true,
+   "cls": "leveraged_unresolved",
+   "resolution": {
+    "probes": 5,
+    "dead": true,
+    "easy": true,
+    "in_band": false,
+    "intermediate_probes": 0,
+    "regimes": [
+     "too_easy",
+     "too_hard"
+    ]
+   }
+  },
+  "97": {
+   "task": "97",
+   "arm": "A",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "outcome": "dropped",
+   "reason": "budget",
+   "n_search": 30,
+   "reference": {
+    "available": true,
+    "n_steps": 14,
+    "reference_id": "668481dd071db81b"
+   },
+   "certified": [
+    "97:fb933fdbfae5846a"
+   ],
+   "uncertified": [],
+   "probe": [
+    {
+     "id": "97:fb933fdbfae5846a",
+     "t": 13,
+     "source": "control",
+     "successes": 4,
+     "n": 4,
+     "verdict": "too_easy"
+    },
+    {
+     "id": "97:88cc63e062b47974",
+     "t": 6,
+     "source": "control",
+     "successes": 0,
+     "n": 4,
+     "verdict": "too_hard"
+    },
+    {
+     "id": "97:080ee62299a9c6e7",
+     "t": 9,
+     "source": "control",
+     "successes": 2,
+     "n": 8,
+     "verdict": "too_hard"
+    },
+    {
+     "id": "97:daa0b3c921c1c8c9",
+     "t": 11,
+     "source": "control",
+     "successes": 4,
+     "n": 4,
+     "verdict": "too_easy"
+    }
+   ],
+   "designer_called": false,
+   "probe_rollouts": 20,
+   "category": "leveraged_outside_target",
+   "stage_family": {
+    "T": 14,
+    "t_max": 13,
+    "rejected": [
+     {
+      "t": 14,
+      "reason": "terminal"
+     }
+    ]
+   },
+   "stage_control": {
+    "T": 14,
+    "t_max": 13,
+    "t_max_verdict": "too_easy",
+    "history": [
+     {
+      "t": 13,
+      "s": 4,
+      "n": 4,
+      "verdict": "too_easy"
+     },
+     {
+      "t": 6,
+      "s": 0,
+      "n": 4,
+      "verdict": "too_hard"
+     },
+     {
+      "t": 9,
+      "s": 2,
+      "n": 8,
+      "verdict": "too_hard"
+     },
+     {
+      "t": 11,
+      "s": 4,
+      "n": 4,
+      "verdict": "too_easy"
+     }
+    ],
+    "lo": 9,
+    "hi": 11,
+    "status": "budget",
+    "unique_cuts": 4,
+    "accepted_t": null,
+    "accepted_d": null
+   },
+   "leverage": true,
+   "cls": "leveraged_unresolved",
+   "resolution": {
+    "probes": 4,
+    "dead": true,
+    "easy": true,
+    "in_band": false,
+    "intermediate_probes": 1,
+    "regimes": [
+     "too_easy",
+     "too_hard"
+    ]
+   }
+  },
+  "99": {
+   "task": "99",
+   "arm": "A",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "outcome": "dropped",
+   "reason": "resolution_limited",
+   "n_search": 26,
+   "reference": {
+    "available": true,
+    "n_steps": 6,
+    "reference_id": "035e5edc4496bd6c"
+   },
+   "certified": [
+    "99:a9d88f31f24b063c"
+   ],
+   "uncertified": [],
+   "probe": [
+    {
+     "id": "99:a9d88f31f24b063c",
+     "t": 5,
+     "source": "control",
+     "successes": 6,
+     "n": 8,
+     "verdict": "too_easy"
+    },
+    {
+     "id": "99:76eb7e83f8e8b636",
+     "t": 2,
+     "source": "control",
+     "successes": 0,
+     "n": 4,
+     "verdict": "too_hard"
+    },
+    {
+     "id": "99:b19be6c60ebe0fd1",
+     "t": 3,
+     "source": "control",
+     "successes": 4,
+     "n": 4,
+     "verdict": "too_easy"
+    }
+   ],
+   "designer_called": false,
+   "probe_rollouts": 16,
+   "category": "leveraged_outside_target",
+   "stage_family": {
+    "T": 6,
+    "t_max": 5,
+    "rejected": [
+     {
+      "t": 6,
+      "reason": "terminal"
+     }
+    ]
+   },
+   "stage_control": {
+    "T": 6,
+    "t_max": 5,
+    "t_max_verdict": "too_easy",
+    "history": [
+     {
+      "t": 5,
+      "s": 6,
+      "n": 8,
+      "verdict": "too_easy"
+     },
+     {
+      "t": 2,
+      "s": 0,
+      "n": 4,
+      "verdict": "too_hard"
+     },
+     {
+      "t": 3,
+      "s": 4,
+      "n": 4,
+      "verdict": "too_easy"
+     }
+    ],
+    "lo": 2,
+    "hi": 3,
+    "status": "resolution_limited",
+    "unique_cuts": 3,
+    "accepted_t": null,
+    "accepted_d": null
+   },
+   "leverage": true,
+   "cls": "leveraged_unresolved",
+   "resolution": {
+    "probes": 3,
+    "dead": true,
+    "easy": true,
+    "in_band": false,
+    "intermediate_probes": 1,
+    "regimes": [
+     "too_easy",
+     "too_hard"
+    ]
+   }
+  },
+  "107": {
+   "task": "107",
+   "arm": "A",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "outcome": "dropped",
+   "reason": "resolution_limited",
+   "n_search": 30,
+   "reference": {
+    "available": true,
+    "n_steps": 8,
+    "reference_id": "21384dd67635b33d"
+   },
+   "certified": [
+    "107:ba2df80ed7d47f0b"
+   ],
+   "uncertified": [],
+   "probe": [
+    {
+     "id": "107:ba2df80ed7d47f0b",
+     "t": 7,
+     "source": "control",
+     "successes": 4,
+     "n": 4,
+     "verdict": "too_easy"
+    },
+    {
+     "id": "107:e75069686bf4a325",
+     "t": 3,
+     "source": "control",
+     "successes": 0,
+     "n": 4,
+     "verdict": "too_hard"
+    },
+    {
+     "id": "107:b8122a397c039e3a",
+     "t": 5,
+     "source": "control",
+     "successes": 6,
+     "n": 8,
+     "verdict": "too_easy"
+    },
+    {
+     "id": "107:6b9a0e6833e0bc45",
+     "t": 4,
+     "source": "control",
+     "successes": 0,
+     "n": 4,
+     "verdict": "too_hard"
+    }
+   ],
+   "designer_called": false,
+   "probe_rollouts": 20,
+   "category": "leveraged_outside_target",
+   "stage_family": {
+    "T": 8,
+    "t_max": 7,
+    "rejected": [
+     {
+      "t": 8,
+      "reason": "terminal"
+     }
+    ]
+   },
+   "stage_control": {
+    "T": 8,
+    "t_max": 7,
+    "t_max_verdict": "too_easy",
+    "history": [
+     {
+      "t": 7,
+      "s": 4,
+      "n": 4,
+      "verdict": "too_easy"
+     },
+     {
+      "t": 3,
+      "s": 0,
+      "n": 4,
+      "verdict": "too_hard"
+     },
+     {
+      "t": 5,
+      "s": 6,
+      "n": 8,
+      "verdict": "too_easy"
+     },
+     {
+      "t": 4,
+      "s": 0,
+      "n": 4,
+      "verdict": "too_hard"
+     }
+    ],
+    "lo": 4,
+    "hi": 5,
+    "status": "resolution_limited",
+    "unique_cuts": 4,
+    "accepted_t": null,
+    "accepted_d": null
+   },
+   "leverage": true,
+   "cls": "leveraged_unresolved",
+   "resolution": {
+    "probes": 4,
+    "dead": true,
+    "easy": true,
+    "in_band": false,
+    "intermediate_probes": 1,
+    "regimes": [
+     "too_easy",
+     "too_hard"
+    ]
+   }
+  },
+  "109": {
+   "task": "109",
+   "arm": "A",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "outcome": "dropped",
+   "reason": "resolution_limited",
+   "n_search": 30,
+   "reference": {
+    "available": true,
+    "n_steps": 7,
+    "reference_id": "7448258a444bff1b"
+   },
+   "certified": [
+    "109:77c2b3e44e38d656"
+   ],
+   "uncertified": [],
+   "probe": [
+    {
+     "id": "109:77c2b3e44e38d656",
+     "t": 6,
+     "source": "control",
+     "successes": 4,
+     "n": 4,
+     "verdict": "too_easy"
+    },
+    {
+     "id": "109:cebb263057c342b4",
+     "t": 3,
+     "source": "control",
+     "successes": 4,
+     "n": 4,
+     "verdict": "too_easy"
+    },
+    {
+     "id": "109:22d4531ad59b85b9",
+     "t": 1,
+     "source": "control",
+     "successes": 1,
+     "n": 8,
+     "verdict": "too_hard"
+    },
+    {
+     "id": "109:baaa5fa2aed71add",
+     "t": 2,
+     "source": "control",
+     "successes": 4,
+     "n": 4,
+     "verdict": "too_easy"
+    }
+   ],
+   "designer_called": false,
+   "probe_rollouts": 20,
+   "category": "leveraged_outside_target",
+   "stage_family": {
+    "T": 7,
+    "t_max": 6,
+    "rejected": [
+     {
+      "t": 7,
+      "reason": "terminal"
+     }
+    ]
+   },
+   "stage_control": {
+    "T": 7,
+    "t_max": 6,
+    "t_max_verdict": "too_easy",
+    "history": [
+     {
+      "t": 6,
+      "s": 4,
+      "n": 4,
+      "verdict": "too_easy"
+     },
+     {
+      "t": 3,
+      "s": 4,
+      "n": 4,
+      "verdict": "too_easy"
+     },
+     {
+      "t": 1,
+      "s": 1,
+      "n": 8,
+      "verdict": "too_hard"
+     },
+     {
+      "t": 2,
+      "s": 4,
+      "n": 4,
+      "verdict": "too_easy"
+     }
+    ],
+    "lo": 1,
+    "hi": 2,
+    "status": "resolution_limited",
+    "unique_cuts": 4,
+    "accepted_t": null,
+    "accepted_d": null
+   },
+   "leverage": true,
+   "cls": "leveraged_unresolved",
+   "resolution": {
+    "probes": 4,
+    "dead": true,
+    "easy": true,
+    "in_band": false,
+    "intermediate_probes": 1,
+    "regimes": [
+     "too_easy",
+     "too_hard"
+    ]
+   }
+  }
+ },
+ "B": {
+  "85": {
+   "task": "85",
+   "arm": "B",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "outcome": "dropped",
+   "reason": "no_valid_proposal",
+   "n_search": 10,
+   "reference": {
+    "available": true,
+    "n_steps": 15,
+    "reference_id": "dfd8a9f55d7edf28"
+   },
+   "diagnoses": [
+    {
+     "error_cause": "The policy never finds the tomato. The tomato is on diningtable 1 (reference finds it at step 11 by going to diningtable 1), but the policy wanders through fridge, cabinets, drawers, countertops and sinkbasin without ever visiting diningtable 1. It treats the fridge as the food source and searches containers exhaustively instead of checking the diningtable where the tomato actually sits.",
+     "evidence": "F1 opens fridge (bowl/mug only), then cycles cabinets 1-5 (plate/nothing), drawer, countertop, sinkbasin across 50 steps; never issues 'go to diningtable 1' or 'take tomato'. Reference goes to diningtable 1 at step 10 and takes tomato 1 at step 11.",
+     "failure_id": "F1",
+     "failure_step": 3,
+     "fix_hint": "The policy needs to discover that the tomato is on diningtable 1 (not in the fridge or cabinets), so it can take it and proceed to heat it in the microwave. Missing capability: locating the target object among many containers/receptacles.",
+     "reference_step": 10
+    },
+    {
+     "error_cause": "Same root cause: the policy searches the fridge and every cabinet/countertop but never goes to diningtable 1, so it never sees the tomato that is sitting there. It ends the episode examining a toaster without ever having picked up the tomato.",
+     "evidence": "F2 opens fridge (bowl/mug), opens cabinets 1-5 (empty/plate), then at step 50 examines toaster 1; never visits diningtable 1 or takes tomato.",
+     "failure_id": "F2",
+     "failure_step": 3,
+     "fix_hint": "Direct the policy's attention to diningtable 1 where the tomato is located, so it can take the tomato and then heat it.",
+     "reference_step": 10
+    }
+   ],
+   "diagnosis_rejected": [],
+   "designer_called": true,
+   "probe_rollouts": 0,
+   "category": "dead",
+   "families": [],
+   "families_rejected": [
+    "highlight_target_receptacle: smoke at d=1 raised TypeError: BaseModel.__init__() takes 1 positional argument but 3 were given"
+   ],
+   "families_full": [],
+   "leverage": false,
+   "cls": "no_leverage",
+   "resolution": {},
+   "intermediate_regime": false
+  },
+  "86": {
+   "task": "86",
+   "arm": "B",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "outcome": "dropped",
+   "reason": "no_leverage",
+   "n_search": 14,
+   "reference": {
+    "available": true,
+    "n_steps": 48,
+    "reference_id": "ee9795388eadfd8f"
+   },
+   "diagnoses": [
+    {
+     "error_cause": "The policy performs a blind exhaustive search of cabinets and drawers, opening every receptacle in order, instead of identifying that the task object is a 'plate' that needs to be picked up, heated, and placed. It never navigates toward the countertop where the plate actually is.",
+     "evidence": "F1 step 1 begins 'go to cabinet 1' and continues opening cabinets/drawers sequentially; the reference at step 43-44 goes to countertop 1 and takes plate 1, then heats it at microwave 1 (steps 45-47) and moves it to countertop 1 (step 48).",
+     "failure_id": "F1",
+     "failure_step": 1,
+     "fix_hint": "The policy lacks the ability to discover that the target object ('plate 1' on countertop 1) is what must be picked up and heated. It needs guidance to locate the plate and remember the goal's sub-steps (take plate -> heat it -> put it on countertop).",
+     "reference_step": 43
+    }
+   ],
+   "diagnosis_rejected": [],
+   "designer_called": true,
+   "probe_rollouts": 0,
+   "category": "dead",
+   "families": [
+    {
+     "name": "goal_substep_reminder",
+     "axis": "O",
+     "mechanism": "Append a persistent reminder of the goal's sub-steps to the observation text as the episode progresses, so the policy always sees what it needs to accomplish (find/take the plate, heat it, put it on the countertop). The amount of detail and the point at which the reminder appears grow with DOSE.",
+     "why": "The policy is stuck in exhaustive receptacle search because it does not connect the abstract goal to the concrete sub-steps. A visible reminder of the needed sub-steps gives it the missing progress/capability without revealing object locations, so it can steer toward taking and heating a plate."
+    }
+   ],
+   "families_rejected": [],
+   "guards": [
+    {
+     "family": "goal_substep_reminder",
+     "ok": true,
+     "source": "oracle"
+    }
+   ],
+   "leverage_by_family": {
+    "goal_substep_reminder": false
+   },
+   "no_leverage_families": [
+    "goal_substep_reminder"
+   ],
+   "families_full": [
+    {
+     "axis": "O",
+     "mechanism": "Append a persistent reminder of the goal's sub-steps to the observation text as the episode progresses, so the policy always sees what it needs to accomplish (find/take the plate, heat it, put it on the countertop). The amount of detail and the point at which the reminder appears grow with DOSE.",
+     "name": "goal_substep_reminder",
+     "why": "The policy is stuck in exhaustive receptacle search because it does not connect the abstract goal to the concrete sub-steps. A visible reminder of the needed sub-steps gives it the missing progress/capability without revealing object locations, so it can steer toward taking and heating a plate."
+    }
+   ],
+   "leverage": false,
+   "cls": "no_leverage",
+   "resolution": {},
+   "intermediate_regime": false
+  },
+  "87": {
+   "task": "87",
+   "arm": "B",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "outcome": "dropped",
+   "reason": "reference_unavailable",
+   "n_search": 10,
+   "reference": {
+    "available": false,
+    "n_steps": 0,
+    "reference_id": null
+   },
+   "designer_called": false,
+   "probe_rollouts": 0,
+   "category": "dead",
+   "leverage": false,
+   "cls": "reference_unavailable",
+   "resolution": {},
+   "intermediate_regime": false
+  },
+  "92": {
+   "task": "92",
+   "arm": "B",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "outcome": "accepted",
+   "reason": "",
+   "n_search": 18,
+   "reference": {
+    "available": true,
+    "n_steps": 48,
+    "reference_id": "f262be947e751751"
+   },
+   "diagnoses": [
+    {
+     "error_cause": "The policy turns on the desklamp immediately at desk 1 before it has located and picked up the cellphone. The cellphone is on armchair 1 (with cd 1 and three keychains), not on the desk. The policy then loops endlessly examining desk 1 and looking, never searching the room for the cellphone.",
+     "evidence": "F1 step1: go to desk 1; step2: use desklamp 1 (turns on lamp with nothing under it); steps 3-50: repeated look/examine desk 1 only. Reference finds cellphone on armchair 1 at step 46 and only then uses desklamp 1 at step 48.",
+     "failure_id": "F1",
+     "failure_step": 2,
+     "fix_hint": "The policy must first find the cellphone (search containers and surfaces across the room) and take it, then return to desk 1 to use the desklamp. It lacks the search/exploration progress toward locating the cellphone.",
+     "reference_step": 46
+    }
+   ],
+   "diagnosis_rejected": [],
+   "designer_called": true,
+   "probe_rollouts": 0,
+   "category": "accepted",
+   "families": [
+    {
+     "name": "surface_relevancy_hint",
+     "axis": "O",
+     "mechanism": "Append a goal-support reminder to the observation text telling the policy it has not yet found the cellphone and should search surfaces/containers, and hide (remove) the premature 'use desklamp 1' admissible command until the cellphone is held. As DOSE grows, the reminder becomes more explicit and more distractor admissible commands (repeated look/examine on the already-seen desk) are trimmed from the admissible list.",
+     "why": "The policy is stuck on desk 1 using/turning on the desklamp before it has the cellphone. Removing the premature desklamp action and prompting continued search redirects it toward locating and taking the cellphone, which is the missing progress."
+    },
+    {
+     "name": "search_ordering_heuristic",
+     "axis": "A",
+     "mechanism": "Block (reject) actions that turn on the desklamp before the cellphone is held, and with growing DOSE also block repeated no-op look/examine actions on an already-visited location to force exploration of unseen surfaces/containers. The block reason nudges the policy toward searching for the cellphone.",
+     "why": "The policy's first consequential error is turning on the desklamp prematurely and then looping on desk 1. Blocking that premature action (and, at higher dose, the redundant look/examine loop) prevents the dead-end and pushes the policy to explore until it finds and takes the cellphone."
+    }
+   ],
+   "families_rejected": [],
+   "guards": [
+    {
+     "family": "surface_relevancy_hint",
+     "ok": true,
+     "source": "oracle"
+    }
+   ],
+   "leverage_by_family": {
+    "surface_relevancy_hint": true
+   },
+   "families_full": [
+    {
+     "axis": "O",
+     "mechanism": "Append a goal-support reminder to the observation text telling the policy it has not yet found the cellphone and should search surfaces/containers, and hide (remove) the premature 'use desklamp 1' admissible command until the cellphone is held. As DOSE grows, the reminder becomes more explicit and more distractor admissible commands (repeated look/examine on the already-seen desk) are trimmed from the admissible list.",
+     "name": "surface_relevancy_hint",
+     "why": "The policy is stuck on desk 1 using/turning on the desklamp before it has the cellphone. Removing the premature desklamp action and prompting continued search redirects it toward locating and taking the cellphone, which is the missing progress."
+    },
+    {
+     "axis": "A",
+     "mechanism": "Block (reject) actions that turn on the desklamp before the cellphone is held, and with growing DOSE also block repeated no-op look/examine actions on an already-visited location to force exploration of unseen surfaces/containers. The block reason nudges the policy toward searching for the cellphone.",
+     "name": "search_ordering_heuristic",
+     "why": "The policy's first consequential error is turning on the desklamp prematurely and then looping on desk 1. Blocking that premature action (and, at higher dose, the redundant look/examine loop) prevents the dead-end and pushes the policy to explore until it finds and takes the cellphone."
+    }
+   ],
+   "leverage": true,
+   "cls": "search_accepted_k16_failed",
+   "resolution": {},
+   "intermediate_regime": false
+  },
+  "97": {
+   "task": "97",
+   "arm": "B",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "outcome": "dropped",
+   "reason": "no_leverage",
+   "n_search": 22,
+   "reference": {
+    "available": true,
+    "n_steps": 14,
+    "reference_id": "668481dd071db81b"
+   },
+   "diagnoses": [
+    {
+     "error_cause": "The policy never performs the 'clean potato 1 with sinkbasin 1' step; it moves the dirty potato directly into the garbagecan, so the goal 'put a CLEAN potato in garbagecan' can never be satisfied.",
+     "evidence": "F1 step 4 'take potato 1 from fridge 1' -> step 5 'go to garbagecan 1' -> step 6 'move potato 1 to garbagecan 1'; reference instead goes to sinkbasin 1 and 'clean potato 1 with sinkbasin 1' at step 11.",
+     "failure_id": "F1",
+     "failure_step": 6,
+     "fix_hint": "The policy needs to discover and execute the cleaning step (clean potato 1 with sinkbasin 1) after taking the potato and BEFORE placing it in the garbagecan.",
+     "reference_step": 11
+    }
+   ],
+   "diagnosis_rejected": [],
+   "designer_called": true,
+   "probe_rollouts": 0,
+   "category": "dead",
+   "families": [
+    {
+     "name": "clean_before_place_reminder",
+     "axis": "O",
+     "mechanism": "While the policy is holding a potato that is not yet clean, append a goal sub-step reminder to the observation text and, more strongly, reorder/surface the 'clean potato 1 with sinkbasin 1' command in the admissible list once the policy is at a sinkbasin. With DOSE=0 nothing changes; higher DOSE adds an explicit textual reminder and pushes the clean command to the front of the admissible list.",
+     "why": "The failure is that the policy skips the cleaning sub-step entirely and places a dirty potato. Surfacing the clean command as the salient next action while the potato is held and a sinkbasin is present directly supplies the missing capability (discovering the clean step)."
+    },
+    {
+     "name": "clean_first_highlight",
+     "axis": "O",
+     "mechanism": "When the policy holds a potato and the 'clean potato 1 with sinkbasin 1' command is admissible, prepend a prominent reminder line and (at higher DOSE) also reorder the admissible list so the clean command appears first. DOSE=0 leaves everything unchanged.",
+     "why": "Same diagnosed bottleneck: the policy places a dirty potato. Making the cleaning action salient right when it becomes available teaches the missing clean-before-place ordering without altering the task or verifier."
+    }
+   ],
+   "families_rejected": [],
+   "guards": [
+    {
+     "family": "clean_before_place_reminder",
+     "ok": true,
+     "source": "oracle"
+    },
+    {
+     "family": "clean_first_highlight",
+     "ok": true,
+     "source": "oracle"
+    }
+   ],
+   "leverage_by_family": {
+    "clean_before_place_reminder": false,
+    "clean_first_highlight": false
+   },
+   "no_leverage_families": [
+    "clean_before_place_reminder",
+    "clean_first_highlight"
+   ],
+   "families_full": [
+    {
+     "axis": "O",
+     "mechanism": "While the policy is holding a potato that is not yet clean, append a goal sub-step reminder to the observation text and, more strongly, reorder/surface the 'clean potato 1 with sinkbasin 1' command in the admissible list once the policy is at a sinkbasin. With DOSE=0 nothing changes; higher DOSE adds an explicit textual reminder and pushes the clean command to the front of the admissible list.",
+     "name": "clean_before_place_reminder",
+     "why": "The failure is that the policy skips the cleaning sub-step entirely and places a dirty potato. Surfacing the clean command as the salient next action while the potato is held and a sinkbasin is present directly supplies the missing capability (discovering the clean step)."
+    },
+    {
+     "axis": "O",
+     "mechanism": "When the policy holds a potato and the 'clean potato 1 with sinkbasin 1' command is admissible, prepend a prominent reminder line and (at higher DOSE) also reorder the admissible list so the clean command appears first. DOSE=0 leaves everything unchanged.",
+     "name": "clean_first_highlight",
+     "why": "Same diagnosed bottleneck: the policy places a dirty potato. Making the cleaning action salient right when it becomes available teaches the missing clean-before-place ordering without altering the task or verifier."
+    }
+   ],
+   "leverage": false,
+   "cls": "no_leverage",
+   "resolution": {},
+   "intermediate_regime": false
+  },
+  "99": {
+   "task": "99",
+   "arm": "B",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "outcome": "dropped",
+   "reason": "no_valid_proposal",
+   "n_search": 10,
+   "reference": {
+    "available": true,
+    "n_steps": 6,
+    "reference_id": "035e5edc4496bd6c"
+   },
+   "diagnoses": [
+    {
+     "error_cause": "The policy never goes to bed 1 to pick up a pillow. It wanders to desk 1, desk 2, then shelf 2, turns on the desklamp, and loops 'look' forever. It never holds a pillow, so 'use desklamp 1' cannot satisfy 'look at pillow under the desklamp'.",
+     "evidence": "Reference steps 2-3 go to bed 1 then take pillow 1; F1 goes desk1/examine, desk2/examine, shelf1, shelf2, use desklamp, then loops 'look' without ever taking a pillow.",
+     "failure_id": "F1",
+     "failure_step": 1,
+     "fix_hint": "The policy needs to discover that the pillow is on bed 1 and that it must take a pillow before using the desklamp. It lacks the sub-goal of acquiring the pillow.",
+     "reference_step": 2
+    }
+   ],
+   "diagnosis_rejected": [],
+   "designer_called": true,
+   "probe_rollouts": 0,
+   "category": "dead",
+   "families": [],
+   "families_rejected": [
+    "surface_pillow_subgoal: privilege: reference action embedded: 'go to bed 1'; privileged constants from the reference: ['pillow 1']"
+   ],
+   "families_full": [],
+   "leverage": false,
+   "cls": "no_leverage",
+   "resolution": {},
+   "intermediate_regime": false
+  },
+  "107": {
+   "task": "107",
+   "arm": "B",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "outcome": "dropped",
+   "reason": "budget",
+   "n_search": 30,
+   "reference": {
+    "available": true,
+    "n_steps": 8,
+    "reference_id": "21384dd67635b33d"
+   },
+   "diagnoses": [
+    {
+     "error_cause": "The policy goes directly to sidetable 1 (where only the desklamp is) and then gets stuck examining the desklamp and turning it on, never discovering where the newspaper is. The reference first explores sidetable 2 and sidetable 3 to find the newspaper, then returns to sidetable 1 to use the desklamp.",
+     "evidence": "F1 step1 'go to sidetable 1'; steps 1-50 loop on examine/look/use desklamp at sidetable 1, never visiting sidetable 2/3, never taking newspaper.",
+     "failure_id": "F1",
+     "failure_step": 1,
+     "fix_hint": "The policy needs to discover the newspaper's location (sidetable 3) and realize it must take the newspaper and carry it back to the desklamp. It is missing exploration toward the other sidetables and the 'take newspaper' action.",
+     "reference_step": 3
+    }
+   ],
+   "diagnosis_rejected": [],
+   "designer_called": true,
+   "probe_rollouts": 0,
+   "category": "dead",
+   "families": [
+    {
+     "name": "goal_substep_reminder",
+     "axis": "O",
+     "mechanism": "Append a persistent reminder of the goal's sub-steps to the observation text, with more sub-steps spelled out as DOSE grows. DOSE=0 returns the observation unchanged.",
+     "why": "The policy is stuck because it does not know the task decomposes into (1) find the newspaper, (2) take it, (3) bring it to the desklamp and use the lamp. Reminding it of these sub-steps steers exploration toward the newspaper without revealing its location."
+    },
+    {
+     "name": "explore_sidetables_salience",
+     "axis": "O",
+     "mechanism": "Boost the salience of 'go to sidetable N' commands in the admissible list by moving them to the front, with more sidetables surfaced (and stronger reordering) as DOSE grows. DOSE=0 leaves the list unchanged.",
+     "why": "The policy fixates on sidetable 1 and never explores the other sidetables where the newspaper is. Making the other sidetable navigation commands more salient encourages exploration toward the newspaper."
+    }
+   ],
+   "families_rejected": [],
+   "guards": [
+    {
+     "family": "goal_substep_reminder",
+     "ok": true,
+     "source": "oracle"
+    }
+   ],
+   "leverage_by_family": {
+    "goal_substep_reminder": true
+   },
+   "dose_control": [
+    {
+     "family": "goal_substep_reminder",
+     "status": "budget",
+     "lo": 0.625,
+     "hi": 0.75,
+     "history": [
+      {
+       "d": 1.0,
+       "s": 4,
+       "n": 4,
+       "verdict": "too_easy"
+      },
+      {
+       "d": 0.5,
+       "s": 1,
+       "n": 8,
+       "verdict": "too_hard"
+      },
+      {
+       "d": 0.75,
+       "s": 4,
+       "n": 4,
+       "verdict": "too_easy"
+      },
+      {
+       "d": 0.625,
+       "s": 0,
+       "n": 4,
+       "verdict": "too_hard"
+      }
+     ]
+    }
+   ],
+   "families_full": [
+    {
+     "axis": "O",
+     "mechanism": "Append a persistent reminder of the goal's sub-steps to the observation text, with more sub-steps spelled out as DOSE grows. DOSE=0 returns the observation unchanged.",
+     "name": "goal_substep_reminder",
+     "why": "The policy is stuck because it does not know the task decomposes into (1) find the newspaper, (2) take it, (3) bring it to the desklamp and use the lamp. Reminding it of these sub-steps steers exploration toward the newspaper without revealing its location."
+    },
+    {
+     "axis": "O",
+     "mechanism": "Boost the salience of 'go to sidetable N' commands in the admissible list by moving them to the front, with more sidetables surfaced (and stronger reordering) as DOSE grows. DOSE=0 leaves the list unchanged.",
+     "name": "explore_sidetables_salience",
+     "why": "The policy fixates on sidetable 1 and never explores the other sidetables where the newspaper is. Making the other sidetable navigation commands more salient encourages exploration toward the newspaper."
+    }
+   ],
+   "leverage": true,
+   "cls": "leveraged_unresolved",
+   "resolution": {
+    "goal_substep_reminder": {
+     "probes": 4,
+     "dead": true,
+     "easy": true,
+     "in_band": false,
+     "intermediate_probes": 1,
+     "regimes": [
+      "too_easy",
+      "too_hard"
+     ]
+    }
+   },
+   "intermediate_regime": true
+  },
+  "109": {
+   "task": "109",
+   "arm": "B",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "outcome": "dropped",
+   "reason": "no_valid_proposal",
+   "n_search": 10,
+   "reference": {
+    "available": true,
+    "n_steps": 7,
+    "reference_id": "7448258a444bff1b"
+   },
+   "diagnoses": [
+    {
+     "error_cause": "The policy goes straight to fridge 1 (and then opens it) instead of first locating and picking up the lettuce. The lettuce is on sinkbasin 1, not in the fridge; the policy never acquires the target object, so it can never cool or discard it and instead wanders opening cabinets/drawers searching for lettuce.",
+     "evidence": "F1 step1 'go to fridge 1' vs reference step2 'go to sinkbasin 1'; F1 opens fridge (apple/potato/tomato, no lettuce) and spends 50 steps opening cabinets/drawers never holding lettuce.",
+     "failure_id": "F1",
+     "failure_step": 1,
+     "fix_hint": "The policy needs to find and pick up the lettuce (on sinkbasin 1) before cooling it. It lacks guidance toward the lettuce's location and toward the take action.",
+     "reference_step": 2
+    },
+    {
+     "error_cause": "Same as F1: policy heads to fridge first and opens it, never locates the lettuce on sinkbasin 1, and thus never holds the lettuce to cool or discard it.",
+     "evidence": "F2 step1 'go to fridge 1' vs reference 'go to sinkbasin 1'; subsequent steps loop between fridge and cabinet 1, never holding lettuce.",
+     "failure_id": "F2",
+     "failure_step": 1,
+     "fix_hint": "Guide the policy to the sinkbasin where the lettuce is and prompt the take action.",
+     "reference_step": 2
+    },
+    {
+     "error_cause": "Same as F1/F2: policy goes to fridge first and opens it, never finds the lettuce on sinkbasin 1, then wanders opening cabinets.",
+     "evidence": "F3 step1 'go to fridge 1' vs reference 'go to sinkbasin 1'; 50 steps of cabinet opening without ever holding lettuce.",
+     "failure_id": "F3",
+     "failure_step": 1,
+     "fix_hint": "Point the policy toward the lettuce location (sinkbasin 1) and the take action.",
+     "reference_step": 2
+    }
+   ],
+   "diagnosis_rejected": [],
+   "designer_called": true,
+   "probe_rollouts": 0,
+   "category": "dead",
+   "families": [],
+   "families_rejected": [
+    "highlight_lettuce_and_take: smoke at d=1 raised NameError: name 'DOSE' is not defined",
+    "guide_lettuce_acquisition: smoke at d=1 raised NameError: name 'DOSE' is not defined"
+   ],
+   "families_full": [],
+   "leverage": false,
+   "cls": "no_leverage",
+   "resolution": {},
+   "intermediate_regime": false
+  }
+ },
+ "gates": {
+  "A_method_version_runtime": true,
+  "A_shared_estimate_identical": true,
+  "A_shared_reference_identical": true,
+  "A_designer_calls_le_1": true,
+  "A_proposals_le_2": true,
+  "A_search_le_cap": true,
+  "A_no_fallback": true,
+  "A_reference_only_on_zero": true,
+  "A_reference_leakage": true,
+  "A_audit": {
+   "tasks": {
+    "85": {
+     "available": true,
+     "reason": "pass",
+     "reference_id": "dfd8a9f55d7edf28",
+     "provenance_intact": true,
+     "designer_record": false,
+     "reference_cuts": [
+      7,
+      10,
+      14
+     ],
+     "reference_steps": 15,
+     "prefixes_by_provenance": {
+      "failure": 0,
+      "reference": 21
+     },
+     "independent_overlap": 90,
+     "leaks": []
+    },
+    "86": {
+     "available": true,
+     "reason": "pass",
+     "reference_id": "ee9795388eadfd8f",
+     "provenance_intact": true,
+     "designer_record": false,
+     "reference_cuts": [
+      23,
+      35,
+      41,
+      47
+     ],
+     "reference_steps": 48,
+     "prefixes_by_provenance": {
+      "failure": 0,
+      "reference": 20
+     },
+     "independent_overlap": 147,
+     "leaks": []
+    },
+    "87": {
+     "available": false,
+     "reason": "verifier_fail"
+    },
+    "92": {
+     "available": true,
+     "reason": "pass",
+     "reference_id": "f262be947e751751",
+     "provenance_intact": true,
+     "designer_record": false,
+     "reference_cuts": [
+      23,
+      35,
+      41,
+      44,
+      47
+     ],
+     "reference_steps": 48,
+     "prefixes_by_provenance": {
+      "failure": 0,
+      "reference": 20
+     },
+     "independent_overlap": 942,
+     "leaks": []
+    },
+    "97": {
+     "available": true,
+     "reason": "pass",
+     "reference_id": "668481dd071db81b",
+     "provenance_intact": true,
+     "designer_record": false,
+     "reference_cuts": [
+      6,
+      9,
+      11,
+      13
+     ],
+     "reference_steps": 14,
+     "prefixes_by_provenance": {
+      "failure": 0,
+      "reference": 20
+     },
+     "independent_overlap": 424,
+     "leaks": []
+    },
+    "99": {
+     "available": true,
+     "reason": "pass",
+     "reference_id": "035e5edc4496bd6c",
+     "provenance_intact": true,
+     "designer_record": false,
+     "reference_cuts": [
+      2,
+      3,
+      5
+     ],
+     "reference_steps": 6,
+     "prefixes_by_provenance": {
+      "failure": 0,
+      "reference": 16
+     },
+     "independent_overlap": 143,
+     "leaks": []
+    },
+    "107": {
+     "available": true,
+     "reason": "pass",
+     "reference_id": "21384dd67635b33d",
+     "provenance_intact": true,
+     "designer_record": false,
+     "reference_cuts": [
+      3,
+      4,
+      5,
+      7
+     ],
+     "reference_steps": 8,
+     "prefixes_by_provenance": {
+      "failure": 0,
+      "reference": 20
+     },
+     "independent_overlap": 233,
+     "leaks": []
+    },
+    "109": {
+     "available": true,
+     "reason": "pass",
+     "reference_id": "7448258a444bff1b",
+     "provenance_intact": true,
+     "designer_record": false,
+     "reference_cuts": [
+      1,
+      2,
+      3,
+      6
+     ],
+     "reference_steps": 7,
+     "prefixes_by_provenance": {
+      "failure": 0,
+      "reference": 20
+     },
+     "independent_overlap": 356,
+     "leaks": []
+    }
+   },
+   "ok": true,
+   "expert_recomputed": false
+  },
+  "B_method_version_runtime": true,
+  "B_shared_estimate_identical": true,
+  "B_shared_reference_identical": true,
+  "B_designer_calls_le_1": true,
+  "B_proposals_le_2": true,
+  "B_search_le_cap": true,
+  "B_no_fallback": true,
+  "B_reference_only_on_zero": true,
+  "B_reference_leakage": true,
+  "B_audit": {
+   "tasks": {
+    "85": {
+     "available": true,
+     "reason": "pass",
+     "reference_id": "dfd8a9f55d7edf28",
+     "provenance_intact": true,
+     "designer_record": true,
+     "reference_cuts": [],
+     "reference_steps": 15,
+     "prefixes_by_provenance": {
+      "failure": 0,
+      "reference": 0
+     },
+     "independent_overlap": 0,
+     "leaks": []
+    },
+    "86": {
+     "available": true,
+     "reason": "pass",
+     "reference_id": "ee9795388eadfd8f",
+     "provenance_intact": true,
+     "designer_record": true,
+     "reference_cuts": [],
+     "reference_steps": 48,
+     "prefixes_by_provenance": {
+      "failure": 0,
+      "reference": 0
+     },
+     "independent_overlap": 0,
+     "leaks": []
+    },
+    "87": {
+     "available": false,
+     "reason": "verifier_fail"
+    },
+    "92": {
+     "available": true,
+     "reason": "pass",
+     "reference_id": "f262be947e751751",
+     "provenance_intact": true,
+     "designer_record": true,
+     "reference_cuts": [],
+     "reference_steps": 48,
+     "prefixes_by_provenance": {
+      "failure": 0,
+      "reference": 0
+     },
+     "independent_overlap": 0,
+     "leaks": []
+    },
+    "97": {
+     "available": true,
+     "reason": "pass",
+     "reference_id": "668481dd071db81b",
+     "provenance_intact": true,
+     "designer_record": true,
+     "reference_cuts": [],
+     "reference_steps": 14,
+     "prefixes_by_provenance": {
+      "failure": 0,
+      "reference": 0
+     },
+     "independent_overlap": 0,
+     "leaks": []
+    },
+    "99": {
+     "available": true,
+     "reason": "pass",
+     "reference_id": "035e5edc4496bd6c",
+     "provenance_intact": true,
+     "designer_record": true,
+     "reference_cuts": [],
+     "reference_steps": 6,
+     "prefixes_by_provenance": {
+      "failure": 0,
+      "reference": 0
+     },
+     "independent_overlap": 0,
+     "leaks": []
+    },
+    "107": {
+     "available": true,
+     "reason": "pass",
+     "reference_id": "21384dd67635b33d",
+     "provenance_intact": true,
+     "designer_record": true,
+     "reference_cuts": [],
+     "reference_steps": 8,
+     "prefixes_by_provenance": {
+      "failure": 0,
+      "reference": 0
+     },
+     "independent_overlap": 0,
+     "leaks": []
+    },
+    "109": {
+     "available": true,
+     "reason": "pass",
+     "reference_id": "7448258a444bff1b",
+     "provenance_intact": true,
+     "designer_record": true,
+     "reference_cuts": [],
+     "reference_steps": 7,
+     "prefixes_by_provenance": {
+      "failure": 0,
+      "reference": 0
+     },
+     "independent_overlap": 0,
+     "leaks": []
+    }
+   },
+   "ok": true,
+   "expert_recomputed": false
+  },
+  "method_unmodified": true,
+  "all_pass": false,
+  "A_no_designer_call": true,
+  "B_mode_assist_on_every_zero_task": false,
+  "B_first_probe_is_d1": true,
+  "B_no_axis_bypass": true
+ },
+ "decision": {
+  "tasks": [
+   "85",
+   "86",
+   "87",
+   "92",
+   "97",
+   "99",
+   "107",
+   "109"
+  ],
+  "zero_tasks": [
+   "85",
+   "86",
+   "87",
+   "92",
+   "97",
+   "99",
+   "107",
+   "109"
+  ],
+  "n_zero": 8,
+  "A": {
+   "reference_unavailable": 1,
+   "no_leverage": 0,
+   "leveraged_unresolved": 6,
+   "search_accepted_k16_failed": 1,
+   "k16_confirmed_learnable": 0,
+   "k16_confirmed_target": 0,
+   "search_accepted": 1,
+   "k16_learnable": 0,
+   "k16_target": 0,
+   "leverage": 7,
+   "leverage_to_accept": 0.14285714285714285,
+   "leverage_to_k16": 0.0,
+   "budget": 3,
+   "probe_rollouts": 136,
+   "resolution_limited": 3,
+   "final_gaps": {
+    "99": [
+     2,
+     3
+    ],
+    "107": [
+     4,
+     5
+    ],
+    "109": [
+     1,
+     2
+    ]
+   },
+   "intermediate_regime_tasks": 6
+  },
+  "B": {
+   "reference_unavailable": 1,
+   "no_leverage": 5,
+   "leveraged_unresolved": 1,
+   "search_accepted_k16_failed": 1,
+   "k16_confirmed_learnable": 0,
+   "k16_confirmed_target": 0,
+   "search_accepted": 1,
+   "k16_learnable": 0,
+   "k16_target": 0,
+   "leverage": 2,
+   "leverage_to_accept": 0.5,
+   "leverage_to_k16": 0.0,
+   "budget": 1,
+   "probe_rollouts": 0,
+   "valid_families": 7,
+   "rejected_families": 4,
+   "valid_family_rate": 0.6363636363636364,
+   "solvable_rate": 1.0,
+   "d1_leverage_rate": 0.4,
+   "dose_order_violation": 0,
+   "no_valid_proposal": 3,
+   "uncertified": 0,
+   "exhausted": 0,
+   "intermediate_regime_tasks": 1
+  },
+  "paired": {
+   "A": 5,
+   "tie": 2,
+   "B": 1
+  },
+  "references_available": 7,
+  "B_upstream_failures": 8,
+  "decision": "INCONCLUSIVE",
+  "reason": "a correctness gate failed"
+ },
+ "spend": {
+  "e6-ar-A": 8.04,
+  "e6-ar-B": 3.45,
+  "e6-ar-confirm": 1.56,
+  "e6-ar-shared": 8.62
+ },
+ "designer_usd": {
+  "A": 0.0,
+  "B": 0.051
+ }
+}

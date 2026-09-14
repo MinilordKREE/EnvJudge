@@ -1,0 +1,80 @@
+[
+ {
+  "id": "A:85:274dc33b05f8cd99",
+  "arm": "A",
+  "task": "85",
+  "kind": "stage",
+  "t": 10,
+  "candidate": {
+   "rules_code": "",
+   "in_env_actions": [
+    {
+     "kwargs": {
+      "text": "look"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "go to sinkbasin 1"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "go to microwave 1"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "open microwave 1"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "close microwave 1"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "go to garbagecan 1"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "go to fridge 1"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "open fridge 1"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "close fridge 1"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "go to diningtable 1"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "look"
+     },
+     "name": "do"
+    }
+   ]
+  }
+ }
+]

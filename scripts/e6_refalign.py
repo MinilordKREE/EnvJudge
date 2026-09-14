@@ -534,20 +534,25 @@ def accepted_envs(arm: str) -> list[dict[str, Any]]:
     out = []
     for c in e3.jsonl(p):
         a = c["aea"]
-        if a["kind"] == "stage":
-            out.append(
-                {
-                    "id": f"{arm}:{a['candidate_id']}",
-                    "arm": arm,
-                    "task": a["task_id"],
-                    "kind": "stage",
-                    "t": a.get("t"),
-                    "candidate": {
-                        "rules_code": c.get("rules_code", ""),
-                        "in_env_actions": c.get("in_env_actions", []),
-                    },
-                }
-            )
+        if a["kind"] not in ("stage", "knob"):
+            continue
+        # "stage": a Setup prefix (arm A); "knob": an accepted Rules candidate at a dose (arm B of
+        # phase 3.4). Every search-accepted environment of either arm is confirmed (prereg).
+        out.append(
+            {
+                "id": f"{arm}:{a['candidate_id']}",
+                "arm": arm,
+                "task": a["task_id"],
+                "kind": a["kind"],
+                "t": a.get("t"),
+                "d": a.get("d"),
+                "family": a.get("family"),
+                "candidate": {
+                    "rules_code": c.get("rules_code", ""),
+                    "in_env_actions": c.get("in_env_actions", []),
+                },
+            }
+        )
     return out
 
 
@@ -578,7 +583,9 @@ def stage_confirm(concurrency: int) -> None:
             e3.to_candidate(env["candidate"]),
             arm=f"confirm-{env['arm']}",
             n=e6.CONFIRM_K,
-            reset_options=sub.stage_reset_options(task),
+            # a Setup prefix replays under the staged config; a Rules candidate is evaluated
+            # exactly as its search probes were (default reset, no prefix)
+            reset_options=sub.stage_reset_options(task) if env["kind"] == "stage" else None,
         )
         p16 = rec["p16"]
         summary[env["id"]] = {

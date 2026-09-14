@@ -58,6 +58,27 @@ def arm_rows(arm: str) -> dict[str, dict[str, Any]]:
     d = er.RUNS / er.ARM_IDS[arm]
     ev = e3.jsonl(d / "events.jsonl")
     calls = {str(c["task_id"]): c for c in e3.jsonl(d / "designer_calls.jsonl")}
+    if arm == "B":
+        # the assistive variant records its mode in the designer record (the refalign-era
+        # ``llm_stage_proposals`` event does not exist on this path) and accepts a Rules
+        # candidate (corpus kind ``knob``), confirmed under ``B:<candidate_id>``
+        for t, c in calls.items():
+            if t in rows:
+                rows[t]["mode"] = c.get("mode")
+        conf_path = er.RUNS / er.CONFIRM_ID / "confirm_summary.json"
+        conf = json.loads(conf_path.read_text()) if conf_path.exists() else {}
+        for rec in e3.jsonl(d / "corpus.jsonl"):
+            a = rec["aea"]
+            if a["kind"] == "knob" and str(a["task_id"]) in rows:
+                r = rows[str(a["task_id"])]
+                r["accepted"] = {
+                    "id": a["candidate_id"],
+                    "family": a.get("family"),
+                    "d": a.get("d"),
+                    "p_hat": a.get("p_hat"),
+                }
+                if f"B:{a['candidate_id']}" in conf:
+                    r["confirm"] = conf[f"B:{a['candidate_id']}"]
     for e in ev:
         p = e.get("payload") or {}
         t = str(p.get("task_id"))
