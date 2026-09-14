@@ -13,7 +13,7 @@ import e6_pool2 as pool
 
 USED: frozenset[int] = frozenset(range(80))  # USED_TASKS_AUDIT_POOL3.md (derived programmatically)
 TASKS: tuple[int, ...] = tuple(t for t in range(80, 80 + 200) if t not in USED)[:50]
-PREREG_SHA: str | None = None  # PREREG_LOW_POOL3.md commit (before the first paid call)
+PREREG_SHA: str | None = "fea12f9"  # PREREG_LOW_POOL3.md commit (pre-paid-call)
 
 pool.RUN_ID = "e6-pool3-k16"
 pool.FROZEN_NAME = "low_pool3_k16.jsonl"
