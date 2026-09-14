@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "run_id": "e6-profile",
+  "created_at": "2026-09-14T06:56:17.446839Z",
+  "seed": 0,
+  "config_sha256": "c88ca7650046aaed6ba597ce66f92640dc22f2175a9094689ed19f504fd88313",
+  "config_schema_version": 1,
+  "aea_config_sha256": "b47534c8e9e0852714e1cd3c1aa80b102282590845e5a1d9466fd31cdc059cb6",
+  "config_path": null,
+  "git_sha": "9601c798f767e7ae0eee4e834a109dd8a47660ec",
+  "git_dirty": false,
+  "envharness_sha": "9601c798f767e7ae0eee4e834a109dd8a47660ec",
+  "aea_version": "0.1.0",
+  "python_version": "3.12.9",
+  "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+  "out_dir": "/home/kree/work/EnvJudge-aea-llm/runs/e6-profile",
+  "extra": {
+    "experiment": "E6 stage profile (LOW response surface along the reference, PREREG_STAGE_PROFILE)",
+    "prereg": "experiments/alfworld_e6/PREREG_STAGE_PROFILE.md",
+    "prereg_sha": "c073fcd",
+    "method_sha": "48dc028",
+    "src_aea_tree": "c28e0125dd6479bd+DIRTY",
+    "src_aea_unmodified_vs_method_sha": true,
+    "method_version": "v0.4",
+    "aea_config": {
+      "schema_version": 4,
+      "method_version": "v0.4",
+      "band_t": [
+        0.4,
+        0.6
+      ],
+      "band_l": [
+        0.2,
+        0.8
+      ],
+      "k": 16,
+      "accept": [
+        3,
+        5
+      ],
+      "probe": [
+        4,
+        8
+      ],
+      "cap": 30,
+      "impl": {
+        "batch_first": 4,
+        "batch_next": 2,
+        "confidence": 0.9,
+        "max_bisections": 4,
+        "order_tolerance": 0.375,
+        "warm_start_min_history": 3,
+        "proposer_cap": 2,
+        "n_failed_rollouts": 3,
+        "max_candidates": 6,
+        "stage_budget": 100,
+        "oracle_attempts": 3,
+        "oracle_max_steps": 50,
+        "policy_max_steps": 50
+      }
+    },
+    "tasks": [
+      33,
+      43,
+      53,
+      54,
+      56,
+      58
+    ],
+    "cap_usd": 15.0,
+    "policy_endpoint_pin": "alibaba",
+    "stage": "profile",
+    "prereg_sha_profile": null,
+    "anchors": [
+      0.0,
+      0.25,
+      0.5,
+      0.75,
+      1.0
+    ],
+    "k": 8
+  }
+}
