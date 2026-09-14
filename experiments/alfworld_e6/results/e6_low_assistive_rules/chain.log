@@ -1,0 +1,52 @@
+shared start 2026-09-14T17:42:37Z
+{"spend_check": "shared", "usd": 0, "ts": "2026-09-14T17:42:39Z"}
+{"spend_check": "shared task 85", "usd": 0, "ts": "2026-09-14T17:42:39Z"}
+{"spend_check": "shared task 87", "usd": 0, "ts": "2026-09-14T17:42:39Z"}
+{"spend_check": "shared task 86", "usd": 0, "ts": "2026-09-14T17:42:39Z"}
+{"spend_check": "shared task 92", "usd": 0, "ts": "2026-09-14T17:42:39Z"}
+Initializing AlfredTWEnv...
+  0%|          | 0/8810 [00:00<?, ?it/s]  0%|          | 44/8810 [00:00<00:25, 347.14it/s]  6%|▋         | 567/8810 [00:00<00:02, 2931.44it/s] 11%|█         | 932/8810 [00:00<00:02, 3240.63it/s] 15%|█▌        | 1352/8810 [00:00<00:02, 3604.85it/s] 20%|█▉        | 1725/8810 [00:00<00:02, 2625.18it/s] 25%|██▍       | 2185/8810 [00:00<00:02, 3148.78it/s] 30%|███       | 2643/8810 [00:00<00:01, 3537.62it/s] 35%|███▍      | 3051/8810 [00:00<00:01, 3687.57it/s] 39%|███▉      | 3446/8810 [00:01<00:01, 2848.91it/s] 44%|████▍     | 3887/8810 [00:01<00:01, 3217.88it/s] 50%|████▉     | 4385/8810 [00:01<00:01, 3663.24it/s] 54%|█████▍    | 4790/8810 [00:01<00:01, 2867.36it/s] 59%|█████▊    | 5172/8810 [00:01<00:01, 3079.74it/s] 64%|██████▎   | 5612/8810 [00:01<00:00, 3398.79it/s] 68%|██████▊   | 5990/8810 [00:02<00:01, 2581.07it/s] 73%|███████▎  | 6415/8810 [00:02<00:00, 2934.34it/s] 78%|███████▊  | 6909/8810 [00:02<00:00, 3400.39it/s] 83%|████████▎ | 7299/8810 [00:02<00:00, 2775.74it/s] 87%|████████▋ | 7707/8810 [00:02<00:00, 3061.23it/s] 92%|█████████▏| 8087/8810 [00:02<00:00, 3234.69it/s] 96%|█████████▌| 8448/8810 [00:02<00:00, 2594.78it/s]100%|██████████| 8810/8810 [00:02<00:00, 3022.43it/s]
+Overall we have 3553 games in split=train
+Training with 3553 games
+{"task_id": "92", "regime": "zero", "p_hat": 0.0, "n": 10, "charged": 10, "probabilities": {"zero": 0.9141006540799997, "band": 0.08589932544000023, "saturated": 2.048000002918826e-08}, "reference": {"reference_id": "f262be947e751751", "success": true, "reason": "pass", "n_steps": 48}}
+{"spend_check": "shared task 97", "usd": 3.62, "ts": "2026-09-14T17:56:17Z"}
+{"task_id": "86", "regime": "zero", "p_hat": 0.0, "n": 10, "charged": 10, "probabilities": {"zero": 0.9141006540799997, "band": 0.08589932544000023, "saturated": 2.048000002918826e-08}, "reference": {"reference_id": "ee9795388eadfd8f", "success": true, "reason": "pass", "n_steps": 48}}
+{"spend_check": "shared task 99", "usd": 3.64, "ts": "2026-09-14T17:56:25Z"}
+{"task_id": "87", "regime": "zero", "p_hat": 0.0, "n": 10, "charged": 10, "probabilities": {"zero": 0.9141006540799997, "band": 0.08589932544000023, "saturated": 2.048000002918826e-08}, "reference": {"reference_id": null, "success": false, "reason": "verifier_fail", "n_steps": 0}}
+{"spend_check": "shared task 107", "usd": 3.78, "ts": "2026-09-14T17:57:00Z"}
+{"task_id": "85", "regime": "zero", "p_hat": 0.0, "n": 10, "charged": 10, "probabilities": {"zero": 0.9141006540799997, "band": 0.08589932544000023, "saturated": 2.048000002918826e-08}, "reference": {"reference_id": "dfd8a9f55d7edf28", "success": true, "reason": "pass", "n_steps": 15}}
+{"spend_check": "shared task 109", "usd": 4.53, "ts": "2026-09-14T17:59:05Z"}
+{"task_id": "99", "regime": "zero", "p_hat": 0.0, "n": 10, "charged": 10, "probabilities": {"zero": 0.9141006540799997, "band": 0.08589932544000023, "saturated": 2.048000002918826e-08}, "reference": {"reference_id": "035e5edc4496bd6c", "success": true, "reason": "pass", "n_steps": 6}}
+{"task_id": "97", "regime": "zero", "p_hat": 0.0, "n": 10, "charged": 10, "probabilities": {"zero": 0.9141006540799997, "band": 0.08589932544000023, "saturated": 2.048000002918826e-08}, "reference": {"reference_id": "668481dd071db81b", "success": true, "reason": "pass", "n_steps": 14}}
+{"task_id": "107", "regime": "zero", "p_hat": 0.0, "n": 10, "charged": 10, "probabilities": {"zero": 0.9141006540799997, "band": 0.08589932544000023, "saturated": 2.048000002918826e-08}, "reference": {"reference_id": "21384dd67635b33d", "success": true, "reason": "pass", "n_steps": 8}}
+shared start 2026-09-14T20:15:03Z
+{"spend_check": "shared", "usd": 7.25, "ts": "2026-09-14T20:15:06Z"}
+{"spend_check": "shared task 109", "usd": 7.25, "ts": "2026-09-14T20:15:07Z"}
+Initializing AlfredTWEnv...
+  0%|          | 0/8810 [00:00<?, ?it/s]  4%|▎         | 313/8810 [00:00<00:02, 3085.21it/s]  7%|▋         | 622/8810 [00:00<00:03, 2606.48it/s] 10%|█         | 888/8810 [00:00<00:06, 1318.26it/s] 13%|█▎        | 1134/8810 [00:00<00:04, 1575.17it/s] 16%|█▋        | 1439/8810 [00:00<00:03, 1933.96it/s] 19%|█▉        | 1716/8810 [00:00<00:03, 2146.40it/s] 22%|██▏       | 1968/8810 [00:01<00:03, 2034.51it/s] 25%|██▍       | 2197/8810 [00:01<00:03, 2038.04it/s] 29%|██▉       | 2533/8810 [00:01<00:02, 2386.88it/s] 32%|███▏      | 2791/8810 [00:01<00:02, 2409.21it/s] 35%|███▍      | 3045/8810 [00:01<00:04, 1337.43it/s] 37%|███▋      | 3289/8810 [00:01<00:03, 1534.44it/s] 41%|████      | 3604/8810 [00:01<00:02, 1862.25it/s] 44%|████▎     | 3846/8810 [00:02<00:02, 1979.58it/s] 47%|████▋     | 4144/8810 [00:02<00:02, 2222.21it/s] 50%|████▉     | 4402/8810 [00:02<00:03, 1362.23it/s] 52%|█████▏    | 4604/8810 [00:02<00:03, 1382.62it/s] 55%|█████▍    | 4824/8810 [00:02<00:02, 1538.51it/s] 58%|█████▊    | 5085/8810 [00:02<00:02, 1767.68it/s] 61%|██████▏   | 5401/8810 [00:02<00:01, 2094.05it/s] 65%|██████▍   | 5722/8810 [00:03<00:01, 2369.46it/s] 68%|██████▊   | 5989/8810 [00:03<00:01, 2163.74it/s] 71%|███████   | 6230/8810 [00:03<00:02, 1281.24it/s] 73%|███████▎  | 6466/8810 [00:03<00:01, 1464.57it/s] 76%|███████▋  | 6727/8810 [00:03<00:01, 1687.25it/s] 79%|███████▉  | 6959/8810 [00:03<00:01, 1823.73it/s] 82%|████████▏ | 7182/8810 [00:04<00:00, 1685.81it/s] 85%|████████▍ | 7450/8810 [00:04<00:00, 1890.78it/s] 87%|████████▋ | 7665/8810 [00:04<00:00, 1898.32it/s] 90%|█████████ | 7944/8810 [00:04<00:00, 2120.33it/s] 93%|█████████▎| 8173/8810 [00:04<00:00, 1215.91it/s] 96%|█████████▌| 8462/8810 [00:04<00:00, 1508.55it/s] 99%|█████████▉| 8752/8810 [00:04<00:00, 1786.12it/s]100%|██████████| 8810/8810 [00:04<00:00, 1769.83it/s]
+Overall we have 3553 games in split=train
+Training with 3553 games
+{"task_id": "109", "regime": "zero", "p_hat": 0.0, "n": 10, "charged": 10, "probabilities": {"zero": 0.9141006540799997, "band": 0.08589932544000023, "saturated": 2.048000002918826e-08}, "reference": {"reference_id": "7448258a444bff1b", "success": true, "reason": "pass", "n_steps": 7}}
+shared exit 0 2026-09-14T20:30:43Z
+arms start 2026-09-14T20:30:43Z
+arms exit A=0 B=0 2026-09-14T22:22:04Z
+confirm start 2026-09-14T22:22:04Z
+{"spend_check": "confirm", "usd": 20.11, "ts": "2026-09-14T22:22:08Z"}
+{"spend_check": "confirm A:85:274dc33b05f8cd99", "usd": 20.11, "ts": "2026-09-14T22:22:08Z"}
+{"confirm": "A:85:274dc33b05f8cd99", "task": "85", "successes": 3, "n": 16, "errors": 0, "p16": 0.1875, "learnable": false}
+{"stage": "confirm", "envs": 1, "usd": 1.56}
+confirm exit 0 2026-09-14T22:28:48Z
+{"zero_tasks": ["85", "86", "87", "92", "97", "99", "107", "109"], "n_zero": 8, "A": {"reference_unavailable": 1, "no_leverage": 0, "leveraged_unresolved": 6, "search_accepted_k16_failed": 1, "k16_confirmed_learnable": 0, "k16_confirmed_target": 0, "search_accepted": 1, "k16_learnable": 0, "k16_target": 0, "leverage": 7, "leverage_to_accept": 0.14285714285714285, "leverage_to_k16": 0.0, "budget": 3, "probe_rollouts": 136, "resolution_limited": 3, "final_gaps": {"99": [2, 3], "107": [4, 5], "109": [1, 2]}, "intermediate_regime_tasks": 6}, "B": {"reference_unavailable": 1, "no_leverage": 5, "leveraged_unresolved": 1, "search_accepted_k16_failed": 1, "k16_confirmed_learnable": 0, "k16_confirmed_target": 0, "search_accepted": 1, "k16_learnable": 0, "k16_target": 0, "leverage": 2, "leverage_to_accept": 0.5, "leverage_to_k16": 0.0, "budget": 1, "probe_rollouts": 0, "valid_families": 7, "rejected_families": 4, "valid_family_rate": 0.6363636363636364, "solvable_rate": 1.0, "d1_leverage_rate": 0.4, "dose_order_violation": 0, "no_valid_proposal": 3, "uncertified": 0, "exhausted": 0, "intermediate_regime_tasks": 1}, "paired": {"A": 5, "tie": 2, "B": 1}, "references_available": 7, "B_upstream_failures": 8, "decision": "INCONCLUSIVE", "reason": "a correctness gate failed"}
+tables exit 0 2026-09-14T22:28:55Z
+{"usd": 21.68, "cap": 60.0, "by_run": {"e6-ar-A": 8.04, "e6-ar-B": 3.45, "e6-ar-confirm": 1.56, "e6-ar-shared": 8.62}, "ts": "2026-09-14T22:28:58Z"}
+E6 assistive rules done 2026-09-14T22:28:59Z
+confirm2 start 2026-09-14T22:32:30Z
+{"spend_check": "confirm", "usd": 21.68, "ts": "2026-09-14T22:32:34Z"}
+{"spend_check": "confirm B:92:surface_relevancy_hint:1.0", "usd": 21.68, "ts": "2026-09-14T22:32:34Z"}
+{"confirm": "B:92:surface_relevancy_hint:1.0", "task": "92", "successes": 13, "n": 16, "errors": 0, "p16": 0.8125, "learnable": false}
+{"stage": "confirm", "envs": 2, "usd": 2.51}
+confirm exit 0 2026-09-14T22:35:35Z
+{"zero_tasks": ["85", "86", "87", "92", "97", "99", "107", "109"], "n_zero": 8, "A": {"reference_unavailable": 1, "no_leverage": 0, "leveraged_unresolved": 6, "search_accepted_k16_failed": 1, "k16_confirmed_learnable": 0, "k16_confirmed_target": 0, "search_accepted": 1, "k16_learnable": 0, "k16_target": 0, "leverage": 7, "leverage_to_accept": 0.14285714285714285, "leverage_to_k16": 0.0, "budget": 3, "probe_rollouts": 136, "resolution_limited": 3, "final_gaps": {"99": [2, 3], "107": [4, 5], "109": [1, 2]}, "intermediate_regime_tasks": 6}, "B": {"reference_unavailable": 1, "no_leverage": 4, "leveraged_unresolved": 2, "search_accepted_k16_failed": 1, "k16_confirmed_learnable": 0, "k16_confirmed_target": 0, "search_accepted": 1, "k16_learnable": 0, "k16_target": 0, "leverage": 3, "leverage_to_accept": 0.3333333333333333, "leverage_to_k16": 0.0, "budget": 1, "probe_rollouts": 0, "valid_families": 7, "rejected_families": 4, "valid_family_rate": 0.6363636363636364, "solvable_rate": 1.0, "d1_leverage_rate": 0.4, "dose_order_violation": 0, "no_valid_proposal": 3, "uncertified": 0, "exhausted": 0, "intermediate_regime_tasks": 3}, "paired": {"A": 4, "tie": 3, "B": 1}, "references_available": 7, "B_upstream_failures": 7, "decision": "RULE_GENERATION_FAILURE"}
+tables exit 0 2026-09-14T22:35:42Z
+{"usd": 22.62, "cap": 60.0, "by_run": {"e6-ar-A": 8.04, "e6-ar-B": 3.45, "e6-ar-confirm": 2.51, "e6-ar-shared": 8.62}, "ts": "2026-09-14T22:35:45Z"}
+confirm2 done 2026-09-14T22:35:46Z

@@ -919,7 +919,7 @@
    ],
    "diagnosis_rejected": [],
    "designer_called": true,
-   "probe_rollouts": 4,
+   "probe_rollouts": 0,
    "category": "dead",
    "mode": "assist",
    "families": [
@@ -1025,7 +1025,7 @@
    ],
    "diagnosis_rejected": [],
    "designer_called": true,
-   "probe_rollouts": 8,
+   "probe_rollouts": 0,
    "category": "accepted",
    "mode": "assist",
    "accepted": {
@@ -1136,7 +1136,7 @@
    ],
    "diagnosis_rejected": [],
    "designer_called": true,
-   "probe_rollouts": 12,
+   "probe_rollouts": 0,
    "category": "dead",
    "mode": "assist",
    "families": [
@@ -1295,7 +1295,7 @@
    ],
    "diagnosis_rejected": [],
    "designer_called": true,
-   "probe_rollouts": 20,
+   "probe_rollouts": 0,
    "category": "dead",
    "mode": "assist",
    "families": [
@@ -1803,7 +1803,7 @@
    "leverage_to_accept": 0.3333333333333333,
    "leverage_to_k16": 0.0,
    "budget": 1,
-   "probe_rollouts": 44,
+   "probe_rollouts": 0,
    "valid_families": 7,
    "rejected_families": 4,
    "valid_family_rate": 0.6363636363636364,
@@ -1821,14 +1821,7 @@
    "B": 1
   },
   "references_available": 7,
-  "B_upstream_failures": 5,
-  "B_upstream_failure_tasks": [
-   "85",
-   "86",
-   "97",
-   "99",
-   "109"
-  ],
+  "B_upstream_failures": 7,
   "decision": "RULE_GENERATION_FAILURE"
  },
  "spend": {

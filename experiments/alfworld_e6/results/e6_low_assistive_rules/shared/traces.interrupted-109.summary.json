@@ -1,0 +1,13 @@
+{
+ "file": "runs/e6-ar-shared/traces.interrupted-109.jsonl (kept in the run directory only: 3.1 MB, above the repo's 1.5 MB hook limit)",
+ "sha256": "abe8e2e7d5267cb9ea2fa43ec684cbab6b1b1ff2bbb3b7b0ab15c3023d4a7328",
+ "n_traces": 8,
+ "iteration_ids": [
+  "estimate-109-0",
+  "estimate-109-1",
+  "estimate-109-2",
+  "estimate-109-3"
+ ],
+ "successes": 1,
+ "note": "estimate rollouts of task 109 interrupted by the machine restart; never replayed; cost stays in the shared ledger (USD 1.08)"
+}

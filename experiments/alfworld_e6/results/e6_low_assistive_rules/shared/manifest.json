@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "run_id": "e6-ar-shared",
+  "created_at": "2026-09-14T17:42:39.383146Z",
+  "seed": 0,
+  "config_sha256": "aa8279162ce7adfa5e660a6d5ff2157ed58fec79a1654e56dd27fcbffa335da7",
+  "config_schema_version": 1,
+  "aea_config_sha256": "8a688301287972f0ab2d16df21e0e90b2d0e1c180e45fa0dc64104118f686b48",
+  "config_path": null,
+  "git_sha": "f3c0745243a9311d55e0c1f86c946a42ea55502b",
+  "git_dirty": false,
+  "envharness_sha": "fb5637c3f217905e4fd1d3e18f8b75e57ab49569",
+  "aea_version": "0.1.0",
+  "python_version": "3.12.9",
+  "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+  "out_dir": "/home/kree/work/EnvJudge-aea-llm/runs/e6-ar-shared",
+  "extra": {
+    "experiment": "E6 LOW assistive Rules (paired shared-evidence comparison, PREREG_LOW_ASSISTIVE_RULES)",
+    "prereg": "experiments/alfworld_e6/PREREG_LOW_ASSISTIVE_RULES.md",
+    "prereg_sha": "4a617fb",
+    "method_sha": "09bc8b0",
+    "src_aea_tree": "21096c1d8ebb8d9b+DIRTY",
+    "src_aea_unmodified_vs_method_sha": true,
+    "method_version": "llm_v1_stage_control",
+    "aea_config": {
+      "schema_version": 4,
+      "method_version": "llm_v1_stage_control",
+      "band_t": [
+        0.4,
+        0.6
+      ],
+      "band_l": [
+        0.2,
+        0.8
+      ],
+      "k": 16,
+      "accept": [
+        3,
+        5
+      ],
+      "probe": [
+        4,
+        8
+      ],
+      "cap": 30,
+      "impl": {
+        "batch_first": 4,
+        "batch_next": 2,
+        "confidence": 0.9,
+        "max_bisections": 4,
+        "order_tolerance": 0.375,
+        "warm_start_min_history": 3,
+        "proposer_cap": 2,
+        "n_failed_rollouts": 3,
+        "max_candidates": 6,
+        "stage_budget": 100,
+        "oracle_attempts": 3,
+        "oracle_max_steps": 50,
+        "policy_max_steps": 50
+      }
+    },
+    "tasks": [
+      85,
+      86,
+      87,
+      92,
+      97,
+      99,
+      107,
+      109
+    ],
+    "cap_usd": 60.0,
+    "policy_endpoint_pin": "alibaba",
+    "stage": "shared evidence"
+  }
+}

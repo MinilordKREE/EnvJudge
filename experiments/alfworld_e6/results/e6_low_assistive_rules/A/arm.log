@@ -1,0 +1,22 @@
+warning: `VIRTUAL_ENV=/home/kree/work/EnvJudge/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead
+{"spend_check": "arms", "usd": 8.62, "ts": "2026-09-14T20:30:46Z"}
+{"spend_check": "arm A task 85", "usd": 8.62, "ts": "2026-09-14T20:30:47Z"}
+Initializing AlfredTWEnv...
+  0%|          | 0/8810 [00:00<?, ?it/s]  3%|▎         | 269/8810 [00:00<00:03, 2688.29it/s]  7%|▋         | 638/8810 [00:00<00:02, 3265.17it/s] 11%|█         | 965/8810 [00:00<00:04, 1737.32it/s] 14%|█▎        | 1194/8810 [00:00<00:04, 1843.37it/s] 17%|█▋        | 1458/8810 [00:00<00:03, 2047.68it/s] 21%|██        | 1807/8810 [00:00<00:02, 2441.31it/s] 24%|██▎       | 2082/8810 [00:01<00:03, 1724.57it/s] 26%|██▌       | 2301/8810 [00:01<00:03, 1788.80it/s] 30%|███       | 2672/8810 [00:01<00:02, 2230.41it/s] 34%|███▍      | 2998/8810 [00:01<00:02, 2485.91it/s] 37%|███▋      | 3280/8810 [00:01<00:02, 2370.92it/s] 40%|████      | 3541/8810 [00:01<00:03, 1691.33it/s] 43%|████▎     | 3797/8810 [00:01<00:02, 1867.06it/s] 47%|████▋     | 4156/8810 [00:01<00:02, 2251.28it/s] 50%|█████     | 4437/8810 [00:02<00:01, 2383.14it/s] 53%|█████▎    | 4706/8810 [00:02<00:01, 2364.46it/s] 56%|█████▋    | 4964/8810 [00:02<00:02, 1663.11it/s] 59%|█████▉    | 5193/8810 [00:02<00:02, 1789.84it/s] 62%|██████▏   | 5503/8810 [00:02<00:01, 2080.14it/s] 66%|██████▋   | 5837/8810 [00:02<00:01, 2385.82it/s] 69%|██████▉   | 6107/8810 [00:03<00:01, 1609.08it/s] 73%|███████▎  | 6435/8810 [00:03<00:01, 1931.61it/s] 76%|███████▌  | 6684/8810 [00:03<00:01, 2019.58it/s] 80%|███████▉  | 7005/8810 [00:03<00:00, 2289.37it/s] 83%|████████▎ | 7271/8810 [00:03<00:00, 2124.99it/s] 85%|████████▌ | 7511/8810 [00:03<00:00, 1476.64it/s] 89%|████████▉ | 7829/8810 [00:03<00:00, 1796.49it/s] 92%|█████████▏| 8115/8810 [00:04<00:00, 2017.28it/s] 95%|█████████▍| 8361/8810 [00:04<00:00, 2002.93it/s] 98%|█████████▊| 8592/8810 [00:04<00:00, 1336.86it/s]100%|█████████▉| 8775/8810 [00:04<00:00, 1409.71it/s]100%|██████████| 8810/8810 [00:04<00:00, 1905.05it/s]
+Overall we have 3553 games in split=train
+Training with 3553 games
+{"arm": "A", "task": "85", "shared_regime": "zero", "regime": "zero", "outcome": "accepted", "reason": "", "n_search": 30, "replayed_estimate": 10}
+{"spend_check": "arm A task 86", "usd": 11.13, "ts": "2026-09-14T20:47:29Z"}
+{"arm": "A", "task": "86", "shared_regime": "zero", "regime": "zero", "outcome": "dropped", "reason": "budget", "n_search": 30, "replayed_estimate": 10}
+{"spend_check": "arm A task 87", "usd": 15.57, "ts": "2026-09-14T21:13:40Z"}
+{"arm": "A", "task": "87", "shared_regime": "zero", "regime": "zero", "outcome": "dropped", "reason": "reference_unavailable", "n_search": 10, "replayed_estimate": 10}
+{"spend_check": "arm A task 92", "usd": 15.57, "ts": "2026-09-14T21:13:41Z"}
+{"arm": "A", "task": "92", "shared_regime": "zero", "regime": "zero", "outcome": "dropped", "reason": "budget", "n_search": 30, "replayed_estimate": 10}
+{"spend_check": "arm A task 97", "usd": 16.74, "ts": "2026-09-14T21:30:20Z"}
+{"arm": "A", "task": "97", "shared_regime": "zero", "regime": "zero", "outcome": "dropped", "reason": "budget", "n_search": 30, "replayed_estimate": 10}
+{"spend_check": "arm A task 99", "usd": 17.81, "ts": "2026-09-14T21:44:51Z"}
+{"arm": "A", "task": "99", "shared_regime": "zero", "regime": "zero", "outcome": "dropped", "reason": "resolution_limited", "n_search": 26, "replayed_estimate": 10}
+{"spend_check": "arm A task 107", "usd": 18.13, "ts": "2026-09-14T21:55:04Z"}
+{"arm": "A", "task": "107", "shared_regime": "zero", "regime": "zero", "outcome": "dropped", "reason": "resolution_limited", "n_search": 30, "replayed_estimate": 10}
+{"spend_check": "arm A task 109", "usd": 19.03, "ts": "2026-09-14T22:09:02Z"}
+{"arm": "A", "task": "109", "shared_regime": "zero", "regime": "zero", "outcome": "dropped", "reason": "resolution_limited", "n_search": 30, "replayed_estimate": 10}

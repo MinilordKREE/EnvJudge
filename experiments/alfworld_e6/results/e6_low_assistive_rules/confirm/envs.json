@@ -1,0 +1,95 @@
+[
+ {
+  "id": "A:85:274dc33b05f8cd99",
+  "arm": "A",
+  "task": "85",
+  "kind": "stage",
+  "t": 10,
+  "d": null,
+  "family": null,
+  "candidate": {
+   "rules_code": "",
+   "in_env_actions": [
+    {
+     "kwargs": {
+      "text": "look"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "go to sinkbasin 1"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "go to microwave 1"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "open microwave 1"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "close microwave 1"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "go to garbagecan 1"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "go to fridge 1"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "open fridge 1"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "close fridge 1"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "go to diningtable 1"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "look"
+     },
+     "name": "do"
+    }
+   ]
+  }
+ },
+ {
+  "id": "B:92:surface_relevancy_hint:1.0",
+  "arm": "B",
+  "task": "92",
+  "kind": "knob",
+  "t": null,
+  "d": 1.0,
+  "family": "surface_relevancy_hint",
+  "candidate": {
+   "rules_code": "import re\n\nclass _Rules(Rules):\n    DOSE = 1.0\n\n    def filter_observation(self, obs, env_state):\n        if self.DOSE == 0:\n            return obs\n        text = obs.text\n        data = dict(obs.data) if isinstance(obs.data, dict) else {}\n        cmds = list(data.get('admissible_commands') or [])\n\n        # Does the policy currently hold the cellphone?\n        holding = 'cellphone' in text and ('pick up the cellphone' in text or 'carrying' in text and 'cellphone' in text)\n\n        if not holding:\n            # Remove the premature desklamp action until the cellphone is held.\n            cmds = [c for c in cmds if not re.search(r'use\\s+desklamp', c)]\n            # Stronger dose: also trim repetitive look/examine of the current spot.\n            if self.DOSE >= 0.5:\n                cmds = [c for c in cmds if c not in ('look', 'examine desk 1')]\n\n            hint = (\"\\n\\n[goal support] You have not found the cellphone yet. \"\n                    \"Search the room's surfaces and containers (armchair, beds, dressers, drawers) for a cellphone, \"\n                    \"take it, then return to the desklamp.\")\n            if self.DOSE >= 0.5:\n                hint += \" Do not turn on the desklamp until you are holding the cellphone.\"\n            text = text.rstrip() + hint\n\n        data['admissible_commands'] = cmds\n        return Observation(text=text, data=data)\n",
+   "in_env_actions": []
+  }
+ }
+]

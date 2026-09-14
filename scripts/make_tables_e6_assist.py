@@ -19,6 +19,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import e3
 import e6_assist as ea
 import e6_refalign as er
+import e6_smoke as e6
 import make_tables_e6_refalign as mr
 import make_tables_e6_stage_control as msc
 
@@ -62,11 +63,19 @@ def arm_rows(arm: str) -> dict[str, dict[str, Any]]:
         # the assistive variant records its mode in the designer record (the refalign-era
         # ``llm_stage_proposals`` event does not exist on this path) and accepts a Rules
         # candidate (corpus kind ``knob``), confirmed under ``B:<candidate_id>``
-        for t, c in calls.items():
+        for t, call in calls.items():
             if t in rows:
-                rows[t]["mode"] = c.get("mode")
+                rows[t]["mode"] = call.get("mode")
         conf_path = er.RUNS / er.CONFIRM_ID / "confirm_summary.json"
         conf = json.loads(conf_path.read_text()) if conf_path.exists() else {}
+        # arm B's charged search rollouts beyond the replayed estimate are dose evaluations
+        # (rollouts phase ``dose:<family>``), the counterpart of arm A's ``probe`` rollouts
+        for t in rows:
+            rows[t]["probe_rollouts"] = sum(
+                int(e.get("n", 0))
+                for e in e6._by_kind(e6._events(d)).get("rollouts", [])
+                if str(e["task_id"]) == t and str(e.get("phase", "")).startswith("dose")
+            )
         for rec in e3.jsonl(d / "corpus.jsonl"):
             a = rec["aea"]
             if a["kind"] == "knob" and str(a["task_id"]) in rows:
@@ -102,6 +111,28 @@ def arm_rows(arm: str) -> dict[str, dict[str, Any]]:
             )
         elif k == "no_leverage":
             rows[t].setdefault("no_leverage_families", []).append(p.get("family"))
+            # the d = 1 measurement of a family without leverage (4 -> 8 rule: too_hard) is
+            # recorded only here; it is a probed intervention (prereg leverage / resolution)
+            rows[t].setdefault("d1_measurements", []).append(
+                {
+                    "family": p.get("family"),
+                    "d": 1.0,
+                    "s": int(p.get("successes", 0)),
+                    "n": int(p.get("n", 0)),
+                    "verdict": "too_hard",
+                }
+            )
+        elif k == "task_done" and p.get("outcome") == "accepted" and p.get("doses") == [1.0]:
+            # accepted in band at d = 1 without a bracket: the measurement lives in task_done
+            rows[t].setdefault("d1_measurements", []).append(
+                {
+                    "family": p.get("family"),
+                    "d": 1.0,
+                    "s": round(float(p.get("p8") or 0.0) * 8),
+                    "n": 8,
+                    "verdict": "in_band",
+                }
+            )
     for t, r in rows.items():
         c = calls.get(t)
         if c and arm == "B":
@@ -113,7 +144,8 @@ def arm_rows(arm: str) -> dict[str, dict[str, Any]]:
         lev_fam = any(r.get("leverage_by_family", {}).values())
         dose_hist = [h for dc in r.get("dose_control", []) for h in dc.get("history", [])]
         lev_dose = any(int(h.get("s", 0)) >= 1 for h in dose_hist)
-        r["leverage"] = lev_probe or lev_fam or lev_dose
+        lev_d1 = any(int(m.get("s", 0)) >= 1 for m in r.get("d1_measurements", []))
+        r["leverage"] = lev_probe or lev_fam or lev_dose or lev_d1
         conf = r.get("confirm") or {}
         if not (r.get("reference") or {}).get("available"):
             cls = "reference_unavailable"
@@ -137,15 +169,17 @@ def arm_rows(arm: str) -> dict[str, dict[str, Any]]:
             ]
             r["resolution"] = _extremes(hist)
         else:
-            per_fam = {
-                dc["family"]: _extremes(
-                    [
-                        {"s": h["s"], "n": h["n"], "verdict": h["verdict"]}
-                        for h in dc.get("history", [])
-                    ]
+            fam_hist: dict[str, list[dict[str, Any]]] = {}
+            for m in r.get("d1_measurements", []):
+                fam_hist.setdefault(str(m["family"]), []).append(
+                    {"s": m["s"], "n": m["n"], "verdict": m["verdict"]}
                 )
-                for dc in r.get("dose_control", [])
-            }
+            for dc in r.get("dose_control", []):
+                fam_hist.setdefault(str(dc["family"]), []).extend(
+                    {"s": h["s"], "n": h["n"], "verdict": h["verdict"]}
+                    for h in dc.get("history", [])
+                )
+            per_fam = {f: _extremes(h) for f, h in fam_hist.items()}
             r["resolution"] = per_fam
             r["intermediate_regime"] = any(x["intermediate_probes"] >= 1 for x in per_fam.values())
     return rows
@@ -217,10 +251,14 @@ def decision(
     out["paired"] = wins
     refs = sum(1 for t in zero if (rows_b[t].get("reference") or {}).get("available"))
     out["references_available"] = refs
-    upstream = (
-        cb["no_valid_proposal"] + cb["uncertified"] + cb["no_leverage"] + cb["dose_order_violation"]
-    )
+    # prereg rule 3 counts TASKS whose arm-B outcome is one of the method's upstream failure
+    # statuses (task_done reasons); a task is counted once
+    upstream_reasons = ("no_valid_proposal", "uncertified", "no_leverage", "dose_order_violation")
+    upstream = sum(1 for t in zero if rows_b[t].get("reason") in upstream_reasons)
     out["B_upstream_failures"] = upstream
+    out["B_upstream_failure_tasks"] = [
+        t for t in zero if rows_b[t].get("reason") in upstream_reasons
+    ]
     if not g.get("all_pass") or len(zero) < 6 or refs < 4:
         out["decision"] = "INCONCLUSIVE"
         out["reason"] = (
@@ -330,12 +368,18 @@ def main(argv: list[str] | None = None) -> int:
         a_s = f"t_max {sca.get('t_max', '-')} ({sca.get('t_max_verdict', '-')}); {a_hist}; {a.get('outcome')} {a.get('reason') or ''} {a_k16}".strip()
         b_fams = "; ".join(f"{f['name']} ({f['axis']})" for f in (b.get("families") or [])) or "-"
         b_probes = "; ".join(
-            f"{dc['family']} "
-            + ", ".join(
-                f"{h['d']}: {h['s']}/{h['n']} {h['verdict']}" for h in dc.get("history", [])
-            )
-            + f" -> {dc['status']}"
-            for dc in b.get("dose_control", [])
+            [
+                f"{m['family']} {m['d']}: {m['s']}/{m['n']} {m['verdict']}"
+                for m in b.get("d1_measurements", [])
+            ]
+            + [
+                f"{dc['family']} "
+                + ", ".join(
+                    f"{h['d']}: {h['s']}/{h['n']} {h['verdict']}" for h in dc.get("history", [])
+                )
+                + f" -> {dc['status']}"
+                for dc in b.get("dose_control", [])
+            ]
         )
         b_lev = "; ".join(
             f"{f}: d=1 {'leverage' if v else 'no leverage'}"

@@ -1,0 +1,26 @@
+{
+ "A:85:274dc33b05f8cd99": {
+  "task": "85",
+  "successes": 3,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.1875,
+  "learnable": false,
+  "arm": "A",
+  "t": 10,
+  "in_band_l": false,
+  "in_band_t": false
+ },
+ "B:92:surface_relevancy_hint:1.0": {
+  "task": "92",
+  "successes": 13,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.8125,
+  "learnable": false,
+  "arm": "B",
+  "t": null,
+  "in_band_l": false,
+  "in_band_t": false
+ }
+}
