@@ -29,9 +29,11 @@ import e6_smoke as e6
 RUNS = e6.RUNS
 FROZEN = e6.FROZEN
 RUN_ID = "e6-pool2-k16"
+FROZEN_NAME = "low_pool2_k16.jsonl"
 USED: frozenset[int] = frozenset(range(30))  # USED_TASKS_AUDIT.md
 TASKS: tuple[int, ...] = tuple(t for t in range(30, 80) if t not in USED)
 PREREG_SHA: str | None = "731b923"  # PREREG_LOW_POOL2.md commit (before the first paid call)
+PREREG_NAME = "PREREG_LOW_POOL2.md"
 CAP_USD = 60.0
 K = 16
 INFLIGHT = 16
@@ -64,8 +66,8 @@ def stage_k16() -> None:
         cfg,
         {
             "stage": "pool2 k16",
-            "prereg": "experiments/alfworld_e6/PREREG_LOW_POOL2.md",
-            "prereg_sha_pool2": PREREG_SHA,
+            "prereg": f"experiments/alfworld_e6/{PREREG_NAME}",
+            "prereg_sha_pool": PREREG_SHA,
             "pool_tasks": list(TASKS),
             "k": K,
             "inflight": INFLIGHT,
@@ -99,7 +101,7 @@ def stage_k16() -> None:
 
 def freeze(summary: dict[str, Any]) -> Path:
     FROZEN.mkdir(parents=True, exist_ok=True)
-    out = FROZEN / "low_pool2_k16.jsonl"
+    out = FROZEN / FROZEN_NAME
     with out.open("w", encoding="utf-8") as fh:
         for t in TASKS:
             r = summary.get(f"{t}:orig")
@@ -122,12 +124,12 @@ def freeze(summary: dict[str, Any]) -> Path:
 
 
 def low_pool2() -> list[int]:
-    rows = e3.jsonl(FROZEN / "low_pool2_k16.jsonl")
+    rows = e3.jsonl(FROZEN / FROZEN_NAME)
     return sorted(int(r["task_id"]) for r in rows if r["class"] == "zero")
 
 
 def distribution() -> dict[str, int]:
-    rows = e3.jsonl(FROZEN / "low_pool2_k16.jsonl")
+    rows = e3.jsonl(FROZEN / FROZEN_NAME)
     out: dict[str, int] = {"zero": 0, "middle": 0, "saturated": 0, "invalid": 0}
     for r in rows:
         out[str(r["class"])] = out.get(str(r["class"]), 0) + 1
