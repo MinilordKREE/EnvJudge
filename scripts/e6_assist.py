@@ -23,8 +23,8 @@ import e6_refalign as er
 
 from aea.errors import ConfigError
 
-PREREG_SHA: str | None = None  # PREREG_LOW_ASSISTIVE_RULES.md commit (pre-paid-call)
-METHOD_SHA: str | None = None  # the phase-3.4 implementation commit (src/aea frozen)
+PREREG_SHA: str | None = "4a617fb"  # PREREG_LOW_ASSISTIVE_RULES.md commit
+METHOD_SHA: str | None = "09bc8b0"  # the phase-3.4 implementation commit (src/aea frozen)
 CAP_USD = 60.0
 N_TASKS = 8
 
