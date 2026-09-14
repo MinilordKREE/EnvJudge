@@ -285,8 +285,7 @@ def stage_shared(concurrency: int) -> None:
     e3.guard("shared")
     cfg = config("A")
     d = shared_dir()
-    d.mkdir(parents=True, exist_ok=True)
-    _manifest(d, SHARED_ID, cfg, {"stage": "shared evidence"})
+    _manifest(d, SHARED_ID, cfg, {"stage": "shared evidence"})  # creates the run directory
     sub, _ = build(cfg, d, SHARED_ID, concurrency=concurrency, with_designer=False)
     provider = sub.reference_provider(cfg)
     assert provider is not None
@@ -350,7 +349,6 @@ def stage_arms(concurrency: int) -> None:
         for arm in ("A", "B"):
             cfg = config(arm)
             d = RUNS / ARM_IDS[arm]
-            d.mkdir(parents=True, exist_ok=True)
             ctx = _manifest(
                 d, ARM_IDS[arm], cfg, {"arm": arm, "stage": "arms", "shared_run": SHARED_ID}
             )
@@ -414,7 +412,7 @@ def stage_confirm(concurrency: int) -> None:
     _ready()
     e3.guard("confirm")
     d = RUNS / CONFIRM_ID
-    d.mkdir(parents=True, exist_ok=True)
+    _manifest(d, CONFIRM_ID, config("A"), {"stage": "confirm"})
     envs = accepted_envs("A") + accepted_envs("B")
     (d / "envs.json").write_text(json.dumps(envs, indent=1), encoding="utf-8")
     sub, _ = build(config("A"), d, CONFIRM_ID, concurrency=concurrency, with_designer=False)
