@@ -42,7 +42,7 @@ import e6_smoke as e6
 RUNS = e6.RUNS
 RESULTS = e6.RESULTS
 RUN_ID = "e6-profile"
-PREREG_SHA: str | None = None  # PREREG_STAGE_PROFILE.md commit, recorded before the first probe
+PREREG_SHA: str | None = "d782c8c"  # PREREG_STAGE_PROFILE.md commit (before the first probe)
 METHOD_SHA = "48dc028"  # src/aea frozen (no method code path is exercised beyond Stage machinery)
 CAP_USD = 35.0
 K = 8
