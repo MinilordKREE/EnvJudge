@@ -32,10 +32,20 @@ from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from typing import Any, Literal, Protocol
 
-from envharness.core.types import Trace
+from envharness.core.code_loader import load_rules_subclass
+from envharness.core.types import Action, Candidate, Trace
 
 from aea import exemplars
-from aea.families import LIBRARY_NAMES, ProposedFamily, _is_library_copy, validate_rules_template
+from aea.families import (
+    LIBRARY_NAMES,
+    Axis,
+    FamilyContext,
+    ProposedFamily,
+    Source,
+    _is_library_copy,
+    _SmokeInner,
+    validate_rules_template,
+)
 from aea.llm.types import ChatMessage, ChatRequest
 from aea.session import SESSION_LOCK, Session, run_expert
 
@@ -884,6 +894,311 @@ def design_low_refalign(
         return RefalignDesign([], [], ["designer returned no tool call"], {})
     return parse_refalign(
         args, failures=failures, trajectory_ids=evidence.trajectory_ids, reference=reference
+    )
+
+
+# ---------------------------------------------------------------------------- LOW assistive Rules
+DESIGN_ASSIST_TOOL: dict[str, Any] = {
+    "type": "function",
+    "function": {
+        "name": "diagnose_and_propose_assistance",
+        "description": (
+            "First diagnose where and why the failed trajectories consequentially diverge from "
+            "the verified successful reference, then propose up to two parameterised ASSISTIVE "
+            "Rules families (easier with DOSE) that address the diagnosed bottleneck."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "diagnoses": DIAGNOSE_TOOL["function"]["parameters"]["properties"]["diagnoses"],
+                "families": {
+                    "type": "array",
+                    "maxItems": MAX_PROPOSALS,
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "name": {"type": "string", "description": "short snake_case name"},
+                            "axis": {"type": "string", "enum": ["O", "T", "A"]},
+                            "mechanism_summary": {
+                                "type": "string",
+                                "description": (
+                                    "one or two sentences: the support mechanism and how its "
+                                    "amount / coverage / salience grows with DOSE"
+                                ),
+                            },
+                            "why": {
+                                "type": "string",
+                                "description": "how this addresses the diagnosed bottleneck",
+                            },
+                            "rules_code": {
+                                "type": "string",
+                                "description": (
+                                    "class _Rules(Rules) with a class attribute DOSE = __DOSE__; "
+                                    "DOSE = 0 must be the unchanged environment"
+                                ),
+                            },
+                            "direction": {"type": "string", "enum": ["easier_with_d"]},
+                        },
+                        "required": [
+                            "name",
+                            "axis",
+                            "mechanism_summary",
+                            "why",
+                            "rules_code",
+                            "direction",
+                        ],
+                    },
+                },
+            },
+            "required": ["diagnoses", "families"],
+        },
+    },
+}
+
+ASSIST_CONTRACT = (
+    "Assistive Rules contract: emit `class _Rules(Rules)` with a class attribute "
+    "`DOSE = __DOSE__` (d in [0, 1]). DOSE = 0 must leave the environment EXACTLY unchanged "
+    "(every hook returns its input); larger DOSE must give MORE assistance of the SAME support "
+    "mechanism (more coverage, more salience, more steps helped), and DOSE = 1 is the strongest "
+    "version of that same mechanism - never a switch to a different mechanism at some threshold. "
+    "The task goal and its verifier must stay the same; the policy must still perform the "
+    "task's actions itself. FORBIDDEN: replaying or listing the reference's actions (the policy "
+    "must not receive 'do A then B then C'); copying reference observations; setting or "
+    "changing won / success / reward / terminated to reach the goal; calling step on the inner "
+    "environment; hard-coding object locations or facts that appear ONLY in the privileged "
+    "reference (you may use what the task goal, the policy's own observations and the env_state "
+    "expose through the hooks). Allowed scaffolding, as abstract examples only: highlight or "
+    "reorder relevant affordances in the admissible list, reduce distractor salience, add "
+    "observation support such as reminders of the goal's sub-steps or of what is being held, "
+    "make a needed interaction easier to discover through feedback after an action. Only the "
+    "names Rules, Action, Blocked, Observation, EnvResponse and the standard library (imported "
+    "inside the code) are available; no Chain/Link. Do not predict whether a family works and "
+    "do not choose a dose: rollout measurements decide."
+)
+
+ASSIST_OBJECTIVE = (
+    "The current policy cannot obtain positive experience from reset. You are given its failed "
+    "trajectories and a VERIFIED successful reference trajectory (observation and action at "
+    "every step). First perform credit assignment exactly as before: for at least one failed "
+    "trajectory find the first CONSEQUENTIAL divergence from the reference (compare states and "
+    "progress, not action strings), the reference step holding the successful counterfactual, "
+    "the error cause and a fix hint (which capability or progress is missing). Then propose up "
+    "to two parameterised ASSISTIVE environment interventions, most promising first, each "
+    "addressing that diagnosed bottleneck, under the contract in the system message. The policy "
+    "will run under your Rules at doses chosen by measurement; it never sees the reference."
+)
+
+
+def assist_messages(evidence: Evidence) -> tuple[ChatMessage, ...]:
+    return (
+        ChatMessage(
+            role="system",
+            content="You design assistive environment interventions under a strict contract.\n"
+            + ASSIST_CONTRACT
+            + "\n\n"
+            + ENVIRONMENT_SURFACE,
+        ),
+        ChatMessage(
+            role="user",
+            content=(
+                f"{ASSIST_OBJECTIVE}\n\n{evidence.text}\n\nCall diagnose_and_propose_assistance."
+            ),
+        ),
+    )
+
+
+@dataclass(frozen=True)
+class AssistFamily:
+    """An LLM-generated assistive Rules family (easier with DOSE); the ``Family`` protocol."""
+
+    name: str
+    axis: Axis
+    template: str
+    mechanism_summary: str = ""
+    why: str = ""
+    source: Source = "llm"
+    direction: str = "easier_with_d"
+
+    def make(self, d: float, ctx: FamilyContext) -> Candidate | None:
+        code = self.template.replace("__DOSE__", repr(float(d))).replace(
+            "__TASK_ID__", repr(str(ctx.task_id))
+        )
+        return Candidate(rules_code=code, rationale=f"{self.name} d={d}")
+
+
+def identity_at_zero(template: str, *, task_id: str = "0") -> list[str]:
+    """LLM-free check that W(0) = E on the smoke inner env: every hook returns its input."""
+    reasons: list[str] = []
+    code = template.replace("__DOSE__", "0.0").replace("__TASK_ID__", repr(task_id))
+    try:
+        cls = load_rules_subclass(code)
+        inst = cls(inner=_SmokeInner())
+        state = inst.inner.get_env_state()
+        act = Action(name="do", kwargs={"text": "look"})
+        if inst.filter_action(act, state) != act:
+            reasons.append("DOSE = 0 changes the action")
+        raw = inst.inner.step(act)
+        out = inst.modify_transition(act, raw, state)
+        if out != raw:
+            reasons.append("DOSE = 0 changes the transition")
+        obs = inst.inner.observe()
+        if inst.filter_observation(obs, state) != obs:
+            reasons.append("DOSE = 0 changes the observation")
+    except Exception as exc:
+        reasons.append(f"identity check raised {type(exc).__name__}: {exc}")
+    return reasons
+
+
+_GOAL_TOKENS = re.compile(r"[a-z]+ \d+")
+
+
+def privilege_check(
+    template: str,
+    *,
+    reference: Reference,
+    failures: Sequence[Trace],
+    goal: str,
+) -> list[str]:
+    """Structural (no AST engine, no LLM judge): the code must not carry reference actions, a
+    replay, a verifier / reward shortcut, or an object token that only the privileged reference
+    exposes (present in the reference observations, absent from the goal and from every
+    observation the policy itself saw)."""
+    reasons: list[str] = []
+    body = template
+    for a in reference.actions:
+        if a and a in body:
+            reasons.append(f"reference action embedded: {a!r}")
+            break
+    for pat, why in (
+        (r"\.step\(", "calls step on the inner environment (disguised Stage)"),
+        (r"\bwon\s*=", "sets won"),
+        (r"\bsuccess\W*[=:]\s*True", "sets success"),
+        (r"terminated\s*=\s*True", "terminates the episode"),
+        (r"\breward\s*=", "changes the reward"),
+        (r"in_env_actions", "uses Setup replay"),
+    ):
+        if re.search(pat, body):
+            reasons.append(why)
+    seen = set(_GOAL_TOKENS.findall(goal.lower()))
+    for t in failures:
+        for s in t.steps:
+            obs = s.filtered_observation or s.raw_observation
+            if obs is not None:
+                seen.update(_GOAL_TOKENS.findall(obs.text.lower()))
+    privileged: set[str] = set()
+    for st in reference.steps:
+        privileged.update(_GOAL_TOKENS.findall(st.observation.lower()))
+    for a in reference.actions:
+        privileged.update(_GOAL_TOKENS.findall(a.lower()))
+    leaked = sorted(tok for tok in privileged - seen if tok in body.lower())
+    if leaked:
+        reasons.append(f"privileged constants from the reference: {leaked[:5]}")
+    return reasons
+
+
+@dataclass
+class AssistDesign:
+    diagnoses: list[Diagnosis]
+    families: list[AssistFamily]
+    rejected: list[str]
+    arguments: dict[str, Any]
+
+
+def parse_assist(
+    arguments: dict[str, Any],
+    *,
+    failures: Sequence[Trace],
+    trajectory_ids: dict[str, str],
+    reference: Reference,
+    goal: str,
+) -> AssistDesign:
+    """Validate a ``diagnose_and_propose_assistance`` call: diagnoses as ``parse_refalign``;
+    each family must be an easier_with_d template that loads and survives the LLM-free smoke at
+    d = 1, is the identity at d = 0, and passes the structural privilege check; at most two;
+    nothing is repaired."""
+    diag = parse_refalign(
+        {"diagnoses": arguments.get("diagnoses") or [], "stages": []},
+        failures=failures,
+        trajectory_ids=trajectory_ids,
+        reference=reference,
+    )
+    out = AssistDesign(diag.diagnoses, [], list(diag.rejected), dict(arguments))
+    for raw in list(arguments.get("families") or [])[:MAX_PROPOSALS]:
+        if not isinstance(raw, dict):
+            out.rejected.append("family entry is not an object")
+            continue
+        name = re.sub(r"[^a-z0-9_]", "_", str(raw.get("name") or "assist_family").lower())[:40]
+        template = str(raw.get("rules_code") or "")
+        if str(raw.get("direction") or "") != "easier_with_d":
+            out.rejected.append(f"{name}: direction must be easier_with_d")
+            continue
+        report = validate_rules_template(template)
+        if not report.ok:
+            out.rejected.append(f"{name}: " + "; ".join(report.reasons))
+            continue
+        zero = identity_at_zero(template)
+        if zero:
+            out.rejected.append(f"{name}: " + "; ".join(zero))
+            continue
+        priv = privilege_check(template, reference=reference, failures=failures, goal=goal)
+        if priv:
+            out.rejected.append(f"{name}: privilege: " + "; ".join(priv))
+            continue
+        axis = raw.get("axis")
+        if axis not in ("O", "T", "A"):
+            out.rejected.append(f"{name}: axis must be O, T or A")
+            continue
+        if any(f.name == name for f in out.families):
+            out.rejected.append(f"{name}: duplicate name")
+            continue
+        out.families.append(
+            AssistFamily(
+                name,
+                axis,
+                template,
+                str(raw.get("mechanism_summary") or "").strip(),
+                str(raw.get("why") or "").strip(),
+            )
+        )
+    return out
+
+
+def design_low_assist(
+    complete: Callable[[ChatRequest], Any],
+    *,
+    model: str,
+    evidence: Evidence,
+    failures: Sequence[Trace],
+    reference: Reference,
+    goal: str,
+    attribution: Any,
+    seed: int,
+) -> AssistDesign:
+    """One LOW designer call under llm_v1_assistive_rules (ledgered as budget=designer)."""
+    response = complete(
+        ChatRequest(
+            model=model,
+            messages=assist_messages(evidence),
+            temperature=0.7,
+            seed=seed,
+            max_tokens=6144,
+            attribution=attribution,
+            tools=(DESIGN_ASSIST_TOOL,),
+            tool_choice={
+                "type": "function",
+                "function": {"name": "diagnose_and_propose_assistance"},
+            },
+        )
+    )
+    args = _tool_arguments(response)
+    if args is None:
+        return AssistDesign([], [], ["designer returned no tool call"], {})
+    return parse_assist(
+        args,
+        failures=failures,
+        trajectory_ids=evidence.trajectory_ids,
+        reference=reference,
+        goal=goal,
     )
 
 

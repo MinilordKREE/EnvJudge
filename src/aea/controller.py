@@ -54,10 +54,12 @@ from aea.designer import (
     ReferenceProvider,
     design_high,
     design_low,
+    design_low_assist,
     design_low_refalign,
     reference_id,
     serialize_high,
     serialize_low,
+    task_goal,
 )
 from aea.errors import BudgetExhausted, InfraError
 from aea.estimate import EstimateResult, estimate
@@ -72,6 +74,7 @@ from aea.io import (
     write_corpus_entry,
 )
 from aea.llm.types import Attribution, BudgetName, ChatRequest, ChatResponse
+from aea.rules_control import assist_bracket
 from aea.session import SESSION_LOCK, Session
 from aea.stage import (
     StagedCandidate,
@@ -408,8 +411,8 @@ class Controller:
 
     @property
     def _llm(self) -> bool:
-        """llm_v1, llm_v1_refalign and llm_v1_stage_control share every path except LOW."""
-        return self.config.method_version in ("llm_v1", "llm_v1_refalign", "llm_v1_stage_control")
+        """Every llm_v1 variant shares every path except LOW."""
+        return self.config.method_version.startswith("llm_v1")
 
     def _harden(self, task: TaskRef, est: EstimateResult) -> TaskOutcome:
         if self._llm:
@@ -595,6 +598,8 @@ class Controller:
     def _stage(self, task: TaskRef, est: EstimateResult) -> TaskOutcome:
         if self.config.method_version == "llm_v1_stage_control":
             return self._stage_control(task, est)
+        if self.config.method_version == "llm_v1_assistive_rules":
+            return self._stage_assist(task, est)
         if self._llm:
             return self._stage_llm(task, est)
         failures = seeded_failures(est.traces, self.config.impl.n_failed_rollouts, seed=task.seed)
@@ -938,6 +943,202 @@ class Controller:
                 task, "dropped", "uncertified", "zero", est.p_hat, detail={"rejected": rejected}
             )
         return self._probe_stages(task, est, staged, opts)
+
+    # ------------------------------------------------------------------ llm_v1_assistive_rules
+    def _stage_assist(self, task: TaskRef, est: EstimateResult) -> TaskOutcome:
+        """LOW under llm_v1_assistive_rules (docs/design/AEA_LOW_ASSISTIVE_RULES.md): failures
+        + the exact rich reference -> ONE designer call (diagnosis, then <= 2 assistive Rules
+        families W(d), easier with d) -> per family, in order: the existing guard at d = 1, the
+        4 -> 8 measurement at d = 1 (too_hard = no leverage -> next family; in_band = accept;
+        too_easy = mirrored bracket inward). No cascade to Stage, no repair, no second call."""
+        failures = seeded_failures(est.traces, self.config.impl.n_failed_rollouts, seed=task.seed)
+        if not failures:
+            return TaskOutcome(task, "dropped", "no_failed_rollout", "zero", est.p_hat)
+        reference = self._lazy_reference(task)
+        if reference is None:
+            return TaskOutcome(task, "dropped", "reference_unavailable", "zero", est.p_hat)
+        evidence = serialize_low(failures, est.p_hat, est.n, reference, rich=True)
+        goal = task_goal(failures)
+        design = design_low_assist(
+            self._designer(),
+            model=self.substrate.designer_model(),
+            evidence=evidence,
+            failures=failures,
+            reference=reference,
+            goal=goal,
+            attribution=self._attr(task, "design_low", "designer"),
+            seed=task.seed,
+        )
+        diagnoses = [
+            {
+                "failure_id": d.failure_id,
+                "failure_step": d.failure_step,
+                "reference_step": d.reference_step,
+                "error_cause": d.error_cause,
+                "fix_hint": d.fix_hint,
+                "evidence": d.evidence,
+            }
+            for d in design.diagnoses
+        ]
+        families = [
+            {"name": f.name, "axis": f.axis, "mechanism": f.mechanism_summary, "why": f.why}
+            for f in design.families
+        ]
+        self._record_designer(
+            task,
+            "zero",
+            evidence,
+            mode="assist",
+            arguments=design.arguments,
+            accepted=[f["name"] for f in families],
+            families=families,
+            diagnoses=diagnoses,
+            rejected=design.rejected,
+            reference_steps=reference.n_steps,
+        )
+        self._ev("llm_diagnosis", task, diagnoses=diagnoses, rejected=[])
+        self._ev("llm_assist_proposals", task, accepted=families, rejected=design.rejected)
+        if not design.families:
+            return TaskOutcome(
+                task,
+                "dropped",
+                "no_valid_proposal",
+                "zero",
+                est.p_hat,
+                detail={"rejected": design.rejected},
+            )
+        ctx = FamilyContext(task_id=task.task_id, success_lengths=())
+        tried = 0
+        last: str = "no_leverage"
+        for fam in design.families:
+            cache: dict[float, Candidate] = {}
+
+            def make(d: float, fam: Any = fam, cache: dict[float, Candidate] = cache) -> Candidate:
+                if d not in cache:
+                    cand = fam.make(d, ctx)
+                    assert cand is not None
+                    cache[d] = cand
+                return cache[d]
+
+            top = make(1.0)
+            with SESSION_LOCK:  # the existing guard at maximum assistance (oracle; no witness)
+                guard = solvable(
+                    top,
+                    lambda c: self.substrate.open_session(task, c, None),
+                    self.config,
+                    policy_success=None,
+                    oracle=self.substrate.has_oracle(),
+                    by_construction=False,
+                )
+            self._ev(
+                "solvable",
+                task,
+                family=fam.name,
+                d=1.0,
+                ok=guard.ok,
+                source=guard.source,
+                detail=guard.detail,
+            )
+            if not guard.ok:
+                self._ev("family_skipped", task, family=fam.name, reason="uncertified")
+                last = "uncertified"
+                continue
+            tried += 1
+
+            def evaluate_at(d: float, fam: Any = fam, make: Any = make) -> Eval:
+                return evaluate(
+                    lambda n: self._rollouts(task, make(d), n, f"dose:{fam.name}"), self.config
+                )
+
+            lev = evaluate_at(1.0)
+            has_leverage = lev.verdict != "too_hard"
+            self._record_leverage(task, fam.name, has_leverage)
+            if lev.verdict == "in_band":
+                return self._accept_assist(
+                    task, fam, cache[1.0], 1.0, lev, est, [DoseEval(1.0, lev)]
+                )
+            if not has_leverage:
+                self._ev("no_leverage", task, family=fam.name, successes=lev.successes, n=lev.n)
+                last = "no_leverage"
+                continue
+            result = assist_bracket(evaluate_at, self.config, leverage=DoseEval(1.0, lev))
+            self._ev(
+                "dose_control",
+                task,
+                family=fam.name,
+                direction="easier_with_d",
+                status=result.status,
+                lo=result.lo,
+                hi=result.hi,
+                history=[
+                    {"d": h.d, "s": h.eval.successes, "n": h.eval.n, "verdict": h.eval.verdict}
+                    for h in result.history
+                ],
+            )
+            if result.status == "accepted" and result.accepted is not None:
+                ev = result.accepted
+                return self._accept_assist(
+                    task, fam, cache[ev.d], ev.d, ev.eval, est, result.history
+                )
+            if result.status == "budget":
+                raise BudgetExhausted(
+                    "cap during assistive dose control",
+                    budget="search",
+                    cap=self.config.cap,
+                    spent=self.budget.account(task.task_id).spent,
+                    task_id=task.task_id,
+                )
+            # a leveraged family that did not land ends the task: no second family gets
+            # fresh budget (exhausted / dose_order_violation)
+            return TaskOutcome(
+                task,
+                "dropped",
+                result.status,
+                "zero",
+                est.p_hat,
+                detail={"family": fam.name, "lo": result.lo, "hi": result.hi},
+            )
+        reason = last if tried == 0 else "no_leverage"
+        return TaskOutcome(
+            task,
+            "dropped",
+            reason,
+            "zero",
+            est.p_hat,
+            detail={"families": [f.name for f in design.families]},
+        )
+
+    def _accept_assist(
+        self,
+        task: TaskRef,
+        fam: Any,
+        cand: Candidate,
+        d: float,
+        ev: Eval,
+        est: EstimateResult,
+        history: list[DoseEval],
+    ) -> TaskOutcome:
+        meta = AeaMeta(
+            kind="knob",
+            task_id=task.task_id,
+            seed=task.seed,
+            regime="zero",
+            family=fam.name,
+            source="llm",
+            axis=fam.axis,
+            d=d,
+            p_hat=ev.p_hat,
+            candidate_id=f"{task.task_id}:{fam.name}:{d}",
+        )
+        self._write_corpus(task, cand, meta)
+        return TaskOutcome(
+            task,
+            "accepted",
+            "",
+            "zero",
+            est.p_hat,
+            detail={"family": fam.name, "d": d, "p8": ev.p_hat, "doses": [h.d for h in history]},
+        )
 
     # ------------------------------------------------------------------ llm_v1_stage_control
     def _stage_control(self, task: TaskRef, est: EstimateResult) -> TaskOutcome:

@@ -24,11 +24,13 @@ Protocol per task (stages ``shared`` then ``arms``):
 from __future__ import annotations
 
 import argparse
+import concurrent.futures as cf
 import copy
 import importlib
 import json
 import os
 import sys
+import threading
 import time
 from pathlib import Path
 from typing import Any
@@ -407,9 +409,11 @@ def _estimate_task(
     return estimate(rollout, cfg), charged
 
 
-def stage_shared(concurrency: int) -> None:
+def stage_shared(concurrency: int, task_concurrency: int = 1) -> None:
     """Per task: the controller's estimator schedule on the real substrate (charged, ledgered),
-    then ONE rich expert reference if the task is ``zero``. Resumable per task."""
+    then ONE rich expert reference if the task is ``zero``. Resumable per task.
+    ``task_concurrency`` > 1 runs tasks in a thread pool (rollouts are subprocesses; the
+    reference session takes the one in-process lock; file appends are locked)."""
     _ready()
     e3.guard("shared")
     cfg = config("A")
@@ -421,10 +425,10 @@ def stage_shared(concurrency: int) -> None:
     writer = TraceWriter(d / "traces.jsonl")
     events = EventWriter(d / "events.jsonl", SHARED_ID)
     done = {str(r["task_id"]) for r in e3.jsonl(d / "shared.jsonl")}
-    for t in TASKS:
+    lock = threading.Lock()
+
+    def one(t: int) -> None:
         task = TaskRef(str(t), t)
-        if task.task_id in done:
-            continue
         e3.guard(f"shared task {t}")
         est, charged = _estimate_task(sub, cfg, task, writer)
         rec: dict[str, Any] = {
@@ -447,7 +451,7 @@ def stage_shared(concurrency: int) -> None:
                 **ref.as_record(),
                 "ts": time.strftime("%FT%TZ", time.gmtime()),
             }
-            with (d / "privileged_references.jsonl").open("a", encoding="utf-8") as fh:
+            with lock, (d / "privileged_references.jsonl").open("a", encoding="utf-8") as fh:
                 fh.write(json.dumps(row) + "\n")
             rec["reference"] = {k: row[k] for k in ("reference_id", "success", "reason", "n_steps")}
             events.write(
@@ -460,14 +464,24 @@ def stage_shared(concurrency: int) -> None:
                     "reference_id": row["reference_id"],
                 },
             )
-        with (d / "shared.jsonl").open("a", encoding="utf-8") as fh:
+        with lock, (d / "shared.jsonl").open("a", encoding="utf-8") as fh:
             fh.write(json.dumps(rec) + "\n")
         print(json.dumps(rec), flush=True)
-        e3.merge(d)
+        with lock:
+            e3.merge(d)
+
+    todo = [t for t in TASKS if str(t) not in done]
+    if task_concurrency <= 1:
+        for t in todo:
+            one(t)
+    else:
+        with cf.ThreadPoolExecutor(max_workers=task_concurrency) as pool:
+            list(pool.map(one, todo))
 
 
-def stage_arms(concurrency: int) -> None:
-    """Both arms on every task whose shared evidence exists; resumable per (arm, task)."""
+def stage_arms(concurrency: int, arms: tuple[str, ...] = ("A", "B")) -> None:
+    """The given arms on every task whose shared evidence exists; resumable per (arm, task).
+    Two arms may run as two processes (separate run directories, frozen shared evidence)."""
     _ready()
     e3.guard("arms")
     for t in TASKS:
@@ -475,7 +489,7 @@ def stage_arms(concurrency: int) -> None:
         shared = shared_estimate(task_id)
         if shared is None:
             raise ConfigError(f"no shared evidence for task {t}: run --stage shared first")
-        for arm in ("A", "B"):
+        for arm in arms:
             cfg = config(arm)
             d = RUNS / ARM_IDS[arm]
             ctx = _manifest(
@@ -587,14 +601,16 @@ def main(argv: list[str] | None = None) -> int:
         "--stage", required=True, choices=["probe", "shared", "arms", "confirm", "tables", "spend"]
     )
     ap.add_argument("--concurrency", type=int, default=e3.ROLLOUT_CONCURRENCY)
+    ap.add_argument("--task-concurrency", type=int, default=1)
+    ap.add_argument("--arm", choices=["A", "B"], default=None)
     args = ap.parse_args(argv)
     try:
         if args.stage == "probe":
             return e3.stage_probe()
         if args.stage == "shared":
-            stage_shared(args.concurrency)
+            stage_shared(args.concurrency, args.task_concurrency)
         elif args.stage == "arms":
-            stage_arms(args.concurrency)
+            stage_arms(args.concurrency, (args.arm,) if args.arm else ("A", "B"))
         elif args.stage == "confirm":
             stage_confirm(args.concurrency)
         elif args.stage == "tables":

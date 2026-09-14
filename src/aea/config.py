@@ -53,7 +53,9 @@ class ImplConfig(StrictModel):
 
 class AEAConfig(StrictModel):
     schema_version: Literal[4] = 4
-    method_version: Literal["v0.4", "llm_v1", "llm_v1_refalign", "llm_v1_stage_control"] = "v0.4"
+    method_version: Literal[
+        "v0.4", "llm_v1", "llm_v1_refalign", "llm_v1_stage_control", "llm_v1_assistive_rules"
+    ] = "v0.4"
     """Which method the controller runs. ``v0.4`` (default; a config without the field is v0.4)
     is the box of docs/spec/AEA_v0.4.md unchanged; ``llm_v1`` (docs/spec/AEA_llm_v1.md) replaces
     the source of interventions on both out-of-band sides by one regime-conditioned designer call
@@ -62,8 +64,10 @@ class AEAConfig(StrictModel):
     observation/action reference) and contract (explicit diagnosis before reference-grounded
     stage selection). ``llm_v1_stage_control`` (phase 3.3b) equals ``llm_v1`` on band and
     saturated and replaces the LOW designer by closed-loop control over the depth of the verified
-    reference prefix (docs/design/AEA_LOW_STAGE_CONTROL.md). Same schema: the field has a
-    default."""
+    reference prefix (docs/design/AEA_LOW_STAGE_CONTROL.md). ``llm_v1_assistive_rules`` (phase
+    3.4) equals ``llm_v1`` on band and saturated and replaces the LOW intervention family by an
+    LLM-generated assistive Rules family W(d) calibrated by the same measurement
+    (docs/design/AEA_LOW_ASSISTIVE_RULES.md). Same schema: the field has a default."""
     band_t: tuple[float, float] = (0.4, 0.6)
     """Target band B_T: the accept range is B_T expressed at ``probe[1]`` rollouts."""
     band_l: tuple[float, float] = (0.2, 0.8)
