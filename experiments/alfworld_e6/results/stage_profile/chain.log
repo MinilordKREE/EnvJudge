@@ -1,0 +1,56 @@
+probe start 2026-09-14T06:59:36Z
+{"spend_check": "profile probe", "usd": 0, "ts": "2026-09-14T06:59:38Z"}
+{"spend_check": "profile task 33 t=0", "usd": 0, "ts": "2026-09-14T06:59:38Z"}
+{"task_id": "33", "t": 0, "T": 9, "frac": 0.0, "successes": 0, "n": 8, "errors": 0, "reruns": 0}
+{"spend_check": "profile task 33 t=2", "usd": 0.39, "ts": "2026-09-14T07:02:11Z"}
+{"task_id": "33", "t": 2, "T": 9, "frac": 0.2222222222222222, "successes": 0, "n": 8, "errors": 0, "reruns": 0}
+{"spend_check": "profile task 33 t=4", "usd": 0.78, "ts": "2026-09-14T07:05:20Z"}
+{"task_id": "33", "t": 4, "T": 9, "frac": 0.4444444444444444, "successes": 3, "n": 8, "errors": 0, "reruns": 0}
+{"spend_check": "profile task 33 t=7", "usd": 1.02, "ts": "2026-09-14T07:07:46Z"}
+{"task_id": "33", "t": 7, "T": 9, "frac": 0.7777777777777778, "successes": 8, "n": 8, "errors": 0, "reruns": 0}
+{"spend_check": "profile task 43 t=0", "usd": 1.02, "ts": "2026-09-14T07:07:59Z"}
+{"task_id": "43", "t": 0, "T": 12, "frac": 0.0, "successes": 0, "n": 8, "errors": 0, "reruns": 0}
+{"spend_check": "profile task 43 t=3", "usd": 2.04, "ts": "2026-09-14T07:12:39Z"}
+{"task_id": "43", "t": 3, "T": 12, "frac": 0.25, "successes": 0, "n": 8, "errors": 0, "reruns": 0}
+{"spend_check": "profile task 43 t=6", "usd": 3.05, "ts": "2026-09-14T07:17:06Z"}
+{"task_id": "43", "t": 6, "T": 12, "frac": 0.5, "successes": 8, "n": 8, "errors": 0, "reruns": 0}
+{"spend_check": "profile task 43 t=9", "usd": 3.07, "ts": "2026-09-14T07:17:31Z"}
+{"task_id": "43", "t": 9, "T": 12, "frac": 0.75, "successes": 8, "n": 8, "errors": 0, "reruns": 0}
+{"spend_check": "profile task 53 t=0", "usd": 3.08, "ts": "2026-09-14T07:17:52Z"}
+{"task_id": "53", "t": 0, "T": 22, "frac": 0.0, "successes": 0, "n": 8, "errors": 0, "reruns": 0}
+{"spend_check": "profile task 53 t=6", "usd": 3.48, "ts": "2026-09-14T07:21:08Z"}
+{"task_id": "53", "t": 6, "T": 22, "frac": 0.2727272727272727, "successes": 0, "n": 8, "errors": 0, "reruns": 0}
+{"spend_check": "profile task 53 t=11", "usd": 3.86, "ts": "2026-09-14T07:24:09Z"}
+{"task_id": "53", "t": 11, "T": 22, "frac": 0.5, "successes": 0, "n": 8, "errors": 0, "reruns": 0}
+{"spend_check": "profile task 53 t=16", "usd": 4.24, "ts": "2026-09-14T07:27:04Z"}
+{"task_id": "53", "t": 16, "T": 22, "frac": 0.7272727272727273, "successes": 0, "n": 8, "errors": 0, "reruns": 0}
+{"spend_check": "profile task 54 t=0", "usd": 4.62, "ts": "2026-09-14T07:30:16Z"}
+{"task_id": "54", "t": 0, "T": 15, "frac": 0.0, "successes": 0, "n": 8, "errors": 0, "reruns": 0}
+{"spend_check": "profile task 54 t=4", "usd": 5.64, "ts": "2026-09-14T07:33:07Z"}
+{"task_id": "54", "t": 4, "T": 15, "frac": 0.26666666666666666, "successes": 1, "n": 8, "errors": 0, "reruns": 0}
+{"spend_check": "profile task 54 t=8", "usd": 6.66, "ts": "2026-09-14T07:38:52Z"}
+{"task_id": "54", "t": 8, "T": 15, "frac": 0.5333333333333333, "successes": 0, "n": 8, "errors": 0, "reruns": 0}
+{"spend_check": "profile task 54 t=11", "usd": 7.7, "ts": "2026-09-14T07:44:21Z"}
+{"task_id": "54", "t": 11, "T": 15, "frac": 0.7333333333333333, "successes": 8, "n": 8, "errors": 0, "reruns": 0}
+{"spend_check": "profile task 56 t=0", "usd": 7.79, "ts": "2026-09-14T07:45:41Z"}
+{"task_id": "56", "t": 0, "T": 23, "frac": 0.0, "successes": 0, "n": 8, "errors": 0, "reruns": 0}
+{"spend_check": "profile task 56 t=6", "usd": 8.26, "ts": "2026-09-14T07:48:41Z"}
+{"task_id": "56", "t": 6, "T": 23, "frac": 0.2608695652173913, "successes": 8, "n": 8, "errors": 0, "reruns": 0}
+{"spend_check": "profile task 56 t=12", "usd": 8.26, "ts": "2026-09-14T07:48:53Z"}
+{"task_id": "56", "t": 12, "T": 23, "frac": 0.5217391304347826, "successes": 8, "n": 8, "errors": 0, "reruns": 0}
+{"spend_check": "profile task 56 t=17", "usd": 8.26, "ts": "2026-09-14T07:49:05Z"}
+{"task_id": "56", "t": 17, "T": 23, "frac": 0.7391304347826086, "successes": 8, "n": 8, "errors": 0, "reruns": 0}
+{"spend_check": "profile task 58 t=0", "usd": 8.27, "ts": "2026-09-14T07:49:18Z"}
+{"task_id": "58", "t": 0, "T": 8, "frac": 0.0, "successes": 0, "n": 8, "errors": 0, "reruns": 0}
+{"spend_check": "profile task 58 t=2", "usd": 8.94, "ts": "2026-09-14T07:52:35Z"}
+{"task_id": "58", "t": 2, "T": 8, "frac": 0.25, "successes": 0, "n": 8, "errors": 0, "reruns": 0}
+{"spend_check": "profile task 58 t=4", "usd": 9.64, "ts": "2026-09-14T07:56:02Z"}
+{"task_id": "58", "t": 4, "T": 8, "frac": 0.5, "successes": 2, "n": 8, "errors": 0, "reruns": 0}
+{"spend_check": "profile task 58 t=6", "usd": 10.23, "ts": "2026-09-14T07:59:42Z"}
+{"task_id": "58", "t": 6, "T": 8, "frac": 0.75, "successes": 8, "n": 8, "errors": 0, "reruns": 0}
+{"stage": "probe", "usd": 10.33}
+probe exit 0 2026-09-14T08:00:38Z
+{"tasks": 6, "references_available": 6, "tasks_measured": 6, "anchors_defined": 30, "anchors_invalid": 0, "leverage": 5, "any_success_after_staging": 5, "useful_band_anchor": 1, "dead_to_easy": 5, "frontier_evidence": 5, "ordered_frontier": 1, "nonmonotonic": 0, "step_like": 4, "no_leverage": 1, "decision": "STAGE_AXIS_SUPPORTS_CONTROL"}
+tables exit 0 2026-09-14T08:00:41Z
+{"usd": 10.33, "cap": 35.0, "ts": "2026-09-14T08:00:43Z"}
+profile done 2026-09-14T08:00:44Z

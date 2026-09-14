@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="660" height="300" font-family="sans-serif" font-size="10">
+<rect x="0" y="0" width="220" height="150" fill="white" stroke="#ccc"/>
+<text x="6" y="12">task 33: ORDERED_FRONTIER</text>
+<rect x="28" y="57.0" width="184" height="26.0" fill="#e8f5e9"/>
+<line x1="28" y1="122" x2="212" y2="122" stroke="#333"/>
+<line x1="28" y1="18" x2="28" y2="122" stroke="#333"/>
+<text x="14" y="125.0">0</text>
+<text x="14" y="73.0">4</text>
+<text x="14" y="21.0">8</text>
+<text x="182" y="134">t/T</text>
+<circle cx="28.0" cy="122.0" r="4" fill="#1565c0"/>
+<text x="22.0" y="116.0">0/8</text>
+<circle cx="68.8" cy="122.0" r="4" fill="#1565c0"/>
+<text x="62.8" y="116.0">0/8</text>
+<circle cx="109.7" cy="83.0" r="4" fill="#1565c0"/>
+<text x="103.7" y="77.0">3/8</text>
+<circle cx="171.2" cy="18.0" r="4" fill="#1565c0"/>
+<text x="165.2" y="12.0">8/8</text>
+<text x="208.0" y="118" fill="#999">T</text>
+<rect x="220" y="0" width="220" height="150" fill="white" stroke="#ccc"/>
+<text x="226" y="12">task 43: STEP_LIKE</text>
+<rect x="248" y="57.0" width="184" height="26.0" fill="#e8f5e9"/>
+<line x1="248" y1="122" x2="432" y2="122" stroke="#333"/>
+<line x1="248" y1="18" x2="248" y2="122" stroke="#333"/>
+<text x="234" y="125.0">0</text>
+<text x="234" y="73.0">4</text>
+<text x="234" y="21.0">8</text>
+<text x="402" y="134">t/T</text>
+<circle cx="248.0" cy="122.0" r="4" fill="#1565c0"/>
+<text x="242.0" y="116.0">0/8</text>
+<circle cx="294.0" cy="122.0" r="4" fill="#1565c0"/>
+<text x="288.0" y="116.0">0/8</text>
+<circle cx="340.0" cy="18.0" r="4" fill="#1565c0"/>
+<text x="334.0" y="12.0">8/8</text>
+<circle cx="386.0" cy="18.0" r="4" fill="#1565c0"/>
+<text x="380.0" y="12.0">8/8</text>
+<text x="428.0" y="118" fill="#999">T</text>
+<rect x="440" y="0" width="220" height="150" fill="white" stroke="#ccc"/>
+<text x="446" y="12">task 53: NO_LEVERAGE</text>
+<rect x="468" y="57.0" width="184" height="26.0" fill="#e8f5e9"/>
+<line x1="468" y1="122" x2="652" y2="122" stroke="#333"/>
+<line x1="468" y1="18" x2="468" y2="122" stroke="#333"/>
+<text x="454" y="125.0">0</text>
+<text x="454" y="73.0">4</text>
+<text x="454" y="21.0">8</text>
+<text x="622" y="134">t/T</text>
+<circle cx="468.0" cy="122.0" r="4" fill="#1565c0"/>
+<text x="462.0" y="116.0">0/8</text>
+<circle cx="518.2" cy="122.0" r="4" fill="#1565c0"/>
+<text x="512.2" y="116.0">0/8</text>
+<circle cx="560.0" cy="122.0" r="4" fill="#1565c0"/>
+<text x="554.0" y="116.0">0/8</text>
+<circle cx="601.8" cy="122.0" r="4" fill="#1565c0"/>
+<text x="595.8" y="116.0">0/8</text>
+<text x="648.0" y="118" fill="#999">T</text>
+<rect x="0" y="150" width="220" height="150" fill="white" stroke="#ccc"/>
+<text x="6" y="162">task 54: STEP_LIKE</text>
+<rect x="28" y="207.0" width="184" height="26.0" fill="#e8f5e9"/>
+<line x1="28" y1="272" x2="212" y2="272" stroke="#333"/>
+<line x1="28" y1="168" x2="28" y2="272" stroke="#333"/>
+<text x="14" y="275.0">0</text>
+<text x="14" y="223.0">4</text>
+<text x="14" y="171.0">8</text>
+<text x="182" y="284">t/T</text>
+<circle cx="28.0" cy="272.0" r="4" fill="#1565c0"/>
+<text x="22.0" y="266.0">0/8</text>
+<circle cx="77.1" cy="259.0" r="4" fill="#1565c0"/>
+<text x="71.1" y="253.0">1/8</text>
+<circle cx="126.1" cy="272.0" r="4" fill="#1565c0"/>
+<text x="120.1" y="266.0">0/8</text>
+<circle cx="162.9" cy="168.0" r="4" fill="#1565c0"/>
+<text x="156.9" y="162.0">8/8</text>
+<text x="208.0" y="268" fill="#999">T</text>
+<rect x="220" y="150" width="220" height="150" fill="white" stroke="#ccc"/>
+<text x="226" y="162">task 56: STEP_LIKE</text>
+<rect x="248" y="207.0" width="184" height="26.0" fill="#e8f5e9"/>
+<line x1="248" y1="272" x2="432" y2="272" stroke="#333"/>
+<line x1="248" y1="168" x2="248" y2="272" stroke="#333"/>
+<text x="234" y="275.0">0</text>
+<text x="234" y="223.0">4</text>
+<text x="234" y="171.0">8</text>
+<text x="402" y="284">t/T</text>
+<circle cx="248.0" cy="272.0" r="4" fill="#1565c0"/>
+<text x="242.0" y="266.0">0/8</text>
+<circle cx="296.0" cy="168.0" r="4" fill="#1565c0"/>
+<text x="290.0" y="162.0">8/8</text>
+<circle cx="344.0" cy="168.0" r="4" fill="#1565c0"/>
+<text x="338.0" y="162.0">8/8</text>
+<circle cx="384.0" cy="168.0" r="4" fill="#1565c0"/>
+<text x="378.0" y="162.0">8/8</text>
+<text x="428.0" y="268" fill="#999">T</text>
+<rect x="440" y="150" width="220" height="150" fill="white" stroke="#ccc"/>
+<text x="446" y="162">task 58: STEP_LIKE</text>
+<rect x="468" y="207.0" width="184" height="26.0" fill="#e8f5e9"/>
+<line x1="468" y1="272" x2="652" y2="272" stroke="#333"/>
+<line x1="468" y1="168" x2="468" y2="272" stroke="#333"/>
+<text x="454" y="275.0">0</text>
+<text x="454" y="223.0">4</text>
+<text x="454" y="171.0">8</text>
+<text x="622" y="284">t/T</text>
+<circle cx="468.0" cy="272.0" r="4" fill="#1565c0"/>
+<text x="462.0" y="266.0">0/8</text>
+<circle cx="514.0" cy="272.0" r="4" fill="#1565c0"/>
+<text x="508.0" y="266.0">0/8</text>
+<circle cx="560.0" cy="246.0" r="4" fill="#1565c0"/>
+<text x="554.0" y="240.0">2/8</text>
+<circle cx="606.0" cy="168.0" r="4" fill="#1565c0"/>
+<text x="600.0" y="162.0">8/8</text>
+<text x="648.0" y="268" fill="#999">T</text>
+</svg>
