@@ -82,6 +82,10 @@ from aea.stage import (
     stage_candidate,
     trace_actions,
 )
+from aea.stage import (
+    candidate_id as stage_candidate_id,
+)
+from aea.stage_control import InvalidStageError, stage_bracket
 from aea.witness import policy_shortest_success, solvable
 
 type Outcome = Literal["accepted", "kept", "dropped", "infra_error"]
@@ -404,8 +408,8 @@ class Controller:
 
     @property
     def _llm(self) -> bool:
-        """llm_v1 and llm_v1_refalign share every path except the LOW designer input/contract."""
-        return self.config.method_version in ("llm_v1", "llm_v1_refalign")
+        """llm_v1, llm_v1_refalign and llm_v1_stage_control share every path except LOW."""
+        return self.config.method_version in ("llm_v1", "llm_v1_refalign", "llm_v1_stage_control")
 
     def _harden(self, task: TaskRef, est: EstimateResult) -> TaskOutcome:
         if self._llm:
@@ -589,6 +593,8 @@ class Controller:
 
     # ------------------------------------------------------------------ stage
     def _stage(self, task: TaskRef, est: EstimateResult) -> TaskOutcome:
+        if self.config.method_version == "llm_v1_stage_control":
+            return self._stage_control(task, est)
         if self._llm:
             return self._stage_llm(task, est)
         failures = seeded_failures(est.traces, self.config.impl.n_failed_rollouts, seed=task.seed)
@@ -932,6 +938,165 @@ class Controller:
                 task, "dropped", "uncertified", "zero", est.p_hat, detail={"rejected": rejected}
             )
         return self._probe_stages(task, est, staged, opts)
+
+    # ------------------------------------------------------------------ llm_v1_stage_control
+    def _stage_control(self, task: TaskRef, est: EstimateResult) -> TaskOutcome:
+        """LOW under llm_v1_stage_control (docs/design/AEA_LOW_STAGE_CONTROL.md): the verified
+        reference defines the assistance family E_t; the existing 4 -> 8 measurement drives an
+        integer bracket from maximum assistance t_max inward. No designer call on this path."""
+        reference = self._lazy_reference(task)
+        if reference is None:
+            return TaskOutcome(task, "dropped", "reference_unavailable", "zero", est.p_hat)
+        opts = self.substrate.stage_reset_options(task)
+        compiled: dict[int, list[str]] = {}
+        cands: dict[int, Candidate] = {}
+        cids: dict[int, str] = {}
+        rejected: list[dict[str, Any]] = []
+
+        def open_fn(c: Candidate | None, ro: dict[str, Any] | None) -> Session:
+            return self.substrate.open_session(task, c, ro)
+
+        def build(t: int) -> tuple[bool, bool]:
+            """(exact replay, terminal after replay) for depth t; caches the candidate."""
+            prefix = list(reference.actions[:t])
+            comp = compile_prefix(open_fn, prefix, opts)
+            body = comp[:-1] if comp and comp[-1] == "look" and prefix[-1:] != ["look"] else comp
+            cand = stage_candidate(comp)
+            sess = open_fn(cand, opts)
+            try:
+                terminal = bool(sess.won or sess.done)
+            finally:
+                sess.close()
+            compiled[t], cands[t], cids[t] = comp, cand, stage_candidate_id(task.task_id, comp)
+            return body == prefix, terminal
+
+        with SESSION_LOCK:  # simulator-side, never charged: the deepest non-terminal prefix
+            t_max = 0
+            for t in range(reference.n_steps, 0, -1):
+                exact, terminal = build(t)
+                if exact and not terminal:
+                    t_max = t
+                    break
+                rejected.append({"t": t, "reason": "terminal" if terminal else "inexact replay"})
+        self._ev("stage_family", task, T=reference.n_steps, t_max=t_max, rejected=rejected)
+        if t_max == 0:
+            return TaskOutcome(
+                task, "dropped", "no_stage_family", "zero", est.p_hat, detail={"rejected": rejected}
+            )
+        profile: list[dict[str, Any]] = []
+
+        def evaluate_at(t: int) -> Eval:
+            with SESSION_LOCK:
+                if t not in cands:
+                    exact, terminal = build(t)
+                    if not exact or terminal:
+                        self._ev(
+                            "stage_candidates",
+                            task,
+                            certified=[],
+                            kinds={},
+                            rejected=[
+                                {
+                                    "id": cids[t],
+                                    "t": t,
+                                    "reason": "inexact" if not exact else "terminal",
+                                }
+                            ],
+                            source="control",
+                        )
+                        raise InvalidStageError(f"depth {t}")
+                guard = solvable(
+                    cands[t],
+                    lambda c: open_fn(c, opts),
+                    self.config,
+                    oracle=self.substrate.has_oracle(),
+                )
+            self._ev(
+                "stage_candidates",
+                task,
+                certified=[cids[t]] if guard.ok else [],
+                kinds={cids[t]: "control"} if guard.ok else {},
+                rejected=[] if guard.ok else [{"id": cids[t], "t": t, "reason": guard.detail}],
+                source="control",
+            )
+            if not guard.ok:
+                raise InvalidStageError(f"depth {t} uncertified")
+            ev = evaluate(
+                lambda n: self._rollouts(task, cands[t], n, "probe", reset_options=opts),
+                self.config,
+            )
+            profile.append(
+                {
+                    "id": cids[t],
+                    "t": t,
+                    "source": "control",
+                    "successes": ev.successes,
+                    "n": ev.n,
+                    "verdict": ev.verdict,
+                }
+            )
+            return ev
+
+        result = stage_bracket(evaluate_at, t_max)
+        acc = result.accepted
+        self._ev(
+            "stage_control",
+            task,
+            T=reference.n_steps,
+            t_max=t_max,
+            t_max_verdict=result.history[0].eval.verdict if result.history else None,
+            history=[
+                {"t": h.t, "s": h.eval.successes, "n": h.eval.n, "verdict": h.eval.verdict}
+                for h in result.history
+            ],
+            lo=result.lo,
+            hi=result.hi,
+            status=result.status,
+            unique_cuts=result.unique_cuts,
+            accepted_t=acc.t if acc else None,
+            accepted_d=(acc.t / t_max) if acc else None,
+        )
+        if result.status == "accepted" and acc is not None:
+            t = acc.t
+            meta = AeaMeta(
+                kind="stage",
+                task_id=task.task_id,
+                seed=task.seed,
+                regime="zero",
+                t=t,
+                state_hash=cids[t].split(":", 1)[1],
+                profile=profile,
+                stage_budget=self.config.impl.stage_budget,
+                candidate_id=cids[t],
+                p_hat=acc.eval.p_hat,
+            )
+            self._write_corpus(task, cands[t], meta)
+            self._ev("probe", task, profile=profile, accepted=cids[t])
+            return TaskOutcome(
+                task,
+                "accepted",
+                "",
+                "zero",
+                est.p_hat,
+                detail={"t": t, "t_max": t_max, "profile": profile},
+            )
+        self._ev("probe", task, profile=profile, accepted=None)
+        if result.status == "budget":
+            raise BudgetExhausted(
+                "cap during stage control",
+                budget="search",
+                cap=self.config.cap,
+                spent=self.budget.account(task.task_id).spent,
+                task_id=task.task_id,
+            )
+        return TaskOutcome(
+            task,
+            "dropped",
+            result.status,
+            "zero",
+            est.p_hat,
+            detail={"t_max": t_max, "lo": result.lo, "hi": result.hi, "profile": profile},
+        )
 
     def _probe_stages(
         self,

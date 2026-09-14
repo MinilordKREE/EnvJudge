@@ -252,7 +252,9 @@ def leakage_audit(d: Path) -> dict[str, Any]:
             if str(pr["task_id"]) == task:
                 for p in pr.get("profile", []):
                     cuts[str(p["id"])] = int(p["t"])
-        ref_cuts = sorted({cuts[c] for c, k in kinds.items() if k == "reference" and c in cuts})
+        ref_cuts = sorted(
+            {cuts[c] for c, k in kinds.items() if k in ("reference", "control") and c in cuts}
+        )
         rec["reference_cuts"] = ref_cuts
         rec["reference_steps"] = len(actions)
         prefixes = [
@@ -272,7 +274,7 @@ def leakage_audit(d: Path) -> dict[str, Any]:
             kind = kinds.get(cid)
             if kind == "failure":
                 attributed["failure"] += 1  # the policy's own actions: never a reference copy
-            elif kind == "reference" and cid in cuts:
+            elif kind in ("reference", "control") and cid in cuts:
                 k = cuts[cid]
                 body = pre[:-1] if pre and pre[-1] == "look" and actions[:k] != pre else pre
                 allowed = [a for a in actions[:k]]
