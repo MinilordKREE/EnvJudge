@@ -1066,7 +1066,9 @@ def privilege_check(
     reasons: list[str] = []
     body = template
     for a in reference.actions:
-        if a and a in body:
+        # only task-specific actions (naming a numbered object / receptacle) count: generic
+        # verbs such as `look` or `inventory` are the policy's own vocabulary
+        if a and _GOAL_TOKENS.search(a.lower()) and a in body:
             reasons.append(f"reference action embedded: {a!r}")
             break
     for pat, why in (

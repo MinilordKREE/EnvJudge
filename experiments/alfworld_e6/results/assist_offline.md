@@ -1,0 +1,18 @@
+# Phase 3.4 offline check: llm_v1_assistive_rules designer on three phase-3.3b LOW tasks
+
+Descriptive only (no policy rollout, no probe, no tuning). Failures and references are the frozen phase-3.3b shared evidence. One designer call per task.
+
+| task | goal | reference steps | diagnoses | raw families | valid families (name, axis) | rejected (reason) |
+|---|---|---|---|---|---|---|
+| 62 | put a clean lettuce in countertop | 12 | 3 | 1 | surface_target_object_affordances (O) | - |
+| 70 | put a glassbottle in fridge | 15 | 1 | 2 | highlight_goal_object_location (O); drop_distractor_containers (O) | - |
+| 78 | put a clean ladle in countertop | 30 | 2 | 2 | salient_ladle_countertop (O) | prioritize_countertop_exploration: privilege: reference action embedded: 'look' |
+
+## Family mechanisms (LLM's own words)
+
+- task 62 surface_target_object_affordances (O): Rewrites the admissible-command list (and matching observation text) so that the commands that progress toward the goal's target object (go to diningtable 1, and later take/clean/move lettuce) are surfaced to the top and the distractor cabinet/container navigation commands are demoted or hidden. Coverage/salience grows with DOSE: at low DOSE the target-relevant commands are reordered to the front; at higher DOSE the irrelevant `go to cabinet N`/`open cabinet N`/`examine cabinet N` distractor commands are removed from the admissible list entirely, leaving only object-progress commands visible. / why: The policy's core bottleneck is that it gets stuck searching empty cabinets and never navigates to diningtable 1 where the lettuce is. Surfacing `go to diningtable 1` and the lettuce take/clean/move affordances while suppressing the cabinet distractors directly guides it to the correct object without revealing any reference action sequence.
+- task 70 highlight_goal_object_location (O): Rewrites the observation to surface the goal object's receptacle/container in the text and reorders admissible commands so that navigation toward the surface holding the goal object (and the take command) are listed first. The amount of highlighting and the number of distractor commands demoted grows with DOSE. / why: The policy is stuck in an undirected search of cabinets. Surfacing which surface holds the goal object and promoting the relevant 'go to <surface>' / 'take glassbottle' commands in the admissible list breaks the search dead-end and gives the policy a positive path.
+- task 70 drop_distractor_containers (O): Demotes/hides irrelevant container commands (cabinets, drawers, microwave, toaster, etc.) from the admissible list so the policy is forced toward surface navigation and the goal object. The number of distractor command families removed grows with DOSE. / why: The policy wastes all its steps opening empty cabinets and drawers. Removing these distractor affordances from the admissible list channels the policy toward surfaces where the glassbottle actually is, addressing the root cause of the search failure.
+- task 78 salient_ladle_countertop (O): Rewrite the observation to surface the ladle's presence on countertop 2 as a goal-relevant hint, and reorder the admissible command list to put 'go to countertop 2' first. The amount of salience/coverage grows with DOSE: at low DOSE only reorder the admissible list; at higher DOSE increasingly emphasize the hint text and prune distracting cabinet/drawer commands. / why: The policy's bottleneck is that it never discovers the ladle is on a countertop and instead exhaustively searches cabinets/drawers. Surfacing the countertop location and prioritizing it in the admissible commands directs the policy to the correct object without revealing the reference action sequence.
+
+Designer spend (ledger): USD 0.025.

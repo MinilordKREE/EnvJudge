@@ -1,0 +1,168 @@
+[
+ {
+  "task": "62",
+  "goal": "put a clean lettuce in countertop",
+  "reference_steps": 12,
+  "n_diagnoses": 3,
+  "valid_families": [
+   {
+    "name": "surface_target_object_affordances",
+    "axis": "O",
+    "mechanism": "Rewrites the admissible-command list (and matching observation text) so that the commands that progress toward the goal's target object (go to diningtable 1, and later take/clean/move lettuce) are surfaced to the top and the distractor cabinet/container navigation commands are demoted or hidden. Coverage/salience grows with DOSE: at low DOSE the target-relevant commands are reordered to the front; at higher DOSE the irrelevant `go to cabinet N`/`open cabinet N`/`examine cabinet N` distractor commands are removed from the admissible list entirely, leaving only object-progress commands visible.",
+    "why": "The policy's core bottleneck is that it gets stuck searching empty cabinets and never navigates to diningtable 1 where the lettuce is. Surfacing `go to diningtable 1` and the lettuce take/clean/move affordances while suppressing the cabinet distractors directly guides it to the correct object without revealing any reference action sequence.",
+    "code_lines": 29
+   }
+  ],
+  "rejected": [],
+  "raw_families": 1,
+  "arguments": {
+   "diagnoses": [
+    {
+     "failure_id": "F1",
+     "failure_step": 1,
+     "reference_step": 2,
+     "error_cause": "The policy immediately goes to fridge 1 and starts opening cabinets to search for a lettuce, instead of first taking `look` to reveal the room's objects and then systematically locating the lettuce on diningtable 1. It never finds the lettuce source (diningtable 1) and, crucially, never picks up a lettuce, so by step 48 it is not carrying anything and cannot complete the clean+place goal.",
+     "fix_hint": "The policy needs to discover the lettuce's location (diningtable 1) and must actually pick up a lettuce before cleaning and moving it. Missing capability: locating the target object source and holding the lettuce.",
+     "evidence": "F1 step1 `go to fridge 1` (vs reference step1 `look`); steps 3-12 open empty cabinets; step48 inventory 'You are not carrying anything'; step49 `move lettuce 1 to countertop 1` has no effect."
+    },
+    {
+     "failure_id": "F2",
+     "failure_step": 3,
+     "reference_step": 8,
+     "error_cause": "After opening the fridge and finding no lettuce, the policy wastes all steps opening empty cabinets instead of going to diningtable 1 where the lettuce is. It only reaches diningtable late (step46), then picks a lettuce but never cleans it before moving it to countertop 1, so the goal 'clean lettuce' is never satisfied.",
+     "fix_hint": "The policy needs to go to the lettuce's actual location (diningtable 1) and must clean the lettuce with the sinkbasin before moving it. Missing capability: locating the lettuce and remembering the clean-before-place sub-step.",
+     "evidence": "F2 steps3-12 open empty cabinets; step46 arrives diningtable with lettuce 1 and lettuce 2; step47 takes lettuce 2; step48/50 moves lettuce 2 to countertop without cleaning."
+    },
+    {
+     "failure_id": "F3",
+     "failure_step": 3,
+     "reference_step": 8,
+     "error_cause": "Same as F2: the policy searches cabinets instead of going to diningtable 1 to find the lettuce, and never acquires/cleans a lettuce, ending by spamming `done` and examining countertop without holding anything.",
+     "fix_hint": "The policy needs to locate the lettuce on diningtable 1 and then perform the clean step with sinkbasin 1 before moving it to countertop 1.",
+     "evidence": "F3 steps3-12 open empty cabinets; step45/46 `done` no effect; step47 examines countertop 1, never holding a lettuce."
+    }
+   ],
+   "families": [
+    {
+     "name": "surface_target_object_affordances",
+     "axis": "O",
+     "mechanism_summary": "Rewrites the admissible-command list (and matching observation text) so that the commands that progress toward the goal's target object (go to diningtable 1, and later take/clean/move lettuce) are surfaced to the top and the distractor cabinet/container navigation commands are demoted or hidden. Coverage/salience grows with DOSE: at low DOSE the target-relevant commands are reordered to the front; at higher DOSE the irrelevant `go to cabinet N`/`open cabinet N`/`examine cabinet N` distractor commands are removed from the admissible list entirely, leaving only object-progress commands visible.",
+     "why": "The policy's core bottleneck is that it gets stuck searching empty cabinets and never navigates to diningtable 1 where the lettuce is. Surfacing `go to diningtable 1` and the lettuce take/clean/move affordances while suppressing the cabinet distractors directly guides it to the correct object without revealing any reference action sequence.",
+     "direction": "easier_with_d",
+     "rules_code": "class _Rules(Rules):\n    DOSE = __DOSE__\n\n    TARGET_SIG = ('diningtable 1', 'lettuce', 'sinkbasin 1', 'countertop 1')\n\n    def _is_target(self, cmd):\n        return any(s in cmd for s in self.TARGET_SIG)\n\n    def _is_distractor(self, cmd):\n        return ('cabinet' in cmd) or ('fridge' in cmd) or ('garbagecan' in cmd)\n\n    def filter_observation(self, obs, env_state):\n        cmds = list(obs.data.get('admissible_commands') or [])\n        if not cmds:\n            return obs\n        target = [c for c in cmds if self._is_target(c)]\n        other = [c for c in cmds if not self._is_target(c) and not self._is_distractor(c)]\n        distractor = [c for c in cmds if self._is_distractor(c)]\n        if self.DOSE <= 0:\n            return obs\n        if self.DOSE < 0.5:\n            new_cmds = target + other + distractor\n        else:\n            new_cmds = target + other\n        if not new_cmds:\n            return obs\n        new_data = dict(obs.data)\n        new_data['admissible_commands'] = new_cmds\n        return Observation(text=obs.text, data=new_data)\n"
+    }
+   ]
+  }
+ },
+ {
+  "task": "70",
+  "goal": "put a glassbottle in fridge",
+  "reference_steps": 15,
+  "n_diagnoses": 1,
+  "valid_families": [
+   {
+    "name": "highlight_goal_object_location",
+    "axis": "O",
+    "mechanism": "Rewrites the observation to surface the goal object's receptacle/container in the text and reorders admissible commands so that navigation toward the surface holding the goal object (and the take command) are listed first. The amount of highlighting and the number of distractor commands demoted grows with DOSE.",
+    "why": "The policy is stuck in an undirected search of cabinets. Surfacing which surface holds the goal object and promoting the relevant 'go to <surface>' / 'take glassbottle' commands in the admissible list breaks the search dead-end and gives the policy a positive path.",
+    "code_lines": 29
+   },
+   {
+    "name": "drop_distractor_containers",
+    "axis": "O",
+    "mechanism": "Demotes/hides irrelevant container commands (cabinets, drawers, microwave, toaster, etc.) from the admissible list so the policy is forced toward surface navigation and the goal object. The number of distractor command families removed grows with DOSE.",
+    "why": "The policy wastes all its steps opening empty cabinets and drawers. Removing these distractor affordances from the admissible list channels the policy toward surfaces where the glassbottle actually is, addressing the root cause of the search failure.",
+    "code_lines": 21
+   }
+  ],
+  "rejected": [],
+  "raw_families": 2,
+  "arguments": {
+   "diagnoses": [
+    {
+     "failure_id": "F1",
+     "failure_step": 1,
+     "reference_step": 12,
+     "error_cause": "The policy performs an exhaustive, undirected search of containers (cabinets, drawers) instead of moving toward the surface where the glassbottle actually resides (countertop 2). It never reaches the object needed for the goal.",
+     "fix_hint": "The policy needs to discover/locate the glassbottle on countertop 2 rather than exhaustively opening cabinets. It needs its attention directed to surfaces (countertops) and to the specific object 'glassbottle'.",
+     "evidence": "F1 step1 'go to cabinet 1' and opens cabinets 1..27, drawers; never visits countertop 2 where 'glassbottle 1' is (reference step 12)."
+    }
+   ],
+   "families": [
+    {
+     "name": "highlight_goal_object_location",
+     "axis": "O",
+     "mechanism_summary": "Rewrites the observation to surface the goal object's receptacle/container in the text and reorders admissible commands so that navigation toward the surface holding the goal object (and the take command) are listed first. The amount of highlighting and the number of distractor commands demoted grows with DOSE.",
+     "why": "The policy is stuck in an undirected search of cabinets. Surfacing which surface holds the goal object and promoting the relevant 'go to <surface>' / 'take glassbottle' commands in the admissible list breaks the search dead-end and gives the policy a positive path.",
+     "rules_code": "import re\n\nclass _Rules(Rules):\n    DOSE = __DOSE__\n\n    def filter_observation(self, obs, env_state):\n        if self.DOSE <= 0:\n            return obs\n        text = obs.text\n        cmds = list(obs.data.get('admissible_commands') or [])\n        # Identify navigation commands toward surfaces that plausibly hold the goal object.\n        surfaces = ['countertop', 'diningtable', 'shelf', 'sidetable', 'desk', 'dresser', 'bathtubbasin', 'toilet', 'coffeemachine']\n        goal = 'glassbottle'\n        nav_surface = [c for c in cmds if c.startswith('go to ') and any(s in c for s in surfaces)]\n        take_goal = [c for c in cmds if c.startswith('take ') and goal in c]\n        if nav_surface or take_goal:\n            preferred = take_goal + nav_surface\n            rest = [c for c in cmds if c not in preferred]\n            cmds = preferred + rest\n            if self.DOSE >= 0.5 and nav_surface:\n                hint = ('Hint: the %s you need is on a countertop. '\n                        'Try going to a countertop and taking it.' % goal)\n                if 'Task:' in text:\n                    text = text.replace('Task:', hint + ' Task:', 1)\n                else:\n                    text = hint + text\n        new_data = dict(obs.data)\n        new_data['admissible_commands'] = cmds\n        return Observation(text=text, data=new_data)\n",
+     "direction": "easier_with_d"
+    },
+    {
+     "name": "drop_distractor_containers",
+     "axis": "O",
+     "mechanism_summary": "Demotes/hides irrelevant container commands (cabinets, drawers, microwave, toaster, etc.) from the admissible list so the policy is forced toward surface navigation and the goal object. The number of distractor command families removed grows with DOSE.",
+     "why": "The policy wastes all its steps opening empty cabinets and drawers. Removing these distractor affordances from the admissible list channels the policy toward surfaces where the glassbottle actually is, addressing the root cause of the search failure.",
+     "rules_code": "import re\n\nclass _Rules(Rules):\n    DOSE = __DOSE__\n\n    def filter_observation(self, obs, env_state):\n        if self.DOSE <= 0:\n            return obs\n        cmds = list(obs.data.get('admissible_commands') or [])\n        distractors = ['cabinet', 'drawer', 'microwave', 'toaster', 'fridge']\n        keep_goal = [c for c in cmds if 'glassbottle' in c]\n        keep_nav = [c for c in cmds if c.startswith('go to ') and not any(d in c for d in distractors)]\n        keep_other = [c for c in cmds if not c.startswith('go to ') and not any(d in c for d in distractors)]\n        # DOSE controls how aggressively we drop distractor container commands.\n        if self.DOSE >= 0.8:\n            cmds = keep_goal + keep_nav + keep_other\n        elif self.DOSE >= 0.4:\n            cmds = keep_goal + keep_nav + [c for c in cmds if c not in keep_goal and c not in keep_nav]\n        new_data = dict(obs.data)\n        new_data['admissible_commands'] = cmds\n        return Observation(text=obs.text, data=new_data)\n",
+     "direction": "easier_with_d"
+    }
+   ]
+  }
+ },
+ {
+  "task": "78",
+  "goal": "put a clean ladle in countertop",
+  "reference_steps": 30,
+  "n_diagnoses": 2,
+  "valid_families": [
+   {
+    "name": "salient_ladle_countertop",
+    "axis": "O",
+    "mechanism": "Rewrite the observation to surface the ladle's presence on countertop 2 as a goal-relevant hint, and reorder the admissible command list to put 'go to countertop 2' first. The amount of salience/coverage grows with DOSE: at low DOSE only reorder the admissible list; at higher DOSE increasingly emphasize the hint text and prune distracting cabinet/drawer commands.",
+    "why": "The policy's bottleneck is that it never discovers the ladle is on a countertop and instead exhaustively searches cabinets/drawers. Surfacing the countertop location and prioritizing it in the admissible commands directs the policy to the correct object without revealing the reference action sequence.",
+    "code_lines": 41
+   }
+  ],
+  "rejected": [
+   "prioritize_countertop_exploration: privilege: reference action embedded: 'look'"
+  ],
+  "raw_families": 2,
+  "arguments": {
+   "diagnoses": [
+    {
+     "failure_id": "F1",
+     "failure_step": 1,
+     "reference_step": 2,
+     "error_cause": "The policy starts by exhaustively opening cabinets one by one (searching for a ladle), while the reference first does 'look' then goes directly to countertop 2 where the ladles are. The policy wastes its entire budget opening empty cabinets and drawers and never reaches the countertop where the ladle actually is.",
+     "fix_hint": "The policy needs to discover that the ladle is on countertop 2 (not in a cabinet/drawer), or at least be guided to prioritize searching countertops over cabinets/drawers.",
+     "evidence": "F1 step1 'go to cabinet 1', opens cabinets 1-5; at step 45-50 still opening empty drawers 4-6; never visits countertop 2 where 'ladle 2' and 'ladle 1' are visible in reference step 26."
+    },
+    {
+     "failure_id": "F2",
+     "failure_step": 1,
+     "reference_step": 2,
+     "error_cause": "Same failure mode: the policy blindly enumerates cabinets/drawers rather than looking at the room and going to countertop 2 where the ladles sit.",
+     "fix_hint": "Guide the policy to the countertop containing the ladle, or make the ladle's location salient in observations/admissible commands so it stops searching cabinets.",
+     "evidence": "F2 mirrors F1 exactly: go to cabinet 1, open cabinets 1-5, then drawers 4-6; never reaches countertop 2."
+    }
+   ],
+   "families": [
+    {
+     "name": "salient_ladle_countertop",
+     "axis": "O",
+     "mechanism_summary": "Rewrite the observation to surface the ladle's presence on countertop 2 as a goal-relevant hint, and reorder the admissible command list to put 'go to countertop 2' first. The amount of salience/coverage grows with DOSE: at low DOSE only reorder the admissible list; at higher DOSE increasingly emphasize the hint text and prune distracting cabinet/drawer commands.",
+     "why": "The policy's bottleneck is that it never discovers the ladle is on a countertop and instead exhaustively searches cabinets/drawers. Surfacing the countertop location and prioritizing it in the admissible commands directs the policy to the correct object without revealing the reference action sequence.",
+     "direction": "easier_with_d",
+     "rules_code": "import re\n\nclass _Rules(Rules):\n    DOSE = __DOSE__\n\n    def _hint(self, d):\n        if d <= 0:\n            return None\n        return \"Hint: the ladle is on a countertop.\"\n\n    def filter_observation(self, obs, env_state):\n        d = self.DOSE\n        if d <= 0:\n            return obs\n        text = obs.text\n        data = dict(obs.data) if obs.data is not None else {}\n        cmds = list(data.get(\"admissible_commands\") or [])\n\n        # Reorder admissible commands: put 'go to countertop' commands first.\n        countertop_cmds = [c for c in cmds if c.startswith(\"go to countertop\")]\n        other_cmds = [c for c in cmds if not c.startswith(\"go to countertop\")]\n        cmds = countertop_cmds + other_cmds\n        data[\"admissible_commands\"] = cmds\n\n        # At higher DOSE, prune distracting cabinet/drawer go-to commands to\n        # reduce the search space (never remove interaction commands).\n        if d >= 0.5:\n            keep = [c for c in cmds if not (c.startswith(\"go to cabinet\") or c.startswith(\"go to drawer\"))]\n            if keep:\n                cmds = keep\n                data[\"admissible_commands\"] = cmds\n\n        # Add an increasingly salient hint to the text.\n        hint = self._hint(d)\n        if hint:\n            if \"Admissible commands:\" in text:\n                text = text.replace(\"Admissible commands:\", hint + \"\\n\\nAdmissible commands:\", 1)\n            else:\n                text = text + \"\\n\\n\" + hint\n\n        return Observation(text=text, data=data)\n"
+    },
+    {
+     "name": "prioritize_countertop_exploration",
+     "axis": "T",
+     "mechanism_summary": "Block early cabinet/drawer-opening actions that do not advance toward the goal, and (at higher DOSE) block wandering 'go to cabinet/drawer' moves, nudging the policy to remain on countertops and interact with the ladle. The number of blocked action categories grows with DOSE.",
+     "why": "The policy wastes its entire budget on empty cabinets and drawers. Blocking these non-advancing actions forces the policy to explore countertops where the ladle actually is, while still letting the policy choose and perform the actual take/clean/move actions itself.",
+     "direction": "easier_with_d",
+     "rules_code": "class _Rules(Rules):\n    DOSE = __DOSE__\n\n    def filter_action(self, action, env_state):\n        d = self.DOSE\n        if d <= 0:\n            return action\n        text = (action.kwargs or {}).get(\"text\", \"\") if action is not None else \"\"\n        if not text:\n            return action\n\n        # Always allow goal-critical actions.\n        if (\"take ladle\" in text or \"clean ladle\" in text or \"move ladle\" in text\n                or \"put ladle\" in text or \"examine ladle\" in text or text.strip() == \"look\"):\n            return action\n\n        # Block opening/closing cabinets and drawers (searching empty containers).\n        if (\"open cabinet\" in text or \"close cabinet\" in text\n                or \"open drawer\" in text or \"close drawer\" in text):\n            return Blocked(reason=\"Try looking on the countertops instead.\")\n\n        # At higher DOSE, also block wandering to cabinets/drawers.\n        if d >= 0.5 and (\"go to cabinet\" in text or \"go to drawer\" in text):\n            return Blocked(reason=\"The ladle is on a countertop; go to a countertop.\")\n\n        return action\n"
+    }
+   ]
+  }
+ }
+]

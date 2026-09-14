@@ -130,10 +130,16 @@ def test_identity_at_zero_and_privilege_checks() -> None:
     fails = [_trace(False, 3)]
     goal = "put x in b"
     assert privilege_check(HINT, reference=ref, failures=fails, goal=goal) == []
-    leak = HINT.replace("Hint: ", "Hint: take x from a ")
+    numbered = Reference(True, "pass", ("look", "take mug 1 from shelf 2", *PLAN[2:]))
+    leak = HINT.replace("Hint: ", "Hint: take mug 1 from shelf 2 ")
     assert any(
         "reference action embedded" in r
-        for r in privilege_check(leak, reference=ref, failures=fails, goal=goal)
+        for r in privilege_check(leak, reference=numbered, failures=fails, goal=goal)
+    )
+    generic_only = HINT.replace("Hint: ", "Hint: take x from a ")  # no numbered token: generic
+    assert not any(
+        "reference action embedded" in r
+        for r in privilege_check(generic_only, reference=ref, failures=fails, goal=goal)
     )
     stage = HINT + (
         "\n    def filter_action(self, action, env_state):"
@@ -148,6 +154,8 @@ def test_identity_at_zero_and_privilege_checks() -> None:
     assert any(
         "sets won" in r for r in privilege_check(cheat, reference=ref, failures=fails, goal=goal)
     )
+    generic = HINT.replace("Hint: ", "Hint: look around first ")  # 'look' is a generic verb
+    assert privilege_check(generic, reference=ref, failures=fails, goal=goal) == []
     priv = HINT.replace("Hint: ", "Hint: look at shelf 2 ")  # 'shelf 2' only in the reference
     assert any(
         "privileged constants" in r
