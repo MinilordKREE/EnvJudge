@@ -1,0 +1,16 @@
+{"schema_version": 1, "seq": 1, "ts": "2026-09-14T10:25:07.137848Z", "run_id": "e6-sc-shared", "kind": "estimate", "payload": {"task_id": "62", "regime": "zero", "p_hat": 0.0, "n": 10}}
+{"schema_version": 1, "seq": 2, "ts": "2026-09-14T10:25:24.428578Z", "run_id": "e6-sc-shared", "kind": "reference", "payload": {"task_id": "62", "available": true, "n_steps": 12, "reason": "pass", "reference_id": "0f40dac609229094"}}
+{"schema_version": 1, "seq": 3, "ts": "2026-09-14T10:38:06.913341Z", "run_id": "e6-sc-shared", "kind": "estimate", "payload": {"task_id": "66", "regime": "zero", "p_hat": 0.0, "n": 10}}
+{"schema_version": 1, "seq": 4, "ts": "2026-09-14T10:38:12.370298Z", "run_id": "e6-sc-shared", "kind": "reference", "payload": {"task_id": "66", "available": true, "n_steps": 9, "reason": "pass", "reference_id": "601aa61817ef96db"}}
+{"schema_version": 1, "seq": 5, "ts": "2026-09-14T10:49:03.995551Z", "run_id": "e6-sc-shared", "kind": "estimate", "payload": {"task_id": "67", "regime": "zero", "p_hat": 0.0, "n": 10}}
+{"schema_version": 1, "seq": 6, "ts": "2026-09-14T10:49:09.553316Z", "run_id": "e6-sc-shared", "kind": "reference", "payload": {"task_id": "67", "available": false, "n_steps": 0, "reason": "verifier_fail", "reference_id": null}}
+{"schema_version": 1, "seq": 7, "ts": "2026-09-14T11:01:52.559583Z", "run_id": "e6-sc-shared", "kind": "estimate", "payload": {"task_id": "70", "regime": "zero", "p_hat": 0.0, "n": 10}}
+{"schema_version": 1, "seq": 8, "ts": "2026-09-14T11:02:00.282482Z", "run_id": "e6-sc-shared", "kind": "reference", "payload": {"task_id": "70", "available": true, "n_steps": 15, "reason": "pass", "reference_id": "a4a080a7da9e85e5"}}
+{"schema_version": 1, "seq": 9, "ts": "2026-09-14T11:16:10.624669Z", "run_id": "e6-sc-shared", "kind": "estimate", "payload": {"task_id": "71", "regime": "zero", "p_hat": 0.0, "n": 10}}
+{"schema_version": 1, "seq": 10, "ts": "2026-09-14T11:16:14.867153Z", "run_id": "e6-sc-shared", "kind": "reference", "payload": {"task_id": "71", "available": true, "n_steps": 14, "reason": "pass", "reference_id": "c187c8859581d92f"}}
+{"schema_version": 1, "seq": 11, "ts": "2026-09-14T11:32:22.445739Z", "run_id": "e6-sc-shared", "kind": "estimate", "payload": {"task_id": "73", "regime": "zero", "p_hat": 0.0, "n": 10}}
+{"schema_version": 1, "seq": 12, "ts": "2026-09-14T11:32:26.405222Z", "run_id": "e6-sc-shared", "kind": "reference", "payload": {"task_id": "73", "available": false, "n_steps": 0, "reason": "verifier_fail", "reference_id": null}}
+{"schema_version": 1, "seq": 13, "ts": "2026-09-14T11:41:04.556611Z", "run_id": "e6-sc-shared", "kind": "estimate", "payload": {"task_id": "78", "regime": "zero", "p_hat": 0.0, "n": 10}}
+{"schema_version": 1, "seq": 14, "ts": "2026-09-14T11:41:12.987995Z", "run_id": "e6-sc-shared", "kind": "reference", "payload": {"task_id": "78", "available": true, "n_steps": 30, "reason": "pass", "reference_id": "96650c27e14aca2a"}}
+{"schema_version": 1, "seq": 15, "ts": "2026-09-14T11:56:42.291569Z", "run_id": "e6-sc-shared", "kind": "estimate", "payload": {"task_id": "79", "regime": "zero", "p_hat": 0.0, "n": 10}}
+{"schema_version": 1, "seq": 16, "ts": "2026-09-14T11:56:47.304135Z", "run_id": "e6-sc-shared", "kind": "reference", "payload": {"task_id": "79", "available": true, "n_steps": 16, "reason": "pass", "reference_id": "3a80be1c591d4f01"}}

@@ -1,0 +1,254 @@
+[
+ {
+  "id": "A:79:86cd2239f5be36e5",
+  "arm": "A",
+  "task": "79",
+  "kind": "stage",
+  "t": 11,
+  "candidate": {
+   "rules_code": "",
+   "in_env_actions": [
+    {
+     "kwargs": {
+      "text": "look"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "go to sinkbasin 1"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "go to microwave 1"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "open microwave 1"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "close microwave 1"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "go to garbagecan 1"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "go to fridge 1"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "open fridge 1"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "close fridge 1"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "go to diningtable 1"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "take tomato 1 from diningtable 1"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "look"
+     },
+     "name": "do"
+    }
+   ]
+  }
+ },
+ {
+  "id": "B:78:39a8d146618c067b",
+  "arm": "B",
+  "task": "78",
+  "kind": "stage",
+  "t": 25,
+  "candidate": {
+   "rules_code": "",
+   "in_env_actions": [
+    {
+     "kwargs": {
+      "text": "look"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "go to sinkbasin 1"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "go to drawer 1"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "open drawer 1"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "close drawer 1"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "go to drawer 2"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "open drawer 2"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "close drawer 2"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "go to drawer 3"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "open drawer 3"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "close drawer 3"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "go to drawer 4"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "open drawer 4"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "close drawer 4"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "go to drawer 5"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "open drawer 5"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "close drawer 5"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "go to drawer 6"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "open drawer 6"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "close drawer 6"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "go to drawer 7"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "open drawer 7"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "close drawer 7"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "go to countertop 1"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "go to countertop 2"
+     },
+     "name": "do"
+    },
+    {
+     "kwargs": {
+      "text": "look"
+     },
+     "name": "do"
+    }
+   ]
+  }
+ }
+]

@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "run_id": "e6-sc-B",
+  "created_at": "2026-09-14T11:59:30.868412Z",
+  "seed": 0,
+  "config_sha256": "a3bf8a04b7543a7a5175593314d9d42c29cc0918a29a04fed568b37d5aaf00b3",
+  "config_schema_version": 1,
+  "aea_config_sha256": "8a688301287972f0ab2d16df21e0e90b2d0e1c180e45fa0dc64104118f686b48",
+  "config_path": null,
+  "git_sha": "21ce0c4e0cbcf75b5461fbfdb2953cbcac3f133d",
+  "git_dirty": false,
+  "envharness_sha": "21ce0c4e0cbcf75b5461fbfdb2953cbcac3f133d",
+  "aea_version": "0.1.0",
+  "python_version": "3.12.9",
+  "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+  "out_dir": "/home/kree/work/EnvJudge-aea-llm/runs/e6-sc-B",
+  "extra": {
+    "experiment": "E6 LOW stage control (paired shared-evidence comparison, PREREG_LOW_STAGE_CONTROL)",
+    "prereg": "experiments/alfworld_e6/PREREG_LOW_STAGE_CONTROL.md",
+    "prereg_sha": "d66fb60",
+    "method_sha": "423011c",
+    "src_aea_tree": "6e7e47ca000664cb+DIRTY",
+    "src_aea_unmodified_vs_method_sha": true,
+    "method_version": "llm_v1_stage_control",
+    "aea_config": {
+      "schema_version": 4,
+      "method_version": "llm_v1_stage_control",
+      "band_t": [
+        0.4,
+        0.6
+      ],
+      "band_l": [
+        0.2,
+        0.8
+      ],
+      "k": 16,
+      "accept": [
+        3,
+        5
+      ],
+      "probe": [
+        4,
+        8
+      ],
+      "cap": 30,
+      "impl": {
+        "batch_first": 4,
+        "batch_next": 2,
+        "confidence": 0.9,
+        "max_bisections": 4,
+        "order_tolerance": 0.375,
+        "warm_start_min_history": 3,
+        "proposer_cap": 2,
+        "n_failed_rollouts": 3,
+        "max_candidates": 6,
+        "stage_budget": 100,
+        "oracle_attempts": 3,
+        "oracle_max_steps": 50,
+        "policy_max_steps": 50
+      }
+    },
+    "tasks": [
+      62,
+      66,
+      67,
+      70,
+      71,
+      73,
+      78,
+      79
+    ],
+    "cap_usd": 50.0,
+    "policy_endpoint_pin": "alibaba",
+    "arm": "B",
+    "stage": "arms",
+    "shared_run": "e6-sc-shared"
+  }
+}

@@ -1,0 +1,1688 @@
+{
+ "A": {
+  "62": {
+   "task": "62",
+   "arm": "A",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "outcome": "dropped",
+   "reason": "too_easy",
+   "n_search": 18,
+   "reference": {
+    "available": true,
+    "n_steps": 12,
+    "reference_id": "0f40dac609229094"
+   },
+   "mode": "refalign",
+   "proposals": [
+    {
+     "source": "reference",
+     "trajectory_id": "reference",
+     "step": 8,
+     "diagnosis": 1
+    },
+    {
+     "source": "reference",
+     "trajectory_id": "reference",
+     "step": 10,
+     "diagnosis": 2
+    }
+   ],
+   "proposal_rejected": [],
+   "diagnoses": [
+    {
+     "failure_id": "F1",
+     "failure_step": 3,
+     "reference_step": 7,
+     "error_cause": "The policy searches cabinets for a lettuce instead of recognizing that the lettuce is on the diningtable. It never reaches the diningtable to pick up the lettuce, so it ends at the countertop empty-handed and cannot move anything.",
+     "fix_hint": "Missing the capability to locate the lettuce: it must learn to go to diningtable 1 and take the lettuce there rather than exhaustively opening cabinets.",
+     "evidence": "F1 steps 3-12 repeatedly go/open cabinets with 'nothing' inside; by step 47-48 it reaches countertop with empty inventory and 'move lettuce 1' has no effect."
+    },
+    {
+     "failure_id": "F2",
+     "failure_step": 47,
+     "reference_step": 10,
+     "error_cause": "The policy takes lettuce 2 from the diningtable and moves it directly to the countertop without cleaning it first. The task requires a CLEAN lettuce, so it fails the goal despite placing an object.",
+     "fix_hint": "Missing the cleaning step: it must clean the picked lettuce at sinkbasin 1 before moving it to the countertop.",
+     "evidence": "F2 step 47 takes lettuce 2, step 48 'move lettuce 2 to countertop' fails (not at countertop), step 49-50 moves it to countertop but never cleaned it."
+    },
+    {
+     "failure_id": "F3",
+     "failure_step": 3,
+     "reference_step": 7,
+     "error_cause": "Same as F1: the policy wanders through cabinets looking for a lettuce and never goes to diningtable 1, so it never obtains the lettuce and then just calls done repeatedly.",
+     "fix_hint": "Missing the capability to locate and obtain the lettuce from diningtable 1.",
+     "evidence": "F3 steps 3-12 open empty cabinets; step 45-47 repeatedly 'done' with no lettuce obtained."
+    }
+   ],
+   "diagnosis_rejected": [],
+   "certified": [
+    "62:eb1e88ab62a732f8",
+    "62:a38658123ab1b447"
+   ],
+   "uncertified": [],
+   "probe": [
+    {
+     "id": "62:eb1e88ab62a732f8",
+     "t": 8,
+     "source": "reference",
+     "successes": 4,
+     "n": 4,
+     "verdict": "too_easy"
+    },
+    {
+     "id": "62:a38658123ab1b447",
+     "t": 10,
+     "source": "reference",
+     "successes": 4,
+     "n": 4,
+     "verdict": "too_easy"
+    }
+   ],
+   "designer_called": true,
+   "probe_rollouts": 8,
+   "category": "leveraged_outside_target",
+   "leverage": true
+  },
+  "66": {
+   "task": "66",
+   "arm": "A",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "outcome": "dropped",
+   "reason": "too_easy",
+   "n_search": 18,
+   "reference": {
+    "available": true,
+    "n_steps": 9,
+    "reference_id": "601aa61817ef96db"
+   },
+   "mode": "refalign",
+   "proposals": [
+    {
+     "source": "reference",
+     "trajectory_id": "reference",
+     "step": 4,
+     "diagnosis": 1
+    },
+    {
+     "source": "reference",
+     "trajectory_id": "reference",
+     "step": 5,
+     "diagnosis": 1
+    }
+   ],
+   "proposal_rejected": [],
+   "diagnoses": [
+    {
+     "failure_id": "F1",
+     "failure_step": 1,
+     "reference_step": 4,
+     "error_cause": "The policy wanders aimlessly across cabinets, drawers, countertops, and sinkbasin without ever locating the lettuce. The lettuce in this environment is on garbagecan 1, but the policy never navigates to garbagecan 1, instead repeatedly visiting empty containers and surfaces.",
+     "fix_hint": "The policy lacks the ability to find the target object (lettuce). It needs to learn to explore/navigate to the garbagecan where the lettuce is located (garbagecan 1), rather than repeatedly checking cabinets/drawers/countertops.",
+     "evidence": "F1 steps 1-12 and 45-50 show repeated visits to cabinet 1, sinkbasin 1, drawer 1, countertop 1 with no lettuce found; reference finds lettuce at garbagecan 1 by step 4 and picks it up at step 5."
+    },
+    {
+     "failure_id": "F2",
+     "failure_step": 1,
+     "reference_step": 4,
+     "error_cause": "The policy searches cabinets and countertops but never reaches garbagecan 1 where the lettuce is located. It eventually finds a different lettuce (lettuce 2) on countertop 3 at step 50, but has already exhausted its step budget without cleaning or placing it.",
+     "fix_hint": "The policy lacks the ability to locate the correct lettuce (lettuce 1 on garbagecan 1). It needs to learn to go to garbagecan 1 to obtain the lettuce, then clean and fridge it.",
+     "evidence": "F2 steps 1-12 search cabinets and countertop 1; only at step 49-50 does it find lettuce 2 on countertop 3, far too late and the wrong instance."
+    },
+    {
+     "failure_id": "F3",
+     "failure_step": 1,
+     "reference_step": 4,
+     "error_cause": "The policy opens cabinet after cabinet (18,19,20,21...) looking for the lettuce, never visiting garbagecan 1 where the lettuce actually is. It never acquires any lettuce.",
+     "fix_hint": "The policy lacks the ability to locate the lettuce. It needs to learn to navigate to garbagecan 1 to pick up lettuce 1 rather than exhaustively opening cabinets.",
+     "evidence": "F3 steps 45-50 show it opening empty cabinets 18-21; reference reaches garbagecan 1 at step 4 and takes lettuce 1 at step 5."
+    }
+   ],
+   "diagnosis_rejected": [],
+   "certified": [
+    "66:315d7908e0b4f68e",
+    "66:6db14e94185348fb"
+   ],
+   "uncertified": [],
+   "probe": [
+    {
+     "id": "66:315d7908e0b4f68e",
+     "t": 4,
+     "source": "reference",
+     "successes": 4,
+     "n": 4,
+     "verdict": "too_easy"
+    },
+    {
+     "id": "66:6db14e94185348fb",
+     "t": 5,
+     "source": "reference",
+     "successes": 4,
+     "n": 4,
+     "verdict": "too_easy"
+    }
+   ],
+   "designer_called": true,
+   "probe_rollouts": 8,
+   "category": "leveraged_outside_target",
+   "leverage": true
+  },
+  "67": {
+   "task": "67",
+   "arm": "A",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "outcome": "dropped",
+   "reason": "uncertified",
+   "n_search": 10,
+   "reference": {
+    "available": false,
+    "n_steps": 0,
+    "reference_id": null
+   },
+   "mode": "failure_only",
+   "proposals": [
+    {
+     "source": "failure",
+     "trajectory_id": "F1",
+     "step": 49
+    },
+    {
+     "source": "failure",
+     "trajectory_id": "F3",
+     "step": 45
+    }
+   ],
+   "proposal_rejected": [],
+   "certified": [],
+   "uncertified": [
+    {
+     "id": "67:3d060f0f42fc3e69",
+     "t": 49,
+     "reason": {
+      "oracle_1": "verifier_fail",
+      "oracle_2": "verifier_fail",
+      "oracle_3": "verifier_fail"
+     }
+    },
+    {
+     "id": "67:78659377657bc3dc",
+     "t": 45,
+     "reason": {
+      "oracle_1": "verifier_fail",
+      "oracle_2": "verifier_fail",
+      "oracle_3": "verifier_fail"
+     }
+    }
+   ],
+   "designer_called": true,
+   "probe_rollouts": 0,
+   "category": "dead",
+   "leverage": false
+  },
+  "70": {
+   "task": "70",
+   "arm": "A",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "outcome": "dropped",
+   "reason": "too_easy",
+   "n_search": 18,
+   "reference": {
+    "available": true,
+    "n_steps": 15,
+    "reference_id": "a4a080a7da9e85e5"
+   },
+   "mode": "refalign",
+   "proposals": [
+    {
+     "source": "reference",
+     "trajectory_id": "reference",
+     "step": 12,
+     "diagnosis": 1
+    },
+    {
+     "source": "reference",
+     "trajectory_id": "reference",
+     "step": 13,
+     "diagnosis": 1
+    }
+   ],
+   "proposal_rejected": [],
+   "diagnoses": [
+    {
+     "failure_id": "F1",
+     "failure_step": 1,
+     "reference_step": 12,
+     "error_cause": "The policy begins an exhaustive, unguided search of cabinets/drawers rather than first locating the target object (glassbottle). It never reaches countertop 2 where the glassbottle 1 actually is, so it never acquires the glassbottle and cannot complete the task.",
+     "fix_hint": "The policy needs to search receptacles that plausibly hold a glassbottle (countertops, diningtable) rather than blindly enumerating cabinets; specifically it must reach countertop 2 and take glassbottle 1.",
+     "evidence": "F1 spends all 50 steps going to/open cabinets 1..27 and drawers, finding only winebottle 1, pot 3, dishsponge 1; it never visits countertop 2 where the reference finds glassbottle 1 at step 12."
+    },
+    {
+     "failure_id": "F2",
+     "failure_step": 1,
+     "reference_step": 12,
+     "error_cause": "Same unguided cabinet/drawer sweep; the policy wanders among cabinets and drawers and never reaches countertop 2, so it never obtains the glassbottle.",
+     "fix_hint": "Must locate and take glassbottle 1 from countertop 2 instead of exhaustively opening cabinets/drawers.",
+     "evidence": "F2 opens cabinets 1..6 then drawers and countertop 1, never countertop 2; ends with empty cabinets, no glassbottle in inventory."
+    },
+    {
+     "failure_id": "F3",
+     "failure_step": 1,
+     "reference_step": 12,
+     "error_cause": "Same failure mode: blind cabinet enumeration without reaching the countertop holding the glassbottle.",
+     "fix_hint": "Must reach countertop 2 and take glassbottle 1.",
+     "evidence": "F3 mirrors F1/F2 cabinet sweep; no countertop 2 visit, no glassbottle acquired."
+    }
+   ],
+   "diagnosis_rejected": [],
+   "certified": [
+    "70:a04910a6bcec053c",
+    "70:ad80f5ab8b46372a"
+   ],
+   "uncertified": [],
+   "probe": [
+    {
+     "id": "70:a04910a6bcec053c",
+     "t": 12,
+     "source": "reference",
+     "successes": 4,
+     "n": 4,
+     "verdict": "too_easy"
+    },
+    {
+     "id": "70:ad80f5ab8b46372a",
+     "t": 13,
+     "source": "reference",
+     "successes": 4,
+     "n": 4,
+     "verdict": "too_easy"
+    }
+   ],
+   "designer_called": true,
+   "probe_rollouts": 8,
+   "category": "leveraged_outside_target",
+   "leverage": true
+  },
+  "71": {
+   "task": "71",
+   "arm": "A",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "outcome": "dropped",
+   "reason": "too_easy",
+   "n_search": 18,
+   "reference": {
+    "available": true,
+    "n_steps": 14,
+    "reference_id": "c187c8859581d92f"
+   },
+   "mode": "refalign",
+   "proposals": [
+    {
+     "source": "reference",
+     "trajectory_id": "reference",
+     "step": 10,
+     "diagnosis": 1
+    },
+    {
+     "source": "reference",
+     "trajectory_id": "reference",
+     "step": 11,
+     "diagnosis": 2
+    }
+   ],
+   "proposal_rejected": [],
+   "diagnoses": [
+    {
+     "failure_id": "F3",
+     "failure_step": 10,
+     "reference_step": 11,
+     "error_cause": "The policy skips the heating step entirely. After picking up the mug it goes straight to cabinet 1, opens it, and moves the (cold) mug in. The task requires a HOT mug, but the policy never heats the mug with the microwave.",
+     "fix_hint": "Missing capability: recognizing that 'hot' is a required property of the mug and that heating must be performed (heat mug with microwave) before placing it in the cabinet.",
+     "evidence": "F3 step 10 'go to cabinet 1', step 12 'move mug 1 to cabinet 1' with no heat action; reference heats mug at step 11-12 before moving it."
+    },
+    {
+     "failure_id": "F1",
+     "failure_step": 11,
+     "reference_step": 11,
+     "error_cause": "After picking up the mug, the policy goes to stoveburner 1 and repeatedly attempts 'go to stoveburner 1' with no effect, instead of going to the microwave and heating the mug. It never applies heat, so it wanders without ever producing a hot mug.",
+     "fix_hint": "Missing capability: knowing the correct heating appliance (microwave) and the correct action 'heat mug 1 with microwave 1' to make the mug hot.",
+     "evidence": "F1 step 11 'go to stoveburner 1', step 12 'go to stoveburner 1 [no effect]'; reference step 11 'go to microwave 1', step 12 'heat mug 1 with microwave 1'."
+    }
+   ],
+   "diagnosis_rejected": [],
+   "certified": [
+    "71:9d0707eac7d2a260",
+    "71:f043393e8aa3073e"
+   ],
+   "uncertified": [],
+   "probe": [
+    {
+     "id": "71:9d0707eac7d2a260",
+     "t": 10,
+     "source": "reference",
+     "successes": 4,
+     "n": 4,
+     "verdict": "too_easy"
+    },
+    {
+     "id": "71:f043393e8aa3073e",
+     "t": 11,
+     "source": "reference",
+     "successes": 4,
+     "n": 4,
+     "verdict": "too_easy"
+    }
+   ],
+   "designer_called": true,
+   "probe_rollouts": 8,
+   "category": "leveraged_outside_target",
+   "leverage": true
+  },
+  "73": {
+   "task": "73",
+   "arm": "A",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "outcome": "dropped",
+   "reason": "uncertified",
+   "n_search": 10,
+   "reference": {
+    "available": false,
+    "n_steps": 0,
+    "reference_id": null
+   },
+   "mode": "failure_only",
+   "proposals": [
+    {
+     "source": "failure",
+     "trajectory_id": "F1",
+     "step": 6
+    },
+    {
+     "source": "failure",
+     "trajectory_id": "F1",
+     "step": 2
+    }
+   ],
+   "proposal_rejected": [],
+   "certified": [],
+   "uncertified": [
+    {
+     "id": "73:05281edbacddc4d7",
+     "t": 6,
+     "reason": {
+      "oracle_1": "verifier_fail",
+      "oracle_2": "verifier_fail",
+      "oracle_3": "verifier_fail"
+     }
+    },
+    {
+     "id": "73:9c8ca48de5563696",
+     "t": 2,
+     "reason": {
+      "oracle_1": "verifier_fail",
+      "oracle_2": "verifier_fail",
+      "oracle_3": "verifier_fail"
+     }
+    }
+   ],
+   "designer_called": true,
+   "probe_rollouts": 0,
+   "category": "dead",
+   "leverage": false
+  },
+  "78": {
+   "task": "78",
+   "arm": "A",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "outcome": "dropped",
+   "reason": "too_easy",
+   "n_search": 18,
+   "reference": {
+    "available": true,
+    "n_steps": 30,
+    "reference_id": "96650c27e14aca2a"
+   },
+   "mode": "refalign",
+   "proposals": [
+    {
+     "source": "reference",
+     "trajectory_id": "reference",
+     "step": 26,
+     "diagnosis": 1
+    },
+    {
+     "source": "reference",
+     "trajectory_id": "reference",
+     "step": 2,
+     "diagnosis": 1
+    }
+   ],
+   "proposal_rejected": [],
+   "diagnoses": [
+    {
+     "failure_id": "F1",
+     "failure_step": 1,
+     "reference_step": 2,
+     "error_cause": "The policy immediately searches cabinets (containers that hold plates/bowls) instead of locating the ladle, which the reference finds on countertop 2. It never reaches countertop 2 within its step budget, so it never acquires the ladle.",
+     "fix_hint": "Missing the search/locate capability: the policy must explore countertops (where the ladle actually is) rather than exhaustively opening cabinets and drawers. It needs to reach countertop 2 to see and take the ladle.",
+     "evidence": "F1 step 1 goes to cabinet 1 and proceeds through cabinets 1-5 and drawers 4-6, never visiting countertop 2; reference reaches countertop 2 at step 26 and finds ladle 2 there."
+    },
+    {
+     "failure_id": "F2",
+     "failure_step": 1,
+     "reference_step": 2,
+     "error_cause": "Same as F1: the policy searches cabinets/drawers in a fixed scan and never visits countertop 2, so it never finds the ladle and runs out of steps.",
+     "fix_hint": "Missing the search/locate capability: must explore countertops to find the ladle (countertop 2), not just cabinets and drawers.",
+     "evidence": "F2 mirrors F1's cabinet 1..5 scan and drawer 4..6 tail, never reaching countertop 2."
+    }
+   ],
+   "diagnosis_rejected": [],
+   "certified": [
+    "78:295e30c472374c29",
+    "78:baaa5fa2aed71add"
+   ],
+   "uncertified": [],
+   "probe": [
+    {
+     "id": "78:295e30c472374c29",
+     "t": 26,
+     "source": "reference",
+     "successes": 4,
+     "n": 4,
+     "verdict": "too_easy"
+    },
+    {
+     "id": "78:baaa5fa2aed71add",
+     "t": 2,
+     "source": "reference",
+     "successes": 0,
+     "n": 4,
+     "verdict": "too_hard"
+    }
+   ],
+   "designer_called": true,
+   "probe_rollouts": 8,
+   "category": "leveraged_outside_target",
+   "leverage": true
+  },
+  "79": {
+   "task": "79",
+   "arm": "A",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "outcome": "accepted",
+   "reason": "",
+   "n_search": 22,
+   "reference": {
+    "available": true,
+    "n_steps": 16,
+    "reference_id": "3a80be1c591d4f01"
+   },
+   "mode": "refalign",
+   "proposals": [
+    {
+     "source": "reference",
+     "trajectory_id": "reference",
+     "step": 10,
+     "diagnosis": 1
+    },
+    {
+     "source": "reference",
+     "trajectory_id": "reference",
+     "step": 11,
+     "diagnosis": 1
+    }
+   ],
+   "proposal_rejected": [],
+   "diagnoses": [
+    {
+     "failure_id": "F1",
+     "failure_step": 1,
+     "reference_step": 10,
+     "error_cause": "The policy begins by exploring cabinets 1-16 looking for a tomato, but the tomato is on diningtable 1 (and a tomato 3 also on diningtable 1). It never locates the actual tomato location and instead wanders to countertop 2, ending up trying to take a non-existent 'tomato 2 from countertop 2' repeatedly.",
+     "fix_hint": "The policy lacks the ability to find the correct tomato location. It should go to diningtable 1 and take tomato 1 (the tomato the reference heats).",
+     "evidence": "F1 steps 1-12 explore cabinets and take a bowl; step 45-50 repeatedly 'take tomato 2 from countertop 2' with 'Nothing happens', never reaching the diningtable tomato."
+    },
+    {
+     "failure_id": "F2",
+     "failure_step": 1,
+     "reference_step": 10,
+     "error_cause": "Same as F1: the policy searches cabinets for a tomato instead of going to diningtable 1, and ultimately fixates on 'tomato 2 from countertop 2' which either does not exist or is not the intended tomato.",
+     "fix_hint": "Missing the capability to identify and navigate to the diningtable to obtain the target tomato (tomato 1).",
+     "evidence": "F2 steps 1-12 mirror F1's cabinet exploration and bowl pickup; steps 45-50 repeatedly attempt 'take/examine tomato 2' with 'Nothing happens'."
+    },
+    {
+     "failure_id": "F3",
+     "failure_step": 1,
+     "reference_step": 10,
+     "error_cause": "Policy explores cabinets rather than the diningtable where the tomato is located, failing to acquire the tomato needed for heating.",
+     "fix_hint": "Missing the navigation/object-location capability: go to diningtable 1 and take tomato 1.",
+     "evidence": "F3 steps 1-11 show cabinet exploration and taking a bowl from cabinet 6 instead of going to the diningtable."
+    }
+   ],
+   "diagnosis_rejected": [],
+   "certified": [
+    "79:274dc33b05f8cd99",
+    "79:86cd2239f5be36e5"
+   ],
+   "uncertified": [],
+   "probe": [
+    {
+     "id": "79:274dc33b05f8cd99",
+     "t": 10,
+     "source": "reference",
+     "successes": 4,
+     "n": 4,
+     "verdict": "too_easy"
+    },
+    {
+     "id": "79:86cd2239f5be36e5",
+     "t": 11,
+     "source": "reference",
+     "successes": 5,
+     "n": 8,
+     "verdict": "in_band"
+    }
+   ],
+   "designer_called": true,
+   "probe_rollouts": 12,
+   "category": "accepted",
+   "accepted": {
+    "id": "79:86cd2239f5be36e5",
+    "t": 11,
+    "p_hat": 0.625
+   },
+   "confirm": {
+    "task": "79",
+    "successes": 15,
+    "n": 16,
+    "errors": 0,
+    "p16": 0.9375,
+    "learnable": false,
+    "arm": "A",
+    "t": 11,
+    "in_band_l": false,
+    "in_band_t": false
+   },
+   "leverage": true
+  }
+ },
+ "B": {
+  "62": {
+   "task": "62",
+   "arm": "B",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "outcome": "dropped",
+   "reason": "resolution_limited",
+   "n_search": 30,
+   "reference": {
+    "available": true,
+    "n_steps": 12,
+    "reference_id": "0f40dac609229094"
+   },
+   "certified": [
+    "62:bb6318ea37de8f4a"
+   ],
+   "uncertified": [],
+   "probe": [
+    {
+     "id": "62:bb6318ea37de8f4a",
+     "t": 11,
+     "source": "control",
+     "successes": 4,
+     "n": 4,
+     "verdict": "too_easy"
+    },
+    {
+     "id": "62:9756b1333bd1019f",
+     "t": 5,
+     "source": "control",
+     "successes": 0,
+     "n": 4,
+     "verdict": "too_hard"
+    },
+    {
+     "id": "62:eb1e88ab62a732f8",
+     "t": 8,
+     "source": "control",
+     "successes": 4,
+     "n": 4,
+     "verdict": "too_easy"
+    },
+    {
+     "id": "62:661bf6dd99f81d4c",
+     "t": 6,
+     "source": "control",
+     "successes": 0,
+     "n": 4,
+     "verdict": "too_hard"
+    },
+    {
+     "id": "62:1bfa65a239cd9765",
+     "t": 7,
+     "source": "control",
+     "successes": 4,
+     "n": 4,
+     "verdict": "too_easy"
+    }
+   ],
+   "designer_called": false,
+   "probe_rollouts": 20,
+   "category": "leveraged_outside_target",
+   "stage_family": {
+    "T": 12,
+    "t_max": 11,
+    "rejected": [
+     {
+      "t": 12,
+      "reason": "terminal"
+     }
+    ]
+   },
+   "stage_control": {
+    "T": 12,
+    "t_max": 11,
+    "t_max_verdict": "too_easy",
+    "history": [
+     {
+      "t": 11,
+      "s": 4,
+      "n": 4,
+      "verdict": "too_easy"
+     },
+     {
+      "t": 5,
+      "s": 0,
+      "n": 4,
+      "verdict": "too_hard"
+     },
+     {
+      "t": 8,
+      "s": 4,
+      "n": 4,
+      "verdict": "too_easy"
+     },
+     {
+      "t": 6,
+      "s": 0,
+      "n": 4,
+      "verdict": "too_hard"
+     },
+     {
+      "t": 7,
+      "s": 4,
+      "n": 4,
+      "verdict": "too_easy"
+     }
+    ],
+    "lo": 6,
+    "hi": 7,
+    "status": "resolution_limited",
+    "unique_cuts": 5,
+    "accepted_t": null,
+    "accepted_d": null
+   },
+   "leverage": true
+  },
+  "66": {
+   "task": "66",
+   "arm": "B",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "outcome": "dropped",
+   "reason": "resolution_limited",
+   "n_search": 25,
+   "reference": {
+    "available": true,
+    "n_steps": 9,
+    "reference_id": "601aa61817ef96db"
+   },
+   "certified": [
+    "66:8174e4c504b24e44"
+   ],
+   "uncertified": [],
+   "probe": [
+    {
+     "id": "66:8174e4c504b24e44",
+     "t": 8,
+     "source": "control",
+     "successes": 4,
+     "n": 4,
+     "verdict": "too_easy"
+    },
+    {
+     "id": "66:315d7908e0b4f68e",
+     "t": 4,
+     "source": "control",
+     "successes": 4,
+     "n": 4,
+     "verdict": "too_easy"
+    },
+    {
+     "id": "66:baaa5fa2aed71add",
+     "t": 2,
+     "source": "control",
+     "successes": 0,
+     "n": 4,
+     "verdict": "too_hard"
+    },
+    {
+     "id": "66:0c367e0853d50815",
+     "t": 3,
+     "source": "control",
+     "successes": 4,
+     "n": 4,
+     "verdict": "too_easy"
+    }
+   ],
+   "designer_called": false,
+   "probe_rollouts": 16,
+   "category": "leveraged_outside_target",
+   "stage_family": {
+    "T": 9,
+    "t_max": 8,
+    "rejected": [
+     {
+      "t": 9,
+      "reason": "terminal"
+     }
+    ]
+   },
+   "stage_control": {
+    "T": 9,
+    "t_max": 8,
+    "t_max_verdict": "too_easy",
+    "history": [
+     {
+      "t": 8,
+      "s": 4,
+      "n": 4,
+      "verdict": "too_easy"
+     },
+     {
+      "t": 4,
+      "s": 4,
+      "n": 4,
+      "verdict": "too_easy"
+     },
+     {
+      "t": 2,
+      "s": 0,
+      "n": 4,
+      "verdict": "too_hard"
+     },
+     {
+      "t": 3,
+      "s": 4,
+      "n": 4,
+      "verdict": "too_easy"
+     }
+    ],
+    "lo": 2,
+    "hi": 3,
+    "status": "resolution_limited",
+    "unique_cuts": 4,
+    "accepted_t": null,
+    "accepted_d": null
+   },
+   "leverage": true
+  },
+  "67": {
+   "task": "67",
+   "arm": "B",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "outcome": "dropped",
+   "reason": "reference_unavailable",
+   "n_search": 10,
+   "reference": {
+    "available": false,
+    "n_steps": 0,
+    "reference_id": null
+   },
+   "designer_called": false,
+   "probe_rollouts": 0,
+   "category": "dead",
+   "leverage": false
+  },
+  "70": {
+   "task": "70",
+   "arm": "B",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "outcome": "dropped",
+   "reason": "resolution_limited",
+   "n_search": 29,
+   "reference": {
+    "available": true,
+    "n_steps": 15,
+    "reference_id": "a4a080a7da9e85e5"
+   },
+   "certified": [
+    "70:1efa6a3993220ecb"
+   ],
+   "uncertified": [],
+   "probe": [
+    {
+     "id": "70:1efa6a3993220ecb",
+     "t": 14,
+     "source": "control",
+     "successes": 4,
+     "n": 4,
+     "verdict": "too_easy"
+    },
+    {
+     "id": "70:ed3227ef0a2a0014",
+     "t": 7,
+     "source": "control",
+     "successes": 0,
+     "n": 4,
+     "verdict": "too_hard"
+    },
+    {
+     "id": "70:48ad2066e70e0eb5",
+     "t": 10,
+     "source": "control",
+     "successes": 0,
+     "n": 4,
+     "verdict": "too_hard"
+    },
+    {
+     "id": "70:a04910a6bcec053c",
+     "t": 12,
+     "source": "control",
+     "successes": 4,
+     "n": 4,
+     "verdict": "too_easy"
+    },
+    {
+     "id": "70:636831359a0915f8",
+     "t": 11,
+     "source": "control",
+     "successes": 4,
+     "n": 4,
+     "verdict": "too_easy"
+    }
+   ],
+   "designer_called": false,
+   "probe_rollouts": 20,
+   "category": "leveraged_outside_target",
+   "stage_family": {
+    "T": 15,
+    "t_max": 14,
+    "rejected": [
+     {
+      "t": 15,
+      "reason": "terminal"
+     }
+    ]
+   },
+   "stage_control": {
+    "T": 15,
+    "t_max": 14,
+    "t_max_verdict": "too_easy",
+    "history": [
+     {
+      "t": 14,
+      "s": 4,
+      "n": 4,
+      "verdict": "too_easy"
+     },
+     {
+      "t": 7,
+      "s": 0,
+      "n": 4,
+      "verdict": "too_hard"
+     },
+     {
+      "t": 10,
+      "s": 0,
+      "n": 4,
+      "verdict": "too_hard"
+     },
+     {
+      "t": 12,
+      "s": 4,
+      "n": 4,
+      "verdict": "too_easy"
+     },
+     {
+      "t": 11,
+      "s": 4,
+      "n": 4,
+      "verdict": "too_easy"
+     }
+    ],
+    "lo": 10,
+    "hi": 11,
+    "status": "resolution_limited",
+    "unique_cuts": 5,
+    "accepted_t": null,
+    "accepted_d": null
+   },
+   "leverage": true
+  },
+  "71": {
+   "task": "71",
+   "arm": "B",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "outcome": "dropped",
+   "reason": "budget",
+   "n_search": 30,
+   "reference": {
+    "available": true,
+    "n_steps": 14,
+    "reference_id": "c187c8859581d92f"
+   },
+   "certified": [
+    "71:d57a438e1c4bd519"
+   ],
+   "uncertified": [],
+   "probe": [
+    {
+     "id": "71:d57a438e1c4bd519",
+     "t": 13,
+     "source": "control",
+     "successes": 4,
+     "n": 4,
+     "verdict": "too_easy"
+    },
+    {
+     "id": "71:5c988b98fec5d485",
+     "t": 6,
+     "source": "control",
+     "successes": 0,
+     "n": 4,
+     "verdict": "too_hard"
+    },
+    {
+     "id": "71:f550a676edb477f6",
+     "t": 9,
+     "source": "control",
+     "successes": 7,
+     "n": 8,
+     "verdict": "too_easy"
+    },
+    {
+     "id": "71:3601e15b19d9ce0f",
+     "t": 7,
+     "source": "control",
+     "successes": 0,
+     "n": 4,
+     "verdict": "too_hard"
+    }
+   ],
+   "designer_called": false,
+   "probe_rollouts": 20,
+   "category": "leveraged_outside_target",
+   "stage_family": {
+    "T": 14,
+    "t_max": 13,
+    "rejected": [
+     {
+      "t": 14,
+      "reason": "terminal"
+     }
+    ]
+   },
+   "stage_control": {
+    "T": 14,
+    "t_max": 13,
+    "t_max_verdict": "too_easy",
+    "history": [
+     {
+      "t": 13,
+      "s": 4,
+      "n": 4,
+      "verdict": "too_easy"
+     },
+     {
+      "t": 6,
+      "s": 0,
+      "n": 4,
+      "verdict": "too_hard"
+     },
+     {
+      "t": 9,
+      "s": 7,
+      "n": 8,
+      "verdict": "too_easy"
+     },
+     {
+      "t": 7,
+      "s": 0,
+      "n": 4,
+      "verdict": "too_hard"
+     }
+    ],
+    "lo": 7,
+    "hi": 9,
+    "status": "budget",
+    "unique_cuts": 4,
+    "accepted_t": null,
+    "accepted_d": null
+   },
+   "leverage": true
+  },
+  "73": {
+   "task": "73",
+   "arm": "B",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "outcome": "dropped",
+   "reason": "reference_unavailable",
+   "n_search": 10,
+   "reference": {
+    "available": false,
+    "n_steps": 0,
+    "reference_id": null
+   },
+   "designer_called": false,
+   "probe_rollouts": 0,
+   "category": "dead",
+   "leverage": false
+  },
+  "78": {
+   "task": "78",
+   "arm": "B",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "outcome": "accepted",
+   "reason": "",
+   "n_search": 30,
+   "reference": {
+    "available": true,
+    "n_steps": 30,
+    "reference_id": "96650c27e14aca2a"
+   },
+   "certified": [
+    "78:417bf6f3ed311e0f"
+   ],
+   "uncertified": [],
+   "probe": [
+    {
+     "id": "78:417bf6f3ed311e0f",
+     "t": 29,
+     "source": "control",
+     "successes": 4,
+     "n": 4,
+     "verdict": "too_easy"
+    },
+    {
+     "id": "78:915fa9167b29bb52",
+     "t": 14,
+     "source": "control",
+     "successes": 0,
+     "n": 4,
+     "verdict": "too_hard"
+    },
+    {
+     "id": "78:5763fc87133b646d",
+     "t": 21,
+     "source": "control",
+     "successes": 0,
+     "n": 4,
+     "verdict": "too_hard"
+    },
+    {
+     "id": "78:39a8d146618c067b",
+     "t": 25,
+     "source": "control",
+     "successes": 3,
+     "n": 8,
+     "verdict": "in_band"
+    }
+   ],
+   "designer_called": false,
+   "probe_rollouts": 20,
+   "category": "accepted_confirmed",
+   "accepted": {
+    "id": "78:39a8d146618c067b",
+    "t": 25,
+    "p_hat": 0.375
+   },
+   "confirm": {
+    "task": "78",
+    "successes": 8,
+    "n": 16,
+    "errors": 0,
+    "p16": 0.5,
+    "learnable": true,
+    "arm": "B",
+    "t": 25,
+    "in_band_l": true,
+    "in_band_t": true
+   },
+   "stage_family": {
+    "T": 30,
+    "t_max": 29,
+    "rejected": [
+     {
+      "t": 30,
+      "reason": "terminal"
+     }
+    ]
+   },
+   "stage_control": {
+    "T": 30,
+    "t_max": 29,
+    "t_max_verdict": "too_easy",
+    "history": [
+     {
+      "t": 29,
+      "s": 4,
+      "n": 4,
+      "verdict": "too_easy"
+     },
+     {
+      "t": 14,
+      "s": 0,
+      "n": 4,
+      "verdict": "too_hard"
+     },
+     {
+      "t": 21,
+      "s": 0,
+      "n": 4,
+      "verdict": "too_hard"
+     },
+     {
+      "t": 25,
+      "s": 3,
+      "n": 8,
+      "verdict": "in_band"
+     }
+    ],
+    "lo": 21,
+    "hi": 29,
+    "status": "accepted",
+    "unique_cuts": 4,
+    "accepted_t": 25,
+    "accepted_d": 0.8620689655172413
+   },
+   "leverage": true
+  },
+  "79": {
+   "task": "79",
+   "arm": "B",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "outcome": "dropped",
+   "reason": "budget",
+   "n_search": 30,
+   "reference": {
+    "available": true,
+    "n_steps": 16,
+    "reference_id": "3a80be1c591d4f01"
+   },
+   "certified": [
+    "79:dac538011a0bce43"
+   ],
+   "uncertified": [],
+   "probe": [
+    {
+     "id": "79:dac538011a0bce43",
+     "t": 15,
+     "source": "control",
+     "successes": 4,
+     "n": 4,
+     "verdict": "too_easy"
+    },
+    {
+     "id": "79:f8af74ee3a6c56a0",
+     "t": 7,
+     "source": "control",
+     "successes": 0,
+     "n": 4,
+     "verdict": "too_hard"
+    },
+    {
+     "id": "79:86cd2239f5be36e5",
+     "t": 11,
+     "source": "control",
+     "successes": 7,
+     "n": 8,
+     "verdict": "too_easy"
+    },
+    {
+     "id": "79:346038744815084e",
+     "t": 9,
+     "source": "control",
+     "successes": 0,
+     "n": 4,
+     "verdict": "too_hard"
+    }
+   ],
+   "designer_called": false,
+   "probe_rollouts": 20,
+   "category": "leveraged_outside_target",
+   "stage_family": {
+    "T": 16,
+    "t_max": 15,
+    "rejected": [
+     {
+      "t": 16,
+      "reason": "terminal"
+     }
+    ]
+   },
+   "stage_control": {
+    "T": 16,
+    "t_max": 15,
+    "t_max_verdict": "too_easy",
+    "history": [
+     {
+      "t": 15,
+      "s": 4,
+      "n": 4,
+      "verdict": "too_easy"
+     },
+     {
+      "t": 7,
+      "s": 0,
+      "n": 4,
+      "verdict": "too_hard"
+     },
+     {
+      "t": 11,
+      "s": 7,
+      "n": 8,
+      "verdict": "too_easy"
+     },
+     {
+      "t": 9,
+      "s": 0,
+      "n": 4,
+      "verdict": "too_hard"
+     }
+    ],
+    "lo": 9,
+    "hi": 11,
+    "status": "budget",
+    "unique_cuts": 4,
+    "accepted_t": null,
+    "accepted_d": null
+   },
+   "leverage": true
+  }
+ },
+ "gates": {
+  "A_method_version_runtime": true,
+  "A_shared_estimate_identical": true,
+  "A_shared_reference_identical": true,
+  "A_designer_calls_le_1": true,
+  "A_proposals_le_2": true,
+  "A_search_le_cap": true,
+  "A_no_fallback": true,
+  "A_reference_only_on_zero": true,
+  "A_reference_leakage": true,
+  "A_audit": {
+   "tasks": {
+    "62": {
+     "available": true,
+     "reason": "pass",
+     "reference_id": "0f40dac609229094",
+     "provenance_intact": true,
+     "designer_record": true,
+     "reference_cuts": [
+      8,
+      10
+     ],
+     "reference_steps": 12,
+     "prefixes_by_provenance": {
+      "failure": 0,
+      "reference": 8
+     },
+     "independent_overlap": 114,
+     "leaks": []
+    },
+    "66": {
+     "available": true,
+     "reason": "pass",
+     "reference_id": "601aa61817ef96db",
+     "provenance_intact": true,
+     "designer_record": true,
+     "reference_cuts": [
+      4,
+      5
+     ],
+     "reference_steps": 9,
+     "prefixes_by_provenance": {
+      "failure": 0,
+      "reference": 8
+     },
+     "independent_overlap": 82,
+     "leaks": []
+    },
+    "67": {
+     "available": false,
+     "reason": "verifier_fail"
+    },
+    "70": {
+     "available": true,
+     "reason": "pass",
+     "reference_id": "a4a080a7da9e85e5",
+     "provenance_intact": true,
+     "designer_record": true,
+     "reference_cuts": [
+      12,
+      13
+     ],
+     "reference_steps": 15,
+     "prefixes_by_provenance": {
+      "failure": 0,
+      "reference": 8
+     },
+     "independent_overlap": 35,
+     "leaks": []
+    },
+    "71": {
+     "available": true,
+     "reason": "pass",
+     "reference_id": "c187c8859581d92f",
+     "provenance_intact": true,
+     "designer_record": true,
+     "reference_cuts": [
+      10,
+      11
+     ],
+     "reference_steps": 14,
+     "prefixes_by_provenance": {
+      "failure": 0,
+      "reference": 8
+     },
+     "independent_overlap": 140,
+     "leaks": []
+    },
+    "73": {
+     "available": false,
+     "reason": "verifier_fail"
+    },
+    "78": {
+     "available": true,
+     "reason": "pass",
+     "reference_id": "96650c27e14aca2a",
+     "provenance_intact": true,
+     "designer_record": true,
+     "reference_cuts": [
+      2,
+      26
+     ],
+     "reference_steps": 30,
+     "prefixes_by_provenance": {
+      "failure": 0,
+      "reference": 8
+     },
+     "independent_overlap": 192,
+     "leaks": []
+    },
+    "79": {
+     "available": true,
+     "reason": "pass",
+     "reference_id": "3a80be1c591d4f01",
+     "provenance_intact": true,
+     "designer_record": true,
+     "reference_cuts": [
+      10,
+      11
+     ],
+     "reference_steps": 16,
+     "prefixes_by_provenance": {
+      "failure": 0,
+      "reference": 13
+     },
+     "independent_overlap": 133,
+     "leaks": []
+    }
+   },
+   "ok": true,
+   "expert_recomputed": false
+  },
+  "B_method_version_runtime": true,
+  "B_shared_estimate_identical": true,
+  "B_shared_reference_identical": true,
+  "B_designer_calls_le_1": true,
+  "B_proposals_le_2": true,
+  "B_search_le_cap": true,
+  "B_no_fallback": true,
+  "B_reference_only_on_zero": true,
+  "B_reference_leakage": true,
+  "B_audit": {
+   "tasks": {
+    "62": {
+     "available": true,
+     "reason": "pass",
+     "reference_id": "0f40dac609229094",
+     "provenance_intact": true,
+     "designer_record": false,
+     "reference_cuts": [
+      5,
+      6,
+      7,
+      8,
+      11
+     ],
+     "reference_steps": 12,
+     "prefixes_by_provenance": {
+      "failure": 0,
+      "reference": 20
+     },
+     "independent_overlap": 184,
+     "leaks": []
+    },
+    "66": {
+     "available": true,
+     "reason": "pass",
+     "reference_id": "601aa61817ef96db",
+     "provenance_intact": true,
+     "designer_record": false,
+     "reference_cuts": [
+      2,
+      3,
+      4,
+      8
+     ],
+     "reference_steps": 9,
+     "prefixes_by_provenance": {
+      "failure": 0,
+      "reference": 16
+     },
+     "independent_overlap": 119,
+     "leaks": []
+    },
+    "67": {
+     "available": false,
+     "reason": "verifier_fail"
+    },
+    "70": {
+     "available": true,
+     "reason": "pass",
+     "reference_id": "a4a080a7da9e85e5",
+     "provenance_intact": true,
+     "designer_record": false,
+     "reference_cuts": [
+      7,
+      10,
+      11,
+      12,
+      14
+     ],
+     "reference_steps": 15,
+     "prefixes_by_provenance": {
+      "failure": 0,
+      "reference": 20
+     },
+     "independent_overlap": 112,
+     "leaks": []
+    },
+    "71": {
+     "available": true,
+     "reason": "pass",
+     "reference_id": "c187c8859581d92f",
+     "provenance_intact": true,
+     "designer_record": false,
+     "reference_cuts": [
+      6,
+      7,
+      9,
+      13
+     ],
+     "reference_steps": 14,
+     "prefixes_by_provenance": {
+      "failure": 0,
+      "reference": 20
+     },
+     "independent_overlap": 429,
+     "leaks": []
+    },
+    "73": {
+     "available": false,
+     "reason": "verifier_fail"
+    },
+    "78": {
+     "available": true,
+     "reason": "pass",
+     "reference_id": "96650c27e14aca2a",
+     "provenance_intact": true,
+     "designer_record": false,
+     "reference_cuts": [
+      14,
+      21,
+      25,
+      29
+     ],
+     "reference_steps": 30,
+     "prefixes_by_provenance": {
+      "failure": 0,
+      "reference": 21
+     },
+     "independent_overlap": 142,
+     "leaks": []
+    },
+    "79": {
+     "available": true,
+     "reason": "pass",
+     "reference_id": "3a80be1c591d4f01",
+     "provenance_intact": true,
+     "designer_record": false,
+     "reference_cuts": [
+      7,
+      9,
+      11,
+      15
+     ],
+     "reference_steps": 16,
+     "prefixes_by_provenance": {
+      "failure": 0,
+      "reference": 20
+     },
+     "independent_overlap": 135,
+     "leaks": []
+    }
+   },
+   "ok": true,
+   "expert_recomputed": false
+  },
+  "method_unmodified": true,
+  "all_pass": true,
+  "A_mode_refalign_on_every_zero_task": true,
+  "B_no_designer_call": true,
+  "B_first_probe_is_t_max": true,
+  "B_no_duplicate_cut": true
+ },
+ "decision": {
+  "tasks": [
+   "62",
+   "66",
+   "67",
+   "70",
+   "71",
+   "73",
+   "78",
+   "79"
+  ],
+  "zero_tasks": [
+   "62",
+   "66",
+   "67",
+   "70",
+   "71",
+   "73",
+   "78",
+   "79"
+  ],
+  "n_zero": 8,
+  "A": {
+   "accepted": 1,
+   "k16_confirmed": 0,
+   "leveraged_outside_target": 5,
+   "dead": 2,
+   "leverage": 6,
+   "budget": 0,
+   "resolution_limited": 0,
+   "nonmonotonic_profile": 0,
+   "invalid_stage": 2,
+   "no_stage_leverage": 0,
+   "probe_rollouts": 52,
+   "conversion": 0.16666666666666666
+  },
+  "B": {
+   "accepted": 1,
+   "k16_confirmed": 1,
+   "leveraged_outside_target": 5,
+   "dead": 2,
+   "leverage": 6,
+   "budget": 2,
+   "resolution_limited": 3,
+   "nonmonotonic_profile": 0,
+   "invalid_stage": 0,
+   "no_stage_leverage": 0,
+   "probe_rollouts": 116,
+   "conversion": 0.16666666666666666
+  },
+  "paired": {
+   "A": 1,
+   "tie": 6,
+   "B": 1
+  },
+  "t_max_verdicts": {
+   "too_hard": 0,
+   "in_band": 0,
+   "too_easy": 6
+  },
+  "decision": "STAGE_CONTROL_NOT_SUPPORTED"
+ },
+ "spend": {
+  "e6-sc-A": 1.07,
+  "e6-sc-B": 6.04,
+  "e6-sc-confirm": 1.55,
+  "e6-sc-shared": 7.97
+ },
+ "designer_usd": {
+  "A": 0.047,
+  "B": 0.0
+ }
+}

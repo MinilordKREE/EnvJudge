@@ -228,7 +228,7 @@ def leakage_audit(d: Path) -> dict[str, Any]:
             out["tasks"][task] = rec
             continue
         row = next((c for c in calls if str(c["task_id"]) == task and c["regime"] == "zero"), {})
-        kept_hash = str(row.get("evidence", "")).split("sha256 ")[1][:16] if row else ""
+        kept_hash = str(row.get("evidence", "")).split("sha256 ")[1][:16] if row else None
         prov = recorded.get(task)
         leaks: list[str] = []
         actions: list[str] = [str(a) for a in (prov or {}).get("actions", [])]
@@ -237,9 +237,12 @@ def leakage_audit(d: Path) -> dict[str, Any]:
         else:
             rid = str(prov.get("reference_id"))
             rec["reference_id"] = rid
-            rec["provenance_intact"] = (
-                rid == reference_id(actions) == str(r.get("reference_id")) == kept_hash
-            )
+            # record == recomputed == reference event; and == the redacted designer evidence
+            # when the arm made a designer call (a controller arm makes none by design)
+            rec["provenance_intact"] = rid == reference_id(actions) == str(
+                r.get("reference_id")
+            ) and (kept_hash is None or kept_hash == rid)
+            rec["designer_record"] = kept_hash is not None
             if not rec["provenance_intact"]:
                 leaks.append("recorded reference hash does not match the record / event / evidence")
         # provenance of every staged prefix: candidate id -> (source, cut)

@@ -1,0 +1,26 @@
+{
+ "A:79:86cd2239f5be36e5": {
+  "task": "79",
+  "successes": 15,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.9375,
+  "learnable": false,
+  "arm": "A",
+  "t": 11,
+  "in_band_l": false,
+  "in_band_t": false
+ },
+ "B:78:39a8d146618c067b": {
+  "task": "78",
+  "successes": 8,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.5,
+  "learnable": true,
+  "arm": "B",
+  "t": 25,
+  "in_band_l": true,
+  "in_band_t": true
+ }
+}

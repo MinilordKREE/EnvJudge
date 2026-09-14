@@ -143,6 +143,13 @@ def main(argv: list[str] | None = None) -> int:
     g = mr.gates(rows_a, rows_b)
     # arm B has no designer call by design: the direct/refalign mode gates do not apply to it
     g.pop("B_mode_refalign_on_every_zero_task", None)
+    # arm B's Stage candidates come from the controller (prereg: source `control` for B)
+    ev_b = e3.jsonl(er.RUNS / er.ARM_IDS["B"] / "events.jsonl")
+    g["B_no_fallback"] = all(
+        (e.get("payload") or {}).get("source") == "control"
+        for e in ev_b
+        if e.get("kind") == "stage_candidates"
+    )
     g["A_mode_refalign_on_every_zero_task"] = all(
         r.get("mode") == "refalign"
         for r in rows_a.values()
