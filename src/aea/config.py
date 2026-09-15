@@ -54,7 +54,12 @@ class ImplConfig(StrictModel):
 class AEAConfig(StrictModel):
     schema_version: Literal[4] = 4
     method_version: Literal[
-        "v0.4", "llm_v1", "llm_v1_refalign", "llm_v1_stage_control", "llm_v1_assistive_rules"
+        "v0.4",
+        "llm_v1",
+        "llm_v1_refalign",
+        "llm_v1_stage_control",
+        "llm_v1_assistive_rules",
+        "llm_v2_iterative_low",
     ] = "v0.4"
     """Which method the controller runs. ``v0.4`` (default; a config without the field is v0.4)
     is the box of docs/spec/AEA_v0.4.md unchanged; ``llm_v1`` (docs/spec/AEA_llm_v1.md) replaces
@@ -67,7 +72,9 @@ class AEAConfig(StrictModel):
     reference prefix (docs/design/AEA_LOW_STAGE_CONTROL.md). ``llm_v1_assistive_rules`` (phase
     3.4) equals ``llm_v1`` on band and saturated and replaces the LOW intervention family by an
     LLM-generated assistive Rules family W(d) calibrated by the same measurement
-    (docs/design/AEA_LOW_ASSISTIVE_RULES.md). Same schema: the field has a default."""
+    (docs/design/AEA_LOW_ASSISTIVE_RULES.md). The experimental ``llm_v2_iterative_low`` adds
+    bounded two-call LOW DESIGN, followed by
+    frozen-family CONTROL; HIGH/MID remain llm_v1. Same schema: the field has a default."""
     band_t: tuple[float, float] = (0.4, 0.6)
     """Target band B_T: the accept range is B_T expressed at ``probe[1]`` rollouts."""
     band_l: tuple[float, float] = (0.2, 0.8)

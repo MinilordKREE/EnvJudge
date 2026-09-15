@@ -51,6 +51,7 @@ from aea.core.trace import TraceWriter as EventWriter
 from aea.core.trace import read_trace
 from aea.designer import (
     AssistDesign,
+    AssistFamily,
     Evidence,
     Reference,
     ReferenceProvider,
@@ -76,6 +77,7 @@ from aea.io import (
     write_corpus_entry,
 )
 from aea.llm.types import Attribution, BudgetName, ChatRequest, ChatResponse
+from aea.low_optimizer import Feedback, LowEnvironmentOptimizer, propose_low
 from aea.rules_control import assist_bracket
 from aea.session import SESSION_LOCK, Session
 from aea.stage import (
@@ -91,7 +93,7 @@ from aea.stage import (
     candidate_id as stage_candidate_id,
 )
 from aea.stage_control import InvalidStageError, stage_bracket
-from aea.witness import policy_shortest_success, solvable
+from aea.witness import Solvable, policy_shortest_success, solvable
 
 type Outcome = Literal["accepted", "kept", "dropped", "infra_error"]
 
@@ -423,7 +425,10 @@ class Controller:
     @property
     def _llm(self) -> bool:
         """Every llm_v1 variant shares every path except LOW."""
-        return self.config.method_version.startswith("llm_v1")
+        return (
+            self.config.method_version.startswith("llm_v1")
+            or self.config.method_version == "llm_v2_iterative_low"
+        )
 
     def _harden(self, task: TaskRef, est: EstimateResult) -> TaskOutcome:
         if self._llm:
@@ -607,6 +612,8 @@ class Controller:
 
     # ------------------------------------------------------------------ stage
     def _stage(self, task: TaskRef, est: EstimateResult) -> TaskOutcome:
+        if self.config.method_version == "llm_v2_iterative_low":
+            return self._stage_iterative_low(task, est)
         if self.config.method_version == "llm_v1_stage_control":
             return self._stage_control(task, est)
         if self.config.method_version == "llm_v1_assistive_rules":
@@ -954,6 +961,147 @@ class Controller:
                 task, "dropped", "uncertified", "zero", est.p_hat, detail={"rejected": rejected}
             )
         return self._probe_stages(task, est, staged, opts)
+
+    # ------------------------------------------------------------------ experimental iterative LOW
+    def _stage_iterative_low(self, task: TaskRef, est: EstimateResult) -> TaskOutcome:
+        failures = seeded_failures(est.traces, self.config.impl.n_failed_rollouts, seed=task.seed)
+        if not failures:
+            return TaskOutcome(task, "dropped", "no_failed_rollout", "zero", est.p_hat)
+        reference = self._lazy_reference(task)
+        if reference is None:
+            return TaskOutcome(
+                task,
+                "dropped",
+                "reference_unavailable",
+                "zero",
+                est.p_hat,
+                detail={"design_status": "inconclusive"},
+            )
+        evidence = serialize_low(failures, est.p_hat, est.n, reference, rich=True)
+        ctx = FamilyContext(task.task_id, ())
+
+        def propose(feedback: Feedback | None, index: int) -> dict[str, Any]:
+            args = propose_low(
+                self._designer(),
+                model=self.substrate.designer_model(),
+                evidence=evidence,
+                feedback=feedback,
+                attribution=self._attr(task, "design_low", "designer"),
+                seed=task.seed + index - 1,
+            )
+            self._record_designer(
+                task,
+                "zero",
+                evidence,
+                mode="iterative_low",
+                optimizer_call_index=index,
+                arguments=args,
+                feedback=feedback.as_record() if feedback else None,
+            )
+            return args
+
+        def certify(candidate: Candidate) -> Solvable:
+            with SESSION_LOCK:
+                return solvable(
+                    candidate,
+                    lambda c: self.substrate.open_session(task, c, None),
+                    self.config,
+                    policy_success=None,
+                    oracle=self.substrate.has_oracle(),
+                    by_construction=False,
+                )
+
+        def measure(family: AssistFamily, dose: float) -> Eval:
+            candidate = family.make(dose, ctx)
+            assert candidate is not None
+
+            def run(n: int) -> list[Trace]:
+                traces = self._rollouts(task, candidate, n, f"dose:{family.name}")
+                if len(traces) != n or any(t.error for t in traces):
+                    raise InfraError("incomplete iterative LOW policy batch", kind="rollout")
+                return traces
+
+            return evaluate(run, self.config)
+
+        optimizer = LowEnvironmentOptimizer(
+            evidence,
+            failures,
+            reference,
+            task_goal(failures),
+            task_id=task.task_id,
+            propose=propose,
+            certify=certify,
+            measure=measure,
+            remaining=lambda: self.budget.account(task.task_id).remaining(),
+            endpoint_reserve=2 * self.config.probe[1],
+        )
+        try:
+            result = optimizer.run()
+        finally:
+            for record in optimizer.history:
+                self._append(self.run_dir / "low_candidates.jsonl", record.as_record())
+        self._ev(
+            "iterative_design",
+            task,
+            status=result.status,
+            reason=result.reason,
+            candidate_ids=[r.candidate_id for r in optimizer.history],
+        )
+        if result.status != "viable":
+            return TaskOutcome(
+                task,
+                "dropped",
+                result.reason,
+                "zero",
+                est.p_hat,
+                detail={"design_status": result.status},
+            )
+        family, endpoint = result.family, result.endpoint
+        assert family is not None and endpoint is not None
+        self._ev(
+            "low_family_frozen",
+            task,
+            candidate_id=result.candidate_id,
+            source_sha256=optimizer.history[-1].source_sha256,
+            family=family.name,
+            direction=family.direction,
+        )
+        history = [DoseEval(1.0, endpoint)]
+        accepted = history[0] if endpoint.verdict == "in_band" else None
+        if accepted is None:
+            control = assist_bracket(lambda d: measure(family, d), self.config, leverage=history[0])
+            history = control.history
+            accepted = control.accepted
+            self._ev(
+                "dose_control",
+                task,
+                family=family.name,
+                direction=family.direction,
+                status=control.status,
+                lo=control.lo,
+                hi=control.hi,
+                history=[
+                    {"d": h.d, "s": h.eval.successes, "n": h.eval.n, "verdict": h.eval.verdict}
+                    for h in history
+                ],
+            )
+            if accepted is None:
+                return TaskOutcome(
+                    task,
+                    "dropped",
+                    control.status,
+                    "zero",
+                    est.p_hat,
+                    detail={"candidate_id": result.candidate_id, "family": family.name},
+                )
+        candidate = family.make(accepted.d, ctx)
+        assert candidate is not None
+        outcome = self._accept_assist(
+            task, family, candidate, accepted.d, accepted.eval, est, history
+        )
+        outcome.detail["design_candidate_id"] = result.candidate_id
+        outcome.detail["source_sha256"] = optimizer.history[-1].source_sha256
+        return outcome
 
     # ------------------------------------------------------------------ llm_v1_assistive_rules
     def _stage_assist(self, task: TaskRef, est: EstimateResult) -> TaskOutcome:
