@@ -1,0 +1,665 @@
+#!/usr/bin/env python3
+"""Read-only audit of a live or completed original-environment viability screen.
+
+Uses only Python's standard library. It never imports application code, resets an
+ALFWorld environment, opens an API client, changes a run artifact, or resumes work.
+JSON goes to stdout (or --output under /tmp); a concise summary goes to stderr.
+Exit 0 = no demonstrated correctness defect; exit 2 = one or more audit failures.
+"""
+
+from __future__ import annotations
+
+import argparse
+import collections
+import hashlib
+import json
+import math
+import re
+import sys
+import time
+from pathlib import Path
+
+DEFAULT_ROOT = Path("/home/kree/work/EnvJudge-aea-llm")
+TASKS = list(range(130, 150))
+VALIDATOR = "bec74ed8a6ff40e119b2299c92b07b8602ff5fef"
+PREREG = "d151b150a65f7455084345e4b165b9b62234bd4a"
+MODEL = "qwen/qwen3-8b"
+PHASE = re.compile(r"^screen:(\d+):episode:(\d+)$")
+OPERATION = re.compile(r"^screen-(\d+)-(\d+)\.json$")
+EPSILON = 1e-8
+
+
+def digest(value: object) -> str:
+    blob = value.encode() if isinstance(value, str) else json.dumps(value, sort_keys=True).encode()
+    return hashlib.sha256(blob).hexdigest()
+
+
+def audit(root: Path, run: Path) -> dict:
+    failures: list[dict] = []
+    pending: list[dict] = []
+    notes: list[str] = []
+    terminal_metadata_omissions: list[dict] = []
+    source_hashes: dict[str, str] = {}
+    checks = 0
+    running = True
+
+    def check(ok: bool, name: str, detail: object = None, *, live: bool = False) -> None:
+        nonlocal checks
+        checks += 1
+        if not ok:
+            item = {"check": name, "detail": detail}
+            (pending if live and running else failures).append(item)
+
+    def location(path: Path) -> str:
+        return str(path.relative_to(root)) if path.is_relative_to(root) else str(path)
+
+    def read(path: Path) -> bytes:
+        blob = path.read_bytes()
+        source_hashes[location(path)] = hashlib.sha256(blob).hexdigest()
+        return blob
+
+    def read_json(path: Path, default: object = None) -> object:
+        return json.loads(read(path)) if path.exists() else default
+
+    def read_jsonl(path: Path) -> list[dict]:
+        if not path.exists():
+            return []
+        blob = read(path)
+        lines = blob.splitlines()
+        rows = []
+        for index, line in enumerate(lines):
+            if not line.strip():
+                continue
+            try:
+                rows.append(json.loads(line))
+            except json.JSONDecodeError:
+                check(
+                    False,
+                    "complete_jsonl_record",
+                    {"path": str(path), "line": index + 1},
+                    live=index == len(lines) - 1,
+                )
+        return rows
+
+    screening = read_json(run / "screening.json")
+    if not isinstance(screening, dict):
+        return {"audit_status": "FAIL", "failures": [{"check": "screening_state_present"}]}
+    running = screening.get("status") == "running"
+    start_screening_hash = source_hashes[location(run / "screening.json")]
+    cap = read_json(run / "cap.json", {})
+    start_cap_hash = source_hashes.get(location(run / "cap.json"))
+    attempts = read_jsonl(run / "cap.attempts.jsonl")
+    ledger = [row for path in sorted(run.glob("ledger.*.jsonl")) for row in read_jsonl(path)]
+    operations = {}
+    for path in sorted((run / "operations").glob("*.json")):
+        match = OPERATION.fullmatch(path.name)
+        check(match is not None, "screening_only_operation", path.name)
+        if match:
+            operations[(int(match[1]), int(match[2]))] = read_json(path)
+    rows = screening.get("tasks", {})
+    declared = [int(key) for key in rows]
+    begun = sorted(set(declared) | {task for task, _ in operations})
+    check(begun == TASKS[: len(begun)], "ascending_contiguous_task_prefix", begun)
+    check(declared == TASKS[: len(declared)], "screening_state_task_order", declared)
+    check(len(begun) <= 20, "at_most_20_ids", len(begun))
+    check(len(screening.get("qualified", [])) <= 4, "at_most_four_zero_tasks")
+    check(
+        screening.get("freeze", {}).get("validator_fidelity_sha") == VALIDATOR, "frozen_validator"
+    )
+    check(
+        screening.get("freeze", {}).get("implementation_sha") == VALIDATOR, "frozen_implementation"
+    )
+    check(screening.get("freeze", {}).get("prereg_commit") == PREREG, "pushed_pool_preregistration")
+
+    # Verify exact frozen runtime/config/audit source bytes, without importing them.
+    freeze = screening.get("freeze", {})
+    expected_files = dict(freeze.get("frozen_config_hashes", {}))
+    expected_files.update(
+        {
+            "scripts/e6_iterative_low_viability.py": freeze.get("driver_sha256"),
+            "src/aea/semantic_privilege.py": freeze.get("semantic_gate_sha256"),
+            "experiments/alfworld_e6/PREREG_ITERATIVE_LOW_VIABILITY_POOL.md": freeze.get(
+                "prereg_sha256"
+            ),
+        }
+    )
+    for filename, expected in freeze.get("input_hashes", {}).items():
+        expected_files["experiments/alfworld_e6/frozen/iterative_low_viability/" + filename] = (
+            expected
+        )
+    runtime_file = (
+        root / "experiments/alfworld_e6/frozen/iterative_low_viability/runtime_hashes.json"
+    )
+    expected_files.update(read_json(runtime_file, {}))
+    for name, expected in expected_files.items():
+        path = root / name
+        check(
+            path.exists() and hashlib.sha256(read(path)).hexdigest() == expected,
+            "frozen_source_hash",
+            name,
+        )
+
+    # Every physical attempt and ledger row must carry the screening attribution.
+    attempts_by_phase = collections.defaultdict(list)
+    ledger_by_phase = collections.defaultdict(list)
+    for collection, nested in [(attempts, True), (ledger, False)]:
+        for row in collection:
+            attr = row.get("attribution", {}) if nested else row
+            phase = attr.get("phase", "")
+            match = PHASE.fullmatch(phase)
+            check(match is not None, "screening_only_physical_or_ledger_phase", phase)
+            check(
+                attr.get("arm") == "screen" and attr.get("budget") == "eval",
+                "screening_only_arm_budget",
+                attr,
+            )
+            if match:
+                task, index = map(int, match.groups())
+                check(task in TASKS and 1 <= index <= 16, "phase_within_screening_grid", phase)
+                check(str(attr.get("task_id")) == str(task), "phase_task_attribution", phase)
+                check(
+                    (task, index) in operations,
+                    "physical_or_ledger_has_dispatched_operation",
+                    phase,
+                )
+            if nested:
+                check(row.get("phase") == "screening", "physical_screening_phase")
+                attempts_by_phase[phase].append(row)
+            else:
+                ledger_by_phase[phase].append(row)
+
+    all_ids = set()
+    recorded_files = set()
+    task_results = []
+    confirmed = []
+    for task in declared:
+        row = rows[str(task)]
+        episodes = row.get("episodes", [])
+        check(row.get("task_id") == task, "task_row_identity", task)
+        check(0 <= len(episodes) <= 16, "per_task_episode_limit", task)
+        check(
+            [r.get("index") for r in episodes] == list(range(1, len(episodes) + 1)),
+            "consecutive_episode_indices",
+            task,
+        )
+        stop_indices = []
+        totals = collections.Counter()
+        for index, record in enumerate(episodes, 1):
+            phase = f"screen:{task}:episode:{index}"
+            path = run / f"task-{task}/original-{index:02}.json"
+            recorded_files.add(path)
+            check(path.exists(), "completed_original_trace_exists", str(path))
+            if not path.exists():
+                continue
+            blob = read(path)
+            traces = json.loads(blob)
+            check(
+                hashlib.sha256(blob).hexdigest() == record.get("file_sha256"),
+                "exact_original_file_hash",
+                phase,
+            )
+            check(
+                digest(traces) == record.get("trace_sha256"), "canonical_original_trace_hash", phase
+            )
+            check(len(traces) == 1, "one_trace_per_screen_episode", phase)
+            check(
+                [t.get("episode_id") for t in traces] == record.get("episode_ids"),
+                "record_episode_ids",
+                phase,
+            )
+            succeeded = sum(bool(t.get("success")) for t in traces)
+            errors = sum(bool(t.get("error")) for t in traces)
+            phase_attempts = attempts_by_phase[phase]
+            retries = [
+                r
+                for r in ledger_by_phase[phase]
+                if r.get("event") in {"infra_retry", "infra_failure"}
+            ]
+            physical_errors = sum(r.get("status") == "ambiguous_failure" for r in phase_attempts)
+            for field, value in [
+                ("successes", succeeded),
+                ("terminal_errors", errors),
+                ("physical_provider_errors", physical_errors),
+                ("provider_retry_or_failure_events", len(retries)),
+            ]:
+                check(record.get(field) == value, "episode_record_reconciles_" + field, phase)
+                totals[field] += value
+            if succeeded or errors or physical_errors or retries:
+                stop_indices.append(index)
+            for trace in traces:
+                episode_id = trace.get("episode_id")
+                check(
+                    bool(episode_id) and episode_id not in all_ids,
+                    "globally_unique_fresh_episode_id",
+                    phase,
+                )
+                all_ids.add(episode_id)
+                check(trace.get("rollout_seed") == task, "original_bridge_seed", phase)
+                check(
+                    trace.get("task_id") == "alfworld-corpus-ours-release",
+                    "original_corpus_task_label",
+                    phase,
+                )
+                candidate = trace.get("candidate", {})
+                check(
+                    candidate.get("rules_code") == "" and candidate.get("in_env_actions") == [],
+                    "identity_original_candidate",
+                    phase,
+                )
+                error = str(trace.get("error") or "")
+                # The frozen runner omits model metadata on its error-return
+                # paths. This is incomplete evidence, not proof of another
+                # policy; the frozen config and physical ledger remain checked.
+                runner_error = error.startswith(
+                    (
+                        "subprocess timeout",
+                        "subprocess exit ",
+                        "subprocess produced no Trace JSON",
+                        "policy.act raised:",
+                        "env.reset raised:",
+                        "env.step raised:",
+                    )
+                )
+                omitted_error_model = (
+                    runner_error
+                    and trace.get("policy_model_id") in (None, "")
+                    and not trace.get("success")
+                    and trace.get("duration_steps", 0) == len(trace.get("steps", []))
+                )
+                check(
+                    trace.get("policy_model_id") == MODEL or omitted_error_model,
+                    "frozen_policy_model",
+                    phase,
+                )
+                if omitted_error_model:
+                    terminal_metadata_omissions.append(
+                        {"phase": phase, "field": "policy_model_id", "error": error}
+                    )
+                check(
+                    trace.get("iteration_id") == f"{phase}-{task}-0",
+                    "original_iteration_provenance",
+                    phase,
+                )
+                steps = trace.get("steps", [])
+                check(len(steps) <= 50, "frozen_50_step_horizon", phase)
+                for step in steps:
+                    check(
+                        step.get("raw_action") == step.get("filtered_action")
+                        and not step.get("blocked_reason"),
+                        "identity_action_surface",
+                        phase,
+                    )
+                    check(
+                        step.get("raw_observation") == step.get("filtered_observation"),
+                        "identity_observation_surface",
+                        phase,
+                    )
+                rollout_rows = [
+                    r
+                    for r in ledger_by_phase[phase]
+                    if r.get("event") == "rollout" and r.get("rollout_uid") == episode_id
+                ]
+                check(
+                    len(rollout_rows) == 1, "one_rollout_ledger_row_per_original", phase, live=True
+                )
+            operation = operations.get((task, index), {})
+            check(
+                operation.get("status") in {"completed", "interrupted"}
+                or (
+                    operation.get("status") == "dispatched"
+                    and (
+                        running
+                        or (
+                            screening.get("status") == "INCONCLUSIVE"
+                            and errors > 0
+                            and bool(cap.get("stopped"))
+                            and (run / "STOP.json").exists()
+                        )
+                    )
+                ),
+                "completed_trace_operation_status",
+                phase,
+            )
+        check(
+            not stop_indices or len(episodes) == min(stop_indices),
+            "no_episode_after_first_success_or_error",
+            {
+                "task": task,
+                "first_stop": min(stop_indices) if stop_indices else None,
+                "n": len(episodes),
+            },
+        )
+        task_status = row.get("status")
+        clean_zero = len(episodes) == 16 and not any(totals.values())
+        if task_status == "confirmed_ZERO":
+            check(clean_zero, "strict_exact_0_of_16_qualification", task)
+            check(row.get("original_k16") == "0/16", "zero_label_matches_count", task)
+            confirmed.append(task)
+        elif task_status == "rejected_first_success":
+            check(
+                bool(episodes)
+                and bool(episodes[-1].get("successes"))
+                and not totals["terminal_errors"],
+                "first_success_rejection_reason",
+                task,
+            )
+        elif task_status == "rejected_provider_error":
+            check(
+                bool(
+                    totals["physical_provider_errors"] or totals["provider_retry_or_failure_events"]
+                )
+                and not totals["terminal_errors"],
+                "strict_retry_rejection_reason",
+                task,
+            )
+        else:
+            check(
+                task_status == "screening",
+                "known_task_screening_status",
+                {"task": task, "status": task_status},
+            )
+        if task != begun[-1]:
+            check(
+                task_status
+                in {"confirmed_ZERO", "rejected_first_success", "rejected_provider_error"},
+                "previous_task_terminal_before_next_task",
+                task,
+                live=True,
+            )
+        task_results.append(
+            {"task": task, "status": task_status, "episodes": len(episodes), **dict(totals)}
+        )
+    check(
+        confirmed == screening.get("qualified", []),
+        "qualified_manifest_matches_strict_zero_rows",
+        {"computed": confirmed, "recorded": screening.get("qualified")},
+        live=True,
+    )
+    if len(confirmed) == 4:
+        check(begun and begun[-1] == confirmed[-1], "stop_scan_after_four_qualified_tasks", begun)
+    status = screening.get("status")
+    if status == "qualified":
+        check(len(confirmed) == 4, "qualified_final_has_exactly_four")
+    if status == "INSUFFICIENT_FRESH_LOW":
+        check(begun == TASKS and len(confirmed) < 4, "insufficient_requires_all_twenty_ids")
+    if status in {"INCONCLUSIVE", "IMPLEMENTATION_FAILURE"}:
+        check(
+            bool(screening.get("interruption"))
+            and (run / "STOP.json").exists()
+            and bool(cap.get("stopped")),
+            "interruption_has_sticky_stop_record",
+        )
+    if status == "IMPLEMENTATION_FAILURE":
+        failures.append(
+            {
+                "check": "driver_reported_implementation_failure",
+                "detail": screening.get("interruption"),
+            }
+        )
+
+    # Recognize a not-yet-recorded live original and never mislabel it a completed
+    # episode. Finished scans may not silently leave orphan original trace files.
+    orphan_files = sorted(set(run.glob("task-*/original-[0-9][0-9].json")) - recorded_files)
+    check(not orphan_files, "all_original_files_indexed", [str(p) for p in orphan_files], live=True)
+    dispatched = [
+        f"{task}:{index}"
+        for (task, index), row in operations.items()
+        if row.get("status") == "dispatched"
+    ]
+    check(len(dispatched) <= 1, "one_original_episode_at_a_time", dispatched)
+    for (task, index), operation in operations.items():
+        check(
+            task in TASKS and 1 <= index <= 16, "dispatched_operation_within_bounds", [task, index]
+        )
+        check(
+            operation.get("metadata") == {"task": task, "n": 1},
+            "single_original_operation_metadata",
+            [task, index],
+        )
+        previous = rows.get(str(task), {}).get("episodes", [])
+        check(index <= len(previous) + 1, "no_skipped_or_duplicate_dispatch", [task, index])
+        if index > len(previous):
+            check(
+                operation.get("status") != "completed",
+                "completed_operation_is_recorded",
+                [task, index],
+                live=True,
+            )
+        if previous and index > len(previous):
+            last = previous[-1]
+            stopped = any(
+                last.get(k)
+                for k in [
+                    "successes",
+                    "terminal_errors",
+                    "physical_provider_errors",
+                    "provider_retry_or_failure_events",
+                ]
+            )
+            check(not stopped, "no_dispatch_after_task_stop_evidence", [task, index])
+    forbidden = [
+        str(p.relative_to(run))
+        for p in run.rglob("*")
+        if p.is_file()
+        and (
+            any(
+                token in p.name
+                for token in [
+                    "privileged_reference",
+                    "designer_input",
+                    "designer_request",
+                    "original_failures",
+                ]
+            )
+            or p.name
+            in {"input_manifest.json", "prepared.json", "design.json", "confirmation.json"}
+        )
+    ]
+    check(not forbidden, "no_reference_designer_or_adaptation_artifacts_yet", forbidden)
+
+    # Reconcile the physical reservation ledger and priced call ledger separately.
+    ids = [r.get("attempt") for r in attempts]
+    check(len(ids) == len(set(ids)) and all(ids), "unique_physical_attempt_ids")
+    actual = uncertain = 0.0
+    historical_spent = 0.0
+    returned_signatures = collections.Counter()
+    for row in attempts:
+        check(row.get("model") == MODEL, "policy_only_physical_model", row.get("model"))
+        reserved = float(row.get("reserved_usd", -1))
+        check(math.isfinite(reserved) and reserved > 0, "positive_finite_request_reservation")
+        check(
+            historical_spent + reserved < 8.0 + EPSILON,
+            "historical_reservation_within_screening_cap",
+            row.get("attempt"),
+        )
+        if row.get("status") == "returned":
+            priced = (
+                int(row["input_tokens"]) * 0.117 + int(row["output_tokens"]) * 0.455
+            ) / 1_000_000
+            charged = max(float(row.get("upstream_usd") or 0), priced)
+            check(
+                abs(charged - float(row.get("conservative_usd", -1))) <= EPSILON,
+                "physical_returned_cost_recalculation",
+            )
+            check(charged <= reserved + EPSILON, "physical_return_within_reservation")
+            actual += charged
+            historical_spent += charged
+            returned_signatures[
+                (row["attribution"]["phase"], row["input_tokens"], row["output_tokens"])
+            ] += 1
+        else:
+            check(row.get("status") == "ambiguous_failure", "known_physical_attempt_status")
+            uncertain += reserved
+            historical_spent += reserved
+    calls = [r for r in ledger if r.get("event") == "call"]
+    call_signatures = collections.Counter()
+    actual_ledger = 0.0
+    for row in calls:
+        check(
+            row.get("model") == MODEL and str(row.get("provider")).lower() == "alibaba",
+            "frozen_policy_provider",
+        )
+        recalculated = (
+            int(row["prompt_tokens"]) * 0.117 + int(row["completion_tokens"]) * 0.455
+        ) / 1_000_000
+        check(abs(recalculated - float(row["usd"])) <= EPSILON, "call_ledger_price_recalculation")
+        check(
+            row.get("pricing_version") == "openrouter-qwen3-8b-2026-09-07",
+            "frozen_call_pricing_version",
+        )
+        check(bool(row.get("request_sha256")), "call_request_hash_present")
+        actual_ledger += float(row["usd"])
+        call_signatures[(row["phase"], row["prompt_tokens"], row["completion_tokens"])] += 1
+    # A returned completion can fail protocol/provider validation before a call
+    # row exists. Its physical cost remains recorded, and the episode must reject.
+    surplus_calls = call_signatures - returned_signatures
+    check(
+        not surplus_calls,
+        "every_priced_call_has_returned_physical_attempt",
+        list(surplus_calls.items()),
+        live=True,
+    )
+    unmatched_returns = returned_signatures - call_signatures
+    for (phase, _tokens_in, _tokens_out), count in unmatched_returns.items():
+        match = PHASE.fullmatch(phase)
+        if match:
+            task, index = map(int, match.groups())
+            records = rows.get(str(task), {}).get("episodes", [])
+            if index <= len(records):
+                record = records[index - 1]
+                check(
+                    bool(
+                        record.get("terminal_errors")
+                        or record.get("provider_retry_or_failure_events")
+                    ),
+                    "unpriced_return_has_recorded_protocol_or_provider_failure",
+                    {"phase": phase, "unpriced_returns": count},
+                )
+    if unmatched_returns:
+        notes.append(
+            "Returned attempts without a priced-call row remain in conservative cost. "
+            "Protocol validation or a live append boundary may explain them."
+        )
+    inflight = cap.get("inflight", {})
+    check(not set(inflight) & set(ids), "no_attempt_both_final_and_inflight", live=True)
+    check(
+        cap.get("attempts") == len(attempts) + len(inflight),
+        "physical_attempt_count_reconciles",
+        {"cap": cap.get("attempts"), "completed": len(attempts), "inflight": len(inflight)},
+        live=True,
+    )
+    check(
+        abs(float(cap.get("actual_usd", -1)) - actual) <= EPSILON,
+        "cap_returned_actual_reconciles",
+        {"cap": cap.get("actual_usd"), "physical": actual},
+        live=True,
+    )
+    check(
+        abs(float(cap.get("uncertain_usd", -1)) - uncertain) <= EPSILON,
+        "cap_failed_reservations_reconcile",
+        {"cap": cap.get("uncertain_usd"), "physical": uncertain},
+        live=True,
+    )
+    committed = (
+        float(cap.get("actual_usd", 0))
+        + float(cap.get("uncertain_usd", 0))
+        + sum(map(float, inflight.values()))
+    )
+    check(
+        cap.get("total_limit_usd") == 20.0 and cap.get("screening_limit_usd") == 8.0,
+        "immutable_8_and_20_dollar_caps",
+    )
+    check(
+        0 <= committed < 8.0 + EPSILON and committed < 20.0,
+        "screening_and_total_cap_respected",
+        committed,
+    )
+    check(not cap.get("bound_violation"), "no_request_reservation_bound_violation")
+    check(cap.get("phase") in {"screening", "screening_complete"}, "no_adaptation_phase_enabled")
+    if not running and cap.get("phase") == "screening_complete":
+        check(
+            abs(float(cap.get("screening_committed_usd", -1)) - committed) <= EPSILON,
+            "frozen_screening_total_reconciles",
+        )
+    if inflight:
+        notes.append(
+            f"{len(inflight)} physical reservation(s) remain in flight, "
+            "fully included in committed cost."
+        )
+    if status in {"INCONCLUSIVE", "IMPLEMENTATION_FAILURE"}:
+        notes.append(
+            "Final interruption is an outcome, not a completed ZERO screen. "
+            "This audit never replaces missing or errored episodes."
+        )
+    moved = any(
+        path.exists() and hashlib.sha256(path.read_bytes()).hexdigest() != expected
+        for path, expected in [
+            (run / "screening.json", start_screening_hash),
+            (run / "cap.json", start_cap_hash),
+        ]
+    )
+    if moved:
+        notes.append(
+            "Live state changed during the read-only snapshot. "
+            "Rerun after the current episode for settled reconciliation."
+        )
+    audit_status = "FAIL" if failures else ("PASS_INTERMEDIATE" if running else "PASS")
+    summary = (
+        f"{audit_status}: {len(begun)} IDs begun, {len(all_ids)} recorded episodes, "
+        f"{len(confirmed)} confirmed ZERO, {len(attempts)} completed physical attempts, "
+        f"${committed:.8f} committed / $8 screening cap; "
+        f"{len(failures)} failures, {len(pending)} live-boundary items."
+    )
+    return {
+        "schema": "aea-viability-screen-readonly-audit-v1",
+        "audit_status": audit_status,
+        "screening_status": status,
+        "summary": summary,
+        "checked_at_unix": time.time(),
+        "checks": checks,
+        "failures": failures,
+        "pending_live_boundary_checks": pending,
+        "notes": notes,
+        "terminal_trace_metadata_omissions": terminal_metadata_omissions,
+        "snapshot_changed": moved,
+        "tasks_begun": begun,
+        "tasks": task_results,
+        "qualified": confirmed,
+        "completed_episode_ids": sorted(all_ids),
+        "dispatched_operations": dispatched,
+        "physical_attempts_completed": len(attempts),
+        "physical_attempts_inflight": len(inflight),
+        "priced_calls": len(calls),
+        "physical_returned_usd": actual,
+        "ambiguous_reservations_usd": uncertain,
+        "actual_ledger_usd": actual_ledger,
+        "committed_cap_usd": committed,
+        "cap": cap,
+        "source_sha256": source_hashes,
+    }
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--root", type=Path, default=DEFAULT_ROOT)
+    parser.add_argument("--run", type=Path)
+    parser.add_argument(
+        "--output", type=Path, help="Optional new JSON output file under /tmp; otherwise stdout."
+    )
+    args = parser.parse_args()
+    run = args.run or args.root / "runs/e6-iterative-low-viability"
+    if args.output and not args.output.resolve().is_relative_to(Path("/tmp")):
+        parser.error("--output must be under /tmp; the audit never writes into a worktree")
+    result = audit(args.root.resolve(), run.resolve())
+    payload = json.dumps(result, indent=2, sort_keys=True) + "\n"
+    if args.output:
+        with args.output.open("x") as stream:
+            stream.write(payload)
+    else:
+        sys.stdout.write(payload)
+    sys.stderr.write(result.get("summary", result["audit_status"]) + "\n")
+    return 2 if result["audit_status"] == "FAIL" else 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

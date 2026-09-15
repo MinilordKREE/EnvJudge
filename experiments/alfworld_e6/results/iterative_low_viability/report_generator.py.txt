@@ -1,0 +1,260 @@
+"""Build a compact, screening-only viability report from a terminal frozen run.
+
+Standard library only: no driver import, API call, simulator, policy, reference generation,
+optimizer execution, or repository write. Raw traces stay local; output contains hashes and
+aggregate fields only. Refuses active screening, formed four-task pools, and adaptation.
+"""
+from __future__ import annotations
+
+import argparse
+from collections import Counter, defaultdict
+import hashlib
+import json
+import math
+from pathlib import Path
+from typing import Any
+
+BASE = 'bec74ed8a6ff40e119b2299c92b07b8602ff5fef'
+PREREG = 'd151b150a65f7455084345e4b165b9b62234bd4a'
+TERMINAL = {'INSUFFICIENT_FRESH_LOW', 'INCONCLUSIVE', 'IMPLEMENTATION_FAILURE'}
+
+
+def sha(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def digest(value: Any) -> str:
+    text = value if isinstance(value, str) else json.dumps(value, sort_keys=True)
+    return hashlib.sha256(text.encode()).hexdigest()
+
+
+def read(path: Path) -> Any:
+    return json.loads(path.read_text())
+
+
+def rows(path: Path) -> list[dict[str, Any]]:
+    return [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
+
+
+def require(ok: bool, message: str) -> None:
+    if not ok:
+        raise ValueError(message)
+
+
+def near(a: float, b: float) -> bool:
+    return math.isclose(a, b, abs_tol=1e-8, rel_tol=1e-9)
+
+
+def build(repo: Path, output: Path) -> dict[str, Any]:
+    repo = repo.resolve()
+    output = output.resolve()
+    require(output.is_relative_to(Path('/tmp')), 'Report output must stay under /tmp')
+    run = repo / 'runs/e6-iterative-low-viability'
+    screening = read(run / 'screening.json')
+    status = screening['status']
+    require(status in TERMINAL, f'Refusing nonterminal/unformed-scope screening status: {status}')
+    require(len(screening['qualified']) < 4, 'Four-task pool formed; requires a separate adaptation report')
+    require(not (run / 'results.json').exists(), 'Adaptation results exist; screening-only helper refused')
+    require(not (run / 'prepared.json').exists() and not (run / 'input_manifest.json').exists(), 'Reference/input preparation exists; screening-only helper refused')
+    require(not list(run.glob('task-*/privileged_reference.json')), 'Reference generation occurred; screening-only helper refused')
+    require(not list(run.glob('task-*/adaptation/*')), 'Adaptation artifacts exist; screening-only helper refused')
+    require(not list(run.glob('task-*/confirmation*')), 'Confirmation artifacts exist; screening-only helper refused')
+    summary = read(run / 'summary.json')
+    cap = read(run / 'cap.json')
+    require(summary['phase'] == 'screening' and summary['screening_status'] == status, 'Frozen driver summary does not match terminal screening')
+    require(summary['decision'] == status, 'Frozen driver decision differs from screening status')
+    require(summary['qualified_tasks'] == screening['qualified'], 'Qualified task list differs between artifacts')
+    require(summary['screening_tasks'] == screening['tasks'], 'Per-task screening records differ from driver summary')
+    require(summary.get('efficacy_evidence_available') is False, 'Driver claims efficacy evidence during screening')
+    freeze = screening['freeze']
+    require(freeze['prereg_commit'] == PREREG, 'Unexpected screening preregistration commit')
+    require(freeze['implementation_sha'] == BASE and freeze['validator_fidelity_sha'] == BASE, 'Unexpected frozen implementation')
+    require(cap['screening_limit_usd'] == 8 and cap['total_limit_usd'] == 20, 'Frozen hard caps differ')
+    prereg_path = repo / 'experiments/alfworld_e6/PREREG_ITERATIVE_LOW_VIABILITY_POOL.md'
+    driver_path = repo / 'scripts/e6_iterative_low_viability.py'
+    require(sha(prereg_path) == freeze['prereg_sha256'], 'Preregistration bytes changed')
+    require(sha(driver_path) == freeze['driver_sha256'], 'Driver bytes changed')
+    frozen = repo / 'experiments/alfworld_e6/frozen/iterative_low_viability'
+    audit_path = frozen / 'used_task_audit.json'
+    audit = read(audit_path)
+    require(audit['never_used_ids'] == list(range(130, 150)), 'Unexpected prospective task sequence')
+    for name, expected in freeze['input_hashes'].items():
+        require(sha(frozen / name) == expected, f'Frozen input hash changed: {name}')
+    for name, expected in freeze['frozen_config_hashes'].items():
+        require(sha(repo / name) == expected, f'Frozen policy/configuration changed: {name}')
+    for name, expected in read(frozen / 'runtime_hashes.json').items():
+        require(sha(repo / name) == expected, f'Frozen runtime changed: {name}')
+
+    # Use each per-process ledger once. Optional merged ledger is hashed for provenance but
+    # never added again; it would double-count the same physical returned calls.
+    ledger_paths = sorted(run.glob('ledger.*.jsonl'))
+    ledger = [item for path in ledger_paths for item in rows(path)]
+    attempts_path = run / 'cap.attempts.jsonl'
+    attempts = rows(attempts_path) if attempts_path.exists() else []
+    calls = [item for item in ledger if item.get('event') == 'call']
+    require(all(item.get('arm') == 'screen' and item.get('budget') == 'eval' for item in calls), 'Non-screening paid call appears in ledger')
+    require(all(item.get('model') == 'qwen/qwen3-8b' for item in calls), 'Non-frozen screening model in ledger')
+    require(all(item.get('phase') == 'screening' for item in attempts), 'Non-screening physical attempt appears')
+    require(len({item['attempt'] for item in attempts}) == len(attempts), 'Duplicate physical attempt identity')
+    by_task_calls: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    by_task_attempts: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    by_task_events: dict[str, Counter[str]] = defaultdict(Counter)
+    for item in ledger:
+        by_task_events[str(item.get('task_id'))][str(item.get('event'))] += 1
+    for item in calls:
+        by_task_calls[str(item['task_id'])].append(item)
+    for item in attempts:
+        by_task_attempts[str(item['attribution']['task_id'])].append(item)
+    task_ids = [int(task) for task in screening['tasks']]
+    require(task_ids == list(range(130, 130 + len(task_ids))) and len(task_ids) <= 20, 'Screening task order differs from ascending preregistration')
+    require(set(by_task_calls) <= set(screening['tasks']) and set(by_task_attempts) <= set(screening['tasks']), 'Costs are attributed outside inspected task IDs')
+    if status == 'INSUFFICIENT_FRESH_LOW':
+        require(task_ids == list(range(130, 150)), 'Insufficient-pool result before all twenty IDs were inspected')
+        require(not cap.get('inflight'), 'Unresolved request remains after completed twenty-ID screening')
+
+    inventory_paths = {run / 'screening.json', run / 'summary.json', run / 'cap.json', prereg_path, driver_path, audit_path, frozen / 'runtime_hashes.json', *ledger_paths}
+    if attempts_path.exists():
+        inventory_paths.add(attempts_path)
+    if (run / 'ledger.jsonl').exists():
+        inventory_paths.add(run / 'ledger.jsonl')
+    if (run / 'STOP.json').exists():
+        inventory_paths.add(run / 'STOP.json')
+    unique_episode_ids: set[str] = set()
+    task_rows = []
+    for task in task_ids:
+        key = str(task)
+        row = screening['tasks'][key]
+        all_traces = []
+        episode_hashes = []
+        for record in row['episodes']:
+            path = run / f'task-{task}/original-{record["index"]:02}.json'
+            raw = read(path)
+            require(sha(path) == record['file_sha256'] and digest(raw) == record['trace_sha256'], f'Original trace hash changed: task {task}, episode {record["index"]}')
+            require([trace['episode_id'] for trace in raw] == record['episode_ids'], 'Recorded episode identity differs from trace')
+            require(sum(bool(trace['success']) for trace in raw) == record['successes'], 'Screening success count differs from raw trace')
+            require(sum(bool(trace.get('error')) for trace in raw) == record['terminal_errors'], 'Screening terminal error count differs from raw trace')
+            for trace in raw:
+                require(trace['rollout_seed'] == task, 'Original trace has wrong environment seed')
+                require(not trace['candidate']['rules_code'] and not trace['candidate']['in_env_actions'], 'Original trace contains an intervention')
+                require(trace['episode_id'] not in unique_episode_ids, 'Duplicate screening episode identity')
+                unique_episode_ids.add(trace['episode_id'])
+            all_traces.extend(raw)
+            episode_hashes.append({'index':record['index'], 'episode_ids':record['episode_ids'], 'trace_sha256':record['trace_sha256'], 'file_sha256':record['file_sha256']})
+            inventory_paths.add(path)
+        physical = by_task_attempts[key]
+        returned = [item for item in physical if item['status'] == 'returned']
+        failed = [item for item in physical if item['status'] == 'ambiguous_failure']
+        valid = [trace for trace in all_traces if not trace.get('error')]
+        task_rows.append({
+            'task_id':task, 'screening_outcome':row['status'],
+            'successes':sum(bool(trace['success']) for trace in valid),
+            'valid_completed_episodes':len(valid), 'episode_operations':len(row['episodes']),
+            'terminal_episode_errors':sum(bool(trace.get('error')) for trace in all_traces),
+            'physical_ambiguous_failures':len(failed),
+            'provider_retry_events':by_task_events[key]['infra_retry'],
+            'provider_terminal_failure_events':by_task_events[key]['infra_failure'],
+            'physical_attempts_completed':len(physical), 'returned_physical_requests':len(returned),
+            'ledger_returned_calls':len(by_task_calls[key]),
+            'actual_ledger_usd':sum(float(item['usd']) for item in by_task_calls[key]),
+            'returned_conservative_usd':sum(float(item['conservative_usd']) for item in returned),
+            'retained_failed_reservation_usd':sum(float(item['reserved_usd']) for item in failed),
+            'episode_hashes':episode_hashes,
+        })
+    returned_usd = sum(float(item['conservative_usd']) for item in attempts if item['status'] == 'returned')
+    uncertain_usd = sum(float(item['reserved_usd']) for item in attempts if item['status'] == 'ambiguous_failure')
+    inflight_usd = sum(float(value) for value in cap['inflight'].values())
+    actual_ledger_usd = sum(float(item['usd']) for item in calls)
+    require(near(returned_usd, cap['actual_usd']), 'Returned physical costs do not reconcile to shared cap')
+    require(near(uncertain_usd, cap['uncertain_usd']), 'Ambiguous reservations do not reconcile to shared cap')
+    require(len(attempts) + len(cap['inflight']) == cap['attempts'], 'Physical request counts do not reconcile')
+    require(near(actual_ledger_usd, summary['actual_ledger_usd']), 'Driver summary ledger USD differs')
+    require(summary['screening_episodes'] == sum(row['episode_operations'] for row in task_rows), 'Driver episode count differs')
+    require(summary['conservative_cap_account'] == cap, 'Driver summary cap snapshot is stale')
+    interruption = screening.get('interruption')
+    reason = (
+        f'The preregistered twenty-ID scan ({task_ids[0]}–{task_ids[-1]}) ended with '
+        f'{len(screening["qualified"])} confirmed ZERO tasks; four were required. No scan extension.'
+        if status == 'INSUFFICIENT_FRESH_LOW' else
+        json.dumps(interruption or {'reason':cap.get('stopped','terminal screening interruption')}, sort_keys=True)
+    )
+    stage_names = ['privileged_reference_generation','C1','C2','C3','structural_validation','d0_identity','lexical_privilege_gate','semantic_privilege_gate','solvability','endpoint_measurement','CONTROL','search_acceptance','K16_confirmation','K16_B_L','K16_B_T']
+    result = {
+        'decision':status, 'phase':'screening_only', 'exact_stop_reason':reason,
+        'four_task_primary_sample_formed':False, 'primary_viability_denominator':None,
+        'efficacy_evidence_available':False, 'LOW_viability_evaluated':False,
+        'qualified_tasks':screening['qualified'], 'inspected_task_ids':task_ids,
+        'screening_task_outcome_counts':dict(Counter(row['screening_outcome'] for row in task_rows)),
+        'screening_episode_operations':sum(row['episode_operations'] for row in task_rows),
+        'valid_completed_episodes':sum(row['valid_completed_episodes'] for row in task_rows),
+        'screening_successful_episodes':sum(row['successes'] for row in task_rows),
+        'tasks':task_rows,
+        'cost':{'actual_ledger_usd':actual_ledger_usd,'returned_conservative_usd':returned_usd,
+                'retained_failed_reservation_usd':uncertain_usd,'inflight_reservation_usd':inflight_usd,
+                'committed_upper_usd':returned_usd+uncertain_usd+inflight_usd,
+                'sum_of_all_dispatched_reservations_usd':sum(float(item['reserved_usd']) for item in attempts)+inflight_usd,
+                'physical_attempts':cap['attempts'],'physical_attempts_completed':len(attempts),
+                'returned_physical_requests':sum(item['status']=='returned' for item in attempts),
+                'ambiguous_failed_requests':sum(item['status']=='ambiguous_failure' for item in attempts),
+                'ledger_returned_calls':len(calls),'screening_cap_usd':8.0,'whole_run_cap_usd':20.0,
+                'note':'Retained failed reservations count against the cap. Sum of all initial reservations is exposure accounting, not an extra billed cost.'},
+        'ledger_event_counts':dict(Counter(item['event'] for item in ledger)),
+        'not_run':{name:'NOT_RUN / N/A' for name in stage_names},
+        'freeze':freeze,
+        'preflight_validation':{'unit_tests_passed':344,'strict_mypy_source_files_passed':96,'pre_commit':'PASS','source':'Root-reported completed checks before the preregistered paid run.'},
+        'final_audit':{'status':'FINAL_AUDIT_PENDING','note':'Root must complete final provenance/accounting/code audit before publishing final report.'},
+        'interpretation':'The prospective screening pool did not form. This provides no estimate of iterative LOW efficacy and does not reclassify any historical IMPLEMENTATION_FAILURE.',
+        'recommendation':'Stop. A larger or differently qualified pool requires separate review and preregistration before any new screening. No LOW method change is recommended from screening alone.',
+        'scope':{'new_api_calls':0,'new_environment_resets':0,'new_policy_episodes':0,'reference_regenerations':0,'research_writes':0,'raw_traces':'Remain local; compact output contains identifiers and hashes only.'},
+    }
+    manifest = {'prereg_commit':PREREG,'base_commit':BASE,'helper_sha256':sha(Path(__file__)), 'files':[{'path':str(path.relative_to(repo)),'bytes':path.stat().st_size,'sha256':sha(path)}for path in sorted(inventory_paths)]}
+    manifest_text = json.dumps(manifest,indent=2,sort_keys=True)+'\n'
+    result['artifact_manifest_sha256'] = hashlib.sha256(manifest_text.encode()).hexdigest()
+    output.mkdir(parents=True,exist_ok=True)
+    (output/'screening_result.json').write_text(json.dumps(result,indent=2,sort_keys=True)+'\n')
+    (output/'artifact_manifest.json').write_text(manifest_text)
+    lines = [
+        '# Iterative LOW viability: fresh-pool screening result', '',
+        f'**Decision: {status}**', '', reason, '',
+        f'Inspected {len(task_ids)} task IDs; {len(screening["qualified"])} qualified ZERO tasks. '
+        'The four-task primary sample did not form. Iterative LOW viability was not evaluated; no four-task efficacy denominator applies.', '',
+        '## Screening outcomes', '',
+        '| Task | Successes / valid episodes | Outcome | Terminal episode errors | Provider retries | Ambiguous failed requests | Physical requests | Ledger USD | Failed reservations USD |',
+        '| --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: |',
+    ]
+    for row in task_rows:
+        lines.append(f'| {row["task_id"]} | {row["successes"]}/{row["valid_completed_episodes"]} | {row["screening_outcome"]} | {row["terminal_episode_errors"]} | {row["provider_retry_events"]} | {row["physical_ambiguous_failures"]} | {row["physical_attempts_completed"]} | ${row["actual_ledger_usd"]:.6f} | ${row["retained_failed_reservation_usd"]:.6f} |')
+    cost=result['cost']
+    lines.extend(['', 'The frozen strict rule excludes a task after any recovered provider retry or ambiguous failed request. Recovered episodes remain in the descriptive s/n column; they do not qualify the task. Failed reservations and retry events describe related accounting records and are not added together as distinct failures.', '',
+        '## Calls and cost', '',
+        f'- Completed valid screening episodes: {result["valid_completed_episodes"]}; episode operations: {result["screening_episode_operations"]}.',
+        f'- Physical request attempts: {cost["physical_attempts"]} ({cost["returned_physical_requests"]} returned, {cost["ambiguous_failed_requests"]} ambiguous failures, {len(cap["inflight"])} in flight).',
+        f'- Actual returned-call ledger cost: **${actual_ledger_usd:.9f}**.',
+        f'- Conservative returned cost: ${returned_usd:.9f}; retained failed-request reservations: ${uncertain_usd:.9f}; in-flight reservations: ${inflight_usd:.9f}.',
+        f'- Committed cost for the hard guard: **${cost["committed_upper_usd"]:.9f}**. Screening cap $8; whole-run cap $20.', '',
+        '## Adaptation stages', '', '| Stage | Result |', '| --- | --- |',
+        '| Privileged references | Not run (N/A) |', '| C1 / C2 / C3 | Not run (N/A) |',
+        '| Structural / identity / lexical / semantic candidate gates | Not run (N/A) |',
+        '| Solvability / endpoint measurement | Not run (N/A) |', '| CONTROL / search acceptance | Not run (N/A) |',
+        '| K16 / B_L / B_T | Not run (N/A) |', '',
+        '## Freeze and validation', '', f'- Pool preregistration commit: `{PREREG}`.', f'- Validator-fidelity implementation: `{BASE}`.',
+        f'- Driver SHA256: `{freeze["driver_sha256"]}`.', f'- Preregistration SHA256: `{freeze["prereg_sha256"]}`.',
+        '- Preflight: 344 unit tests passed; strict mypy passed for 96 source files; pre-commit passed.',
+        '- **FINAL_AUDIT_PENDING**: root must finish the final provenance, accounting and frozen-code audit.',
+        '- Raw traces remain local. `artifact_manifest.json` records exact source-artifact hashes; `screening_result.json` retains compact per-task counts and evidence hashes.', '',
+        '## Interpretation and next action', '', result['interpretation'], '', result['recommendation'], '',
+    ])
+    (output/'screening_result.md').write_text('\n'.join(lines))
+    return result
+
+
+def main() -> None:
+    parser=argparse.ArgumentParser()
+    parser.add_argument('--repo',type=Path,default=Path('/home/kree/work/EnvJudge-aea-llm'))
+    parser.add_argument('--output-dir',type=Path,default=Path('/tmp/viability_screening_report'))
+    args=parser.parse_args()
+    result=build(args.repo,args.output_dir)
+    print(json.dumps({'decision':result['decision'],'inspected':len(result['inspected_task_ids']),'qualified':result['qualified_tasks'],'output_dir':str(args.output_dir),'final_audit':'PENDING'},sort_keys=True))
+
+
+if __name__=='__main__':
+    main()

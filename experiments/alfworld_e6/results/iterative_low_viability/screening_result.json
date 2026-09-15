@@ -1,0 +1,910 @@
+{
+  "LOW_viability_evaluated": false,
+  "artifact_manifest_sha256": "590ec0cb5eac1b9e5e3e5ab55b8560fd2aaab65f56ef884fbd147d85ab773f9c",
+  "call_counts": {
+    "K16_policy_episodes": 0,
+    "adaptation_policy_episodes": 0,
+    "designer": 0,
+    "reference_provider": 0
+  },
+  "completed_without_terminal_error_episodes": 26,
+  "cost": {
+    "actual_ledger_usd": 1.386324485,
+    "ambiguous_failed_requests": 30,
+    "committed_upper_usd": 1.521326846,
+    "inflight_reservation_usd": 0,
+    "ledger_returned_calls": 904,
+    "note": "Retained failed reservations count against the cap. Sum of all initial reservations is exposure accounting, not an extra billed cost.",
+    "physical_attempts": 934,
+    "physical_attempts_completed": 934,
+    "retained_failed_reservation_usd": 0.13500236100000002,
+    "returned_conservative_usd": 1.386324485,
+    "returned_physical_requests": 904,
+    "screening_cap_usd": 8.0,
+    "sum_of_all_dispatched_reservations_usd": 5.536507171,
+    "whole_run_cap_usd": 20.0
+  },
+  "decision": "INSUFFICIENT_FRESH_LOW",
+  "efficacy_evidence_available": false,
+  "exact_stop_reason": "The preregistered twenty-ID scan (130\u2013149) ended with 0 confirmed ZERO tasks; four were required. No scan extension.",
+  "failure_funnel": {
+    "CONTROL_unresolved": null,
+    "K16_B_L": null,
+    "K16_B_T": null,
+    "candidate_structural_failures": null,
+    "endpoint_too_hard": null,
+    "endpoint_viable": null,
+    "lexical_privilege_rejects": null,
+    "reference_unavailable": null,
+    "search_accepted": null,
+    "semantic_FAIL": null,
+    "semantic_UNCERTAIN": null,
+    "solvability_failures": null,
+    "status": "NOT_ASSESSED_POOL_NOT_FORMED"
+  },
+  "final_audit": {
+    "baseline_files_unchanged": 2480,
+    "checks": 21198,
+    "failures": 0,
+    "historical_run_files_unchanged": 105,
+    "main_unchanged": true,
+    "preservation_audit_sha256": "ec09f46273162e57f5279551fbe8a44da228af9bf204fca190ea24248b9607ac",
+    "screening_audit_sha256": "40df567dbded5db3379399bbb4fed35fa6cac565b5ba8563368479ef53cd0a8c",
+    "status": "PASS"
+  },
+  "four_task_primary_sample_formed": false,
+  "freeze": {
+    "driver_sha256": "21e3a91c2a598385e2ed8c27fdeab0584015874d3c5411260a00f6bc042f839c",
+    "frozen_config_hashes": {
+      "configs/alfworld_config_100.yaml": "ef6a64096b198d7105bb3d3083f922ac0c0ee60bd2186c67ab4bd99863089e30",
+      "configs/corpus_aea.yaml": "a5f4b3c7ec0ace3ffebef184481585402dbf9a2d594d4fcde4dfc355a97eab10",
+      "configs/pricing.yaml": "22ec07333b638ad6b5679bc58ce1f7fd0a1c8b526bed5420c378a03147805f7e",
+      "scripts/e3.py": "4152356515fee743170205780be85ac45436073294b7bd9981dc1df221635363",
+      "scripts/e6_iterative_low_smoke.py": "86aa45af30cfafefd251b8da5f1fc45399404956eac18f5f94c0027899acd459"
+    },
+    "implementation_sha": "bec74ed8a6ff40e119b2299c92b07b8602ff5fef",
+    "input_hashes": {
+      "runtime_hashes.json": "ee52b40374ea0b28bc39cb7df262c13babb27a947981d96aa62b0b6e8ca00d29",
+      "used_task_audit.json": "cc40cca0dec23c1fa2220cfdc102cd1de33d0753c74030194641bf7e02df9d4b"
+    },
+    "prereg_commit": "d151b150a65f7455084345e4b165b9b62234bd4a",
+    "prereg_sha256": "d89acbcf7ddf6b692dd8368296627d87bd6b05740a563cdcb15c6cb38c31b7fb",
+    "semantic_gate_sha256": "ab0ba2aceffd53f408191105a4cfedb2dacc6136bd16defd03d553fad5b5dccd",
+    "semantic_gate_version": "alfworld-semantic-screen-v1",
+    "source_tree": "6cc4166ced6c9a4564438750153c33d64e5967de",
+    "validator_fidelity_sha": "bec74ed8a6ff40e119b2299c92b07b8602ff5fef"
+  },
+  "inspected_task_ids": [
+    130,
+    131,
+    132,
+    133,
+    134,
+    135,
+    136,
+    137,
+    138,
+    139,
+    140,
+    141,
+    142,
+    143,
+    144,
+    145,
+    146,
+    147,
+    148,
+    149
+  ],
+  "interpretation": "The prospective screening pool did not form. This provides no estimate of iterative LOW efficacy and does not reclassify any historical IMPLEMENTATION_FAILURE.",
+  "ledger_event_counts": {
+    "call": 904,
+    "infra_retry": 30,
+    "rollout": 26
+  },
+  "not_run": {
+    "C1": "NOT_RUN / N/A",
+    "C2": "NOT_RUN / N/A",
+    "C3": "NOT_RUN / N/A",
+    "CONTROL": "NOT_RUN / N/A",
+    "K16_B_L": "NOT_RUN / N/A",
+    "K16_B_T": "NOT_RUN / N/A",
+    "K16_confirmation": "NOT_RUN / N/A",
+    "d0_identity": "NOT_RUN / N/A",
+    "endpoint_measurement": "NOT_RUN / N/A",
+    "lexical_privilege_gate": "NOT_RUN / N/A",
+    "privileged_reference_generation": "NOT_RUN / N/A",
+    "search_acceptance": "NOT_RUN / N/A",
+    "semantic_privilege_gate": "NOT_RUN / N/A",
+    "solvability": "NOT_RUN / N/A",
+    "structural_validation": "NOT_RUN / N/A"
+  },
+  "phase": "screening_only",
+  "preflight_validation": {
+    "pre_commit": "PASS",
+    "source": "Root-reported completed checks before the preregistered paid run.",
+    "strict_mypy_source_files_passed": 96,
+    "unit_tests_passed": 344
+  },
+  "primary_viability_denominator": null,
+  "qualified_tasks": [],
+  "recommendation": "Stop. A larger or differently qualified pool requires separate review and preregistration before any new screening. No LOW method change is recommended from screening alone.",
+  "recovered_error_episodes": 13,
+  "recovered_error_kinds": {
+    "connection": 1,
+    "http_429": 29
+  },
+  "scope": {
+    "new_api_calls": 0,
+    "new_environment_resets": 0,
+    "new_policy_episodes": 0,
+    "raw_traces": "Remain local; compact output contains identifiers and hashes only.",
+    "reference_regenerations": 0,
+    "research_writes": 0
+  },
+  "screening_episode_operations": 26,
+  "screening_successful_episodes": 13,
+  "screening_task_cross_counts": {
+    "any_recovered_error": 13,
+    "any_success": 13,
+    "no_success_with_recovered_error": 7,
+    "success_and_recovered_error": 6,
+    "success_without_error": 7
+  },
+  "screening_task_outcome_counts": {
+    "rejected_first_success": 7,
+    "rejected_provider_error": 13
+  },
+  "strictly_error_free_episodes": 13,
+  "tasks": [
+    {
+      "C1": "NOT_GENERATED_POOL_NOT_FORMED",
+      "C2": "NOT_GENERATED_POOL_NOT_FORMED",
+      "C3": "NOT_GENERATED_POOL_NOT_FORMED",
+      "K16_rollouts": 0,
+      "LOW_stages": "NOT_RUN_POOL_NOT_FORMED",
+      "actual_ledger_usd": 0.09637495400000001,
+      "adaptation_rollouts": 0,
+      "designer_calls": 0,
+      "episode_hashes": [
+        {
+          "episode_ids": [
+            "2788c930e0"
+          ],
+          "file_sha256": "1d2175aba707892f5d3e970b583dc443e0423a1b72729b5ef4f5961834c600dd",
+          "index": 1,
+          "trace_sha256": "60426691c96b3e6f8a8f5106d2740e8b37dadae4c590ec99827c3ad48558721d"
+        }
+      ],
+      "episode_operations": 1,
+      "ledger_returned_calls": 50,
+      "physical_ambiguous_failures": 2,
+      "physical_attempts_completed": 52,
+      "provider_retry_events": 2,
+      "provider_terminal_failure_events": 0,
+      "reference_status": "NOT_REQUESTED",
+      "retained_failed_reservation_usd": 0.015060227,
+      "returned_conservative_usd": 0.09637495400000001,
+      "returned_physical_requests": 50,
+      "screening_outcome": "rejected_provider_error",
+      "successes": 0,
+      "task_id": 130,
+      "terminal_episode_errors": 0,
+      "valid_completed_episodes": 1
+    },
+    {
+      "C1": "NOT_GENERATED_POOL_NOT_FORMED",
+      "C2": "NOT_GENERATED_POOL_NOT_FORMED",
+      "C3": "NOT_GENERATED_POOL_NOT_FORMED",
+      "K16_rollouts": 0,
+      "LOW_stages": "NOT_RUN_POOL_NOT_FORMED",
+      "actual_ledger_usd": 0.0069632420000000006,
+      "adaptation_rollouts": 0,
+      "designer_calls": 0,
+      "episode_hashes": [
+        {
+          "episode_ids": [
+            "f34cdc21ba"
+          ],
+          "file_sha256": "6e94988c1e3e89d56fdf91b28815488c5b644625f2c1fddb3a46fe2dfe1f875e",
+          "index": 1,
+          "trace_sha256": "174998b811b6c4253bc5f26b838e0359272b1c5237b5b9461885f67eb9a2bb46"
+        }
+      ],
+      "episode_operations": 1,
+      "ledger_returned_calls": 18,
+      "physical_ambiguous_failures": 0,
+      "physical_attempts_completed": 18,
+      "provider_retry_events": 0,
+      "provider_terminal_failure_events": 0,
+      "reference_status": "NOT_REQUESTED",
+      "retained_failed_reservation_usd": 0,
+      "returned_conservative_usd": 0.0069632420000000006,
+      "returned_physical_requests": 18,
+      "screening_outcome": "rejected_first_success",
+      "successes": 1,
+      "task_id": 131,
+      "terminal_episode_errors": 0,
+      "valid_completed_episodes": 1
+    },
+    {
+      "C1": "NOT_GENERATED_POOL_NOT_FORMED",
+      "C2": "NOT_GENERATED_POOL_NOT_FORMED",
+      "C3": "NOT_GENERATED_POOL_NOT_FORMED",
+      "K16_rollouts": 0,
+      "LOW_stages": "NOT_RUN_POOL_NOT_FORMED",
+      "actual_ledger_usd": 0.001785706,
+      "adaptation_rollouts": 0,
+      "designer_calls": 0,
+      "episode_hashes": [
+        {
+          "episode_ids": [
+            "37c6b60ebe"
+          ],
+          "file_sha256": "8c9d3e1d6c2735bba97b1e2273c05dc61dc1b7e1ddf14f7f91af750d552c8491",
+          "index": 1,
+          "trace_sha256": "587c0bfa94653d66cb697bd363e2ddc332cbd57c8fc826f75dc59445bc536923"
+        }
+      ],
+      "episode_operations": 1,
+      "ledger_returned_calls": 8,
+      "physical_ambiguous_failures": 0,
+      "physical_attempts_completed": 8,
+      "provider_retry_events": 0,
+      "provider_terminal_failure_events": 0,
+      "reference_status": "NOT_REQUESTED",
+      "retained_failed_reservation_usd": 0,
+      "returned_conservative_usd": 0.0017857060000000002,
+      "returned_physical_requests": 8,
+      "screening_outcome": "rejected_first_success",
+      "successes": 1,
+      "task_id": 132,
+      "terminal_episode_errors": 0,
+      "valid_completed_episodes": 1
+    },
+    {
+      "C1": "NOT_GENERATED_POOL_NOT_FORMED",
+      "C2": "NOT_GENERATED_POOL_NOT_FORMED",
+      "C3": "NOT_GENERATED_POOL_NOT_FORMED",
+      "K16_rollouts": 0,
+      "LOW_stages": "NOT_RUN_POOL_NOT_FORMED",
+      "actual_ledger_usd": 0.13313482000000001,
+      "adaptation_rollouts": 0,
+      "designer_calls": 0,
+      "episode_hashes": [
+        {
+          "episode_ids": [
+            "97ec14401c"
+          ],
+          "file_sha256": "de49037d1890d5a6f4162233fc8cadbbb2d01471fc5b9c82b7f7c6f56ad297b9",
+          "index": 1,
+          "trace_sha256": "e677d9e4ec8c53d5f421955de79cad426359840c7d92d2e172aea6122fd7a3c1"
+        }
+      ],
+      "episode_operations": 1,
+      "ledger_returned_calls": 50,
+      "physical_ambiguous_failures": 2,
+      "physical_attempts_completed": 52,
+      "provider_retry_events": 2,
+      "provider_terminal_failure_events": 0,
+      "reference_status": "NOT_REQUESTED",
+      "retained_failed_reservation_usd": 0.019299722000000002,
+      "returned_conservative_usd": 0.13313482000000001,
+      "returned_physical_requests": 50,
+      "screening_outcome": "rejected_provider_error",
+      "successes": 0,
+      "task_id": 133,
+      "terminal_episode_errors": 0,
+      "valid_completed_episodes": 1
+    },
+    {
+      "C1": "NOT_GENERATED_POOL_NOT_FORMED",
+      "C2": "NOT_GENERATED_POOL_NOT_FORMED",
+      "C3": "NOT_GENERATED_POOL_NOT_FORMED",
+      "K16_rollouts": 0,
+      "LOW_stages": "NOT_RUN_POOL_NOT_FORMED",
+      "actual_ledger_usd": 0.070300867,
+      "adaptation_rollouts": 0,
+      "designer_calls": 0,
+      "episode_hashes": [
+        {
+          "episode_ids": [
+            "474a807e64"
+          ],
+          "file_sha256": "8ee3015aa79a43b29242bf08865f7caf0a6aec55db6244e9f091046a0187b89a",
+          "index": 1,
+          "trace_sha256": "3631642d4d9073c36fd596a0737954d82be144856d2e5ea1d315eaf6d2587157"
+        },
+        {
+          "episode_ids": [
+            "885d8636e7"
+          ],
+          "file_sha256": "57168ec081f97ae278b70f236cad5ce00d1df1a098e9096ba867a087d54790b0",
+          "index": 2,
+          "trace_sha256": "dcf1fc0f27b3bfd77d52e88b0e5d1b11588ce58e4e430238136a063b8f68c7a4"
+        }
+      ],
+      "episode_operations": 2,
+      "ledger_returned_calls": 79,
+      "physical_ambiguous_failures": 0,
+      "physical_attempts_completed": 79,
+      "provider_retry_events": 0,
+      "provider_terminal_failure_events": 0,
+      "reference_status": "NOT_REQUESTED",
+      "retained_failed_reservation_usd": 0,
+      "returned_conservative_usd": 0.070300867,
+      "returned_physical_requests": 79,
+      "screening_outcome": "rejected_first_success",
+      "successes": 1,
+      "task_id": 134,
+      "terminal_episode_errors": 0,
+      "valid_completed_episodes": 2
+    },
+    {
+      "C1": "NOT_GENERATED_POOL_NOT_FORMED",
+      "C2": "NOT_GENERATED_POOL_NOT_FORMED",
+      "C3": "NOT_GENERATED_POOL_NOT_FORMED",
+      "K16_rollouts": 0,
+      "LOW_stages": "NOT_RUN_POOL_NOT_FORMED",
+      "actual_ledger_usd": 0.035836658,
+      "adaptation_rollouts": 0,
+      "designer_calls": 0,
+      "episode_hashes": [
+        {
+          "episode_ids": [
+            "950dc27673"
+          ],
+          "file_sha256": "e8b3973356f412fbab5dd63314d6a9e53facef1bce20745ddfefcc5050729f91",
+          "index": 1,
+          "trace_sha256": "ec8d8257c93d13923650ee2962baf187920abc838345b177b7e85c26ddab28db"
+        }
+      ],
+      "episode_operations": 1,
+      "ledger_returned_calls": 35,
+      "physical_ambiguous_failures": 0,
+      "physical_attempts_completed": 35,
+      "provider_retry_events": 0,
+      "provider_terminal_failure_events": 0,
+      "reference_status": "NOT_REQUESTED",
+      "retained_failed_reservation_usd": 0,
+      "returned_conservative_usd": 0.035836658,
+      "returned_physical_requests": 35,
+      "screening_outcome": "rejected_first_success",
+      "successes": 1,
+      "task_id": 135,
+      "terminal_episode_errors": 0,
+      "valid_completed_episodes": 1
+    },
+    {
+      "C1": "NOT_GENERATED_POOL_NOT_FORMED",
+      "C2": "NOT_GENERATED_POOL_NOT_FORMED",
+      "C3": "NOT_GENERATED_POOL_NOT_FORMED",
+      "K16_rollouts": 0,
+      "LOW_stages": "NOT_RUN_POOL_NOT_FORMED",
+      "actual_ledger_usd": 0.046898098000000006,
+      "adaptation_rollouts": 0,
+      "designer_calls": 0,
+      "episode_hashes": [
+        {
+          "episode_ids": [
+            "c7048192bf"
+          ],
+          "file_sha256": "a069b7e67c2431db0b8ec7e0d755a77f0f3621b422b1b445075d87d26c73e9d0",
+          "index": 1,
+          "trace_sha256": "7182f64cc11702655e64768f8475140e59811126ce8f16d4f4c74953575506a5"
+        }
+      ],
+      "episode_operations": 1,
+      "ledger_returned_calls": 50,
+      "physical_ambiguous_failures": 1,
+      "physical_attempts_completed": 51,
+      "provider_retry_events": 1,
+      "provider_terminal_failure_events": 0,
+      "reference_status": "NOT_REQUESTED",
+      "retained_failed_reservation_usd": 0.00315367,
+      "returned_conservative_usd": 0.046898098000000006,
+      "returned_physical_requests": 50,
+      "screening_outcome": "rejected_provider_error",
+      "successes": 0,
+      "task_id": 136,
+      "terminal_episode_errors": 0,
+      "valid_completed_episodes": 1
+    },
+    {
+      "C1": "NOT_GENERATED_POOL_NOT_FORMED",
+      "C2": "NOT_GENERATED_POOL_NOT_FORMED",
+      "C3": "NOT_GENERATED_POOL_NOT_FORMED",
+      "K16_rollouts": 0,
+      "LOW_stages": "NOT_RUN_POOL_NOT_FORMED",
+      "actual_ledger_usd": 0.017814082000000002,
+      "adaptation_rollouts": 0,
+      "designer_calls": 0,
+      "episode_hashes": [
+        {
+          "episode_ids": [
+            "9a6af41eef"
+          ],
+          "file_sha256": "ac51781737b5f4011e0d6667410fe014fe50ee47b7493ffdcd4ffc3fe603876e",
+          "index": 1,
+          "trace_sha256": "af94217c2f1009d83d19c7a659ed3932aa9a08e29d5e8531fb92404e7a87d51e"
+        }
+      ],
+      "episode_operations": 1,
+      "ledger_returned_calls": 27,
+      "physical_ambiguous_failures": 2,
+      "physical_attempts_completed": 29,
+      "provider_retry_events": 2,
+      "provider_terminal_failure_events": 0,
+      "reference_status": "NOT_REQUESTED",
+      "retained_failed_reservation_usd": 0.004955873,
+      "returned_conservative_usd": 0.017814082000000002,
+      "returned_physical_requests": 27,
+      "screening_outcome": "rejected_provider_error",
+      "successes": 1,
+      "task_id": 137,
+      "terminal_episode_errors": 0,
+      "valid_completed_episodes": 1
+    },
+    {
+      "C1": "NOT_GENERATED_POOL_NOT_FORMED",
+      "C2": "NOT_GENERATED_POOL_NOT_FORMED",
+      "C3": "NOT_GENERATED_POOL_NOT_FORMED",
+      "K16_rollouts": 0,
+      "LOW_stages": "NOT_RUN_POOL_NOT_FORMED",
+      "actual_ledger_usd": 0.000584844,
+      "adaptation_rollouts": 0,
+      "designer_calls": 0,
+      "episode_hashes": [
+        {
+          "episode_ids": [
+            "57518ed81b"
+          ],
+          "file_sha256": "3e1a45ba6aa7500a21219ae3c928f556b13a5f825916e0eecd74a9fc92bcf4f4",
+          "index": 1,
+          "trace_sha256": "e0d6203b1a4d9da5d7f0a8c69988915d265efc24f9aff849a58b5601ec0460ce"
+        }
+      ],
+      "episode_operations": 1,
+      "ledger_returned_calls": 4,
+      "physical_ambiguous_failures": 0,
+      "physical_attempts_completed": 4,
+      "provider_retry_events": 0,
+      "provider_terminal_failure_events": 0,
+      "reference_status": "NOT_REQUESTED",
+      "retained_failed_reservation_usd": 0,
+      "returned_conservative_usd": 0.000584844,
+      "returned_physical_requests": 4,
+      "screening_outcome": "rejected_first_success",
+      "successes": 1,
+      "task_id": 138,
+      "terminal_episode_errors": 0,
+      "valid_completed_episodes": 1
+    },
+    {
+      "C1": "NOT_GENERATED_POOL_NOT_FORMED",
+      "C2": "NOT_GENERATED_POOL_NOT_FORMED",
+      "C3": "NOT_GENERATED_POOL_NOT_FORMED",
+      "K16_rollouts": 0,
+      "LOW_stages": "NOT_RUN_POOL_NOT_FORMED",
+      "actual_ledger_usd": 0.004401891000000001,
+      "adaptation_rollouts": 0,
+      "designer_calls": 0,
+      "episode_hashes": [
+        {
+          "episode_ids": [
+            "add9429f90"
+          ],
+          "file_sha256": "46c8d0314ec6003ef653ddec97c4a8db9450b14448c81f8dad4937f5094b6dae",
+          "index": 1,
+          "trace_sha256": "a8d33c707aae4418305f13c5cfeb48c387db32fbbaba66badf9dc4de130056b9"
+        }
+      ],
+      "episode_operations": 1,
+      "ledger_returned_calls": 12,
+      "physical_ambiguous_failures": 0,
+      "physical_attempts_completed": 12,
+      "provider_retry_events": 0,
+      "provider_terminal_failure_events": 0,
+      "reference_status": "NOT_REQUESTED",
+      "retained_failed_reservation_usd": 0,
+      "returned_conservative_usd": 0.004401891000000001,
+      "returned_physical_requests": 12,
+      "screening_outcome": "rejected_first_success",
+      "successes": 1,
+      "task_id": 139,
+      "terminal_episode_errors": 0,
+      "valid_completed_episodes": 1
+    },
+    {
+      "C1": "NOT_GENERATED_POOL_NOT_FORMED",
+      "C2": "NOT_GENERATED_POOL_NOT_FORMED",
+      "C3": "NOT_GENERATED_POOL_NOT_FORMED",
+      "K16_rollouts": 0,
+      "LOW_stages": "NOT_RUN_POOL_NOT_FORMED",
+      "actual_ledger_usd": 0.118073865,
+      "adaptation_rollouts": 0,
+      "designer_calls": 0,
+      "episode_hashes": [
+        {
+          "episode_ids": [
+            "a2f0f0dc1c"
+          ],
+          "file_sha256": "883e4365104793da07ed49826014b7f42f90408be05a72ee78e6f405fbbb1ce3",
+          "index": 1,
+          "trace_sha256": "698385eb70c3c261bac0a9ac03ff6493fea8db45efec95c9828c281400fec35e"
+        },
+        {
+          "episode_ids": [
+            "f3024d5856"
+          ],
+          "file_sha256": "5a36724dbfa04381bb7ba31a246ff1244c32d6ac02eccfa70e678c175df7dbf5",
+          "index": 2,
+          "trace_sha256": "8dacf56efd446fa3e88309e1b0d44b03bca6bb23b3e1bd541cceebe241ef5b7d"
+        }
+      ],
+      "episode_operations": 2,
+      "ledger_returned_calls": 74,
+      "physical_ambiguous_failures": 10,
+      "physical_attempts_completed": 84,
+      "provider_retry_events": 10,
+      "provider_terminal_failure_events": 0,
+      "reference_status": "NOT_REQUESTED",
+      "retained_failed_reservation_usd": 0.033503119000000005,
+      "returned_conservative_usd": 0.118073865,
+      "returned_physical_requests": 74,
+      "screening_outcome": "rejected_provider_error",
+      "successes": 1,
+      "task_id": 140,
+      "terminal_episode_errors": 0,
+      "valid_completed_episodes": 2
+    },
+    {
+      "C1": "NOT_GENERATED_POOL_NOT_FORMED",
+      "C2": "NOT_GENERATED_POOL_NOT_FORMED",
+      "C3": "NOT_GENERATED_POOL_NOT_FORMED",
+      "K16_rollouts": 0,
+      "LOW_stages": "NOT_RUN_POOL_NOT_FORMED",
+      "actual_ledger_usd": 0.0010024300000000001,
+      "adaptation_rollouts": 0,
+      "designer_calls": 0,
+      "episode_hashes": [
+        {
+          "episode_ids": [
+            "a3a6c643cb"
+          ],
+          "file_sha256": "2f2cf0887c719e44c4786e96d6774c0519b2b447baed521f4e6be4cc419fe221",
+          "index": 1,
+          "trace_sha256": "5c55ac507fe22902ea34c4e3cb49c8877461376f7b6bf8c71b15f0c7f1f5ad49"
+        }
+      ],
+      "episode_operations": 1,
+      "ledger_returned_calls": 5,
+      "physical_ambiguous_failures": 2,
+      "physical_attempts_completed": 7,
+      "provider_retry_events": 2,
+      "provider_terminal_failure_events": 0,
+      "reference_status": "NOT_REQUESTED",
+      "retained_failed_reservation_usd": 0.0034800350000000002,
+      "returned_conservative_usd": 0.0010024300000000001,
+      "returned_physical_requests": 5,
+      "screening_outcome": "rejected_provider_error",
+      "successes": 1,
+      "task_id": 141,
+      "terminal_episode_errors": 0,
+      "valid_completed_episodes": 1
+    },
+    {
+      "C1": "NOT_GENERATED_POOL_NOT_FORMED",
+      "C2": "NOT_GENERATED_POOL_NOT_FORMED",
+      "C3": "NOT_GENERATED_POOL_NOT_FORMED",
+      "K16_rollouts": 0,
+      "LOW_stages": "NOT_RUN_POOL_NOT_FORMED",
+      "actual_ledger_usd": 0.098960212,
+      "adaptation_rollouts": 0,
+      "designer_calls": 0,
+      "episode_hashes": [
+        {
+          "episode_ids": [
+            "c2856747bf"
+          ],
+          "file_sha256": "98f1a294dde5bcf57f3cb8de3189a734dd8fd3389d73b3262d21c37586fdbe30",
+          "index": 1,
+          "trace_sha256": "89aca7a3ed3504b55f7db557023e92a4147fa30bd97d9cd33b174d689fb3edfa"
+        }
+      ],
+      "episode_operations": 1,
+      "ledger_returned_calls": 50,
+      "physical_ambiguous_failures": 3,
+      "physical_attempts_completed": 53,
+      "provider_retry_events": 3,
+      "provider_terminal_failure_events": 0,
+      "reference_status": "NOT_REQUESTED",
+      "retained_failed_reservation_usd": 0.011420292,
+      "returned_conservative_usd": 0.098960212,
+      "returned_physical_requests": 50,
+      "screening_outcome": "rejected_provider_error",
+      "successes": 0,
+      "task_id": 142,
+      "terminal_episode_errors": 0,
+      "valid_completed_episodes": 1
+    },
+    {
+      "C1": "NOT_GENERATED_POOL_NOT_FORMED",
+      "C2": "NOT_GENERATED_POOL_NOT_FORMED",
+      "C3": "NOT_GENERATED_POOL_NOT_FORMED",
+      "K16_rollouts": 0,
+      "LOW_stages": "NOT_RUN_POOL_NOT_FORMED",
+      "actual_ledger_usd": 0.014162577,
+      "adaptation_rollouts": 0,
+      "designer_calls": 0,
+      "episode_hashes": [
+        {
+          "episode_ids": [
+            "ef9366f25a"
+          ],
+          "file_sha256": "b44e4a8434efc1dedf01840cc9d837643ded47f0dbdf02c0698a1713a45f9d83",
+          "index": 1,
+          "trace_sha256": "e1b9b993e8d43c33ddaba771880eb17d2b542a8ec7f0969d103db346018e6c0d"
+        }
+      ],
+      "episode_operations": 1,
+      "ledger_returned_calls": 19,
+      "physical_ambiguous_failures": 0,
+      "physical_attempts_completed": 19,
+      "provider_retry_events": 0,
+      "provider_terminal_failure_events": 0,
+      "reference_status": "NOT_REQUESTED",
+      "retained_failed_reservation_usd": 0,
+      "returned_conservative_usd": 0.014162577,
+      "returned_physical_requests": 19,
+      "screening_outcome": "rejected_first_success",
+      "successes": 1,
+      "task_id": 143,
+      "terminal_episode_errors": 0,
+      "valid_completed_episodes": 1
+    },
+    {
+      "C1": "NOT_GENERATED_POOL_NOT_FORMED",
+      "C2": "NOT_GENERATED_POOL_NOT_FORMED",
+      "C3": "NOT_GENERATED_POOL_NOT_FORMED",
+      "K16_rollouts": 0,
+      "LOW_stages": "NOT_RUN_POOL_NOT_FORMED",
+      "actual_ledger_usd": 0.138900892,
+      "adaptation_rollouts": 0,
+      "designer_calls": 0,
+      "episode_hashes": [
+        {
+          "episode_ids": [
+            "94768d5fc8"
+          ],
+          "file_sha256": "3953eb50f4f85d4e6f8880cda63761e5bb3aea19b479a42428287719f1de1614",
+          "index": 1,
+          "trace_sha256": "3eec77a6057437f4e85890dae8e9d3fd77cca1b984b51d21097b712093a64c63"
+        },
+        {
+          "episode_ids": [
+            "d28206492d"
+          ],
+          "file_sha256": "4ce292ad0814f70b3a7af87b711d75c8cd89fa0df9586582dfb4e28ba00a84ea",
+          "index": 2,
+          "trace_sha256": "2c2fb66517d81828648b1a2e7ddd84e641c00e1af889a42d8d78777daf908262"
+        },
+        {
+          "episode_ids": [
+            "195804871d"
+          ],
+          "file_sha256": "9aa5015176eeeece8dd2b5fc888e1e22e54e5eb13d91160ff3532f3c5b176993",
+          "index": 3,
+          "trace_sha256": "b94315a7d0dfb435441bfd87f860c01bfef07223c80b3b5b5a84c6d9c197ddfe"
+        }
+      ],
+      "episode_operations": 3,
+      "ledger_returned_calls": 118,
+      "physical_ambiguous_failures": 1,
+      "physical_attempts_completed": 119,
+      "provider_retry_events": 1,
+      "provider_terminal_failure_events": 0,
+      "reference_status": "NOT_REQUESTED",
+      "retained_failed_reservation_usd": 0.003962023,
+      "returned_conservative_usd": 0.138900892,
+      "returned_physical_requests": 118,
+      "screening_outcome": "rejected_provider_error",
+      "successes": 1,
+      "task_id": 144,
+      "terminal_episode_errors": 0,
+      "valid_completed_episodes": 3
+    },
+    {
+      "C1": "NOT_GENERATED_POOL_NOT_FORMED",
+      "C2": "NOT_GENERATED_POOL_NOT_FORMED",
+      "C3": "NOT_GENERATED_POOL_NOT_FORMED",
+      "K16_rollouts": 0,
+      "LOW_stages": "NOT_RUN_POOL_NOT_FORMED",
+      "actual_ledger_usd": 0.41341280500000005,
+      "adaptation_rollouts": 0,
+      "designer_calls": 0,
+      "episode_hashes": [
+        {
+          "episode_ids": [
+            "430b2ac2cc"
+          ],
+          "file_sha256": "0aa0221460bd37d158596c61fa8165dbb6256546bfc33b0d12158e8c366279c2",
+          "index": 1,
+          "trace_sha256": "5e3c460664341362a84fd41e9fd920cca3fa861fd1111062a86be5b9a031cd50"
+        },
+        {
+          "episode_ids": [
+            "3bd2ff7829"
+          ],
+          "file_sha256": "8b71b9fdf35385a9e29cb01e1733688987fe06466960d4c651b0b5222de5e850",
+          "index": 2,
+          "trace_sha256": "8793baceaa4dd8e2c9137b8e87b640d62248125bea955ad1774ac343edb60514"
+        },
+        {
+          "episode_ids": [
+            "2c228009a6"
+          ],
+          "file_sha256": "c7dce609a10a92de61f772e18d3c190ec53a9016536a093be6dea5cbd2a46322",
+          "index": 3,
+          "trace_sha256": "d6d12f6df65477dbe59adef12f287013438a26db9bf2e43f5fa408c086d21b89"
+        }
+      ],
+      "episode_operations": 3,
+      "ledger_returned_calls": 150,
+      "physical_ambiguous_failures": 1,
+      "physical_attempts_completed": 151,
+      "provider_retry_events": 1,
+      "provider_terminal_failure_events": 0,
+      "reference_status": "NOT_REQUESTED",
+      "retained_failed_reservation_usd": 0.013538707,
+      "returned_conservative_usd": 0.41341280500000005,
+      "returned_physical_requests": 150,
+      "screening_outcome": "rejected_provider_error",
+      "successes": 0,
+      "task_id": 145,
+      "terminal_episode_errors": 0,
+      "valid_completed_episodes": 3
+    },
+    {
+      "C1": "NOT_GENERATED_POOL_NOT_FORMED",
+      "C2": "NOT_GENERATED_POOL_NOT_FORMED",
+      "C3": "NOT_GENERATED_POOL_NOT_FORMED",
+      "K16_rollouts": 0,
+      "LOW_stages": "NOT_RUN_POOL_NOT_FORMED",
+      "actual_ledger_usd": 0.059731347000000004,
+      "adaptation_rollouts": 0,
+      "designer_calls": 0,
+      "episode_hashes": [
+        {
+          "episode_ids": [
+            "584f992caa"
+          ],
+          "file_sha256": "ed932401656804748f7dd38e9801b41ce9e7d9d8d95c0cb3ff346b67e6e6b8db",
+          "index": 1,
+          "trace_sha256": "07b8823946088be1dcb134b8d29695c93b0b226950928a36197ebcc04c8b8719"
+        }
+      ],
+      "episode_operations": 1,
+      "ledger_returned_calls": 50,
+      "physical_ambiguous_failures": 2,
+      "physical_attempts_completed": 52,
+      "provider_retry_events": 2,
+      "provider_terminal_failure_events": 0,
+      "reference_status": "NOT_REQUESTED",
+      "retained_failed_reservation_usd": 0.009066551,
+      "returned_conservative_usd": 0.059731347000000004,
+      "returned_physical_requests": 50,
+      "screening_outcome": "rejected_provider_error",
+      "successes": 0,
+      "task_id": 146,
+      "terminal_episode_errors": 0,
+      "valid_completed_episodes": 1
+    },
+    {
+      "C1": "NOT_GENERATED_POOL_NOT_FORMED",
+      "C2": "NOT_GENERATED_POOL_NOT_FORMED",
+      "C3": "NOT_GENERATED_POOL_NOT_FORMED",
+      "K16_rollouts": 0,
+      "LOW_stages": "NOT_RUN_POOL_NOT_FORMED",
+      "actual_ledger_usd": 0.009575267,
+      "adaptation_rollouts": 0,
+      "designer_calls": 0,
+      "episode_hashes": [
+        {
+          "episode_ids": [
+            "32c6b82120"
+          ],
+          "file_sha256": "6401b080b8ae75bf752746ca1df0950d77542a72754a0d31361d801bdf7e7b6d",
+          "index": 1,
+          "trace_sha256": "09c3b8f2230906404ac54efaf3434456b702d33df0fd193f64a551cd5aac61f2"
+        }
+      ],
+      "episode_operations": 1,
+      "ledger_returned_calls": 21,
+      "physical_ambiguous_failures": 1,
+      "physical_attempts_completed": 22,
+      "provider_retry_events": 1,
+      "provider_terminal_failure_events": 0,
+      "reference_status": "NOT_REQUESTED",
+      "retained_failed_reservation_usd": 0.0036963160000000003,
+      "returned_conservative_usd": 0.009575267,
+      "returned_physical_requests": 21,
+      "screening_outcome": "rejected_provider_error",
+      "successes": 1,
+      "task_id": 147,
+      "terminal_episode_errors": 0,
+      "valid_completed_episodes": 1
+    },
+    {
+      "C1": "NOT_GENERATED_POOL_NOT_FORMED",
+      "C2": "NOT_GENERATED_POOL_NOT_FORMED",
+      "C3": "NOT_GENERATED_POOL_NOT_FORMED",
+      "K16_rollouts": 0,
+      "LOW_stages": "NOT_RUN_POOL_NOT_FORMED",
+      "actual_ledger_usd": 0.08900092500000001,
+      "adaptation_rollouts": 0,
+      "designer_calls": 0,
+      "episode_hashes": [
+        {
+          "episode_ids": [
+            "58b70e2bd8"
+          ],
+          "file_sha256": "bb490c5f91ec03c03f28e6b529e4099b535f1851682d8b30351c44b316f41a2a",
+          "index": 1,
+          "trace_sha256": "06e49ba6f292f91c469b14be386c07174aa2cc2ed40bb4df473c60ea6e706b54"
+        }
+      ],
+      "episode_operations": 1,
+      "ledger_returned_calls": 50,
+      "physical_ambiguous_failures": 2,
+      "physical_attempts_completed": 52,
+      "provider_retry_events": 2,
+      "provider_terminal_failure_events": 0,
+      "reference_status": "NOT_REQUESTED",
+      "retained_failed_reservation_usd": 0.010064912,
+      "returned_conservative_usd": 0.08900092500000001,
+      "returned_physical_requests": 50,
+      "screening_outcome": "rejected_provider_error",
+      "successes": 0,
+      "task_id": 148,
+      "terminal_episode_errors": 0,
+      "valid_completed_episodes": 1
+    },
+    {
+      "C1": "NOT_GENERATED_POOL_NOT_FORMED",
+      "C2": "NOT_GENERATED_POOL_NOT_FORMED",
+      "C3": "NOT_GENERATED_POOL_NOT_FORMED",
+      "K16_rollouts": 0,
+      "LOW_stages": "NOT_RUN_POOL_NOT_FORMED",
+      "actual_ledger_usd": 0.029409003000000003,
+      "adaptation_rollouts": 0,
+      "designer_calls": 0,
+      "episode_hashes": [
+        {
+          "episode_ids": [
+            "8bf28ec8ea"
+          ],
+          "file_sha256": "27c09d78490b3a17517875762615e872c61fcabd69cd9a1dc14dafe579b1cac2",
+          "index": 1,
+          "trace_sha256": "97ac15ec40b99cd19aafdfb0f6e654d09b133e6c75fb1cb21872a9759df7e14f"
+        }
+      ],
+      "episode_operations": 1,
+      "ledger_returned_calls": 34,
+      "physical_ambiguous_failures": 1,
+      "physical_attempts_completed": 35,
+      "provider_retry_events": 1,
+      "provider_terminal_failure_events": 0,
+      "reference_status": "NOT_REQUESTED",
+      "retained_failed_reservation_usd": 0.0038009140000000003,
+      "returned_conservative_usd": 0.029409003000000003,
+      "returned_physical_requests": 34,
+      "screening_outcome": "rejected_provider_error",
+      "successes": 1,
+      "task_id": 149,
+      "terminal_episode_errors": 0,
+      "valid_completed_episodes": 1
+    }
+  ],
+  "valid_completed_episodes": 26
+}
