@@ -1,0 +1,74 @@
+[
+  {
+    "evidence_ids": [
+      "436b877e58",
+      "5558bfec42",
+      "4ea28306dc"
+    ],
+    "evidence_n": 10,
+    "evidence_sha256": "ec466890031f53551a4799714a130cd584cb9757d579d2ea4009d7eb74c4007e",
+    "evidence_source": "/home/kree/work/EnvJudge-aea-llm/runs/e6-pool3-k16/confirm.jsonl",
+    "fresh_original_rollouts": 0,
+    "original_k16": "0/16",
+    "reference_id": "14c924bb414ffd1e",
+    "reference_ok": true,
+    "reference_reason": "pass",
+    "reference_sha256": "93310a8a7eaeeeada055dee8c00bac0c9e103265e2b8837994d2acf4a3ca595e",
+    "reference_steps": 5,
+    "task_id": "110"
+  },
+  {
+    "evidence_ids": [
+      "1204829a62",
+      "fe6d09f519",
+      "d45654777d"
+    ],
+    "evidence_n": 10,
+    "evidence_sha256": "3fe56eccfa64222cdee9d09ec76266227efc7085d9d92fb18c443a8115675c1f",
+    "evidence_source": "/home/kree/work/EnvJudge-aea-llm/runs/e6-pool3-k16/confirm.jsonl",
+    "fresh_original_rollouts": 0,
+    "original_k16": "0/16",
+    "reference_id": "9f1502115cd92a43",
+    "reference_ok": true,
+    "reference_reason": "pass",
+    "reference_sha256": "15d51ac83eea9ef118e80a9541941f81edc3ccfc87d28e3c2d72b937e3437f39",
+    "reference_steps": 10,
+    "task_id": "114"
+  },
+  {
+    "evidence_ids": [
+      "344e71ba14",
+      "2ebb3e172b",
+      "37ad99151d"
+    ],
+    "evidence_n": 10,
+    "evidence_sha256": "180d57ebe50bcbbb4060bab132a96380140b9e02cc4934fbac12ae0ad602117a",
+    "evidence_source": "/home/kree/work/EnvJudge-aea-llm/runs/e6-pool3-k16/confirm.jsonl",
+    "fresh_original_rollouts": 0,
+    "original_k16": "0/16",
+    "reference_id": null,
+    "reference_ok": false,
+    "reference_reason": "verifier_fail",
+    "reference_sha256": "729c583918ceb1ac4081152d8748572f316b7168fe262edcdb0201616edee0b1",
+    "reference_steps": 0,
+    "task_id": "115"
+  },
+  {
+    "evidence_ids": [
+      "afede69dc0",
+      "2dcc3e9223",
+      "9a47b9c175"
+    ],
+    "evidence_n": 10,
+    "evidence_sha256": "24f2def9b9c92ea034c395dd5b1518353017ec8d3b79a698172fbf3ecb943209",
+    "evidence_source": "/home/kree/work/EnvJudge-aea-llm/runs/e6-pool3-k16/confirm.jsonl",
+    "fresh_original_rollouts": 0,
+    "original_k16": "0/16",
+    "reference_id": "de1683aefd48799c",
+    "reference_ok": true,
+    "reference_reason": "pass",
+    "reference_sha256": "fdd5352128563fede883c15d94ff83e5ca382c6e39371a99708f75ff5ecc0a8b",
+    "reference_steps": 10,
+    "task_id": "126"
+  }
+]

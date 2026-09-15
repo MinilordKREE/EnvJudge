@@ -1,0 +1,159 @@
+{
+  "held_out": [
+    129
+  ],
+  "original_trace_file_sha256": "db0ad3d2601c8ecb3b804bd05dc507fb41b29295abee3cc09e70e2f18fec3456",
+  "pool_sha256": "f415aced6c4423356b2f4c62f68e4ec70a13c76feb3a0907fc04685b132473ed",
+  "selected": [
+    110,
+    114,
+    115,
+    126
+  ],
+  "sources": [
+    {
+      "path": "runs/e6-ar-A/events.jsonl",
+      "tasks": [
+        85,
+        86,
+        87,
+        92,
+        97,
+        99,
+        107,
+        109
+      ]
+    },
+    {
+      "path": "runs/e6-ar-B/events.jsonl",
+      "tasks": [
+        85,
+        86,
+        87,
+        92,
+        97,
+        99,
+        107,
+        109
+      ]
+    },
+    {
+      "path": "runs/e6-ar-shared/events.jsonl",
+      "tasks": [
+        85,
+        86,
+        87,
+        92,
+        97,
+        99,
+        107,
+        109
+      ]
+    },
+    {
+      "path": "runs/e6-oa-O1/events.jsonl",
+      "tasks": [
+        85,
+        86,
+        92,
+        97
+      ]
+    },
+    {
+      "path": "runs/e6-oa-O2/events.jsonl",
+      "tasks": [
+        99,
+        107,
+        109
+      ]
+    },
+    {
+      "path": "experiments/alfworld_e6/results/e6_low_assistive_rules/A/events.jsonl",
+      "tasks": [
+        85,
+        86,
+        87,
+        92,
+        97,
+        99,
+        107,
+        109
+      ]
+    },
+    {
+      "path": "experiments/alfworld_e6/results/e6_low_assistive_rules/B/events.jsonl",
+      "tasks": [
+        85,
+        86,
+        87,
+        92,
+        97,
+        99,
+        107,
+        109
+      ]
+    },
+    {
+      "path": "experiments/alfworld_e6/results/e6_low_assistive_rules/shared/events.jsonl",
+      "tasks": [
+        85,
+        86,
+        87,
+        92,
+        97,
+        99,
+        107,
+        109
+      ]
+    },
+    {
+      "path": "experiments/alfworld_e6/results/e6_low_oracle_actuator/O1/events.jsonl",
+      "tasks": [
+        85,
+        86,
+        92,
+        97
+      ]
+    },
+    {
+      "path": "experiments/alfworld_e6/results/e6_low_oracle_actuator/O2/events.jsonl",
+      "tasks": [
+        99,
+        107,
+        109
+      ]
+    }
+  ],
+  "unused": [
+    110,
+    114,
+    115,
+    126,
+    129
+  ],
+  "used": [
+    85,
+    86,
+    87,
+    92,
+    97,
+    99,
+    107,
+    109
+  ],
+  "zero": [
+    85,
+    86,
+    87,
+    92,
+    97,
+    99,
+    107,
+    109,
+    110,
+    114,
+    115,
+    126,
+    129
+  ]
+}
