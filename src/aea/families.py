@@ -33,7 +33,7 @@ from aea import exemplars
 from aea.llm.types import ChatMessage, ChatRequest
 
 type Axis = Literal["O", "T", "A"]
-type Source = Literal["library", "llm"]
+type Source = Literal["library", "llm", "oracle"]
 
 
 @dataclass(frozen=True)

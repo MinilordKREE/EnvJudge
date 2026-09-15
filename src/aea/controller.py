@@ -33,6 +33,7 @@ same table the uninterrupted run would have.
 from __future__ import annotations
 
 import concurrent.futures as cf
+import hashlib
 import threading
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
@@ -49,6 +50,7 @@ from aea.core.io import append_jsonl
 from aea.core.trace import TraceWriter as EventWriter
 from aea.core.trace import read_trace
 from aea.designer import (
+    AssistDesign,
     Evidence,
     Reference,
     ReferenceProvider,
@@ -92,6 +94,10 @@ from aea.stage_control import InvalidStageError, stage_bracket
 from aea.witness import policy_shortest_success, solvable
 
 type Outcome = Literal["accepted", "kept", "dropped", "infra_error"]
+
+
+type AssistProvider = Callable[[TaskRef, Sequence[Trace], Reference, str], AssistDesign]
+"""Experiment-only: (task, failures, reference, goal) -> the frozen hand-verified family."""
 
 
 @dataclass(frozen=True)
@@ -152,10 +158,15 @@ class Controller:
         use_proposer: bool = True,
         leverage: LeverageTable | None = None,
         reference: ReferenceProvider | None = None,
+        assist_provider: AssistProvider | None = None,
     ) -> None:
         self.config = config
         self.reference = reference
         """``llm_v1`` LOW only: the privileged reference provider (None = failure-only mode)."""
+        self.assist_provider = assist_provider
+        """Experiment-only (docs/design/AEA_LOW_ORACLE_ACTUATOR_CEILING.md): a hand-verified
+        assistive family per task replaces the LOW designer call of ``llm_v1_assistive_rules``;
+        production never sets it (None = the designer path)."""
         self.substrate = substrate
         self.run_dir = run_dir
         self.run_id = run_id
@@ -957,47 +968,76 @@ class Controller:
         reference = self._lazy_reference(task)
         if reference is None:
             return TaskOutcome(task, "dropped", "reference_unavailable", "zero", est.p_hat)
-        evidence = serialize_low(failures, est.p_hat, est.n, reference, rich=True)
         goal = task_goal(failures)
-        design = design_low_assist(
-            self._designer(),
-            model=self.substrate.designer_model(),
-            evidence=evidence,
-            failures=failures,
-            reference=reference,
-            goal=goal,
-            attribution=self._attr(task, "design_low", "designer"),
-            seed=task.seed,
-        )
-        diagnoses = [
-            {
-                "failure_id": d.failure_id,
-                "failure_step": d.failure_step,
-                "reference_step": d.reference_step,
-                "error_cause": d.error_cause,
-                "fix_hint": d.fix_hint,
-                "evidence": d.evidence,
-            }
-            for d in design.diagnoses
-        ]
-        families = [
-            {"name": f.name, "axis": f.axis, "mechanism": f.mechanism_summary, "why": f.why}
-            for f in design.families
-        ]
-        self._record_designer(
-            task,
-            "zero",
-            evidence,
-            mode="assist",
-            arguments=design.arguments,
-            accepted=[f["name"] for f in families],
-            families=families,
-            diagnoses=diagnoses,
-            rejected=design.rejected,
-            reference_steps=reference.n_steps,
-        )
-        self._ev("llm_diagnosis", task, diagnoses=diagnoses, rejected=[])
-        self._ev("llm_assist_proposals", task, accepted=families, rejected=design.rejected)
+        if self.assist_provider is not None:
+            # experiment-only oracle actuator: the frozen hand-verified family replaces the
+            # designer call; no designer record, no LLM; everything below is unchanged
+            design = self.assist_provider(task, failures, reference, goal)
+            families = [
+                {
+                    "name": f.name,
+                    "axis": f.axis,
+                    "mechanism": f.mechanism_summary,
+                    "why": f.why,
+                    "source": f.source,
+                    "code_sha256": hashlib.sha256(f.template.encode("utf-8")).hexdigest()[:16],
+                }
+                for f in design.families
+            ]
+            self._append(
+                self.run_dir / "oracle_families.jsonl",
+                {
+                    "task_id": task.task_id,
+                    "regime": "zero",
+                    "method_version": self.config.method_version,
+                    "mode": "oracle",
+                    "families": families,
+                    "rejected": design.rejected,
+                    "reference_steps": reference.n_steps,
+                },
+            )
+            self._ev("oracle_actuator", task, families=families, rejected=design.rejected)
+        else:
+            evidence = serialize_low(failures, est.p_hat, est.n, reference, rich=True)
+            design = design_low_assist(
+                self._designer(),
+                model=self.substrate.designer_model(),
+                evidence=evidence,
+                failures=failures,
+                reference=reference,
+                goal=goal,
+                attribution=self._attr(task, "design_low", "designer"),
+                seed=task.seed,
+            )
+            diagnoses = [
+                {
+                    "failure_id": d.failure_id,
+                    "failure_step": d.failure_step,
+                    "reference_step": d.reference_step,
+                    "error_cause": d.error_cause,
+                    "fix_hint": d.fix_hint,
+                    "evidence": d.evidence,
+                }
+                for d in design.diagnoses
+            ]
+            families = [
+                {"name": f.name, "axis": f.axis, "mechanism": f.mechanism_summary, "why": f.why}
+                for f in design.families
+            ]
+            self._record_designer(
+                task,
+                "zero",
+                evidence,
+                mode="assist",
+                arguments=design.arguments,
+                accepted=[f["name"] for f in families],
+                families=families,
+                diagnoses=diagnoses,
+                rejected=design.rejected,
+                reference_steps=reference.n_steps,
+            )
+            self._ev("llm_diagnosis", task, diagnoses=diagnoses, rejected=[])
+            self._ev("llm_assist_proposals", task, accepted=families, rejected=design.rejected)
         if not design.families:
             return TaskOutcome(
                 task,
@@ -1124,7 +1164,7 @@ class Controller:
             seed=task.seed,
             regime="zero",
             family=fam.name,
-            source="llm",
+            source=getattr(fam, "source", "llm"),
             axis=fam.axis,
             d=d,
             p_hat=ev.p_hat,

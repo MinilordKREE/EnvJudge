@@ -89,6 +89,19 @@ def select_low(records: dict[str, dict[str, Any]]) -> list[int]:
 TASKS: list[int] = select_low(e6.frozen_k16())
 
 
+# experiment hooks (defaults reproduce every earlier experiment; the oracle-actuator ceiling of
+# phase 3.5a injects the frozen family provider, disables the designer, splits tasks per arm
+# process and stamps the manifests)
+CONTROLLER_KWARGS: dict[str, Any] = {}
+WITH_DESIGNER: bool = True
+ARM_TASKS: dict[str, list[int]] | None = None
+MANIFEST_EXTRA: dict[str, Any] = {}
+
+
+def arm_tasks(arm: str) -> list[int]:
+    return list(ARM_TASKS.get(arm, TASKS)) if ARM_TASKS else list(TASKS)
+
+
 def config(arm: str) -> AEAConfig:
     return AEAConfig.model_validate({"method_version": ARM_VERSIONS[arm]})
 
@@ -484,18 +497,23 @@ def stage_arms(concurrency: int, arms: tuple[str, ...] = ("A", "B")) -> None:
     Two arms may run as two processes (separate run directories, frozen shared evidence)."""
     _ready()
     e3.guard("arms")
-    for t in TASKS:
-        task_id = str(t)
-        shared = shared_estimate(task_id)
-        if shared is None:
-            raise ConfigError(f"no shared evidence for task {t}: run --stage shared first")
-        for arm in arms:
+    for arm in arms:
+        for t in arm_tasks(arm):
+            task_id = str(t)
+            shared = shared_estimate(task_id)
+            if shared is None:
+                raise ConfigError(f"no shared evidence for task {t}: run --stage shared first")
             cfg = config(arm)
             d = RUNS / ARM_IDS[arm]
             ctx = _manifest(
-                d, ARM_IDS[arm], cfg, {"arm": arm, "stage": "arms", "shared_run": SHARED_ID}
+                d,
+                ARM_IDS[arm],
+                cfg,
+                {"arm": arm, "stage": "arms", "shared_run": SHARED_ID, **MANIFEST_EXTRA},
             )
-            real, _ = build(cfg, d, ARM_IDS[arm], concurrency=concurrency)
+            real, _ = build(
+                cfg, d, ARM_IDS[arm], concurrency=concurrency, with_designer=WITH_DESIGNER
+            )
             frozen = FrozenSubstrate(real, task_id)
             ctrl = Controller(
                 cfg,
@@ -505,6 +523,7 @@ def stage_arms(concurrency: int, arms: tuple[str, ...] = ("A", "B")) -> None:
                 arm=arm,
                 use_proposer=True,
                 reference=frozen.reference_provider(cfg),
+                **CONTROLLER_KWARGS,
             )
             if task_id in ctrl.completed_tasks():
                 continue
@@ -560,16 +579,17 @@ def stage_confirm(concurrency: int) -> None:
     _ready()
     e3.guard("confirm")
     d = RUNS / CONFIRM_ID
-    _manifest(d, CONFIRM_ID, config("A"), {"stage": "confirm"})
-    envs = accepted_envs("A") + accepted_envs("B")
+    first = next(iter(ARM_IDS))
+    _manifest(d, CONFIRM_ID, config(first), {"stage": "confirm", **MANIFEST_EXTRA})
+    envs = [e for arm in ARM_IDS for e in accepted_envs(arm)]
     (d / "envs.json").write_text(json.dumps(envs, indent=1), encoding="utf-8")
-    sub, _ = build(config("A"), d, CONFIRM_ID, concurrency=concurrency, with_designer=False)
+    sub, _ = build(config(first), d, CONFIRM_ID, concurrency=concurrency, with_designer=False)
     summary_path = d / "confirm_summary.json"
     summary: dict[str, Any] = (
         json.loads(summary_path.read_text(encoding="utf-8")) if summary_path.exists() else {}
     )
     writer = TraceWriter(d / "confirm.jsonl")
-    cfg = config("A")
+    cfg = config(first)
     for env in envs:
         if env["id"] in summary:
             continue

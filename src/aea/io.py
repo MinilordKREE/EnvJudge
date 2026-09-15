@@ -38,7 +38,7 @@ class AeaMeta(StrictModel):
     round: int = 0
     regime: str | None = None
     family: str | None = None
-    source: Literal["library", "llm"] | None = None
+    source: Literal["library", "llm", "oracle"] | None = None
     axis: str | None = None
     d: float | None = None
     p_hat: float | None = None

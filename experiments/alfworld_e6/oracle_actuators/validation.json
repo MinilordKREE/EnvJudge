@@ -1,0 +1,394 @@
+{
+ "85": {
+  "task": "85",
+  "class": "S",
+  "family": "explored_receptacle_pruning",
+  "code_sha256_16": "e5534269381e3916",
+  "goal": "heat some tomato and put it in diningtable",
+  "reference_id": "dfd8a9f55d7edf28",
+  "reference_steps": 15,
+  "validation_reasons": [],
+  "reference_replay_d0": {
+   "won": true,
+   "n_steps": 15,
+   "blocked_steps": 0,
+   "annotated_obs": 0
+  },
+  "reference_replay_d1": {
+   "won": true,
+   "n_steps": 15,
+   "blocked_steps": 0,
+   "annotated_obs": 0
+  },
+  "reference_replay_original": {
+   "won": true,
+   "n_steps": 15
+  },
+  "identity_at_zero_on_env": true,
+  "failure_prefix": [
+   "go to fridge 1",
+   "open fridge 1",
+   "go to cabinet 1",
+   "open cabinet 1",
+   "go to fridge 1",
+   "go to cabinet 2",
+   "open cabinet 2",
+   "go to cabinet 3",
+   "go to cabinet 4",
+   "open cabinet 4",
+   "open cabinet 5",
+   "go to drawer 1"
+  ],
+  "failure_prefix_support_events": {
+   "0.25": 5,
+   "0.5": 8,
+   "0.75": 8,
+   "1": 10
+  },
+  "support_monotone_in_dose": true,
+  "oracle_guard_d1": {
+   "ok": true,
+   "source": "oracle",
+   "detail": {
+    "oracle_attempt": 1
+   }
+  },
+  "offline_valid": true
+ },
+ "86": {
+  "task": "86",
+  "class": "G",
+  "family": "goal_decomposition_annotation",
+  "code_sha256_16": "70992eda167f2199",
+  "goal": "put a hot plate in countertop",
+  "reference_id": "ee9795388eadfd8f",
+  "reference_steps": 48,
+  "validation_reasons": [],
+  "reference_replay_d0": {
+   "won": true,
+   "n_steps": 48,
+   "blocked_steps": 0,
+   "annotated_obs": 0
+  },
+  "reference_replay_d1": {
+   "won": true,
+   "n_steps": 48,
+   "blocked_steps": 0,
+   "annotated_obs": 48
+  },
+  "reference_replay_original": {
+   "won": true,
+   "n_steps": 48
+  },
+  "identity_at_zero_on_env": true,
+  "failure_prefix": [
+   "go to cabinet 1",
+   "go to cabinet 2",
+   "open cabinet 2",
+   "go to cabinet 3",
+   "open cabinet 3",
+   "go to cabinet 4",
+   "open cabinet 4",
+   "go to cabinet 5",
+   "open cabinet 5",
+   "go to cabinet 6",
+   "open cabinet 6",
+   "go to cabinet 7"
+  ],
+  "failure_prefix_support_events": {
+   "0.25": 3,
+   "0.5": 6,
+   "0.75": 9,
+   "1": 12
+  },
+  "support_monotone_in_dose": true,
+  "oracle_guard_d1": {
+   "ok": true,
+   "source": "oracle",
+   "detail": {
+    "oracle_attempt": 1
+   }
+  },
+  "offline_valid": true
+ },
+ "92": {
+  "task": "92",
+  "class": "P",
+  "family": "precondition_gating",
+  "code_sha256_16": "796a166826347706",
+  "goal": "look at cellphone under the desklamp",
+  "reference_id": "f262be947e751751",
+  "reference_steps": 48,
+  "validation_reasons": [],
+  "reference_replay_d0": {
+   "won": true,
+   "n_steps": 48,
+   "blocked_steps": 0,
+   "annotated_obs": 0
+  },
+  "reference_replay_d1": {
+   "won": true,
+   "n_steps": 48,
+   "blocked_steps": 0,
+   "annotated_obs": 0
+  },
+  "reference_replay_original": {
+   "won": true,
+   "n_steps": 48
+  },
+  "identity_at_zero_on_env": true,
+  "failure_prefix": [
+   "go to desk 1",
+   "use desklamp 1",
+   "look",
+   "examine desk 1",
+   "look",
+   "look",
+   "look",
+   "look",
+   "look",
+   "examine desk 1",
+   "look",
+   "examine desk 1"
+  ],
+  "failure_prefix_support_events": {
+   "0.25": 0,
+   "0.5": 0,
+   "0.75": 0,
+   "1": 1
+  },
+  "support_monotone_in_dose": true,
+  "oracle_guard_d1": {
+   "ok": true,
+   "source": "oracle",
+   "detail": {
+    "oracle_attempt": 1
+   }
+  },
+  "offline_valid": true
+ },
+ "97": {
+  "task": "97",
+  "class": "P",
+  "family": "precondition_gating",
+  "code_sha256_16": "dc89dcd9b1f4dc2e",
+  "goal": "put a clean potato in garbagecan",
+  "reference_id": "668481dd071db81b",
+  "reference_steps": 14,
+  "validation_reasons": [],
+  "reference_replay_d0": {
+   "won": true,
+   "n_steps": 14,
+   "blocked_steps": 0,
+   "annotated_obs": 0
+  },
+  "reference_replay_d1": {
+   "won": true,
+   "n_steps": 14,
+   "blocked_steps": 0,
+   "annotated_obs": 0
+  },
+  "reference_replay_original": {
+   "won": true,
+   "n_steps": 14
+  },
+  "identity_at_zero_on_env": true,
+  "failure_prefix": [
+   "go to cabinet 1",
+   "go to fridge 1",
+   "open fridge 1",
+   "take potato 1 from fridge 1",
+   "go to garbagecan 1",
+   "move potato 1 to garbagecan 1",
+   "inventory",
+   "inventory",
+   "examine garbagecan 1",
+   "take potato 1 from garbagecan 1",
+   "move potato 1 to garbagecan 1",
+   "inventory"
+  ],
+  "failure_prefix_support_events": {
+   "0.25": 0,
+   "0.5": 1,
+   "0.75": 1,
+   "1": 2
+  },
+  "support_monotone_in_dose": true,
+  "oracle_guard_d1": {
+   "ok": true,
+   "source": "oracle",
+   "detail": {
+    "oracle_attempt": 1
+   }
+  },
+  "offline_valid": true
+ },
+ "99": {
+  "task": "99",
+  "class": "P",
+  "family": "precondition_gating",
+  "code_sha256_16": "d5a0e8fd494405f0",
+  "goal": "look at pillow under the desklamp",
+  "reference_id": "035e5edc4496bd6c",
+  "reference_steps": 6,
+  "validation_reasons": [],
+  "reference_replay_d0": {
+   "won": true,
+   "n_steps": 6,
+   "blocked_steps": 0,
+   "annotated_obs": 0
+  },
+  "reference_replay_d1": {
+   "won": true,
+   "n_steps": 6,
+   "blocked_steps": 0,
+   "annotated_obs": 0
+  },
+  "reference_replay_original": {
+   "won": true,
+   "n_steps": 6
+  },
+  "identity_at_zero_on_env": true,
+  "failure_prefix": [
+   "go to desk 1",
+   "examine desk 1",
+   "go to desk 2",
+   "examine desk 2",
+   "go to shelf 1",
+   "go to shelf 2",
+   "use desklamp 1",
+   "look",
+   "look",
+   "look",
+   "look",
+   "look"
+  ],
+  "failure_prefix_support_events": {
+   "0.25": 0,
+   "0.5": 0,
+   "0.75": 0,
+   "1": 1
+  },
+  "support_monotone_in_dose": true,
+  "oracle_guard_d1": {
+   "ok": true,
+   "source": "oracle",
+   "detail": {
+    "oracle_attempt": 1
+   }
+  },
+  "offline_valid": true
+ },
+ "107": {
+  "task": "107",
+  "class": "P",
+  "family": "precondition_gating",
+  "code_sha256_16": "3cd952c0a4cf71c4",
+  "goal": "look at newspaper under the desklamp",
+  "reference_id": "21384dd67635b33d",
+  "reference_steps": 8,
+  "validation_reasons": [],
+  "reference_replay_d0": {
+   "won": true,
+   "n_steps": 8,
+   "blocked_steps": 0,
+   "annotated_obs": 0
+  },
+  "reference_replay_d1": {
+   "won": true,
+   "n_steps": 8,
+   "blocked_steps": 0,
+   "annotated_obs": 0
+  },
+  "reference_replay_original": {
+   "won": true,
+   "n_steps": 8
+  },
+  "identity_at_zero_on_env": true,
+  "failure_prefix": [
+   "go to sidetable 1",
+   "use desklamp 1",
+   "look",
+   "examine sidetable 1",
+   "look",
+   "examine sidetable 1",
+   "look",
+   "look",
+   "examine sidetable 1",
+   "look",
+   "examine sidetable 1",
+   "look"
+  ],
+  "failure_prefix_support_events": {
+   "0.25": 0,
+   "0.5": 0,
+   "0.75": 0,
+   "1": 1
+  },
+  "support_monotone_in_dose": true,
+  "oracle_guard_d1": {
+   "ok": true,
+   "source": "oracle",
+   "detail": {
+    "oracle_attempt": 1
+   }
+  },
+  "offline_valid": true
+ },
+ "109": {
+  "task": "109",
+  "class": "S",
+  "family": "explored_receptacle_pruning",
+  "code_sha256_16": "c685b2d9c4506195",
+  "goal": "cool some lettuce and put it in garbagecan",
+  "reference_id": "7448258a444bff1b",
+  "reference_steps": 7,
+  "validation_reasons": [],
+  "reference_replay_d0": {
+   "won": true,
+   "n_steps": 7,
+   "blocked_steps": 0,
+   "annotated_obs": 0
+  },
+  "reference_replay_d1": {
+   "won": true,
+   "n_steps": 7,
+   "blocked_steps": 0,
+   "annotated_obs": 0
+  },
+  "reference_replay_original": {
+   "won": true,
+   "n_steps": 7
+  },
+  "identity_at_zero_on_env": true,
+  "failure_prefix": [
+   "go to fridge 1",
+   "open fridge 1",
+   "go to cabinet 1",
+   "go to fridge 1",
+   "examine fridge 1",
+   "go to cabinet 1",
+   "go to fridge 1",
+   "go to cabinet 1",
+   "go to fridge 1",
+   "examine fridge 1",
+   "go to cabinet 1",
+   "go to fridge 1"
+  ],
+  "failure_prefix_support_events": {
+   "0.25": 0,
+   "0.5": 0,
+   "0.75": 0,
+   "1": 4
+  },
+  "support_monotone_in_dose": true,
+  "oracle_guard_d1": {
+   "ok": true,
+   "source": "oracle",
+   "detail": {
+    "oracle_attempt": 1
+   }
+  },
+  "offline_valid": true
+ }
+}
