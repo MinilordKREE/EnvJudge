@@ -1,0 +1,45 @@
+[
+  {
+    "task_id": "114",
+    "evidence_matches_independent_audit": true,
+    "reference_hash_matches": true,
+    "serialized_matches": true,
+    "reference_ok": true,
+    "steps": 10,
+    "reference_action_alignment": true,
+    "reference_id_matches": true,
+    "prior_reference_byte_identical": true
+  },
+  {
+    "task_id": "115",
+    "evidence_matches_independent_audit": true,
+    "reference_hash_matches": true,
+    "serialized_matches": true,
+    "reference_ok": false,
+    "steps": 0,
+    "reference_action_alignment": true,
+    "reference_id_matches": true,
+    "prior_reference_byte_identical": true
+  },
+  {
+    "task_id": "126",
+    "evidence_matches_independent_audit": true,
+    "reference_hash_matches": true,
+    "serialized_matches": true,
+    "reference_ok": true,
+    "steps": 10,
+    "reference_action_alignment": true,
+    "reference_id_matches": true,
+    "prior_reference_byte_identical": true
+  },
+  {
+    "task_id": "129",
+    "evidence_matches_independent_audit": true,
+    "reference_hash_matches": true,
+    "serialized_matches": true,
+    "reference_ok": true,
+    "steps": 30,
+    "reference_action_alignment": true,
+    "reference_id_matches": true
+  }
+]

@@ -1,0 +1,37 @@
+{
+  "driver_sha256": "22112d20634d5e4d9b06439a7c1355d60de6aaa1ab9a32286a76d431e4bdfb6d",
+  "exact_prompt_isolation_cases": 5,
+  "llm_free_integration": {
+    "includes_real_task110": true,
+    "passed": 10,
+    "seconds": 689.55,
+    "skip": "existing optional ray/gymnasium RL-loader dependency; ray absent",
+    "skipped": 1
+  },
+  "mypy_strict": {
+    "passed": true,
+    "source_files": 93
+  },
+  "new_driver_tests": 8,
+  "paid_calls_before_prereg": 0,
+  "pre_commit_all_files": "passed",
+  "production_edits": 0,
+  "ruff": "passed",
+  "ruff_format": {
+    "files": 176,
+    "passed": true
+  },
+  "semantic_benchmark": {
+    "FAIL": 9,
+    "PASS": 3,
+    "UNCERTAIN": 2,
+    "archived_task110": "FAIL",
+    "cases": 14,
+    "matched": 14
+  },
+  "unit": {
+    "integration_deselected": 11,
+    "passed": 298,
+    "seconds": 12.7
+  }
+}
