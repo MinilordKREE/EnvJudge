@@ -26,6 +26,7 @@ from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from typing import Any, Literal, Protocol
 
+from envharness.bridges.alfworld.bridge import AlfworldEnvState
 from envharness.core.code_loader import RulesCodeError, load_rules_subclass
 from envharness.core.types import Action, Candidate, EnvResponse, Observation
 
@@ -126,17 +127,15 @@ class ValidationReport:
 class _SmokeInner:
     """Minimal inner env for the LLM-free smoke: one observation, one transition."""
 
-    class _State:
-        step_count = 1
-        won = False
-        admissible_commands = ["look", "go to a"]
-        obs_text = "You see a room."
-        extras: dict[str, Any] = {}
-
     def __init__(self) -> None:
-        self.state = self._State()
+        # Use the real Rules state contract; retain the existing post-step smoke fixture.
+        self.state = AlfworldEnvState(
+            step_count=1,
+            admissible_commands=["look", "go to a"],
+            obs_text="You see a room.",
+        )
 
-    def get_env_state(self) -> Any:
+    def get_env_state(self) -> AlfworldEnvState:
         return self.state
 
     def observe(self) -> Observation:
