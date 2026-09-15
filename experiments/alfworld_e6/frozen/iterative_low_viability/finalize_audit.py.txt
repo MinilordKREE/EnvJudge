@@ -1,0 +1,92 @@
+#!/usr/bin/env python3
+"""Finalize the immutable, compact train bridge-seed audit without external calls."""
+from __future__ import annotations
+import collections
+import csv
+import hashlib
+import io
+import json
+from pathlib import Path
+
+OUT=Path('/tmp/viability_used_task_audit')
+ROOTS={'EnvJudge':Path('/home/kree/work/EnvJudge'),'EnvJudge-aea-llm':Path('/home/kree/work/EnvJudge-aea-llm')}
+def sha(path:Path)->str:return hashlib.sha256(path.read_bytes()).hexdigest()
+def write(name:str,value:object)->None:
+    if (OUT/name).exists():
+        assert json.loads((OUT/name).read_text())==value
+        return
+    with (OUT/name).open('x') as f:json.dump(value,f,indent=2,sort_keys=True);f.write('\n')
+inv=json.loads((OUT/'source_inventory.json').read_text())
+audit=json.loads((OUT/'used_task_audit_draft.json').read_text())
+used=set(audit['used_task_ids'])
+# Independent recursive checks for task ID arrays and CSV labels in small
+# metadata, in addition to all raw structured scalar fields already scanned.
+array_sources=[]
+for source in inv['sources']:
+    relative=source['path']
+    if not relative.startswith(('runs/','experiments/')):continue
+    path=ROOTS[source['worktree']]/relative
+    if path.suffix not in {'.json','.csv'} or source['bytes']>4_000_000:continue
+    blob=path.read_bytes();assert hashlib.sha256(blob).hexdigest()==source['sha256']
+    values=set()
+    def walk(node:object)->None:
+        if isinstance(node,dict):
+            for key,value in node.items():
+                if key in {'tasks','task_ids'} and isinstance(value,list):
+                    values.update(int(v) for v in value if isinstance(v,(int,str)) and str(v).isdigit())
+                walk(value)
+        elif isinstance(node,list):
+            for value in node:walk(value)
+    try:
+        if path.suffix=='.json':walk(json.loads(blob))
+        else:
+            for row in csv.DictReader(io.StringIO(blob.decode())):
+                values.update(int(row[k]) for k in ['task','task_id'] if str(row.get(k,'')).isdigit())
+    except (ValueError,UnicodeError):continue
+    if values:
+        assert values<=used,(relative,values-used)
+        array_sources.append({'worktree':source['worktree'],'path':relative,'sha256':source['sha256'],'ids':sorted(values)})
+write('array_and_csv_crosscheck.json',{'sources':array_sources,'new_ids':[]})
+# Review every otherwise-new generic seed against its domain. Calendar-valued
+# seeds belong to named extraction/matching/sample RNGs, verified in source.
+bare=json.loads((OUT/'bare_seed_domain_review.json').read_text())
+classifications=collections.defaultdict(set); unclassified=[]
+for value,paths in bare.items():
+    for path in paths:
+        if '_eval_in_distribution.jsonl' in path or '_eval_out_of_distribution.jsonl' in path:
+            category='held_out_environment_split'
+        elif any(prefix in path for prefix in ['/runs/e3sl-eval/','/runs/r1-eval/','/runs/e0-20260907/eval/','/runs/e0d1-20260908/eval/']):
+            category='held_out_eval_accounting_or_driver_metadata'
+        elif 'e6-iterative-low-semantic-smoke/' in path or 'e6_iterative_low_semantic_smoke/' in path:
+            assert int(value)==130
+            category='task129_designer_C2_request_rng'
+        elif int(value) in {20260907,20260920,20260921,20260922,20260930,20260931,20260932}:
+            category='reference_sample_or_bank_extraction_matching_rng'
+        else:
+            unclassified.append({'path':path,'value':int(value)});continue
+        classifications[category].add((path,int(value)))
+assert not unclassified,unclassified
+source_index={(r['worktree'],r['path']):r for r in inv['sources']}
+witness_paths=[('EnvJudge','runs/e3-A/traces.jsonl'),('EnvJudge-aea-llm','runs/e6-pool2-k16/confirm.jsonl'),('EnvJudge-aea-llm','runs/e6-pool3-k16/confirm.jsonl')]
+witnesses=[]; witnessed=set()
+for worktree,path in witness_paths:
+    record=source_index[(worktree,path)]
+    ids=record['numeric_fields'].get('rollout_seed',[])
+    witnessed.update(ids)
+    witnesses.append({'worktree':worktree,'path':path,'sha256':record['sha256'],'bytes':record['bytes'],'rollout_seed_ids':ids})
+assert witnessed==used
+# Exact seed130 example: records carry task129 + designer budget, independently
+# of the integer RNG seed. All fields below are metadata; prompts are not copied.
+request_path=ROOTS['EnvJudge-aea-llm']/'runs/e6-iterative-low-semantic-smoke/task-129/D/privileged_designer_requests.jsonl'
+request=next(json.loads(line) for line in request_path.read_text().splitlines() if json.loads(line)['seed']==130)
+assert request['attribution']['task_id']=='129' and request['attribution']['budget']=='designer'
+eval_path=ROOTS['EnvJudge']/'runs/e3sl-eval/N-seeds-0/round1/N_eval_in_distribution.jsonl'
+evaluation=next(json.loads(line) for line in eval_path.read_text().splitlines() if json.loads(line)['seed']==130)
+assert evaluation['split']=='eval_in_distribution'
+all_proofs=audit.pop('used_sources')
+audit.pop('generic_seed_values_pending_domain_review')
+audit.update({'audit_status':'FROZEN_BEFORE_FRESH_SCREENING','full_inventory_local_path':str(OUT/'source_inventory.json'),'full_inventory_compressed_sha256':sha(OUT/'source_inventory.json.gz'),'all_consumption_sources_count':len(all_proofs),'all_consumption_sources_local_artifact':'used_task_audit_draft.json','all_consumption_sources_artifact_sha256':sha(OUT/'used_task_audit_draft.json'),'coverage_witnesses':witnesses,'domain_rules':['The unit is a nonnegative train-split ALFWorld bridge reset seed, not an LLM random seed or a held-out split seed.','Scan every existing run/experiment artifact in both worktrees, and archived real ALFWorld pilots; hash all files and collect explicit rollout_seed/reset_seed and historical numeric task labels.','Unit fixtures and Python source literals do not demonstrate execution; inspect only real integration call sites and fixtures actually used by those tests.','Bare seed fields are separately reviewed by provider-request, held-out split, or extraction/matching/sample RNG domain.','Conservative artifact labels introduce no extra IDs: all 130 used IDs are independently witnessed in actual rollout_seed records.'],'generic_seed_domain_review':{'unclassified':[],'local_artifact':'bare_seed_domain_review.json','sha256':sha(OUT/'bare_seed_domain_review.json'),'categories':{name:{'path_value_pairs':len(entries),'values':sorted({v for _,v in entries})} for name,entries in sorted(classifications.items())}},'seed130_domain_examples':[{'path':str(request_path.relative_to(ROOTS['EnvJudge-aea-llm'])),'sha256':sha(request_path),'seed':130,'attribution':request['attribution'],'reason':'designer request RNG; environment task is 129'},{'path':str(eval_path.relative_to(ROOTS['EnvJudge'])),'sha256':sha(eval_path),'seed':130,'split':evaluation['split'],'reason':'held-out split environment; different task universe from train'}],'metadata_array_csv_crosscheck':{'files_with_task_arrays_or_csv_labels':len(array_sources),'new_ids':[],'sha256':sha(OUT/'array_and_csv_crosscheck.json')},'script_sha256':{name:sha(OUT/name) for name in ['scan_sources.py','derive_used_tasks.py','finalize_audit.py']},'execution':{'api_calls':0,'fresh_environment_resets':0,'research_worktree_writes':0,'main_worktree_writes':0},'scope_limit':'Absence means no bridge use found in the complete extant repository/run/pilot records and known real integration calls; it is not a claim about unrecorded activity outside this workspace.'})
+write('used_task_audit.json',audit)
+report=f'''# Frozen used-task audit for iterative LOW viability\n\n**Smallest unused train bridge-seed task ID: 130.** The first 20 unused IDs are\n**130–149**, ascending. Actual historical rollout records independently contain\nexactly **0–129**. No prospective task content was inspected.\n\n## Scope and reproducibility\n\nThe read-only scan hashed {inv['source_count']:,} files ({inv['source_bytes']:,} bytes)\nacross both worktrees: all run and experiment artifacts, archived ALFWorld pilots,\nreal integration sources/fixtures, and task-universe implementation. The full local\nsource inventory SHA-256 is `{audit['source_inventory_sha256']}`.\nThe compact audit links exact script and full-inventory hashes, all-consumption\nevidence metadata, and three real rollout-trace files that together independently\nwitness every consumed ID. Large local manifests contain paths/hashes/numeric\nmetadata only; raw prompts and traces are not exported.\n\n## Domain separation\n\n- `rollout_seed` and `reset_seed` identify actual bridge use. Historical task labels\n  produce the same 130-ID union; no ambiguous extra ID is silently excluded.\n- Task 129's C2 designer request has RNG `seed=130` and attribution `task_id=129`,\n  `budget=designer`. This does **not** consume train task 130.\n- E0/E3-SL/R1 evaluation seeds refer to `eval_in_distribution` and\n  `eval_out_of_distribution`; they are separate from the train-split universe.\n- Reference sampling and bank extraction/matching RNG seeds are not bridge seeds.\n- Fake unit-fixture identifiers are excluded. Real integration calls/fixtures\n  cover 0, 1, 2, 5, 8, 9, 14, 20, 110, already inside the consumed set.\n- Supplemental task-ID-array and CSV-label parsing found no additional IDs.\n\nGeneric seed review left **zero unclassified values**. The immutable audit uses\nthe first 20 nonnegative integers absent from the consumed set; it does not infer\nfreshness by taking a remembered maximum. All prior smokes retain their previous\nconclusions. This audit used no API call or fresh environment reset and changed\nneither worktree.\n'''
+with (OUT/'USED_TASKS_AUDIT.md').open('x') as f:f.write(report)
+print(json.dumps({'audit_sha256':sha(OUT/'used_task_audit.json'),'audit_bytes':(OUT/'used_task_audit.json').stat().st_size,'first20':audit['never_used_ids'],'crosscheck_sources':len(array_sources)}))

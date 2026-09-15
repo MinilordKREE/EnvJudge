@@ -1,0 +1,68 @@
+#!/usr/bin/env python3
+"""Deterministically derive train bridge-seed consumption from frozen metadata."""
+from __future__ import annotations
+import ast
+import collections
+import gzip
+import hashlib
+import json
+from pathlib import Path
+
+OUT=Path('/tmp/viability_used_task_audit')
+RESEARCH=Path('/home/kree/work/EnvJudge-aea-llm')
+ROOTS={'EnvJudge':Path('/home/kree/work/EnvJudge'),'EnvJudge-aea-llm':RESEARCH}
+
+def digest(blob:bytes)->str:return hashlib.sha256(blob).hexdigest()
+def write(name:str,value:object)->None:
+    with (OUT/name).open('x') as f:json.dump(value,f,indent=2,sort_keys=True);f.write('\n')
+def source_ok(path:str)->bool:
+    return path.startswith(('runs/','experiments/','docs/pilots/e1pilot/','docs/pilots/eobs/')) and not any(x in path for x in ['/tests/','/.venv/','/site-packages/'])
+
+data=json.loads((OUT/'source_inventory.json').read_text())
+used=set(); proof=[]; ambiguous=[]; bare_only=collections.defaultdict(set)
+for record in data['sources']:
+    if not source_ok(record['path']):continue
+    fields=record.get('numeric_fields',{})
+    direct=set(fields.get('rollout_seed',[]))|set(fields.get('reset_seed',[]))
+    actual_artifact=Path(record['path']).suffix in {'.json','.jsonl','.gz','.with_errors','.crashed'}
+    # Artifact task_id/task values label historical tasks, while source literals
+    # and unit-fixture IDs are not evidence that an environment was executed.
+    labeled=(set(fields.get('task_id',[]))|set(fields.get('task',[]))|set(record.get('path_task_ids',[]))) if actual_artifact else set()
+    values=direct|labeled
+    if values:
+        used.update(values)
+        proof.append({'worktree':record['worktree'],'path':record['path'],'sha256':record['sha256'],'bytes':record['bytes'],'direct_environment_seeds':sorted(direct),'historical_task_labels':sorted(labeled)})
+    for value in fields.get('seed',[]):bare_only[value].add(record['worktree']+'/'+record['path'])
+# Programmatically extract literal seeds actually passed to real integration
+# helpers, then add IDs read by real integration tests from their fixture files.
+integration=[]
+for relative in ['tests/integration/test_alfworld.py','tests/integration/test_semantic_privilege_alfworld.py','docs/pilots/eobs/tests/test_integration.py']:
+    path=RESEARCH/relative
+    tree=ast.parse(path.read_text())
+    values=set()
+    for node in ast.walk(tree):
+        if not isinstance(node,ast.Call):continue
+        name=node.func.id if isinstance(node.func,ast.Name) else ''
+        if name in {'open_session','TaskRef','_run_capture'} and len(node.args)>1:
+            value=node.args[1]
+            if isinstance(value,ast.Constant) and isinstance(value.value,int):values.add(value.value)
+    used.update(values)
+    integration.append({'path':relative,'sha256':digest(path.read_bytes()),'seeds':sorted(values),'basis':'literal argument 2 of real integration open_session, TaskRef, or _run_capture calls'})
+for relative in ['tests/fixtures/stage8.json','tests/fixtures/failed_prefixes.json']:
+    path=RESEARCH/relative;fixture=json.loads(path.read_text())
+    values={int(fixture['task_id'])} if 'task_id' in fixture else {int(t['task_id']) for t in fixture['trajectories']}
+    used.update(values)
+    integration.append({'path':relative,'sha256':digest(path.read_bytes()),'seeds':sorted(values),'basis':'fixture IDs consumed by real test_alfworld.py integration tests'})
+# Do not silently turn a generic seed or same-number held-out task into a train
+# bridge task. Emit each otherwise-new value for explicit context audit.
+new_bare={value:sorted(paths) for value,paths in bare_only.items() if value not in used}
+write('bare_seed_domain_review.json',new_bare)
+unused=[];number=0
+while len(unused)<20:
+    if number not in used:unused.append(number)
+    number+=1
+write('used_task_audit_draft.json',{'schema':'aea-alfworld-used-bridge-seeds-v1','method_commit':'bec74ed8a6ff40e119b2299c92b07b8602ff5fef','worktrees':data['worktrees'],'universe':{'id':'nonnegative integer ALFWorld train-split bridge reset seed','task_ref':'TaskRef(str(t), t)','data_root':'~/eh_alfworld_data','split':'train','repetition_threshold':0},'used_task_ids':sorted(used),'smallest_never_used':unused[0],'start_id':unused[0],'never_used_ids':unused,'selection':'first 20 nonnegative integers absent from the full used set, in ascending order; no task semantics examined','source_count':data['source_count'],'source_bytes':data['source_bytes'],'source_inventory_sha256':digest((OUT/'source_inventory.json').read_bytes()),'used_sources':proof,'integration_replay_sources':integration,'generic_seed_values_pending_domain_review':sorted(new_bare)})
+# Compression has no wall-clock header, so the immutable metadata is reproducible.
+blob=gzip.compress((OUT/'source_inventory.json').read_bytes(),mtime=0)
+with (OUT/'source_inventory.json.gz').open('xb') as f:f.write(blob)
+print(json.dumps({'used_ids':sorted(used),'never_used_ids':unused,'proof_sources':len(proof),'bare_seed_new':sorted(new_bare),'inventory_compressed_bytes':len(blob)},indent=2))

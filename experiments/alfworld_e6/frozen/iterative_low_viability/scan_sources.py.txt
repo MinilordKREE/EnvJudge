@@ -1,0 +1,55 @@
+#!/usr/bin/env python3
+"""Read-only source inventory; never imports the environment or any API client."""
+from __future__ import annotations
+import collections
+import hashlib
+import json
+import pathlib
+import re
+import subprocess
+import time
+
+OUT = pathlib.Path('/tmp/viability_used_task_audit')
+ROOTS = [pathlib.Path('/home/kree/work/EnvJudge'), pathlib.Path('/home/kree/work/EnvJudge-aea-llm')]
+# Structured fields distinguish environment seeds from policy/designer RNG seeds.
+# Bare seed is retained for separate context review, never automatically relabelled.
+FIELD = re.compile(rb'(?<![\\\w])["\'](task_id|task|rollout_seed|reset_seed|seed)["\']\s*:\s*["\']?([0-9]+)(?=["\',}\]\s])')
+PATH_TASK = re.compile(r'(?:^|/)(?:task[-_]|privileged_reference_)(\d+)(?=[/._]|$)')
+selected = []
+for root in ROOTS:
+    for directory in ['runs', 'experiments']:
+        selected.extend((root, p) for p in (root / directory).rglob('*') if p.is_file())
+# Static source for integration/replay provenance and task-universe mapping.
+for root in ROOTS:
+    for directory in ['tests/integration', 'tests/fixtures', 'scripts', 'docs/pilots']:
+        selected.extend((root, p) for p in (root / directory).rglob('*') if p.is_file() and p.suffix in ['.py', '.json', '.jsonl', '.md', '.sh'])
+    for relative in ['src/aea/session.py','src/aea/substrate.py','third_party/envharness/envharness/bridges/alfworld/bridge.py']:
+        p = root / relative
+        if p.is_file(): selected.append((root,p))
+records=[]
+started=time.time()
+for index,(root,p) in enumerate(sorted(set(selected),key=lambda x:str(x[1]))):
+    blob=p.read_bytes()
+    found=collections.defaultdict(set)
+    offsets={}
+    # Gzipped gate surface artifacts contain only already indexed historical task IDs.
+    # Keep the exact compressed-byte hash and also scan decompressed contents.
+    scan=blob
+    if p.suffix=='.gz':
+        import gzip
+        scan=gzip.decompress(blob)
+    for match in FIELD.finditer(scan):
+        key=match.group(1).decode(); value=int(match.group(2))
+        found[key].add(value); offsets.setdefault(f'{key}:{value}',match.start())
+    path_ids=sorted({int(m.group(1)) for m in PATH_TASK.finditer(str(p.relative_to(root)))})
+    record={'worktree':root.name,'path':str(p.relative_to(root)),'bytes':len(blob),'sha256':hashlib.sha256(blob).hexdigest()}
+    if found: record['numeric_fields']={k:sorted(v) for k,v in sorted(found.items())};record['first_offsets']=offsets
+    if path_ids: record['path_task_ids']=path_ids
+    records.append(record)
+    if index % 5000 == 0: print(f'scanned {index}/{len(selected)} files, {time.time()-started:.1f}s',flush=True)
+result={'schema':'bridge-seed-source-inventory-v1','worktrees':{str(r):subprocess.check_output(['git','rev-parse','HEAD'],cwd=r,text=True).strip() for r in ROOTS},'source_count':len(records),'source_bytes':sum(r['bytes'] for r in records),'sources':records}
+with (OUT/'source_inventory.json').open('x') as f:json.dump(result,f,sort_keys=True,indent=2);f.write('\n')
+for key in ['task_id','task','rollout_seed','reset_seed','seed']:
+ ids=sorted({t for r in records if r['path'].startswith(('runs/','experiments/')) for t in r.get('numeric_fields',{}).get(key,[])})
+ print(key,len(ids),ids)
+print('seconds',time.time()-started)
