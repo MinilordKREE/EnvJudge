@@ -1,0 +1,86 @@
+[
+  {
+    "episode_id": "d6a9c60b0b",
+    "error": false,
+    "iteration_id": "D:C1:dose:1.0-110-0",
+    "steps": 6,
+    "success": true
+  },
+  {
+    "episode_id": "bedd4a93ba",
+    "error": false,
+    "iteration_id": "D:C1:dose:1.0-110-1",
+    "steps": 6,
+    "success": true
+  },
+  {
+    "episode_id": "e69ba8968d",
+    "error": false,
+    "iteration_id": "D:C1:dose:1.0-110-2",
+    "steps": 9,
+    "success": true
+  },
+  {
+    "episode_id": "f085b2b537",
+    "error": false,
+    "iteration_id": "D:C1:dose:1.0-110-3",
+    "steps": 6,
+    "success": true
+  },
+  {
+    "episode_id": "65411ac535",
+    "error": false,
+    "iteration_id": "D:C1:dose:0.5-110-0",
+    "steps": 9,
+    "success": true
+  },
+  {
+    "episode_id": "5fddd7cb8e",
+    "error": false,
+    "iteration_id": "D:C1:dose:0.5-110-1",
+    "steps": 6,
+    "success": true
+  },
+  {
+    "episode_id": "d9422f986a",
+    "error": false,
+    "iteration_id": "D:C1:dose:0.5-110-2",
+    "steps": 6,
+    "success": true
+  },
+  {
+    "episode_id": "33cf13144e",
+    "error": false,
+    "iteration_id": "D:C1:dose:0.5-110-3",
+    "steps": 6,
+    "success": true
+  },
+  {
+    "episode_id": "46d6bad8b5",
+    "error": true,
+    "iteration_id": "D:C1:dose:0.25-110-0",
+    "steps": 42,
+    "success": false
+  },
+  {
+    "episode_id": "76da1189cd",
+    "error": true,
+    "iteration_id": "D:C1:dose:0.25-110-1",
+    "steps": 0,
+    "success": false
+  },
+  {
+    "episode_id": "182a883c68",
+    "error": true,
+    "iteration_id": "D:C1:dose:0.25-110-2",
+    "steps": 0,
+    "success": false
+  },
+  {
+    "episode_id": "850717f671",
+    "error": true,
+    "iteration_id": "D:C1:dose:0.25-110-3",
+    "steps": 0,
+    "success": false
+  }
+]

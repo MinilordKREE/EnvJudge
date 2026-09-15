@@ -1,0 +1,51 @@
+{
+  "D_C2_improves_C1": 0,
+  "D_K16_BL": 0,
+  "D_better_I": 0,
+  "D_worse_I": 0,
+  "completed_pairs": 0,
+  "conservative_cap_account": {
+    "actual_usd": 0.05824037400000003,
+    "attempts": 105,
+    "inflight": {},
+    "stopped": "privilege_violation",
+    "uncertain_usd": 0.026578253
+  },
+  "correctness_audit": {
+    "candidate": "C1",
+    "decision": "IMPLEMENTATION_FAILURE",
+    "evidence": [
+      "task-110/D/proposals.jsonl",
+      "task-110/original_failures.json",
+      "task-110/privileged_reference.json",
+      "task-110/D/traces.jsonl"
+    ],
+    "gate": "privilege_isolation",
+    "reason": "C1 hard-codes sofa priority for finding the pillow. The reference reveals pillow-on-sofa; the three frozen learner failures reveal sofa only as a navigation option, never the object-location association. The policy formatter exposes the reordered commands. Existing lexical privilege_check passed this semantic leak.",
+    "source_changed": false,
+    "stop_action": "Set existing transport persistent-stop flag; allow in-flight request to settle; no subsequent HTTP dispatch.",
+    "task_id": "110",
+    "timestamp": "2026-09-15T16:20:09.728989+00:00"
+  },
+  "cost_by_task": {
+    "110": {
+      "logical_per_arm_usd": {
+        "D": 0.050144814,
+        "I": 0.050144814
+      },
+      "physical_designer_calls": 1,
+      "physical_policy_calls": 96,
+      "physical_usd": 0.050144814,
+      "shared_c1_usd": 0.050144814
+    }
+  },
+  "decision": "IMPLEMENTATION_FAILURE",
+  "interruption": {
+    "kind": "smoke_rollout",
+    "reason": "[smoke_rollout, attempts=0] incomplete/errored policy measurement: policy.act raised: InfraError: [smoke_cost_cap, attempts=1] non-retryable provider error: [smoke_cost_cap, attempts=0] physical API calls stopped: privilege_violation; policy.act raised: InfraError: [smoke_cost_cap, attempts=1] non-retryable provider error: [smoke_cost_cap, attempts=0] physical API calls stopped: privilege_violation; policy.act raised: InfraError: [smoke_cost_cap, attempts=1] non-retryable provider error: [smoke_cost_cap, attempts=0] physical API calls stopped: privilege_violation; policy.act raised: InfraError: [smoke_cost_cap, attempts=1] non-retryable provider error: [smoke_cost_cap, attempts=0] physical API calls stopped: privilege_violation",
+    "type": "InfraError"
+  },
+  "physical_ledger_usd": 0.050144814,
+  "primary_denominator": 4,
+  "ties": 0
+}

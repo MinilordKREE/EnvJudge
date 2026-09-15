@@ -126,3 +126,12 @@ driver/audit correction must be logged. The smoke ends for review without automa
 The last driver-only hardening preserves a sticky monetary stop and gives bound/accounting
 violations priority as `IMPLEMENTATION_FAILURE`; its focused tests and pre-commit are rerun
 before the implementation commit. Exact final counts appear in the smoke report.
+
+## Smoke outcome (method remains frozen)
+
+The preregistered smoke stopped on task110 as **IMPLEMENTATION_FAILURE**. C1 encoded the
+reference-only pillow–sofa association by ordering learner-visible commands; the unchanged
+lexical privilege gate missed this relationship-level leak. No C2, search accept or K16
+ran. The core method was not repaired after its freeze. The report-label correction is
+audit-only and separately logged. See
+[the complete smoke report](../../experiments/alfworld_e6/results/e6_iterative_low_smoke.md).

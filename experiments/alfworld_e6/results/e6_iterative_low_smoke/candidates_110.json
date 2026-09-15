@@ -1,0 +1,22 @@
+[
+  {
+    "candidate_id": "110:C1:326d1b19f1d2b29dff831a2c445e2787ff0b40a36ef9d6be757dff5b64d28ded",
+    "endpoint": [
+      4,
+      4,
+      "too_easy"
+    ],
+    "mechanism": "Reorders and highlights the admissible command list so the pillow-related navigation/pickup commands (go to sofa 1, then take pillow 1 from sofa 1) are surfaced at the front and the desklamp interaction is demoted/deprioritized until the pillow is in hand; higher DOSE increases salience (more prominent reordering, prepending a goal-progress reminder) of the same mechanism.",
+    "optimizer_call_index": 1,
+    "parent_candidate_id": null,
+    "privilege": [],
+    "rejection_reason": null,
+    "remaining_calls": 1,
+    "remaining_policy": 16,
+    "requested_operation": "PROPOSE",
+    "solvability": "{\"detail\": {\"oracle_attempt\": 1}, \"ok\": true, \"source\": \"oracle\"}",
+    "source": "import re\n\nclass _Rules(Rules):\n    DOSE = __DOSE__\n\n    def filter_observation(self, obs, env_state):\n        d = self.DOSE\n        if d <= 0:\n            return obs\n\n        cmds = list(obs.data.get(\"admissible_commands\") or [])\n        if not cmds:\n            return obs\n\n        # Determine whether the pillow is currently held (inventory evidence).\n        text = obs.text or \"\"\n        holding_pillow = bool(re.search(r\"\\bpillow\\b\", text)) and (\n            \"You pick up the pillow\" in text or \"carrying\" in text.lower()\n        )\n\n        def rank(c):\n            c = c.strip().lower()\n            if not holding_pillow:\n                # Lead with getting the pillow, then reaching the lamp location.\n                if c.startswith(\"take pillow\") or c.startswith(\"pick up pillow\"):\n                    return 0\n                if c.startswith(\"go to sofa\"):\n                    return 1\n                if c.startswith(\"examine sofa\"):\n                    return 2\n                if c.startswith(\"use desklamp\") or c.startswith(\"examine desklamp\"):\n                    return 3\n            else:\n                # Pillow held: lead with going to the lamp and using it.\n                if c.startswith(\"go to sidetable\") or c.startswith(\"go to desklamp\"):\n                    return 0\n                if c.startswith(\"use desklamp\"):\n                    return 1\n            return 4\n\n        # Higher DOSE reorders more aggressively and adds a goal-progress reminder.\n        if d >= 0.5:\n            cmds = sorted(cmds, key=rank)\n\n        reminder = \"\"\n        if d >= 0.5 and not holding_pillow:\n            reminder = \"[goal progress] First find and take the pillow, then bring it to the desklamp. \"\n        elif d >= 0.5:\n            reminder = \"[goal progress] You have the pillow; now go to the desklamp and use it. \"\n\n        new_text = text\n        if reminder:\n            new_text = reminder + text\n\n        new_data = dict(obs.data)\n        new_data[\"admissible_commands\"] = cmds\n        return Observation(text=new_text, data=new_data)\n",
+    "source_sha256": "326d1b19f1d2b29dff831a2c445e2787ff0b40a36ef9d6be757dff5b64d28ded",
+    "structural": []
+  }
+]

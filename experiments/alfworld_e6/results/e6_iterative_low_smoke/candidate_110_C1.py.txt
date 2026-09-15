@@ -1,0 +1,57 @@
+import re
+
+class _Rules(Rules):
+    DOSE = __DOSE__
+
+    def filter_observation(self, obs, env_state):
+        d = self.DOSE
+        if d <= 0:
+            return obs
+
+        cmds = list(obs.data.get("admissible_commands") or [])
+        if not cmds:
+            return obs
+
+        # Determine whether the pillow is currently held (inventory evidence).
+        text = obs.text or ""
+        holding_pillow = bool(re.search(r"\bpillow\b", text)) and (
+            "You pick up the pillow" in text or "carrying" in text.lower()
+        )
+
+        def rank(c):
+            c = c.strip().lower()
+            if not holding_pillow:
+                # Lead with getting the pillow, then reaching the lamp location.
+                if c.startswith("take pillow") or c.startswith("pick up pillow"):
+                    return 0
+                if c.startswith("go to sofa"):
+                    return 1
+                if c.startswith("examine sofa"):
+                    return 2
+                if c.startswith("use desklamp") or c.startswith("examine desklamp"):
+                    return 3
+            else:
+                # Pillow held: lead with going to the lamp and using it.
+                if c.startswith("go to sidetable") or c.startswith("go to desklamp"):
+                    return 0
+                if c.startswith("use desklamp"):
+                    return 1
+            return 4
+
+        # Higher DOSE reorders more aggressively and adds a goal-progress reminder.
+        if d >= 0.5:
+            cmds = sorted(cmds, key=rank)
+
+        reminder = ""
+        if d >= 0.5 and not holding_pillow:
+            reminder = "[goal progress] First find and take the pillow, then bring it to the desklamp. "
+        elif d >= 0.5:
+            reminder = "[goal progress] You have the pillow; now go to the desklamp and use it. "
+
+        new_text = text
+        if reminder:
+            new_text = reminder + text
+
+        new_data = dict(obs.data)
+        new_data["admissible_commands"] = cmds
+        return Observation(text=new_text, data=new_data)

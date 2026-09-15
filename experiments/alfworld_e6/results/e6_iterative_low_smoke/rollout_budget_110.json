@@ -1,0 +1,23 @@
+[
+  {
+    "budget": "search",
+    "n": 4,
+    "phase": "D:C1:dose:0.25",
+    "refunded": 0,
+    "task_id": "110"
+  },
+  {
+    "budget": "search",
+    "n": 4,
+    "phase": "D:C1:dose:0.5",
+    "refunded": 0,
+    "task_id": "110"
+  },
+  {
+    "budget": "search",
+    "n": 4,
+    "phase": "D:C1:dose:1.0",
+    "refunded": 0,
+    "task_id": "110"
+  }
+]

@@ -778,7 +778,11 @@ def report() -> dict[str, Any]:
     elif improved >= 2 and better >= 1 and worse <= better:
         decision = "ITERATIVE_LOW_STRONG_SIGNAL" if confirmed else "ITERATIVE_LOW_SIGNAL"
     cap = json.loads((RUN / "cap.json").read_text())
-    if cap.get("bound_violation"):
+    audit_path = RUN / "correctness_audit.json"
+    correctness_audit = json.loads(audit_path.read_text()) if audit_path.exists() else None
+    if cap.get("bound_violation") or (
+        correctness_audit and correctness_audit.get("decision") == "IMPLEMENTATION_FAILURE"
+    ):
         decision = "IMPLEMENTATION_FAILURE"
     ledger = [row for path in RUN.glob("ledger.*.jsonl") for row in jsonl(path)]
     physical_by_task = {}
@@ -814,6 +818,7 @@ def report() -> dict[str, Any]:
             "physical_policy_calls": sum(row["budget"] != "designer" for row in calls),
         }
     summary = {
+        "correctness_audit": correctness_audit,
         "cost_by_task": physical_by_task,
         "decision": decision,
         "primary_denominator": 4,

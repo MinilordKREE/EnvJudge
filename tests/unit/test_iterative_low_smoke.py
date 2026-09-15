@@ -188,3 +188,23 @@ def test_bound_violation_stops_later_calls_and_is_implementation_failure(
         {"tasks": {}, "interruption": {"kind": "smoke_design_inconclusive"}},
     )
     assert smoke.report()["decision"] == "IMPLEMENTATION_FAILURE"
+
+
+def test_confirmed_privilege_audit_overrides_interrupt_label(
+    smoke: Any, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(smoke, "RUN", tmp_path)
+    smoke.write_json(tmp_path / "prepared.json", [{"reference_ok": True}] * 4)
+    smoke.write_json(
+        tmp_path / "results.json",
+        {"tasks": {}, "interruption": {"kind": "smoke_rollout"}},
+    )
+    smoke.write_json(
+        tmp_path / "cap.json",
+        {"actual_usd": 0.05, "uncertain_usd": 0, "inflight": {}, "attempts": 1},
+    )
+    smoke.write_json(
+        tmp_path / "correctness_audit.json",
+        {"decision": "IMPLEMENTATION_FAILURE", "gate": "privilege_isolation"},
+    )
+    assert smoke.report()["decision"] == "IMPLEMENTATION_FAILURE"

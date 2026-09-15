@@ -1,0 +1,34 @@
+{
+  "task_id": "110",
+  "candidate_id": "110:C1:326d1b19f1d2b29dff831a2c445e2787ff0b40a36ef9d6be757dff5b64d28ded",
+  "source_sha256": "326d1b19f1d2b29dff831a2c445e2787ff0b40a36ef9d6be757dff5b64d28ded",
+  "reference_id": "14c924bb414ffd1e",
+  "failed_episode_ids": [
+    "436b877e58",
+    "5558bfec42",
+    "4ea28306dc"
+  ],
+  "failed_unique_actions": [
+    "examine sidetable 1",
+    "go to sidetable 1",
+    "look",
+    "use desklamp 1"
+  ],
+  "failed_non_goal_pillow_observations": 0,
+  "reference_location_fact": "You arrive at sofa 1. On the sofa 1, you see a pillow 1.",
+  "reference_location_step": 3,
+  "evaluated_episode_id": "d6a9c60b0b",
+  "evaluated_step": 1,
+  "action_before_observation": "go to sidetable 1",
+  "admissible_commands_first5": [
+    "go to sofa 1",
+    "use desklamp 1",
+    "examine sidetable 1",
+    "go to coffeetable 1",
+    "go to diningtable 1"
+  ],
+  "policy_observation": "[goal progress] First find and take the pillow, then bring it to the desklamp. Task: Your task is to: look at pillow under the desklamp.\n\nYou arrive at sidetable 1. On the sidetable 1, you see a desklamp 1.\n\nAdmissible commands: examine sidetable 1, go to coffeetable 1, go to diningtable 1, go to drawer 1, go to drawer 2, go to drawer 3, go to drawer 4, go to dresser 1, go to garbagecan 1, go to sidetable 2, go to sofa 1, help, inventory, look, use desklamp 1\n\nAdmissible actions: [go to sofa 1, use desklamp 1, examine sidetable 1, go to coffeetable 1, go to diningtable 1, go to drawer 1, go to drawer 2, go to drawer 3, go to drawer 4, go to dresser 1, go to garbagecan 1, go to sidetable 2, help, inventory, look].\n\nReason about the current situation inside `<think> </think>` tags, then present ONE admissible action inside `<action> </action>` tags. Example:\n<think>...</think><action>go to drawer 1</action>",
+  "policy_observation_sha256": "69567fcf4f37edb7eff255788123812d71a057ce759eb547458cc7426efb39ab",
+  "formatter_source": "third_party/envharness/envharness/agents/policy.py:370",
+  "format": "think_action"
+}
