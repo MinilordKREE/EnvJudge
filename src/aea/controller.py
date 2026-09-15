@@ -79,6 +79,7 @@ from aea.io import (
 from aea.llm.types import Attribution, BudgetName, ChatRequest, ChatResponse
 from aea.low_optimizer import Feedback, LowEnvironmentOptimizer, propose_low
 from aea.rules_control import assist_bracket
+from aea.semantic_low import LowPrivilegeScreen, ScreenedLowOptimizer
 from aea.session import SESSION_LOCK, Session
 from aea.stage import (
     StagedCandidate,
@@ -425,9 +426,9 @@ class Controller:
     @property
     def _llm(self) -> bool:
         """Every llm_v1 variant shares every path except LOW."""
-        return (
-            self.config.method_version.startswith("llm_v1")
-            or self.config.method_version == "llm_v2_iterative_low"
+        return self.config.method_version.startswith("llm_v1") or self.config.method_version in (
+            "llm_v2_iterative_low",
+            "llm_v2_iterative_low_semantic_gate",
         )
 
     def _harden(self, task: TaskRef, est: EstimateResult) -> TaskOutcome:
@@ -612,7 +613,10 @@ class Controller:
 
     # ------------------------------------------------------------------ stage
     def _stage(self, task: TaskRef, est: EstimateResult) -> TaskOutcome:
-        if self.config.method_version == "llm_v2_iterative_low":
+        if self.config.method_version in (
+            "llm_v2_iterative_low",
+            "llm_v2_iterative_low_semantic_gate",
+        ):
             return self._stage_iterative_low(task, est)
         if self.config.method_version == "llm_v1_stage_control":
             return self._stage_control(task, est)
@@ -979,6 +983,28 @@ class Controller:
             )
         evidence = serialize_low(failures, est.p_hat, est.n, reference, rich=True)
         ctx = FamilyContext(task.task_id, ())
+        privilege_screen: LowPrivilegeScreen | None = None
+        if self.config.method_version == "llm_v2_iterative_low_semantic_gate":
+            privilege_screen = LowPrivilegeScreen(
+                task_id=task.task_id,
+                reference=reference,
+                designer_evidence=serialize_low(failures, est.p_hat, est.n, None).text,
+                failures=failures,
+                goal=task_goal(failures),
+                open_original_session=lambda: self.substrate.open_session(task, None, None),
+                max_bisections=self.config.impl.max_bisections,
+                max_steps=self.config.impl.policy_max_steps,
+                audit_dir=self.run_dir / "semantic_privilege_inputs",
+                record=lambda record: self._append(
+                    self.run_dir / "semantic_privilege.jsonl", record
+                ),
+                task_prompt=str(getattr(self.substrate, "task_prompt", "")),
+                action_format=str(
+                    getattr(self.substrate, "policy_spec_kwargs", {}).get(
+                        "action_format", "think_action"
+                    )
+                ),
+            )
 
         def propose(feedback: Feedback | None, index: int) -> dict[str, Any]:
             args = propose_low(
@@ -1012,6 +1038,8 @@ class Controller:
                 )
 
         def measure(family: AssistFamily, dose: float) -> Eval:
+            if privilege_screen is not None:
+                privilege_screen.require_pass(family, dose)
             candidate = family.make(dose, ctx)
             assert candidate is not None
 
@@ -1023,17 +1051,27 @@ class Controller:
 
             return evaluate(run, self.config)
 
-        optimizer = LowEnvironmentOptimizer(
-            evidence,
-            failures,
-            reference,
-            task_goal(failures),
-            task_id=task.task_id,
-            propose=propose,
-            certify=certify,
-            measure=measure,
-            remaining=lambda: self.budget.account(task.task_id).remaining(),
-            endpoint_reserve=2 * self.config.probe[1],
+        optimizer_kwargs: dict[str, Any] = {
+            "task_id": task.task_id,
+            "propose": propose,
+            "certify": certify,
+            "measure": measure,
+            "remaining": lambda: self.budget.account(task.task_id).remaining(),
+            "endpoint_reserve": 2 * self.config.probe[1],
+        }
+        optimizer = (
+            ScreenedLowOptimizer(
+                evidence,
+                failures,
+                reference,
+                task_goal(failures),
+                screen=privilege_screen.screen,
+                **optimizer_kwargs,
+            )
+            if privilege_screen is not None
+            else LowEnvironmentOptimizer(
+                evidence, failures, reference, task_goal(failures), **optimizer_kwargs
+            )
         )
         try:
             result = optimizer.run()

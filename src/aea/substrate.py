@@ -192,7 +192,7 @@ def reference_provider(
     with ``task_id`` / ``seed``)."""
     if not (
         config.method_version.startswith("llm_v1")
-        or config.method_version == "llm_v2_iterative_low"
+        or config.method_version in ("llm_v2_iterative_low", "llm_v2_iterative_low_semantic_gate")
     ):
         return None
     return ExpertReference(
