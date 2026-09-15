@@ -1,0 +1,182 @@
+{
+  "historical_cost_basis": {
+    "basis": "Historical measured costs only; not a current provider price quote or efficacy evidence.",
+    "caveat": "Caps include ambiguous failed-request reservations and may stop before logical episode caps complete.",
+    "designer_smoke": {
+      "by_task": {
+        "114": {
+          "call": 1,
+          "usd": 0.007585468000000001
+        },
+        "126": {
+          "call": 3,
+          "usd": 0.011639980000000001
+        },
+        "129": {
+          "call": 3,
+          "usd": 0.012224079999999998
+        }
+      },
+      "episode_steps": {
+        "max": null,
+        "mean": null,
+        "median": null,
+        "n": 0,
+        "p90": null,
+        "p95": null,
+        "sum": 0
+      },
+      "events": {
+        "call": 7
+      },
+      "ledger_files": [
+        {
+          "path": "runs/e6-iterative-low-semantic-smoke/ledger.191096.jsonl",
+          "sha256": "1d28cdb9d49862c42f8da43c75332b3f089221648bc3e2b5275df0c945a13a8f"
+        }
+      ],
+      "models": {
+        "deepseek-v4-pro": {
+          "call_usd": {
+            "max": 0.007585468000000001,
+            "mean": 0.004492789714285714,
+            "median": 0.0027594159999999998,
+            "n": 7,
+            "p90": 0.007585468000000001,
+            "p95": 0.007585468000000001,
+            "sum": 0.031449528
+          },
+          "calls": 7,
+          "completion_tokens": {
+            "max": 1142,
+            "mean": 975.2857142857143,
+            "median": 980,
+            "n": 7,
+            "p90": 1142,
+            "p95": 1142,
+            "sum": 6827
+          },
+          "prompt_tokens": {
+            "max": 9944,
+            "mean": 9502.42857142857,
+            "median": 9540,
+            "n": 7,
+            "p90": 9944,
+            "p95": 9944,
+            "sum": 66517
+          },
+          "provider_counts": {
+            "null": 7
+          }
+        }
+      },
+      "physical_attempts": {
+        "by_model": {
+          "deepseek-v4-pro": {
+            "reservation_usd": {
+              "max": 0.07481628,
+              "mean": 0.07247874857142858,
+              "median": 0.07292076000000002,
+              "n": 7,
+              "p90": 0.07481628,
+              "p95": 0.07481628,
+              "sum": 0.5073512400000001
+            },
+            "returned_conservative_usd": {
+              "max": 0.01711512,
+              "mean": 0.016405337142857145,
+              "median": 0.016477560000000002,
+              "n": 7,
+              "p90": 0.01711512,
+              "p95": 0.01711512,
+              "sum": 0.11483736000000001
+            }
+          }
+        },
+        "file_sha256": "4edc4d0ee538502f2a6e48c88ae4b24385f306483227a6bbe212eb99d3acb6f7",
+        "n": 7,
+        "reservation_usd": {
+          "max": 0.07481628,
+          "mean": 0.07247874857142858,
+          "median": 0.07292076000000002,
+          "n": 7,
+          "p90": 0.07481628,
+          "p95": 0.07481628,
+          "sum": 0.5073512400000001
+        },
+        "returned_conservative_usd": {
+          "max": 0.01711512,
+          "mean": 0.016405337142857145,
+          "median": 0.016477560000000002,
+          "n": 7,
+          "p90": 0.01711512,
+          "p95": 0.01711512,
+          "sum": 0.11483736000000001
+        },
+        "status": {
+          "returned": 7
+        }
+      },
+      "rollout_fields_example": null
+    },
+    "episode_cost_audit_sha256": "2834df420545bc51acc4cb98d552c9ea6d1cc7e68c082ed936ba4b616d3c8abb",
+    "frozen_caps_usd": {
+      "screening": 8,
+      "whole_run": 20
+    },
+    "policy_pool": {
+      "all_mean_usd_per_episode": 0.0471936471175,
+      "all_tasks_with_physical_retries": 29,
+      "ledger_sha256": "0f7933214a7a870edf001d5d5d86483679373dd5d87156b991d7c0ed57e37f99",
+      "method": "Canonical merged ledger grouped by task; compare independently archived confirm_summary. No episode-level dollar attribution is inferred from child ledgers (call rows lack rollout_uid).",
+      "planning": {
+        "30adapt_times4_at_zero_mean": 10.4576627025,
+        "K16times4_at_all_mean": 3.02039341552,
+        "designer12_at_recent_peak_conservative_max": 0.20538144000000003,
+        "four_zero_min64_at_zero_mean": 5.577420108,
+        "full320screen_at_all_mean": 15.101967077600001,
+        "max504policy_at_all_mean": 23.78559814722,
+        "total_min64screen_plus120adapt_plus64confirm_at_zero_mean_plus12designer": 21.8178843585
+      },
+      "summary_sha256": "e555012dc89cf845ea699b98ec460caa5ae7156ff0b7d247564084970a337b8d",
+      "zero_max_task_mean_usd_per_episode": 0.1337929246875,
+      "zero_mean_usd_per_episode": 0.0871471891875,
+      "zero_task_count": 13,
+      "zero_task_ids": [
+        "85",
+        "86",
+        "87",
+        "92",
+        "97",
+        "99",
+        "107",
+        "109",
+        "110",
+        "114",
+        "115",
+        "126",
+        "129"
+      ],
+      "zero_tasks_with_physical_retries": 9
+    },
+    "source_audit_sha256": "8741bdd2b5096a6e90d56b037b777de850b66c6d6f3fe791522f838e1dbf23f4"
+  },
+  "plan": {
+    "completion_guaranteed": false,
+    "maximum_120_adaptation_episodes_usd": 10.4576627025,
+    "maximum_12_designer_recent_high_usd": 0.20538144000000003,
+    "maximum_64_confirmation_at_overall_mean_usd": 3.02039341552,
+    "minimum_64_zero_episodes_usd": 5.577420108,
+    "note": "Rejected IDs and infrastructure retries add costs. Neither cap may increase after execution begins.",
+    "screening_limit_usd": 8.0,
+    "whole_run_limit_usd": 20.0
+  },
+  "schema": "aea-viability-v2-measured-cost-plan-v1",
+  "v1_screening": {
+    "completed_episodes": 26,
+    "failed_reservations_usd": 0.135002361,
+    "note": "Strict-retry early exclusion truncates tasks; not an estimate of V2 ZERO yield.",
+    "returned_cost_usd": 1.386324485,
+    "returned_mean_usd": 0.0533201725
+  }
+}

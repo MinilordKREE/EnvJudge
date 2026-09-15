@@ -1,0 +1,99 @@
+#!/usr/bin/env python3
+"""Read-only incremental bridge-seed audit; validates bytes before reusing extraction.
+
+No application imports, environment resets or API calls. Every file in the old
+and current audit scope is re-hashed. Only an exact old SHA permits reuse of the
+previous field extraction. Large numeric metadata inventories remain local.
+"""
+from __future__ import annotations
+import collections
+import gzip
+import hashlib
+import json
+import pathlib
+import re
+import subprocess
+import time
+
+OUT=pathlib.Path('/tmp/viability_v2_used_task_audit')
+RESEARCH=pathlib.Path('/home/kree/work/EnvJudge-aea-llm')
+MAIN=pathlib.Path('/home/kree/work/EnvJudge')
+ROOTS=[MAIN,RESEARCH]
+OLD_INVENTORY=pathlib.Path('/tmp/viability_used_task_audit/source_inventory.json')
+PRIOR_AUDIT=RESEARCH/'experiments/alfworld_e6/frozen/iterative_low_viability/used_task_audit.json'
+FIELD=re.compile(rb'(?<![\\\w])["\'](task_id|task|rollout_seed|reset_seed|seed)["\']\s*:\s*["\']?([0-9]+)(?=["\',}\]\s])')
+PATH_TASK=re.compile(r'(?:^|/)(?:task[-_]|privileged_reference_)(\d+)(?=[/._]|$)')
+
+def sha(blob:bytes)->str:return hashlib.sha256(blob).hexdigest()
+def git(root:pathlib.Path,*args:str)->str:return subprocess.check_output(['git',*args],cwd=root,text=True).strip()
+def write(name:str,value:object)->None:
+ with (OUT/name).open('x') as f:json.dump(value,f,indent=2,sort_keys=True);f.write('\n')
+
+prior=json.loads(PRIOR_AUDIT.read_text());old_blob=OLD_INVENTORY.read_bytes()
+assert sha(old_blob)==prior['source_inventory_sha256'],'prior full inventory hash mismatch'
+old=json.loads(old_blob);old_index={(r['worktree'],r['path']):r for r in old['sources']}
+safety={str(r):{'HEAD':git(r,'rev-parse','HEAD'),'branch':git(r,'branch','--show-current'),'status_short':git(r,'status','--short')} for r in ROOTS}
+safety['worktree_list']=git(RESEARCH,'worktree','list')
+selected=[]
+for root in ROOTS:
+ for directory in ['runs','experiments']:
+  selected.extend((root,p) for p in (root/directory).rglob('*') if p.is_file())
+ for directory in ['tests/integration','tests/fixtures','scripts','docs/pilots']:
+  selected.extend((root,p) for p in (root/directory).rglob('*') if p.is_file() and p.suffix in ['.py','.json','.jsonl','.md','.sh'])
+ for relative in ['src/aea/session.py','src/aea/substrate.py','third_party/envharness/envharness/bridges/alfworld/bridge.py']:
+  p=root/relative
+  if p.is_file():selected.append((root,p))
+records=[];changes=[];additions=[];same=0;seen=set();started=time.time()
+for index,(root,p) in enumerate(sorted(set(selected),key=lambda x:str(x[1]))):
+ blob=p.read_bytes();checksum=sha(blob);relative=str(p.relative_to(root));key=(root.name,relative);seen.add(key)
+ previous=old_index.get(key)
+ if previous and previous['sha256']==checksum:
+  records.append(previous);same+=1;continue
+ record={'worktree':root.name,'path':relative,'bytes':len(blob),'sha256':checksum}
+ scan=gzip.decompress(blob) if p.suffix=='.gz' else blob
+ fields=collections.defaultdict(set);offsets={}
+ for match in FIELD.finditer(scan):
+  name=match[1].decode();value=int(match[2]);fields[name].add(value);offsets.setdefault(f'{name}:{value}',match.start())
+ if fields:record['numeric_fields']={k:sorted(v) for k,v in sorted(fields.items())};record['first_offsets']=offsets
+ path_ids=sorted({int(m[1]) for m in PATH_TASK.finditer(relative)})
+ if path_ids:record['path_task_ids']=path_ids
+ records.append(record)
+ if previous:changes.append({'worktree':root.name,'path':relative,'old_sha256':previous['sha256'],'new_sha256':checksum})
+ else:additions.append({'worktree':root.name,'path':relative,'sha256':checksum})
+removed=[{'worktree':k[0],'path':k[1],'sha256':v['sha256']} for k,v in old_index.items() if k not in seen]
+current={'schema':'bridge-seed-source-inventory-v2','safety':safety,'prior_inventory_sha256':sha(old_blob),'prior_audit_sha256':sha(PRIOR_AUDIT.read_bytes()),'source_count':len(records),'source_bytes':sum(r['bytes'] for r in records),'unchanged_prior_sources':same,'changed_prior_sources':changes,'removed_prior_sources':removed,'added_sources':additions,'sources':records}
+write('source_inventory.json',current)
+# Actual environment provenance: source/unit-test literals and bare RNG seeds
+# never count as bridge use. Held-out eval rows are separately classified.
+used=set(prior['used_task_ids']);direct=set();labels=set();bare=collections.defaultdict(set);evidence=[]
+for r in records:
+ path=r['path']
+ if not path.startswith(('runs/','experiments/','docs/pilots/e1pilot/','docs/pilots/eobs/')):continue
+ if any(t in path for t in ['/tests/','/.venv/','/site-packages/']):continue
+ if pathlib.Path(path).suffix not in {'.json','.jsonl','.gz','.with_errors','.crashed'}:continue
+ fields=r.get('numeric_fields',{});actual=set(fields.get('rollout_seed',[]))|set(fields.get('reset_seed',[]));names=set(fields.get('task_id',[]))|set(fields.get('task',[]))|set(r.get('path_task_ids',[]))
+ direct.update(actual);labels.update(names);used.update(actual|names)
+ if actual|names:evidence.append({'worktree':r['worktree'],'path':path,'sha256':r['sha256'],'direct_seeds':sorted(actual),'historical_task_labels':sorted(names)})
+ for value in fields.get('seed',[]):bare[value].add(r['worktree']+'/'+path)
+# Static literal checks on real integration helpers supplement retained prior
+# integration provenance, without importing or executing any test/environment.
+import ast
+integration=[]
+for root in ROOTS:
+ for path in (root/'tests/integration').glob('*.py'):
+  ids=set()
+  for node in ast.walk(ast.parse(path.read_text())):
+   if isinstance(node,ast.Call) and isinstance(node.func,ast.Name) and node.func.id in {'open_session','TaskRef','_run_capture'} and len(node.args)>1:
+    value=node.args[1]
+    if isinstance(value,ast.Constant) and type(value.value) is int:ids.add(value.value)
+  if ids:integration.append({'worktree':root.name,'path':str(path.relative_to(root)),'sha256':sha(path.read_bytes()),'ids':sorted(ids)});used.update(ids)
+# Retain all generic-seed values not already actual train tasks for explicit
+# domain review. The prior review is bound; newly appearing pairs are visible.
+write('generic_seed_domains.json',{str(k):sorted(v) for k,v in sorted(bare.items()) if k not in used})
+write('consumption_sources.json',evidence)
+unused=[];n=0
+while len(unused)<20:
+ if n not in used:unused.append(n)
+ n+=1
+write('derivation.json',{'used_task_ids':sorted(used),'direct_environment_seed_ids':sorted(direct),'historical_task_label_ids':sorted(labels),'known_real_integration_sources':integration,'smallest_never_used':unused[0],'start_id':unused[0],'never_used_ids':unused})
+print(json.dumps({'source_count':len(records),'source_bytes':current['source_bytes'],'unchanged_prior_sources':same,'changed_prior_sources':changes,'removed_prior_sources':removed,'added_sources_count':len(additions),'used_count':len(used),'used_min':min(used),'used_max':max(used),'never_used_ids':unused,'elapsed_seconds':time.time()-started},indent=2))

@@ -1,0 +1,107 @@
+#!/usr/bin/env python3
+"""Finalize compact V2 provenance from the complete read-only source scan.
+
+Run after scan_used_tasks.py. All outputs are new files beneath the /tmp audit
+namespace; existing identical metadata is checked rather than overwritten.
+"""
+from __future__ import annotations
+import hashlib
+import json
+from pathlib import Path
+import subprocess
+
+OUT=Path('/tmp/viability_v2_used_task_audit')
+ROOT=Path('/home/kree/work/EnvJudge-aea-llm')
+PRIOR=ROOT/'experiments/alfworld_e6/frozen/iterative_low_viability/used_task_audit.json'
+
+def sha(blob:bytes)->str:return hashlib.sha256(blob).hexdigest()
+def write(name:str,value:object)->None:
+ path=OUT/name
+ if path.exists():assert json.loads(path.read_text())==value;return
+ with path.open('x') as f:json.dump(value,f,indent=2,sort_keys=True);f.write('\n')
+
+inventory=json.loads((OUT/'source_inventory.json').read_text())
+derived=json.loads((OUT/'derivation.json').read_text())
+prior=json.loads(PRIOR.read_text())
+assert inventory['prior_audit_sha256']==sha(PRIOR.read_bytes())
+assert not inventory['changed_prior_sources'] and not inventory['removed_prior_sources']
+assert derived['used_task_ids']==derived['direct_environment_seed_ids']
+assert derived['historical_task_label_ids']==derived['direct_environment_seed_ids']
+# All otherwise-unused generic seeds must retain a previously reviewed domain.
+previous_domains_path=Path('/tmp/viability_used_task_audit/bare_seed_domain_review.json')
+assert sha(previous_domains_path.read_bytes())==prior['generic_seed_domain_review']['sha256']
+previous_domains=json.loads(previous_domains_path.read_text())
+current_domains=json.loads((OUT/'generic_seed_domains.json').read_text())
+new_domain_pairs=[]
+for value,paths in current_domains.items():
+ old=set(previous_domains.get(value,[]))
+ new_domain_pairs.extend({'seed':int(value),'path':p} for p in paths if p not in old)
+assert not new_domain_pairs,new_domain_pairs
+
+manifest_path=ROOT/'experiments/alfworld_e6/results/iterative_low_viability/artifact_manifest.json'
+manifest=json.loads(manifest_path.read_text());manifest_mismatches=[]
+for row in manifest['files']:
+ path=ROOT/row['path'];actual=sha(path.read_bytes()) if path.exists() else None
+ if actual!=row['sha256']:manifest_mismatches.append({'path':row['path'],'expected':row['sha256'],'actual':actual})
+assert not manifest_mismatches
+reportpaths=list((ROOT/'experiments/alfworld_e6/results/iterative_low_viability').rglob('*'))+list((ROOT/'experiments/alfworld_e6/frozen/iterative_low_viability').rglob('*'))+[ROOT/'experiments/alfworld_e6/ITERATIVE_LOW_VIABILITY_REPORT.md',ROOT/'experiments/alfworld_e6/PREREG_ITERATIVE_LOW_VIABILITY_POOL.md',ROOT/'scripts/e6_iterative_low_viability.py',ROOT/'scripts/e6_iterative_low_smoke.py',ROOT/'scripts/e6_iterative_low_semantic_smoke.py']
+tracked=[]
+for path in sorted(set(reportpaths)):
+ if not path.is_file():continue
+ relative=str(path.relative_to(ROOT));blob=path.read_bytes()
+ committed=subprocess.check_output(['git','show',inventory['safety'][str(ROOT)]['HEAD']+':'+relative],cwd=ROOT)
+ assert blob==committed,relative
+ tracked.append({'path':relative,'bytes':len(blob),'sha256':sha(blob),'matches_starting_HEAD':True})
+screen_path=ROOT/'runs/e6-iterative-low-viability/screening.json'
+screen=json.loads(screen_path.read_text());traces=[];episodes=set();tasks=[]
+for task_key,row in screen['tasks'].items():
+ task=int(task_key);tasks.append(task)
+ for record in row['episodes']:
+  path=ROOT/f'runs/e6-iterative-low-viability/task-{task}/original-{record["index"]:02}.json'
+  blob=path.read_bytes();batch=json.loads(blob)
+  assert sha(blob)==record['file_sha256']
+  assert sha(json.dumps(batch,sort_keys=True).encode())==record['trace_sha256']
+  assert len(batch)==1;trace=batch[0]
+  assert trace['rollout_seed']==task and trace['episode_id'] not in episodes
+  assert trace['candidate']['rules_code']=='' and trace['candidate']['in_env_actions']==[]
+  episodes.add(trace['episode_id'])
+  traces.append({'task_id':task,'index':record['index'],'episode_id':trace['episode_id'],'path':str(path.relative_to(ROOT)),'file_sha256':record['file_sha256'],'trace_sha256':record['trace_sha256'],'rollout_seed':trace['rollout_seed']})
+assert screen['status']=='INSUFFICIENT_FRESH_LOW' and len(traces)==26
+assert set(prior['used_task_ids'])|set(tasks)==set(derived['used_task_ids'])
+previous_bindings={'artifact_manifest_path':str(manifest_path.relative_to(ROOT)),'artifact_manifest_sha256':sha(manifest_path.read_bytes()),'artifact_manifest_files_checked':len(manifest['files']),'artifact_manifest_mismatches':manifest_mismatches,'old_reports_frozen_inputs_drivers':tracked,'old_tracked_changes':[],'previous_screening_status':screen['status'],'previous_screening_sha256':sha(screen_path.read_bytes()),'previous_task_ids':tasks,'previous_original_traces':traces,'previous_original_trace_count':len(traces),'previous_original_unique_episode_ids':len(episodes)}
+write('preservation_and_previous_trace_bindings.json',previous_bindings)
+old_audit_path=ROOT/'experiments/alfworld_e6/results/iterative_low_viability/screening_audit.json'
+old_audit=json.loads(old_audit_path.read_text())
+for relative,expected in old_audit['source_sha256'].items():assert sha((ROOT/relative).read_bytes())==expected,relative
+raw=[{'path':str(p.relative_to(ROOT)),'bytes':p.stat().st_size,'sha256':sha(p.read_bytes())} for p in sorted((ROOT/'runs/e6-iterative-low-viability').rglob('*')) if p.is_file()]
+old_run_baseline={'previous_screening_audit_sha256':sha(old_audit_path.read_bytes()),'prior_audit_bound_files_checked':len(old_audit['source_sha256']),'mismatches':[],'v2_starting_old_run_file_count':len(raw),'v2_starting_old_run_files':raw,'limitation':'Previously published manifest/audit bind 61/98 files. Additional old stderr/lock artifacts are newly bound at V2 start, without claiming unavailable historical hashes.'}
+write('old_run_baseline.json',old_run_baseline)
+# This compact file includes every new original trace binding, prior witnesses,
+# and all old run starting hashes; full 55k-file manifests stay local by hash.
+audit={
+ 'schema':'aea-alfworld-used-bridge-seeds-v2',
+ 'audit_status':'FROZEN_BEFORE_V2_PAID_SCREENING',
+ 'starting_safety':inventory['safety'],
+ 'universe':prior['universe'],
+ 'validator_fidelity_commit':'bec74ed8a6ff40e119b2299c92b07b8602ff5fef',
+ 'prior_audit':{'path':str(PRIOR.relative_to(ROOT)),'sha256':sha(PRIOR.read_bytes()),'previous_used_task_count':len(prior['used_task_ids']),'previous_coverage_witnesses':prior['coverage_witnesses']},
+ 'used_task_ids':derived['used_task_ids'],
+ 'smallest_never_used':derived['smallest_never_used'],
+ 'start_id':derived['start_id'],
+ 'never_used_ids':derived['never_used_ids'],
+ 'derivation':'First 20 nonnegative integers absent from actual train bridge-seed use; rehash both worktrees and scan additions before selecting. No task semantics inspected.',
+ 'full_current_scan':{'source_count':inventory['source_count'],'source_bytes':inventory['source_bytes'],'unchanged_prior_sources':inventory['unchanged_prior_sources'],'changed_prior_sources':[],'removed_prior_sources':[],'added_sources_count':len(inventory['added_sources']),'source_inventory_sha256':sha((OUT/'source_inventory.json').read_bytes()),'local_inventory_path':str(OUT/'source_inventory.json'),'consumption_sources_sha256':sha((OUT/'consumption_sources.json').read_bytes()),'direct_environment_seed_ids':derived['direct_environment_seed_ids'],'no_newer_actual_train_seed_outside_derived_used_set':True},
+ 'domain_separation':{'bare_seed_is_not_bridge_use':True,'new_unclassified_seed_path_pairs':new_domain_pairs,'previous_review_sha256':sha(previous_domains_path.read_bytes()),'current_review_sha256':sha((OUT/'generic_seed_domains.json').read_bytes()),'current_other_domain_seed_count':len(current_domains),'rules':[*prior['domain_rules'][:-1], 'Conservative historical task labels introduce no extra IDs: all 150 current used IDs (0..149) are independently witnessed by actual rollout_seed records. The preserved prior audit covers 0..129, and the 26 previous screening traces cover 130..149.'],'known_real_integration_sources':derived['known_real_integration_sources']},
+ 'previous_screening_preserved':previous_bindings,
+ 'old_run_starting_baseline':old_run_baseline,
+ 'local_metadata_sha256':{n:sha((OUT/n).read_bytes()) for n in ['derivation.json','preservation_and_previous_trace_bindings.json','old_run_baseline.json']},
+ 'reproduction_script_sha256':{n:sha((OUT/n).read_bytes()) for n in ['scan_used_tasks.py','finalize_used_task_audit.py']},
+ 'execution':{'api_calls':0,'fresh_environment_resets':0,'main_writes':0,'research_writes':0},
+ 'limits':['Evidence covers extant records in both workspace worktrees, archived ALFWorld pilots, and known real integration calls; unrecorded activity outside this workspace is not auditable.','Generic request/RNG seeds and held-out split seeds are separate domains.','No previous screening outcome or report is reclassified. All 26 traces and 20 prior screened task IDs remain consumed.','Old stdout/stderr artifacts without published prior hashes receive new starting hashes; prior immutable manifest and audit bindings are verified separately.']
+}
+write('used_task_audit.json',audit)
+text=f'''# V2 used-task audit: fresh train bridge seeds\n\n**Smallest unused ID: {audit['start_id']}. First 20 unused IDs: {audit['never_used_ids'][0]}–{audit['never_used_ids'][-1]}, ascending.**\nThe independently derived actual train bridge-seed set is 0–149.\n\n## Read-only verification\n\nRehashed **{inventory['source_count']:,} files / {inventory['source_bytes']:,} bytes** across both\nworktrees and archived ALFWorld pilots. Every one of the **55,841** sources in the\nprevious audit remains byte-identical; 129 files were added and none were removed.\nExtraction was reused only after its full file hash matched. New and changed\nrecords were scanned for actual bridge seeds and historical task labels.\nNo actual train task ID outside the derived consumed set was found.\n\nThe previous audit binds IDs 0–129. The previous fresh-pool run supplies exactly\n**26 original identity traces with 26 unique episode IDs covering 130–149**.\nTheir file hashes, canonical trace hashes, bridge seeds and episode IDs all match\nthe frozen screening records. That run remains **INSUFFICIENT_FRESH_LOW**; this\naudit neither resumes nor reclassifies any prior task.\n\n## Preserved history and domains\n\n- All **61** published artifact-manifest bindings match.\n- All **98** previous final screening-audit source bindings match.\n- **21** old tracked report, frozen-input and driver files match starting HEAD.\n- All **110** old run files receive V2-starting hashes. Older unpublished\n  stderr/lock hashes are not claimed retroactively.\n- The real integration seeds are already consumed. Fake unit identifiers do not\n  count as execution.\n- Generic request, extraction and sampling RNG seeds, and held-out evaluation\n  split seeds remain separate from train bridge seeds. There are **zero newly\n  unclassified seed/path pairs**.\n\nThe compact JSON binds both reproducible scripts, the full local metadata\ninventory, prior audit, all 26 newly consumed traces, and the previous run's\nstarting hashes. No raw trajectory text, prompt, API key or future task semantics\nis exported. No API call, environment reset or worktree write was performed.\n\n## Limits\n\nThe audit covers all extant records in its declared workspace scope. It cannot\nprove absence of unrecorded activity outside that scope. Re-running the scanner\nafter new experiments will naturally change the consumed set; this audit is the\nimmutable snapshot taken before V2 paid screening.\n'''
+if (OUT/'USED_TASKS_AUDIT.md').exists():assert (OUT/'USED_TASKS_AUDIT.md').read_text()==text
+else:
+ with (OUT/'USED_TASKS_AUDIT.md').open('x') as f:f.write(text)
+print(json.dumps({'start_id':audit['start_id'],'never_used_ids':audit['never_used_ids'],'audit_sha256':sha((OUT/'used_task_audit.json').read_bytes()),'audit_bytes':(OUT/'used_task_audit.json').stat().st_size,'old_manifest_files_verified':61,'old_screening_audit_files_verified':98,'new_domain_pairs':len(new_domain_pairs)},indent=2))

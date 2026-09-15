@@ -1,0 +1,21 @@
+{
+  "baseline_files_unchanged": 2500,
+  "format_check_files": 185,
+  "historical_run_files_unchanged": 215,
+  "integration_deselected": 11,
+  "log_sha256": {
+    "mypy_preflight.txt": "aa60b37a175c871db4c8bad9f16f897009093cf892379b6cae45a5d27ae3e4aa",
+    "precommit_preflight.txt": "942760896d97dc0fb37822af66b9af50173e00e0c0a27e600036b165e43aef9f",
+    "unit_preflight.txt": "aa73cc21b89023f08917e1ddf6e63f2bd62df5ac44847adab8f257218e4d0c26"
+  },
+  "main_unchanged": true,
+  "new_driver_sha256": "c230bcfaea60b3c1b346018a5a7380c96d67c25e4f8fbe75702aef517d6129f4",
+  "paid_calls_before_freeze": 0,
+  "precommit": "PASS",
+  "production_modified": false,
+  "ruff": "PASS",
+  "starting_head": "d88d2e1b7be3279f89944f155fc41cf1c18a5c2a",
+  "status": "PASS_BEFORE_PAID_SCREENING",
+  "strict_mypy_files": 97,
+  "unit_passed": 369
+}
