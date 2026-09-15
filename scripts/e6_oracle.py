@@ -25,7 +25,7 @@ import oracle_actuators as oa
 
 from aea.errors import ConfigError
 
-PREREG_SHA: str | None = None  # PREREG_LOW_ORACLE_ACTUATOR.md commit (recorded before the run)
+PREREG_SHA: str | None = "978e2ac"  # PREREG_LOW_ORACLE_ACTUATOR.md commit (recorded before the run)
 METHOD_SHA: str | None = "23e87aa"  # the actuator-freeze commit (src/aea + dossier frozen)
 CAP_USD = 30.0
 TASKS: list[int] = [85, 86, 92, 97, 99, 107, 109]
