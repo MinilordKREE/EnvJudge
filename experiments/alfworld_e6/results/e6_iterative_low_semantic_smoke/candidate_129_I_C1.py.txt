@@ -1,0 +1,44 @@
+import re
+
+class _Rules(Rules):
+    DOSE = __DOSE__
+
+    def _goal_mentions_butterknife(self, env_state):
+        return 'butterknife' in (env_state.goal_text or '').lower()
+
+    def filter_observation(self, obs, env_state):
+        if not self._goal_mentions_butterknife(env_state):
+            return obs
+        text = obs.text
+        data = obs.data
+        cmds = list(data.get('admissible_commands') or []) if data else []
+
+        # DOSE == 0: unchanged
+        if self.DOSE <= 0.0:
+            return obs
+
+        hint = "Hint: the butterknife is on a countertop (try countertop 2)."
+
+        # Add the hint into the observation text at increasing salience.
+        if self.DOSE < 0.5:
+            if 'Hint:' not in text:
+                text = text.rstrip() + '\n\n' + hint
+        else:
+            # Stronger: put the hint right after the task line.
+            lines = text.split('\n')
+            if lines and lines[0].startswith('Task:'):
+                if 'Hint:' not in lines[0]:
+                    lines[0] = lines[0] + '  ' + hint
+                    text = '\n'.join(lines)
+            elif 'Hint:' not in text:
+                text = text.rstrip() + '\n\n' + hint
+
+        # Reorder admissible commands to promote 'go to countertop 2'.
+        target = 'go to countertop 2'
+        if target in cmds:
+            cmds.remove(target)
+            cmds.insert(0, target)
+
+        new_data = dict(data) if data else {}
+        new_data['admissible_commands'] = cmds
+        return Observation(text=text, data=new_data)

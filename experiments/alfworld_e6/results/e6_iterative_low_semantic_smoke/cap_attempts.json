@@ -1,0 +1,79 @@
+[
+  {
+    "attempt": "76c160578e554c85b4b074d91ce6fe86",
+    "conservative_usd": 0.016477560000000002,
+    "input_tokens": 9336,
+    "model": "deepseek-v4-pro",
+    "output_tokens": 1049,
+    "reserved_usd": 0.07080876000000001,
+    "started": 1789496428.1396408,
+    "status": "returned",
+    "upstream_usd": null
+  },
+  {
+    "attempt": "1fa191e64d4648729ff3ea44cdb65e07",
+    "conservative_usd": 0.015297480000000002,
+    "input_tokens": 9165,
+    "model": "deepseek-v4-pro",
+    "output_tokens": 808,
+    "reserved_usd": 0.07080876000000001,
+    "started": 1789496941.4737937,
+    "status": "returned",
+    "upstream_usd": null
+  },
+  {
+    "attempt": "85b37e39da784e8a8a092ea90c2ad51d",
+    "conservative_usd": 0.016808880000000002,
+    "input_tokens": 9866,
+    "model": "deepseek-v4-pro",
+    "output_tokens": 956,
+    "reserved_usd": 0.07408632000000001,
+    "started": 1789496948.5910156,
+    "status": "returned",
+    "upstream_usd": null
+  },
+  {
+    "attempt": "e6b0d0b11e344bd5aedb615c990a6511",
+    "conservative_usd": 0.01648944,
+    "input_tokens": 9552,
+    "model": "deepseek-v4-pro",
+    "output_tokens": 980,
+    "reserved_usd": 0.07292076000000002,
+    "started": 1789496958.4201062,
+    "status": "returned",
+    "upstream_usd": null
+  },
+  {
+    "attempt": "68ec825e156b4d9aa909346b08b7969d",
+    "conservative_usd": 0.016303320000000003,
+    "input_tokens": 9114,
+    "model": "deepseek-v4-pro",
+    "output_tokens": 1079,
+    "reserved_usd": 0.07080876000000001,
+    "started": 1789496967.2442403,
+    "status": "returned",
+    "upstream_usd": null
+  },
+  {
+    "attempt": "3c84a46b481741e28f134954c9e2adf6",
+    "conservative_usd": 0.01634556,
+    "input_tokens": 9944,
+    "model": "deepseek-v4-pro",
+    "output_tokens": 813,
+    "reserved_usd": 0.07481628,
+    "started": 1789496977.0354662,
+    "status": "returned",
+    "upstream_usd": null
+  },
+  {
+    "attempt": "903e659a6eec4692846ddbcbc8238591",
+    "conservative_usd": 0.01711512,
+    "input_tokens": 9540,
+    "model": "deepseek-v4-pro",
+    "output_tokens": 1142,
+    "reserved_usd": 0.0731016,
+    "started": 1789496984.2251987,
+    "status": "returned",
+    "upstream_usd": null
+  }
+]

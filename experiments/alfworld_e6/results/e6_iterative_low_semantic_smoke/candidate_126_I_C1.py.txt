@@ -1,0 +1,39 @@
+import re
+
+class _Rules(Rules):
+    DOSE = __DOSE__
+
+    TARGET_HINTS = {
+        'go to microwave 1': 'the potato is here',
+        'open microwave 1': 'the potato is inside',
+        'take potato 1 from microwave 1': 'take the potato',
+    }
+
+    def _annotate(self, cmds):
+        if self.DOSE <= 0:
+            return list(cmds)
+        out = []
+        hinted = []
+        for c in cmds:
+            key = c.strip()
+            if key in self.TARGET_HINTS and self.DOSE > 0:
+                hinted.append((key, self.TARGET_HINTS[key]))
+            else:
+                out.append(c)
+        # Surface hinted commands at the top, annotated with a salient hint.
+        for key, hint in hinted:
+            out.insert(0, f'{key}  [hint: {hint}]')
+        return out
+
+    def filter_observation(self, obs, env_state):
+        cmds = obs.data.get('admissible_commands')
+        if cmds is None:
+            return obs
+        new_cmds = self._annotate(list(cmds))
+        new_text = obs.text
+        # Rewrite the 'Admissible commands:' section to match the reordered list
+        # so text and structured data stay consistent for the policy.
+        m = re.search(r'Admissible commands:.*', new_text, re.DOTALL)
+        if m:
+            new_text = new_text[:m.start()] + 'Admissible commands: ' + ', '.join(new_cmds)
+        return Observation(text=new_text, data=dict(obs.data, admissible_commands=new_cmds))

@@ -1,0 +1,44 @@
+{
+  "affected": [
+    {
+      "arm": "D",
+      "call": 2,
+      "missing_field": "last_action_was_effective",
+      "source_sha256": "ee62c351c25cdb805f849447db5ac28dfad0678ef2e60aa460133a5c9fe220d8",
+      "task_id": "126"
+    },
+    {
+      "arm": "shared",
+      "call": 1,
+      "missing_field": "goal_text",
+      "source_sha256": "58529c8cffb9de778977d1984e0ee4a49dd4353512f38b49fe7be88004fc6008",
+      "task_id": "129"
+    },
+    {
+      "arm": "I",
+      "call": 2,
+      "missing_field": "goal_text",
+      "source_sha256": "d1caa3b5014b7c637fd72f44a28cfe198878acfb8fb89fea42af38d2fd4f2466",
+      "task_id": "129"
+    }
+  ],
+  "candidate": "C2_D",
+  "candidate_source_sha256": "ee62c351c25cdb805f849447db5ac28dfad0678ef2e60aa460133a5c9fe220d8",
+  "confirmations": 0,
+  "decision": "IMPLEMENTATION_FAILURE",
+  "gate": "static_validator_contract_fidelity",
+  "independent_reproduction": {
+    "direct_hook_checks_passed": 12,
+    "proof_sha256": "213392519e5d0b951901815aac7326a5328df39aab19e0a7801598d220772f23",
+    "real_state_class": "envharness.bridges.alfworld.bridge.AlfworldEnvState",
+    "scope": "state-schema fidelity only; not semantic or efficacy admission"
+  },
+  "method_patched": false,
+  "no_requests_after_stop": true,
+  "paid_requests_sticky_stopped": true,
+  "physical_designer_calls": 7,
+  "policy_rollouts": 0,
+  "reason": "Frozen validate_rules_template._State omits last_action_was_effective, a documented and real ALFWorldState attribute; this falsely rejects D2 before semantic screening. Stop per user frozen-method defect instruction, no patch-and-continue.",
+  "stopped_at_unix": 1789497023.2949407,
+  "task_id": "126"
+}

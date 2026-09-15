@@ -1,0 +1,142 @@
+{
+  "C1_failed_ordinal_pairs": 2,
+  "C2_improves_C1": {
+    "D": 0,
+    "I": 0
+  },
+  "D_better_I": 0,
+  "D_worse_I": 0,
+  "K16_BL": {
+    "D": 0,
+    "I": 0
+  },
+  "completed_referenced_tasks": 3,
+  "conservative_cap_account": {
+    "actual_usd": 0.11483736,
+    "attempts": 7,
+    "inflight": {},
+    "stop_time_unix": 1789497023.2949407,
+    "stopped": "implementation_failure: frozen validator state omits advertised last_action_was_effective",
+    "uncertain_usd": 0.0
+  },
+  "conservative_failed_request_reservation": 0.0,
+  "cost_by_task": {
+    "114": {
+      "logical_designer_requests": {
+        "D": 1,
+        "I": 1
+      },
+      "logical_per_arm_usd": {
+        "D": 0.007585468000000001,
+        "I": 0.007585468000000001
+      },
+      "logical_requested_adaptation_rollouts": {
+        "D": 0,
+        "I": 0
+      },
+      "physical_designer_requests": {
+        "D": 1,
+        "I": 0
+      },
+      "physical_requested_adaptation_rollouts": {
+        "D": 0,
+        "I": 0
+      },
+      "physical_usd": 0.007585468000000001,
+      "shared_C1_requested_rollouts": 0,
+      "shared_C1_usd": 0.007585468000000001
+    },
+    "115": {
+      "logical_designer_requests": {
+        "D": 0,
+        "I": 0
+      },
+      "logical_per_arm_usd": {
+        "D": 0,
+        "I": 0
+      },
+      "logical_requested_adaptation_rollouts": {
+        "D": 0,
+        "I": 0
+      },
+      "physical_designer_requests": {
+        "D": 0,
+        "I": 0
+      },
+      "physical_requested_adaptation_rollouts": {
+        "D": 0,
+        "I": 0
+      },
+      "physical_usd": 0,
+      "shared_C1_requested_rollouts": 0,
+      "shared_C1_usd": 0
+    },
+    "126": {
+      "logical_designer_requests": {
+        "D": 2,
+        "I": 2
+      },
+      "logical_per_arm_usd": {
+        "D": 0.009193404,
+        "I": 0.009033684
+      },
+      "logical_requested_adaptation_rollouts": {
+        "D": 0,
+        "I": 0
+      },
+      "physical_designer_requests": {
+        "D": 2,
+        "I": 1
+      },
+      "physical_requested_adaptation_rollouts": {
+        "D": 0,
+        "I": 0
+      },
+      "physical_usd": 0.011639980000000001,
+      "shared_C1_requested_rollouts": 0,
+      "shared_C1_usd": 0.006587108
+    },
+    "129": {
+      "logical_designer_requests": {
+        "D": 2,
+        "I": 2
+      },
+      "logical_per_arm_usd": {
+        "D": 0.009464664,
+        "I": 0.009849443999999999
+      },
+      "logical_requested_adaptation_rollouts": {
+        "D": 0,
+        "I": 0
+      },
+      "physical_designer_requests": {
+        "D": 2,
+        "I": 1
+      },
+      "physical_requested_adaptation_rollouts": {
+        "D": 0,
+        "I": 0
+      },
+      "physical_usd": 0.01222408,
+      "shared_C1_requested_rollouts": 0,
+      "shared_C1_usd": 0.007090028
+    }
+  },
+  "decision": "IMPLEMENTATION_FAILURE",
+  "interruption": null,
+  "physical_confirmation_usd": 0,
+  "physical_designer_usd": 0.031449528,
+  "physical_policy_usd": 0,
+  "physical_total_usd": 0.031449528,
+  "primary_denominator": 4,
+  "referenced_denominator": 3,
+  "semantic_gate_counts": {
+    "FAIL": 0,
+    "PASS": 0,
+    "UNCERTAIN": 1
+  },
+  "ties": 2,
+  "unranked_tasks": [
+    "114"
+  ]
+}

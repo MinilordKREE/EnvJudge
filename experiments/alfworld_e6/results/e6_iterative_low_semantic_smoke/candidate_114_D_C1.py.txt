@@ -1,0 +1,39 @@
+import re
+
+class _Rules(Rules):
+    DOSE = __DOSE__
+
+    def filter_observation(self, obs, env_state):
+        if self.DOSE <= 0:
+            return obs
+        text = obs.text
+        cmds = list(obs.data.get("admissible_commands", [])) if obs.data else []
+
+        # Sub-step reminder appended to the observation text.
+        reminder = "Remember: get a cloth, clean it at a sink, then put it in the toilet."
+        if reminder not in text:
+            text = text + "\n\n" + reminder
+
+        # Promote cleaning and correct-object commands in the admissible list.
+        def score(c):
+            s = 0
+            if re.search(r"clean\s+cloth.*sinkbasin", c):
+                s += 3
+            if c.startswith("take cloth") or c.startswith("move cloth"):
+                s += 2
+            if "cloth" in c:
+                s += 1
+            return s
+
+        if cmds:
+            # Higher DOSE -> more aggressive promotion of the relevant commands.
+            n = max(1, int(round(self.DOSE * 6)))
+            cmds = sorted(cmds, key=lambda c: (-score(c), cmds.index(c)))
+            # Limit the number of reordered (promoted) commands based on DOSE.
+            promoted = [c for c in cmds if score(c) > 0][:n]
+            rest = [c for c in cmds if c not in promoted]
+            cmds = promoted + rest
+
+        new_data = dict(obs.data) if obs.data else {}
+        new_data["admissible_commands"] = cmds
+        return Observation(text=text, data=new_data)

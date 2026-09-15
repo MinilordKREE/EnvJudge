@@ -1,0 +1,293 @@
+{
+  "finding": "CONFIRMED_IMPLEMENTATION_FAILURE",
+  "reason": "Frozen structural smoke state omits documented and real hook fields, falsely rejecting actual candidates.",
+  "scope": "API/state-schema fidelity reproduction only. Successful direct hooks do not grant semantic, solvability, or policy admission.",
+  "production_writes": 0,
+  "api_calls": 0,
+  "policy_rollouts": 0,
+  "reference_regenerations": 0,
+  "affected": [
+    {
+      "task": 126,
+      "arm": "D",
+      "optimizer_call_index": 2,
+      "candidate_id": "126:C2:ee62c351c25cdb805f849447db5ac28dfad0678ef2e60aa460133a5c9fe220d8",
+      "source_sha256": "ee62c351c25cdb805f849447db5ac28dfad0678ef2e60aa460133a5c9fe220d8",
+      "recorded_structural": [
+        "smoke at d=1 raised AttributeError: '_State' object has no attribute 'last_action_was_effective'"
+      ],
+      "frozen_validation": {
+        "ok": false,
+        "reasons": [
+          "smoke at d=1 raised AttributeError: '_State' object has no attribute 'last_action_was_effective'"
+        ]
+      },
+      "real_state_class": "envharness.bridges.alfworld.bridge.AlfworldEnvState",
+      "real_state_defaults": {
+        "goal_text": "",
+        "obs_text": "",
+        "admissible_commands": [],
+        "inventory": [],
+        "won": false,
+        "done": false,
+        "score": 0.0,
+        "max_score": 1.0,
+        "step_count": 0,
+        "last_action_was_effective": true,
+        "repetition_count": 1,
+        "last_obs_for_repeat": "",
+        "extras": {}
+      },
+      "hook_checks": [
+        {
+          "dose": 0.0,
+          "last_action_was_effective": true,
+          "hook_exception": null,
+          "identity": true,
+          "result": {
+            "text": "Task: Your task is to: put a cool potato in garbagecan.\n\nNothing happens.",
+            "data": {
+              "admissible_commands": [
+                "look",
+                "go to countertop 2"
+              ]
+            }
+          }
+        },
+        {
+          "dose": 0.0,
+          "last_action_was_effective": false,
+          "hook_exception": null,
+          "identity": true,
+          "result": {
+            "text": "Task: Your task is to: put a cool potato in garbagecan.\n\nNothing happens.",
+            "data": {
+              "admissible_commands": [
+                "look",
+                "go to countertop 2"
+              ]
+            }
+          }
+        },
+        {
+          "dose": 1.0,
+          "last_action_was_effective": true,
+          "hook_exception": null,
+          "identity": true,
+          "result": {
+            "text": "Task: Your task is to: put a cool potato in garbagecan.\n\nNothing happens.",
+            "data": {
+              "admissible_commands": [
+                "look",
+                "go to countertop 2"
+              ]
+            }
+          }
+        },
+        {
+          "dose": 1.0,
+          "last_action_was_effective": false,
+          "hook_exception": null,
+          "identity": false,
+          "result": {
+            "text": "Task: Your task is to: put a cool potato in garbagecan.\n\nNothing happens.\nReminder: you still need to find the potato, then take the potato, then cool the potato, then put the potato in the garbagecan.",
+            "data": {
+              "admissible_commands": [
+                "look",
+                "go to countertop 2"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "task": 129,
+      "arm": "D",
+      "optimizer_call_index": 1,
+      "candidate_id": "129:C1:58529c8cffb9de778977d1984e0ee4a49dd4353512f38b49fe7be88004fc6008",
+      "source_sha256": "58529c8cffb9de778977d1984e0ee4a49dd4353512f38b49fe7be88004fc6008",
+      "recorded_structural": [
+        "smoke at d=1 raised AttributeError: '_State' object has no attribute 'goal_text'"
+      ],
+      "frozen_validation": {
+        "ok": false,
+        "reasons": [
+          "smoke at d=1 raised AttributeError: '_State' object has no attribute 'goal_text'"
+        ]
+      },
+      "real_state_class": "envharness.bridges.alfworld.bridge.AlfworldEnvState",
+      "real_state_defaults": {
+        "goal_text": "",
+        "obs_text": "",
+        "admissible_commands": [],
+        "inventory": [],
+        "won": false,
+        "done": false,
+        "score": 0.0,
+        "max_score": 1.0,
+        "step_count": 0,
+        "last_action_was_effective": true,
+        "repetition_count": 1,
+        "last_obs_for_repeat": "",
+        "extras": {}
+      },
+      "hook_checks": [
+        {
+          "dose": 0.0,
+          "last_action_was_effective": true,
+          "hook_exception": null,
+          "identity": true,
+          "result": {
+            "text": "Task: Your task is to: put a clean butterknife in countertop.\n\nNothing happens.",
+            "data": {
+              "admissible_commands": [
+                "look",
+                "go to countertop 2"
+              ]
+            }
+          }
+        },
+        {
+          "dose": 0.0,
+          "last_action_was_effective": false,
+          "hook_exception": null,
+          "identity": true,
+          "result": {
+            "text": "Task: Your task is to: put a clean butterknife in countertop.\n\nNothing happens.",
+            "data": {
+              "admissible_commands": [
+                "look",
+                "go to countertop 2"
+              ]
+            }
+          }
+        },
+        {
+          "dose": 1.0,
+          "last_action_was_effective": true,
+          "hook_exception": null,
+          "identity": false,
+          "result": {
+            "text": "Task: Your task is to: put a clean butterknife in countertop.  Hint: the butterknife is on a countertop (try countertop 2).\n\nNothing happens.",
+            "data": {
+              "admissible_commands": [
+                "go to countertop 2",
+                "look"
+              ]
+            }
+          }
+        },
+        {
+          "dose": 1.0,
+          "last_action_was_effective": false,
+          "hook_exception": null,
+          "identity": false,
+          "result": {
+            "text": "Task: Your task is to: put a clean butterknife in countertop.  Hint: the butterknife is on a countertop (try countertop 2).\n\nNothing happens.",
+            "data": {
+              "admissible_commands": [
+                "go to countertop 2",
+                "look"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "task": 129,
+      "arm": "I",
+      "optimizer_call_index": 2,
+      "candidate_id": "129:C2:d1caa3b5014b7c637fd72f44a28cfe198878acfb8fb89fea42af38d2fd4f2466",
+      "source_sha256": "d1caa3b5014b7c637fd72f44a28cfe198878acfb8fb89fea42af38d2fd4f2466",
+      "recorded_structural": [
+        "smoke at d=1 raised AttributeError: '_State' object has no attribute 'goal_text'"
+      ],
+      "frozen_validation": {
+        "ok": false,
+        "reasons": [
+          "smoke at d=1 raised AttributeError: '_State' object has no attribute 'goal_text'"
+        ]
+      },
+      "real_state_class": "envharness.bridges.alfworld.bridge.AlfworldEnvState",
+      "real_state_defaults": {
+        "goal_text": "",
+        "obs_text": "",
+        "admissible_commands": [],
+        "inventory": [],
+        "won": false,
+        "done": false,
+        "score": 0.0,
+        "max_score": 1.0,
+        "step_count": 0,
+        "last_action_was_effective": true,
+        "repetition_count": 1,
+        "last_obs_for_repeat": "",
+        "extras": {}
+      },
+      "hook_checks": [
+        {
+          "dose": 0.0,
+          "last_action_was_effective": true,
+          "hook_exception": null,
+          "identity": true,
+          "result": {
+            "text": "Task: Your task is to: put a clean butterknife in countertop.\n\nNothing happens.",
+            "data": {
+              "admissible_commands": [
+                "look",
+                "go to countertop 2"
+              ]
+            }
+          }
+        },
+        {
+          "dose": 0.0,
+          "last_action_was_effective": false,
+          "hook_exception": null,
+          "identity": true,
+          "result": {
+            "text": "Task: Your task is to: put a clean butterknife in countertop.\n\nNothing happens.",
+            "data": {
+              "admissible_commands": [
+                "look",
+                "go to countertop 2"
+              ]
+            }
+          }
+        },
+        {
+          "dose": 1.0,
+          "last_action_was_effective": true,
+          "hook_exception": null,
+          "identity": false,
+          "result": {
+            "text": "Task: Your task is to: put a clean butterknife in countertop.  Reminder: find the butterknife on a countertop, take it, clean it, then put it on a countertop.\n\nNothing happens.",
+            "data": {
+              "admissible_commands": [
+                "go to countertop 2",
+                "look"
+              ]
+            }
+          }
+        },
+        {
+          "dose": 1.0,
+          "last_action_was_effective": false,
+          "hook_exception": null,
+          "identity": false,
+          "result": {
+            "text": "Task: Your task is to: put a clean butterknife in countertop.  Reminder: find the butterknife on a countertop, take it, clean it, then put it on a countertop.\n\nNothing happens.",
+            "data": {
+              "admissible_commands": [
+                "go to countertop 2",
+                "look"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

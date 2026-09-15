@@ -1,0 +1,23 @@
+{
+  "driver_sha256": "22112d20634d5e4d9b06439a7c1355d60de6aaa1ab9a32286a76d431e4bdfb6d",
+  "frozen_manifest_hashes": {
+    "frozen_invariants.json": "e502dde783c20e1cef6aea46b26810a499c26fa84598e2ea60fa1bc967d8e47b",
+    "pool_audit.json": "1c582bdecff8ff08d99caf21368d1776e1f084b09ce5441481160517b5d415de",
+    "prepared.json": "8259ad172b10386393766ea6b27e23be97dc07f52e33ad07e63df2bc6f1ce260",
+    "scanned_files.json": "057d231bf39416bbf891d5a2ed1b83d7ee51c6a2605890c531eef4db3b3fbdf2"
+  },
+  "implementation_sha": "7555cc3bf0594cb132250949fa57e18fecf10982",
+  "input_hashes": {
+    "configs/alfworld_config_100.yaml": "ef6a64096b198d7105bb3d3083f922ac0c0ee60bd2186c67ab4bd99863089e30",
+    "configs/corpus_aea.yaml": "a5f4b3c7ec0ace3ffebef184481585402dbf9a2d594d4fcde4dfc355a97eab10",
+    "configs/pricing.yaml": "22ec07333b638ad6b5679bc58ce1f7fd0a1c8b526bed5420c378a03147805f7e",
+    "scripts/e3.py": "4152356515fee743170205780be85ac45436073294b7bd9981dc1df221635363",
+    "scripts/e6_iterative_low_smoke.py": "86aa45af30cfafefd251b8da5f1fc45399404956eac18f5f94c0027899acd459"
+  },
+  "method_version": "llm_v2_iterative_low_semantic_gate",
+  "prereg_commit": "dcd37c514f30fc9e6f626922ec6f3f7e7791d40e",
+  "prereg_sha256": "05f39db1d40c87197dd71bc0cce74d280d5ca117d07b83e5fcc3c40529ac3263",
+  "semantic_gate_sha256": "ab0ba2aceffd53f408191105a4cfedb2dacc6136bd16defd03d553fad5b5dccd",
+  "semantic_gate_version": "alfworld-semantic-screen-v1",
+  "src_tree": "ee579f05b9ab51cc4686d98e5c5c1ef95fb03ada"
+}

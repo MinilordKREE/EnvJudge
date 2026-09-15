@@ -1,0 +1,31 @@
+import re
+
+class _Rules(Rules):
+    DOSE = __DOSE__
+
+    SUBGOALS = [
+        'find the potato',
+        'take the potato',
+        'cool the potato',
+        'put the potato in the garbagecan',
+    ]
+
+    def _reminder(self, env_state):
+        # Number of sub-goals surfaced grows with DOSE.
+        n = int(round(self.DOSE * len(self.SUBGOALS)))
+        if n <= 0:
+            return None
+        parts = self.SUBGOALS[:n]
+        return 'Reminder: you still need to ' + ', then '.join(parts) + '.'
+
+    def filter_observation(self, obs, env_state):
+        if self.DOSE <= 0:
+            return obs
+        # Trigger the reminder when the last action was ineffective (no world change),
+        # which is exactly when the policy is stuck exploring unproductively.
+        if not env_state.last_action_was_effective:
+            rem = self._reminder(env_state)
+            if rem:
+                new_text = obs.text + '\n' + rem
+                return Observation(text=new_text, data=obs.data)
+        return obs

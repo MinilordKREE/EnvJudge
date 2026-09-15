@@ -1,0 +1,61 @@
+"""Read-only reproduction of actual smoke candidates against advertised state schema.
+
+No simulator, provider, policy, reference regeneration, or production edit. Instantiate only
+real AlfworldEnvState data records and invoke the frozen actual candidate hooks directly.
+"""
+from pathlib import Path
+import hashlib
+import json
+from dataclasses import asdict
+
+from envharness.bridges.alfworld.bridge import AlfworldEnvState
+from envharness.core.code_loader import load_rules_subclass
+from envharness.core.types import Observation
+from aea.families import _SmokeInner, validate_rules_template
+
+ROOT = Path('/home/kree/work/EnvJudge-aea-llm')
+RUN = ROOT / 'runs/e6-iterative-low-semantic-smoke'
+CASES = [(126, 'D', 2, 'put a cool potato in garbagecan.'),
+         (129, 'D', 1, 'put a clean butterknife in countertop.'),
+         (129, 'I', 2, 'put a clean butterknife in countertop.')]
+rows = []
+for task, arm, index, goal in CASES:
+    candidate_path = RUN / f'task-{task}/{arm}/candidates.json'
+    recorded = json.loads(candidate_path.read_text())[index - 1]
+    source = recorded['source']
+    assert hashlib.sha256(source.encode()).hexdigest() == recorded['source_sha256']
+    frozen_validation = validate_rules_template(source, task_id=str(task))
+    observations = []
+    for dose in (0.0, 1.0):
+        for effective in (True, False):
+            state = AlfworldEnvState(goal_text=goal, last_action_was_effective=effective)
+            obs = Observation(text=f'Task: Your task is to: {goal}\n\nNothing happens.',
+                              data={'admissible_commands': ['look', 'go to countertop 2']})
+            code = source.replace('__DOSE__', repr(dose)).replace('__TASK_ID__', repr(str(task)))
+            cls = load_rules_subclass(code)
+            wrapper = cls(inner=_SmokeInner())
+            result = wrapper.filter_observation(obs, state)
+            assert isinstance(result, Observation)
+            if dose == 0.0:
+                assert result == obs
+            observations.append({'dose': dose, 'last_action_was_effective': effective,
+                                 'hook_exception': None, 'identity': result == obs,
+                                 'result': result.model_dump(mode='json')})
+    rows.append({'task': task, 'arm': arm, 'optimizer_call_index': index,
+                 'candidate_id': recorded['candidate_id'], 'source_sha256': recorded['source_sha256'],
+                 'recorded_structural': recorded['structural'],
+                 'frozen_validation': asdict(frozen_validation),
+                 'real_state_class': 'envharness.bridges.alfworld.bridge.AlfworldEnvState',
+                 'real_state_defaults': asdict(AlfworldEnvState()),
+                 'hook_checks': observations})
+result = {
+    'finding': 'CONFIRMED_IMPLEMENTATION_FAILURE',
+    'reason': 'Frozen structural smoke state omits documented and real hook fields, falsely rejecting actual candidates.',
+    'scope': 'API/state-schema fidelity reproduction only. Successful direct hooks do not grant semantic, solvability, or policy admission.',
+    'production_writes': 0, 'api_calls': 0, 'policy_rollouts': 0, 'reference_regenerations': 0,
+    'affected': rows,
+}
+out = Path('/tmp/semantic_smoke_actual_candidate_repro.json')
+out.write_text(json.dumps(result, indent=2) + '\n')
+print(json.dumps({'output': str(out), 'finding': result['finding'], 'affected': [r['candidate_id'] for r in rows],
+                  'successful_direct_hook_checks': sum(len(r['hook_checks']) for r in rows)}, indent=2))

@@ -1,0 +1,286 @@
+"""Read-only provenance audit of the frozen four-task semantic smoke artifacts."""
+
+from __future__ import annotations
+
+import argparse
+import gzip
+import hashlib
+import json
+import subprocess
+from dataclasses import asdict
+from datetime import datetime, timezone
+from pathlib import Path
+
+from envharness.core.types import Trace
+
+from aea.core.hashing import sha256_of
+from aea.designer import AssistFamily, Reference, ReferenceStep, serialize_low, task_goal
+from aea.families import FamilyContext
+from aea.llm.types import ChatRequest
+from aea.llm.pricing import load_pricing
+from aea.llm.types import Usage
+from aea.low_optimizer import Feedback, ITERATIVE_ASSIST_TOOL, iterative_messages
+from aea.stage import trace_actions
+
+
+def digest(value):
+    raw = value if isinstance(value, str) else json.dumps(value, sort_keys=True)
+    return hashlib.sha256(raw.encode()).hexdigest()
+
+
+def audit(root: Path):
+    run = root / "runs/e6-iterative-low-semantic-smoke"
+    checked, pending, violations = [], [], []
+
+    def check(condition, name, detail=None):
+        (checked if condition else violations).append({"check": name, "detail": detail})
+
+    def read(path, default=None):
+        if not path.exists():
+            return default
+        try:
+            return json.loads(path.read_text())
+        except json.JSONDecodeError:
+            pending.append(str(path.relative_to(run)) + ": partial JSON")
+            return default
+
+    def rows(path):
+        if not path.exists():
+            return []
+        answer = []
+        for i, line in enumerate(path.read_text().splitlines(), 1):
+            try:
+                answer.append(json.loads(line))
+            except json.JSONDecodeError:
+                pending.append(f"{path.relative_to(run)}:{i}: partial JSONL")
+        return answer
+
+    frozen = read(run / "freeze.json", {})
+    tree = subprocess.check_output(["git", "rev-parse", "HEAD:src/aea"], cwd=root, text=True).strip()
+    dirty = subprocess.check_output(["git", "status", "--porcelain", "--", "src/aea"], cwd=root, text=True).strip()
+    check(tree == frozen.get("src_tree") and not dirty, "frozen_production_tree")
+    for relative, sha in frozen.get("input_hashes", {}).items():
+        check(digest((root / relative).read_text()) == sha, "frozen_input:" + relative)
+    for key, relative in (
+        ("driver_sha256", "scripts/e6_iterative_low_semantic_smoke.py"),
+        ("semantic_gate_sha256", "src/aea/semantic_privilege.py"),
+        ("prereg_sha256", "experiments/alfworld_e6/PREREG_ITERATIVE_LOW_SEMANTIC_SMOKE.md"),
+    ):
+        if key in frozen:
+            check(digest((root / relative).read_text()) == frozen[key], "frozen:" + key)
+    results = read(run / "results.json", {})
+    ledger = [row for file in sorted(run.glob("ledger.*.jsonl")) for row in rows(file)]
+    cap = read(run / "cap.json", {})
+    attempts = rows(run / "cap.attempts.jsonl")
+    calls = sorted((r for r in ledger if r["event"] == "call"), key=lambda r: r["ts"])
+    pricing = load_pricing(root / "configs/pricing.yaml")
+    for row in calls:
+        usage = Usage(prompt_tokens=row["prompt_tokens"], completion_tokens=row["completion_tokens"], cached_tokens=row["cached_tokens"], reasoning_tokens=row["reasoning_tokens"])
+        charge = pricing.cost(row["model"], usage, datetime.fromisoformat(row["ts"]))
+        check(abs(charge.usd - row["usd"]) < 1e-12 and charge.tier == row["pricing_tier"] and charge.pricing_version == row["pricing_version"], "ledger_frozen_pricing:" + row["request_sha256"])
+    check(len(attempts) == cap.get("attempts"), "cap_attempt_count")
+    check(abs(sum(r["conservative_usd"] for r in attempts) - cap.get("actual_usd", 0)) < 1e-12, "cap_conservative_sum")
+    if cap.get("stopped"):
+        check(not cap["inflight"] and cap["uncertain_usd"] == 0, "final_no_open_reservations")
+        check(all(r["started"] < cap["stop_time_unix"] for r in attempts), "no_attempt_after_sticky_stop")
+        check(len(attempts) == len(calls) == 7 and all(r["budget"] == "designer" for r in calls), "final_seven_designer_zero_policy_calls")
+        check(all(r["status"] == "returned" for r in attempts), "final_no_retries_or_ambiguous_attempts")
+        check(all(a["input_tokens"] == r["prompt_tokens"] and a["output_tokens"] == r["completion_tokens"] for a, r in zip(attempts, calls)), "cap_ledger_token_reconciliation")
+    cost = {
+        "physical_attempts": len(attempts),
+        "ledger_priced_usd": sum(r["usd"] for r in calls),
+        "conservative_cap_usd": cap.get("actual_usd"),
+        "policy_calls": sum(r["budget"] != "designer" for r in calls),
+        "first_attempt_utc": datetime.fromtimestamp(min(a["started"] for a in attempts), timezone.utc).isoformat() if attempts else None,
+        "last_attempt_started_utc": datetime.fromtimestamp(max(a["started"] for a in attempts), timezone.utc).isoformat() if attempts else None,
+        "last_ledger_call_utc": calls[-1]["ts"] if calls else None,
+        "sticky_stop_utc": datetime.fromtimestamp(cap["stop_time_unix"], timezone.utc).isoformat() if cap.get("stop_time_unix") else None,
+        "stop_reason": cap.get("stopped"),
+    }
+    prepared = read(run / "prepared.json", [])
+    check([r["task_id"] for r in prepared] == ["114", "115", "126", "129"], "task_set")
+    stats = {}
+    for original in prepared:
+        task = original["task_id"]
+        taskdir = run / f"task-{task}"
+        failrows = read(taskdir / "original_failures.json", [])
+        refrow = read(taskdir / "privileged_reference.json", {})
+        check(digest(failrows) == original["evidence_sha256"], task + ":frozen_failures")
+        check(digest(refrow) == original["reference_sha256"], task + ":frozen_reference")
+        failures = [Trace.model_validate(row) for row in failrows]
+        raw_actions = {trace.episode_id: trace_actions(trace) for trace in failures}
+        ref = Reference(refrow["success"], refrow["reason"], tuple(refrow["actions"]), tuple(
+            ReferenceStep(s["step"], s["observation"], tuple(s["admissible"]), s["action"])
+            for s in refrow["steps"]
+        ))
+        evidence = serialize_low(failures, 0.0, 10, ref, rich=True)
+        semantic_evidence = serialize_low(failures, 0.0, 10, None).text
+        check(evidence.sha256 == original["serialized_evidence_sha256"], task + ":evidence_serialization")
+        taskresult = results.get("tasks", {}).get(task, {})
+        arms = {}
+        for arm in ("D", "I"):
+            directory = taskdir / arm
+            cands = read(directory / "candidates.json", [])
+            summary = taskresult.get("arms", {}).get(arm) or read(directory / "summary.json", {})
+            if not cands and summary:
+                cands = summary.get("candidates", [])
+            arms[arm] = {"candidates": cands, "summary": summary}
+        gates = rows(taskdir / "semantic_gates.jsonl")
+        gate_by_source = {}
+        for gate in gates:
+            result = gate["result"]
+            sha = result["input_sha256"]
+            artifact = taskdir / "privileged_semantic_inputs" / (sha + ".json.gz")
+            check(artifact.exists(), task + ":semantic_input_exists:" + sha)
+            if not artifact.exists():
+                continue
+            payload = gzip.decompress(artifact.read_bytes()).decode()
+            data = json.loads(payload)
+            check(digest(payload) == sha, task + ":semantic_input_hash:" + sha)
+            source_sha = digest(data["source"])
+            check(source_sha == result["source_sha256"], task + ":semantic_source_binding:" + sha)
+            check(data["task_id"] == task and data["reference"] == json.loads(json.dumps(asdict(ref))), task + ":semantic_reference_binding:" + sha)
+            check(data["designer_evidence"] == semantic_evidence, task + ":semantic_designer_evidence:" + sha)
+            check(gate["doses"] == [i / 16 for i in range(17)], task + ":all_frozen_doses:" + sha)
+            probes = data["probes"]
+            check(set(p["dose"] for p in probes) <= set(gate["doses"]), task + ":probe_dose_membership:" + sha)
+            for p in probes:
+                ev = p["evidence"]
+                check(ev["task_id"] == task and ev["episode_id"] in original["evidence_ids"], task + ":probe_episode_identity:" + sha)
+                if p["error"] is None:
+                    check(len(ev["observations"]) == ev["step"] + 1 and len(ev["actions"]) == ev["step"], task + ":probe_prefix_lengths:" + sha)
+                if ev["episode_id"] in raw_actions:
+                    check(ev["actions"] == raw_actions[ev["episode_id"]][:ev["step"]], task + ":probe_raw_actions:" + sha)
+                    check(ev["goal"] == task_goal(failures), task + ":probe_goal:" + sha)
+            gate_by_source[source_sha] = result
+        c1 = arms["D"]["candidates"][:1]
+        dproposals = rows(taskdir / "D/proposals.jsonl")
+        c1source = c1[0]["source"] if c1 else None
+        if c1source is None and dproposals:
+            families = dproposals[0]["arguments"].get("families", [])
+            if isinstance(families, list) and len(families) == 1:
+                c1source = families[0].get("rules_code")
+        for arm in ("D", "I"):
+            directory = taskdir / arm
+            records = arms[arm]["candidates"]
+            summary = arms[arm]["summary"]
+            logs = rows(directory / "designer_inputs.jsonl")
+            requests = rows(directory / "privileged_designer_requests.jsonl")
+            feedbacks = rows(directory / "feedback.jsonl")
+            proposals = rows(directory / "proposals.jsonl")
+            check(len(records) <= 2 and len(logs) <= (2 if arm == "D" else 1), f"{task}:{arm}:call_caps")
+            if len(logs) != len(requests):
+                pending.append(f"{task}:{arm}:request/log write in progress")
+            for log, reqrow in zip(logs, requests):
+                index = log["call_index"]
+                label = f"{task}:{arm}:C{index}"
+                request = ChatRequest.model_validate(reqrow)
+                feedback = None
+                if arm == "D" and index == 2:
+                    packet = next((r for r in feedbacks if r["call_index"] == 2), None)
+                    if packet is None:
+                        # D feedback index is flushed after the outstanding designer call.
+                        prefix = "TYPED DESIGN FEEDBACK\n"
+                        body = request.messages[1].content.split(prefix, 1)
+                        check(len(body) == 2, label + ":feedback_packet_in_request")
+                        if len(body) != 2:
+                            continue
+                        feedback = Feedback(**json.loads(body[1].split("\n", 1)[0]))
+                        pending.append(label + ":feedback_index_flush")
+                    else:
+                        feedback = Feedback(**packet["feedback"])
+                        expected_gates = [g["result"]["input_sha256"] for g in gates if g["result"]["source_sha256"] == feedback.source_sha256]
+                        check(packet["gate_input_sha256"] == expected_gates, label + ":feedback_gate_hashes")
+                    check(feedback.source == c1source and feedback.source_sha256 == digest(c1source), label + ":feedback_C1_binding")
+                    if c1:
+                        check(feedback.candidate_id == c1[0]["candidate_id"] and feedback.reason == c1[0]["rejection_reason"], label + ":feedback_C1_outcome")
+                expected = iterative_messages(evidence, feedback, previous_source=c1source if arm == "I" and index == 2 else None)
+                check(request.messages == expected, label + ":exact_frozen_messages")
+                check(digest(reqrow) == log["request_sha256"] and log["evidence_sha256"] == evidence.sha256, label + ":request_hash")
+                check(request.seed == int(task) + index - 1 and request.temperature == 0.7 and request.max_tokens == 6144 and request.tools == (ITERATIVE_ASSIST_TOOL,), label + ":frozen_generation")
+                check(request.attribution.task_id == task and request.attribution.arm == arm and request.attribution.budget == "designer", label + ":attribution")
+                upstream_hash = sha256_of({"provider": "deepseek", "request": request.model_dump()})
+                billed = [row for row in ledger if row["task_id"] == task and row["phase"] == request.attribution.phase and row["event"] == "call"]
+                if billed:
+                    check(all(row["request_sha256"] == upstream_hash for row in billed), label + ":upstream_ledger_request_binding")
+                else:
+                    pending.append(label + ":upstream_ledger_flush")
+                if arm == "I":
+                    check(index == 2 and log["feedback_supplied"] is False and log["previous_source_sha256"] == digest(c1source), label + ":blind_I_source_only")
+            for i, candidate in enumerate(records, 1):
+                label = f"{task}:{arm}:C{i}"
+                sha = digest(candidate["source"])
+                check(candidate["source_sha256"] == sha and candidate["candidate_id"] == f"{task}:C{i}:{sha}", label + ":source_identity")
+                check(candidate["optimizer_call_index"] == i and candidate["remaining_calls"] == 2 - i, label + ":call_accounting")
+                check(candidate["parent_candidate_id"] == (records[i - 2]["candidate_id"] if i > 1 else None), label + ":lineage")
+                proposal = next((row for row in (dproposals if arm == "I" and i == 1 else proposals) if row["call_index"] == i), None)
+                if proposal:
+                    rawfamilies = proposal["arguments"].get("families", [])
+                    if isinstance(rawfamilies, list) and len(rawfamilies) == 1:
+                        check(candidate["source"] == str(rawfamilies[0].get("rules_code") or ""), label + ":unmodified_designer_source")
+                if candidate["solvability"] is not None or candidate["endpoint"] is not None:
+                    check(gate_by_source.get(sha, {}).get("decision") == "PASS", label + ":policy_admission")
+            batches = rows(directory / "physical_batches.jsonl")
+            physical = sum(row["n"] for row in batches)
+            measurements = rows(directory / "measurements.jsonl")
+            allowed_trace_hashes = set()
+            for measurement in measurements:
+                index = measurement["call_index"]
+                if len(records) < index:
+                    pending.append(f"{task}:{arm}:candidate_history_flush")
+                    continue
+                code = records[index - 1]["source"].replace("__DOSE__", repr(float(measurement["d"]))).replace("__TASK_ID__", repr(task))
+                check(digest(code) == measurement["candidate_hash"], f"{task}:{arm}:C{index}:measurement_source_dose_identity")
+                allowed_trace_hashes.add(measurement["candidate_hash"])
+            if arm == "I" and c1 and c1[0]["endpoint"]:
+                allowed_trace_hashes.add(digest(c1[0]["source"].replace("__DOSE__", "1.0").replace("__TASK_ID__", repr(task))))
+            if summary:
+                logical = summary["logical_rollouts"]
+                check(logical <= 20 and summary["designer_calls_logical"] <= 2, f"{task}:{arm}:logical_caps")
+                check(summary["physical_rollouts"] == physical, f"{task}:{arm}:physical_accounting")
+                expected_shared = 0
+                if arm == "I":
+                    if summary.get("shared_C1_terminal"):
+                        expected_shared = arms["D"]["summary"]["logical_rollouts"]
+                    elif c1 and c1[0]["endpoint"]:
+                        expected_shared = c1[0]["endpoint"][1]
+                check(logical == physical + expected_shared, f"{task}:{arm}:shared_C1_logical_charge")
+                if not summary.get("shared_C1_terminal"):
+                    traces = rows(directory / "traces.jsonl")
+                    check(len(traces) == logical and all(t["error"] is None for t in traces), f"{task}:{arm}:completed_adaptation_trace_count")
+                    check(all(digest(t["candidate"]["rules_code"]) in allowed_trace_hashes for t in traces), f"{task}:{arm}:adaptation_trace_source_dose_identity")
+                if summary.get("search_accepted"):
+                    family = AssistFamily(**summary["final_family"])
+                    candidate = family.make(summary["dose"], FamilyContext(task, ()))
+                    check(candidate is not None and digest(candidate.rules_code) == summary["final_environment_hash"], f"{task}:{arm}:final_environment_identity")
+                    check(gate_by_source.get(digest(family.template), {}).get("decision") == "PASS", f"{task}:{arm}:final_admission")
+                    confirmation = summary.get("confirmation")
+                    if confirmation:
+                        check(confirmation["environment_hash"] == summary["final_environment_hash"] and confirmation["dose"] == summary["dose"] and confirmation["n"] == 16, f"{task}:{arm}:K16_identity")
+                        traces = rows(taskdir / f'confirm-{confirmation["environment_hash"]}-{confirmation["dose"]}.jsonl')
+                        check(len(traces) == 16 and sum(bool(t["success"]) for t in traces) == confirmation["successes"], f"{task}:{arm}:K16_trace_count")
+                        check(all(digest(t["candidate"]["rules_code"]) == confirmation["environment_hash"] and t["error"] is None for t in traces), f"{task}:{arm}:K16_frozen_trace_identity")
+                stats[f"{task}:{arm}"] = {"candidates": len(records), "logical_rollouts": logical, "physical_rollouts": physical, "gate": summary["gate_name"]}
+            elif original["reference_ok"]:
+                pending.append(f"{task}:{arm}:summary")
+        if arms["D"]["candidates"] and arms["I"]["candidates"]:
+            check(arms["D"]["candidates"][0] == arms["I"]["candidates"][0], task + ":exact_shared_C1_record")
+        if not original["reference_ok"]:
+            check(not any((taskdir / arm / "designer_inputs.jsonl").exists() for arm in ("D", "I")), task + ":unavailable_no_designer")
+    counts = {}
+    for row in checked:
+        key = row["check"].split(":")[-2] if ":probe_" in row["check"] else row["check"]
+        counts[key] = counts.get(key, 0) + 1
+    complete = len(results.get("tasks", {})) == 4 and all(row.get("status") in ("completed", "reference_unavailable") for row in results.get("tasks", {}).values())
+    correctness = read(run / "correctness_audit.json", {})
+    return {"timestamp_utc": datetime.now(timezone.utc).isoformat(), "scope": "Recorded input/output provenance, request isolation and cost accounting; method validity is a separate correctness audit.", "decision": "VIOLATION" if violations else "PASS" if complete and not pending else "PASS_SO_FAR", "experiment_correctness_decision": correctness.get("decision"), "checks_passed": len(checked), "check_counts": counts, "violations": violations, "pending": sorted(set(pending)), "tasks": stats, "cost": cost, "run_interruption": results.get("interruption")}
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--root", type=Path, default=Path("/home/kree/work/EnvJudge-aea-llm"))
+    parser.add_argument("--output", type=Path, default=Path("/tmp/semantic_smoke_audit/runtime_provenance.json"))
+    args = parser.parse_args()
+    report = audit(args.root)
+    args.output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
+    print(json.dumps({k: v for k, v in report.items() if k != "check_counts"}, indent=2))

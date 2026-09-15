@@ -1,0 +1,452 @@
+[
+  {
+    "arms": {
+      "D": {
+        "candidates": [
+          {
+            "candidate_id": "114:C1:db95316167cc2b07f14d783004e3f1782e6a8de5900cc0c4bc9027bc3bee4954",
+            "category": "SEMANTIC_UNCERTAIN",
+            "endpoint": null,
+            "mechanism": "Add an observation-side reminder of the required sub-steps (pick up a cloth, then clean it at a sink, then put it in the toilet) and, when a cloth is held but not yet cleaned, reorder/salience-boost the admissible 'clean cloth ... with sinkbasin' command so the missing cleaning step is easy to discover. DOSE controls how much of this support is shown: DOSE=0 leaves observations exactly unchanged; higher DOSE adds the sub-step reminder and increasingly promotes the clean command and the correct cloth-related commands in the admissible list.",
+            "optimizer_call_index": 1,
+            "parent_candidate_id": null,
+            "privilege": [
+              "semantic_privilege_uncertain: {\"findings\": [{\"activation\": \"task=114; episode=1204829a62; step=0; dose=0.0625; hooks=filter_observation,policy_formatter,same_original_state\", \"candidate_evidence\": [\"final_prompt: 'Remember: get a cloth, clean it at a sink, then put it in the toilet.'\"], \"decision\": \"UNCERTAIN\", \"information\": \"Changed text has unsupported or ungrounded semantics\", \"kind\": \"UNSUPPORTED\", \"public_evidence_check\": \"Not established\", \"reference_evidence\": []}, {\"activation\": \"task=114; episode=1204829a62; step=0; dose=0.0625; hooks=filter_observation,policy_formatter,same_original_state\", \"candidate_evidence\": [\"observation.text: 'Remember: get a cloth, clean it at a sink, then put it in the toilet.'\"], \"decision\": \"UNCERTAIN\", \"information\": \"Changed text has unsupported or ungrounded semantics\", \"kind\": \"UNSUPPORTED\", \"public_evidence_check\": \"Not established\", \"reference_evidence\": []}, {\"activation\": \"task=114; episode=1204829a62; step=1; dose=0.0625; hooks=filter_action,modify_transition,filter_observation,policy_formatter,same_original_state\", \"candidate_evidence\": [\"final_prompt: 'Remember: get a cloth, clean it at a sink, then put it in the toilet.'\"], \"decision\": \"UNCERTAIN\", \"information\": \"Changed text has unsupported or ungrounded semantics\", \"kind\": \"UNSUPPORTED\", \"public_evidence_check\": \"Not established\", \"reference_evidence\": []}], \"gate_input_sha256\": \"41b02ba0995fd28db309acbf89fd51cdea7e24198459222122bae65db74efbc9\", \"gate_version\": \"alfworld-semantic-screen-v1\"}"
+            ],
+            "rejection_reason": "semantic_privilege_uncertain: {\"findings\": [{\"activation\": \"task=114; episode=1204829a62; step=0; dose=0.0625; hooks=filter_observation,policy_formatter,same_original_state\", \"candidate_evidence\": [\"final_prompt: 'Remember: get a cloth, clean it at a sink, then put it in the toilet.'\"], \"decision\": \"UNCERTAIN\", \"information\": \"Changed text has unsupported or ungrounded semantics\", \"kind\": \"UNSUPPORTED\", \"public_evidence_check\": \"Not established\", \"reference_evidence\": []}, {\"activation\": \"task=114; episode=1204829a62; step=0; dose=0.0625; hooks=filter_observation,policy_formatter,same_original_state\", \"candidate_evidence\": [\"observation.text: 'Remember: get a cloth, clean it at a sink, then put it in the toilet.'\"], \"decision\": \"UNCERTAIN\", \"information\": \"Changed text has unsupported or ungrounded semantics\", \"kind\": \"UNSUPPORTED\", \"public_evidence_check\": \"Not established\", \"reference_evidence\": []}, {\"activation\": \"task=114; episode=1204829a62; step=1; dose=0.0625; hooks=filter_action,modify_transition,filter_observation,policy_formatter,same_original_state\", \"candidate_evidence\": [\"final_prompt: 'Remember: get a cloth, clean it at a sink, then put it in the toilet.'\"], \"decision\": \"UNCERTAIN\", \"information\": \"Changed text has unsupported or ungrounded semantics\", \"kind\": \"UNSUPPORTED\", \"public_evidence_check\": \"Not established\", \"reference_evidence\": []}], \"gate_input_sha256\": \"41b02ba0995fd28db309acbf89fd51cdea7e24198459222122bae65db74efbc9\", \"gate_version\": \"alfworld-semantic-screen-v1\"}",
+            "remaining_calls": 1,
+            "remaining_policy": 20,
+            "requested_operation": "PROPOSE",
+            "solvability": null,
+            "source_artifact": "candidate_114_D_C1.py.txt",
+            "source_sha256": "db95316167cc2b07f14d783004e3f1782e6a8de5900cc0c4bc9027bc3bee4954",
+            "structural": []
+          }
+        ],
+        "confirmation": null,
+        "control": null,
+        "designer_inputs": [
+          {
+            "arm": "D",
+            "call_index": 1,
+            "evidence_sha256": "222fd1258ab8be292f2c0059e039cf56a287ba0538cbb9103df07a96e18836bc",
+            "feedback_supplied": false,
+            "independently_constructed_match": true,
+            "previous_source_sha256": null,
+            "request_sha256": "5d886781c6402ce0811d961b4aae4fbfb139d3a9c2653e32a76f8b2d2bccb2fc",
+            "requested_operation": "PROPOSE"
+          }
+        ],
+        "feedback": [],
+        "gate": "SEMANTIC_UNCERTAIN",
+        "logical_rollouts": 0,
+        "physical_rollouts": 0,
+        "reason": "semantic_privilege_uncertain: {\"findings\": [{\"activation\": \"task=114; episode=1204829a62; step=0; dose=0.0625; hooks=filter_observation,policy_formatter,same_original_state\", \"candidate_evidence\": [\"final_prompt: 'Remember: get a cloth, clean it at a sink, then put it in the toilet.'\"], \"decision\": \"UNCERTAIN\", \"information\": \"Changed text has unsupported or ungrounded semantics\", \"kind\": \"UNSUPPORTED\", \"public_evidence_check\": \"Not established\", \"reference_evidence\": []}, {\"activation\": \"task=114; episode=1204829a62; step=0; dose=0.0625; hooks=filter_observation,policy_formatter,same_original_state\", \"candidate_evidence\": [\"observation.text: 'Remember: get a cloth, clean it at a sink, then put it in the toilet.'\"], \"decision\": \"UNCERTAIN\", \"information\": \"Changed text has unsupported or ungrounded semantics\", \"kind\": \"UNSUPPORTED\", \"public_evidence_check\": \"Not established\", \"reference_evidence\": []}, {\"activation\": \"task=114; episode=1204829a62; step=1; dose=0.0625; hooks=filter_action,modify_transition,filter_observation,policy_formatter,same_original_state\", \"candidate_evidence\": [\"final_prompt: 'Remember: get a cloth, clean it at a sink, then put it in the toilet.'\"], \"decision\": \"UNCERTAIN\", \"information\": \"Changed text has unsupported or ungrounded semantics\", \"kind\": \"UNSUPPORTED\", \"public_evidence_check\": \"Not established\", \"reference_evidence\": []}], \"gate_input_sha256\": \"41b02ba0995fd28db309acbf89fd51cdea7e24198459222122bae65db74efbc9\", \"gate_version\": \"alfworld-semantic-screen-v1\"}",
+        "search_accepted": false,
+        "status": "inconclusive"
+      },
+      "I": {
+        "candidates": [
+          {
+            "candidate_id": "114:C1:db95316167cc2b07f14d783004e3f1782e6a8de5900cc0c4bc9027bc3bee4954",
+            "category": "SEMANTIC_UNCERTAIN",
+            "endpoint": null,
+            "mechanism": "Add an observation-side reminder of the required sub-steps (pick up a cloth, then clean it at a sink, then put it in the toilet) and, when a cloth is held but not yet cleaned, reorder/salience-boost the admissible 'clean cloth ... with sinkbasin' command so the missing cleaning step is easy to discover. DOSE controls how much of this support is shown: DOSE=0 leaves observations exactly unchanged; higher DOSE adds the sub-step reminder and increasingly promotes the clean command and the correct cloth-related commands in the admissible list.",
+            "optimizer_call_index": 1,
+            "parent_candidate_id": null,
+            "privilege": [
+              "semantic_privilege_uncertain: {\"findings\": [{\"activation\": \"task=114; episode=1204829a62; step=0; dose=0.0625; hooks=filter_observation,policy_formatter,same_original_state\", \"candidate_evidence\": [\"final_prompt: 'Remember: get a cloth, clean it at a sink, then put it in the toilet.'\"], \"decision\": \"UNCERTAIN\", \"information\": \"Changed text has unsupported or ungrounded semantics\", \"kind\": \"UNSUPPORTED\", \"public_evidence_check\": \"Not established\", \"reference_evidence\": []}, {\"activation\": \"task=114; episode=1204829a62; step=0; dose=0.0625; hooks=filter_observation,policy_formatter,same_original_state\", \"candidate_evidence\": [\"observation.text: 'Remember: get a cloth, clean it at a sink, then put it in the toilet.'\"], \"decision\": \"UNCERTAIN\", \"information\": \"Changed text has unsupported or ungrounded semantics\", \"kind\": \"UNSUPPORTED\", \"public_evidence_check\": \"Not established\", \"reference_evidence\": []}, {\"activation\": \"task=114; episode=1204829a62; step=1; dose=0.0625; hooks=filter_action,modify_transition,filter_observation,policy_formatter,same_original_state\", \"candidate_evidence\": [\"final_prompt: 'Remember: get a cloth, clean it at a sink, then put it in the toilet.'\"], \"decision\": \"UNCERTAIN\", \"information\": \"Changed text has unsupported or ungrounded semantics\", \"kind\": \"UNSUPPORTED\", \"public_evidence_check\": \"Not established\", \"reference_evidence\": []}], \"gate_input_sha256\": \"41b02ba0995fd28db309acbf89fd51cdea7e24198459222122bae65db74efbc9\", \"gate_version\": \"alfworld-semantic-screen-v1\"}"
+            ],
+            "rejection_reason": "semantic_privilege_uncertain: {\"findings\": [{\"activation\": \"task=114; episode=1204829a62; step=0; dose=0.0625; hooks=filter_observation,policy_formatter,same_original_state\", \"candidate_evidence\": [\"final_prompt: 'Remember: get a cloth, clean it at a sink, then put it in the toilet.'\"], \"decision\": \"UNCERTAIN\", \"information\": \"Changed text has unsupported or ungrounded semantics\", \"kind\": \"UNSUPPORTED\", \"public_evidence_check\": \"Not established\", \"reference_evidence\": []}, {\"activation\": \"task=114; episode=1204829a62; step=0; dose=0.0625; hooks=filter_observation,policy_formatter,same_original_state\", \"candidate_evidence\": [\"observation.text: 'Remember: get a cloth, clean it at a sink, then put it in the toilet.'\"], \"decision\": \"UNCERTAIN\", \"information\": \"Changed text has unsupported or ungrounded semantics\", \"kind\": \"UNSUPPORTED\", \"public_evidence_check\": \"Not established\", \"reference_evidence\": []}, {\"activation\": \"task=114; episode=1204829a62; step=1; dose=0.0625; hooks=filter_action,modify_transition,filter_observation,policy_formatter,same_original_state\", \"candidate_evidence\": [\"final_prompt: 'Remember: get a cloth, clean it at a sink, then put it in the toilet.'\"], \"decision\": \"UNCERTAIN\", \"information\": \"Changed text has unsupported or ungrounded semantics\", \"kind\": \"UNSUPPORTED\", \"public_evidence_check\": \"Not established\", \"reference_evidence\": []}], \"gate_input_sha256\": \"41b02ba0995fd28db309acbf89fd51cdea7e24198459222122bae65db74efbc9\", \"gate_version\": \"alfworld-semantic-screen-v1\"}",
+            "remaining_calls": 1,
+            "remaining_policy": 20,
+            "requested_operation": "PROPOSE",
+            "solvability": null,
+            "source_artifact": "candidate_114_I_C1.py.txt",
+            "source_sha256": "db95316167cc2b07f14d783004e3f1782e6a8de5900cc0c4bc9027bc3bee4954",
+            "structural": []
+          }
+        ],
+        "confirmation": null,
+        "control": null,
+        "designer_inputs": [],
+        "feedback": [],
+        "gate": "SEMANTIC_UNCERTAIN",
+        "logical_rollouts": 0,
+        "physical_rollouts": 0,
+        "reason": "semantic_privilege_uncertain: {\"findings\": [{\"activation\": \"task=114; episode=1204829a62; step=0; dose=0.0625; hooks=filter_observation,policy_formatter,same_original_state\", \"candidate_evidence\": [\"final_prompt: 'Remember: get a cloth, clean it at a sink, then put it in the toilet.'\"], \"decision\": \"UNCERTAIN\", \"information\": \"Changed text has unsupported or ungrounded semantics\", \"kind\": \"UNSUPPORTED\", \"public_evidence_check\": \"Not established\", \"reference_evidence\": []}, {\"activation\": \"task=114; episode=1204829a62; step=0; dose=0.0625; hooks=filter_observation,policy_formatter,same_original_state\", \"candidate_evidence\": [\"observation.text: 'Remember: get a cloth, clean it at a sink, then put it in the toilet.'\"], \"decision\": \"UNCERTAIN\", \"information\": \"Changed text has unsupported or ungrounded semantics\", \"kind\": \"UNSUPPORTED\", \"public_evidence_check\": \"Not established\", \"reference_evidence\": []}, {\"activation\": \"task=114; episode=1204829a62; step=1; dose=0.0625; hooks=filter_action,modify_transition,filter_observation,policy_formatter,same_original_state\", \"candidate_evidence\": [\"final_prompt: 'Remember: get a cloth, clean it at a sink, then put it in the toilet.'\"], \"decision\": \"UNCERTAIN\", \"information\": \"Changed text has unsupported or ungrounded semantics\", \"kind\": \"UNSUPPORTED\", \"public_evidence_check\": \"Not established\", \"reference_evidence\": []}], \"gate_input_sha256\": \"41b02ba0995fd28db309acbf89fd51cdea7e24198459222122bae65db74efbc9\", \"gate_version\": \"alfworld-semantic-screen-v1\"}",
+        "search_accepted": false,
+        "status": "inconclusive"
+      }
+    },
+    "c1_category": "SEMANTIC_UNCERTAIN",
+    "reference_available": true,
+    "status": "completed",
+    "task": "114"
+  },
+  {
+    "arms": {
+      "D": {
+        "candidates": [],
+        "confirmation": null,
+        "control": null,
+        "designer_inputs": [],
+        "feedback": [],
+        "gate": "no_reference",
+        "logical_rollouts": 0,
+        "physical_rollouts": 0,
+        "reason": "reference_unavailable",
+        "search_accepted": false,
+        "status": "reference_unavailable"
+      },
+      "I": {
+        "candidates": [],
+        "confirmation": null,
+        "control": null,
+        "designer_inputs": [],
+        "feedback": [],
+        "gate": "no_reference",
+        "logical_rollouts": 0,
+        "physical_rollouts": 0,
+        "reason": "reference_unavailable",
+        "search_accepted": false,
+        "status": "reference_unavailable"
+      }
+    },
+    "c1_category": "not_generated",
+    "reference_available": false,
+    "status": "reference_unavailable",
+    "task": "115"
+  },
+  {
+    "arms": {
+      "D": {
+        "candidates": [
+          {
+            "candidate_id": "126:C1:1b682d5d2c0844c09f735f21a59989c4773c363faf46a0242791471fb7c4992d",
+            "category": "PRIVILEGE_FAIL",
+            "endpoint": null,
+            "mechanism": "Re-order and/or annotate the admissible command list so that actions that lead toward the target object (go to microwave 1, open microwave 1, take potato 1 from microwave 1) are surfaced at the top and prefixed with a salient hint, with more commands covered/emphasised as DOSE increases. DOSE=0 returns the admissible list exactly unchanged.",
+            "optimizer_call_index": 1,
+            "parent_candidate_id": null,
+            "privilege": [
+              "reference action embedded: 'go to microwave 1'",
+              "privileged constants from the reference: ['potato 1']"
+            ],
+            "rejection_reason": "reference action embedded: 'go to microwave 1'; privileged constants from the reference: ['potato 1']",
+            "remaining_calls": 1,
+            "remaining_policy": 20,
+            "requested_operation": "PROPOSE",
+            "solvability": null,
+            "source_artifact": "candidate_126_D_C1.py.txt",
+            "source_sha256": "1b682d5d2c0844c09f735f21a59989c4773c363faf46a0242791471fb7c4992d",
+            "structural": []
+          },
+          {
+            "candidate_id": "126:C2:ee62c351c25cdb805f849447db5ac28dfad0678ef2e60aa460133a5c9fe220d8",
+            "category": "STRUCTURAL_FAIL",
+            "endpoint": null,
+            "mechanism": "When the policy's action has no effect (or leaves the world unchanged), append a goal-oriented reminder to the observation describing what remains to be done in terms of the task's sub-goals (find the potato, cool it, put it in the garbagecan). As DOSE increases, the reminder becomes more frequent (triggered on more action types) and more specific about the sub-goals, from a generic 'you still need to find the potato' up to enumerating the full remaining sub-goal list. DOSE=0 returns the observation exactly unchanged.",
+            "optimizer_call_index": 2,
+            "parent_candidate_id": "126:C1:1b682d5d2c0844c09f735f21a59989c4773c363faf46a0242791471fb7c4992d",
+            "privilege": [],
+            "rejection_reason": "smoke at d=1 raised AttributeError: '_State' object has no attribute 'last_action_was_effective'",
+            "remaining_calls": 0,
+            "remaining_policy": 20,
+            "requested_operation": "REPLACE_MECHANISM",
+            "solvability": null,
+            "source_artifact": "candidate_126_D_C2.py.txt",
+            "source_sha256": "ee62c351c25cdb805f849447db5ac28dfad0678ef2e60aa460133a5c9fe220d8",
+            "structural": [
+              "smoke at d=1 raised AttributeError: '_State' object has no attribute 'last_action_was_effective'"
+            ]
+          }
+        ],
+        "confirmation": null,
+        "control": null,
+        "designer_inputs": [
+          {
+            "arm": "D",
+            "call_index": 1,
+            "evidence_sha256": "5121caccf5b23e00e9af3da143f528265b982d2f340583078aa38016f8f72616",
+            "feedback_supplied": false,
+            "independently_constructed_match": true,
+            "previous_source_sha256": null,
+            "request_sha256": "a35155630f6fb4900d3d205b301b7b4e88fc508d14049879361d615ff7a7b154",
+            "requested_operation": "PROPOSE"
+          },
+          {
+            "arm": "D",
+            "call_index": 2,
+            "evidence_sha256": "5121caccf5b23e00e9af3da143f528265b982d2f340583078aa38016f8f72616",
+            "feedback_supplied": true,
+            "independently_constructed_match": true,
+            "previous_source_sha256": null,
+            "request_sha256": "fd584059f9185ed56f8d82ab6af41d087b3b6d446be3678e4b66f9dec1b94aca",
+            "requested_operation": "REPLACE_MECHANISM"
+          }
+        ],
+        "feedback": [
+          {
+            "C1_source_sha256": "1b682d5d2c0844c09f735f21a59989c4773c363faf46a0242791471fb7c4992d",
+            "call_index": 2,
+            "feedback": {
+              "candidate_id": "126:C1:1b682d5d2c0844c09f735f21a59989c4773c363faf46a0242791471fb7c4992d",
+              "category": "privilege",
+              "endpoint": null,
+              "failed_episode_id": null,
+              "failed_rollout": null,
+              "mechanism": "Re-order and/or annotate the admissible command list so that actions that lead toward the target object (go to microwave 1, open microwave 1, take potato 1 from microwave 1) are surfaced at the top and prefixed with a salient hint, with more commands covered/emphasised as DOSE increases. DOSE=0 returns the admissible list exactly unchanged.",
+              "operation": "REPLACE_MECHANISM",
+              "reason": "reference action embedded: 'go to microwave 1'; privileged constants from the reference: ['potato 1']",
+              "remaining_calls": 1,
+              "remaining_policy": 20,
+              "source": "import re\n\nclass _Rules(Rules):\n    DOSE = __DOSE__\n\n    TARGET_HINTS = {\n        'go to microwave 1': 'the potato is here',\n        'open microwave 1': 'the potato is inside',\n        'take potato 1 from microwave 1': 'take the potato',\n    }\n\n    def _annotate(self, cmds):\n        if self.DOSE <= 0:\n            return list(cmds)\n        out = []\n        hinted = []\n        for c in cmds:\n            key = c.strip()\n            if key in self.TARGET_HINTS and self.DOSE > 0:\n                hinted.append((key, self.TARGET_HINTS[key]))\n            else:\n                out.append(c)\n        # Surface hinted commands at the top, annotated with a salient hint.\n        for key, hint in hinted:\n            out.insert(0, f'{key}  [hint: {hint}]')\n        return out\n\n    def filter_observation(self, obs, env_state):\n        cmds = obs.data.get('admissible_commands')\n        if cmds is None:\n            return obs\n        new_cmds = self._annotate(list(cmds))\n        new_text = obs.text\n        # Rewrite the 'Admissible commands:' section to match the reordered list\n        # so text and structured data stay consistent for the policy.\n        m = re.search(r'Admissible commands:.*', new_text, re.DOTALL)\n        if m:\n            new_text = new_text[:m.start()] + 'Admissible commands: ' + ', '.join(new_cmds)\n        return Observation(text=new_text, data=dict(obs.data, admissible_commands=new_cmds))\n",
+              "source_sha256": "1b682d5d2c0844c09f735f21a59989c4773c363faf46a0242791471fb7c4992d"
+            },
+            "gate_input_sha256": []
+          }
+        ],
+        "gate": "invalid / privilege_fail",
+        "logical_rollouts": 0,
+        "physical_rollouts": 0,
+        "reason": "smoke at d=1 raised AttributeError: '_State' object has no attribute 'last_action_was_effective'",
+        "search_accepted": false,
+        "status": "unresolved"
+      },
+      "I": {
+        "candidates": [
+          {
+            "candidate_id": "126:C1:1b682d5d2c0844c09f735f21a59989c4773c363faf46a0242791471fb7c4992d",
+            "category": "PRIVILEGE_FAIL",
+            "endpoint": null,
+            "mechanism": "Re-order and/or annotate the admissible command list so that actions that lead toward the target object (go to microwave 1, open microwave 1, take potato 1 from microwave 1) are surfaced at the top and prefixed with a salient hint, with more commands covered/emphasised as DOSE increases. DOSE=0 returns the admissible list exactly unchanged.",
+            "optimizer_call_index": 1,
+            "parent_candidate_id": null,
+            "privilege": [
+              "reference action embedded: 'go to microwave 1'",
+              "privileged constants from the reference: ['potato 1']"
+            ],
+            "rejection_reason": "reference action embedded: 'go to microwave 1'; privileged constants from the reference: ['potato 1']",
+            "remaining_calls": 1,
+            "remaining_policy": 20,
+            "requested_operation": "PROPOSE",
+            "solvability": null,
+            "source_artifact": "candidate_126_I_C1.py.txt",
+            "source_sha256": "1b682d5d2c0844c09f735f21a59989c4773c363faf46a0242791471fb7c4992d",
+            "structural": []
+          },
+          {
+            "candidate_id": "126:C2:fcc0fb5f0c6752fcbdb7c5caa1dbf40316af158fb6ca1ff9406d5636438c9bcb",
+            "category": "PRIVILEGE_FAIL",
+            "endpoint": null,
+            "mechanism": "Increase the salience of the microwave (and the potato inside it) in the observation text and in the admissible-commands list, so the policy is drawn to the microwave where the potato is located. With higher DOSE, the microwave is highlighted more strongly and additional supportive reminders of the goal's sub-steps are injected, without ever revealing object locations beyond what the policy's own observations expose.",
+            "optimizer_call_index": 2,
+            "parent_candidate_id": "126:C1:1b682d5d2c0844c09f735f21a59989c4773c363faf46a0242791471fb7c4992d",
+            "privilege": [
+              "reference action embedded: 'go to microwave 1'",
+              "privileged constants from the reference: ['potato 1']"
+            ],
+            "rejection_reason": "reference action embedded: 'go to microwave 1'; privileged constants from the reference: ['potato 1']",
+            "remaining_calls": 0,
+            "remaining_policy": 20,
+            "requested_operation": "REPLACE_MECHANISM",
+            "solvability": null,
+            "source_artifact": "candidate_126_I_C2.py.txt",
+            "source_sha256": "fcc0fb5f0c6752fcbdb7c5caa1dbf40316af158fb6ca1ff9406d5636438c9bcb",
+            "structural": []
+          }
+        ],
+        "confirmation": null,
+        "control": null,
+        "designer_inputs": [
+          {
+            "arm": "I",
+            "call_index": 2,
+            "evidence_sha256": "5121caccf5b23e00e9af3da143f528265b982d2f340583078aa38016f8f72616",
+            "feedback_supplied": false,
+            "independently_constructed_match": true,
+            "previous_source_sha256": "1b682d5d2c0844c09f735f21a59989c4773c363faf46a0242791471fb7c4992d",
+            "request_sha256": "6a6746b53f2433aef4e9a18fe2a7c79cd764f5b36abb792b7c361665bea1ecfc",
+            "requested_operation": "INDEPENDENT_PROPOSAL"
+          }
+        ],
+        "feedback": [],
+        "gate": "invalid / privilege_fail",
+        "logical_rollouts": 0,
+        "physical_rollouts": 0,
+        "reason": "reference action embedded: 'go to microwave 1'; privileged constants from the reference: ['potato 1']",
+        "search_accepted": false,
+        "status": "unresolved"
+      }
+    },
+    "c1_category": "PRIVILEGE_FAIL",
+    "reference_available": true,
+    "status": "completed",
+    "task": "126"
+  },
+  {
+    "arms": {
+      "D": {
+        "candidates": [
+          {
+            "candidate_id": "129:C1:58529c8cffb9de778977d1984e0ee4a49dd4353512f38b49fe7be88004fc6008",
+            "category": "STRUCTURAL_FAIL",
+            "endpoint": null,
+            "mechanism": "Rewrite the observation (both text and data['admissible_commands']) to surface the location of the butterknife as a goal-relevant hint and to promote navigation commands toward countertop 2. The amount of assistance grows with DOSE: at low DOSE a short reminder of the goal's target object is appended to the observation text; at higher DOSE the countertop 2 navigation command is moved to the front of the admissible list and a hint naming countertop 2 as the likely location is added; at DOSE=1 the admissible list is reordered to place 'go to countertop 2' first and the observation text explicitly states the butterknife is on countertop 2. The mechanism (revealing/highlighting the butterknife's surface location) is the same across all doses; only its coverage/salience grows.",
+            "optimizer_call_index": 1,
+            "parent_candidate_id": null,
+            "privilege": [],
+            "rejection_reason": "smoke at d=1 raised AttributeError: '_State' object has no attribute 'goal_text'",
+            "remaining_calls": 1,
+            "remaining_policy": 20,
+            "requested_operation": "PROPOSE",
+            "solvability": null,
+            "source_artifact": "candidate_129_D_C1.py.txt",
+            "source_sha256": "58529c8cffb9de778977d1984e0ee4a49dd4353512f38b49fe7be88004fc6008",
+            "structural": [
+              "smoke at d=1 raised AttributeError: '_State' object has no attribute 'goal_text'"
+            ]
+          },
+          {
+            "candidate_id": "129:C2:2bd72ab1ed262ae77872625ed18a629b146be97d0159ac43b8e772b195c099e9",
+            "category": "PRIVILEGE_FAIL",
+            "endpoint": null,
+            "mechanism": "Rewrite the observation (both text and data['admissible_commands']) to surface the butterknife's location as a goal-relevant hint and to promote navigation toward countertop 2. The support mechanism is identical across doses: reveal/highlight that the butterknife is on countertop 2; only coverage/salience grows with DOSE.",
+            "optimizer_call_index": 2,
+            "parent_candidate_id": "129:C1:58529c8cffb9de778977d1984e0ee4a49dd4353512f38b49fe7be88004fc6008",
+            "privilege": [
+              "reference action embedded: 'go to countertop 2'"
+            ],
+            "rejection_reason": "reference action embedded: 'go to countertop 2'",
+            "remaining_calls": 0,
+            "remaining_policy": 20,
+            "requested_operation": "REPAIR_CODE",
+            "solvability": null,
+            "source_artifact": "candidate_129_D_C2.py.txt",
+            "source_sha256": "2bd72ab1ed262ae77872625ed18a629b146be97d0159ac43b8e772b195c099e9",
+            "structural": []
+          }
+        ],
+        "confirmation": null,
+        "control": null,
+        "designer_inputs": [
+          {
+            "arm": "D",
+            "call_index": 1,
+            "evidence_sha256": "7be6dd40eb294d716d2ae8758564615c9173ffb9083856b3df24aac0ee4ecc33",
+            "feedback_supplied": false,
+            "independently_constructed_match": true,
+            "previous_source_sha256": null,
+            "request_sha256": "2f8ff3201091c820ac0766193f3762e2115947691782c14e522f1b0013b671ff",
+            "requested_operation": "PROPOSE"
+          },
+          {
+            "arm": "D",
+            "call_index": 2,
+            "evidence_sha256": "7be6dd40eb294d716d2ae8758564615c9173ffb9083856b3df24aac0ee4ecc33",
+            "feedback_supplied": true,
+            "independently_constructed_match": true,
+            "previous_source_sha256": null,
+            "request_sha256": "4ed92527003f56c03ccaf303583793c81b833940ff87e26885ad98ecd265000f",
+            "requested_operation": "REPAIR_CODE"
+          }
+        ],
+        "feedback": [
+          {
+            "C1_source_sha256": "58529c8cffb9de778977d1984e0ee4a49dd4353512f38b49fe7be88004fc6008",
+            "call_index": 2,
+            "feedback": {
+              "candidate_id": "129:C1:58529c8cffb9de778977d1984e0ee4a49dd4353512f38b49fe7be88004fc6008",
+              "category": "mechanical",
+              "endpoint": null,
+              "failed_episode_id": null,
+              "failed_rollout": null,
+              "mechanism": "Rewrite the observation (both text and data['admissible_commands']) to surface the location of the butterknife as a goal-relevant hint and to promote navigation commands toward countertop 2. The amount of assistance grows with DOSE: at low DOSE a short reminder of the goal's target object is appended to the observation text; at higher DOSE the countertop 2 navigation command is moved to the front of the admissible list and a hint naming countertop 2 as the likely location is added; at DOSE=1 the admissible list is reordered to place 'go to countertop 2' first and the observation text explicitly states the butterknife is on countertop 2. The mechanism (revealing/highlighting the butterknife's surface location) is the same across all doses; only its coverage/salience grows.",
+              "operation": "REPAIR_CODE",
+              "reason": "smoke at d=1 raised AttributeError: '_State' object has no attribute 'goal_text'",
+              "remaining_calls": 1,
+              "remaining_policy": 20,
+              "source": "import re\n\nclass _Rules(Rules):\n    DOSE = __DOSE__\n\n    def _goal_mentions_butterknife(self, env_state):\n        return 'butterknife' in (env_state.goal_text or '').lower()\n\n    def filter_observation(self, obs, env_state):\n        if not self._goal_mentions_butterknife(env_state):\n            return obs\n        text = obs.text\n        data = obs.data\n        cmds = list(data.get('admissible_commands') or []) if data else []\n\n        # DOSE == 0: unchanged\n        if self.DOSE <= 0.0:\n            return obs\n\n        hint = \"Hint: the butterknife is on a countertop (try countertop 2).\"\n\n        # Add the hint into the observation text at increasing salience.\n        if self.DOSE < 0.5:\n            if 'Hint:' not in text:\n                text = text.rstrip() + '\\n\\n' + hint\n        else:\n            # Stronger: put the hint right after the task line.\n            lines = text.split('\\n')\n            if lines and lines[0].startswith('Task:'):\n                if 'Hint:' not in lines[0]:\n                    lines[0] = lines[0] + '  ' + hint\n                    text = '\\n'.join(lines)\n            elif 'Hint:' not in text:\n                text = text.rstrip() + '\\n\\n' + hint\n\n        # Reorder admissible commands to promote 'go to countertop 2'.\n        target = 'go to countertop 2'\n        if target in cmds:\n            cmds.remove(target)\n            cmds.insert(0, target)\n\n        new_data = dict(data) if data else {}\n        new_data['admissible_commands'] = cmds\n        return Observation(text=text, data=new_data)\n",
+              "source_sha256": "58529c8cffb9de778977d1984e0ee4a49dd4353512f38b49fe7be88004fc6008"
+            },
+            "gate_input_sha256": []
+          }
+        ],
+        "gate": "invalid / privilege_fail",
+        "logical_rollouts": 0,
+        "physical_rollouts": 0,
+        "reason": "reference action embedded: 'go to countertop 2'",
+        "search_accepted": false,
+        "status": "unresolved"
+      },
+      "I": {
+        "candidates": [
+          {
+            "candidate_id": "129:C1:58529c8cffb9de778977d1984e0ee4a49dd4353512f38b49fe7be88004fc6008",
+            "category": "STRUCTURAL_FAIL",
+            "endpoint": null,
+            "mechanism": "Rewrite the observation (both text and data['admissible_commands']) to surface the location of the butterknife as a goal-relevant hint and to promote navigation commands toward countertop 2. The amount of assistance grows with DOSE: at low DOSE a short reminder of the goal's target object is appended to the observation text; at higher DOSE the countertop 2 navigation command is moved to the front of the admissible list and a hint naming countertop 2 as the likely location is added; at DOSE=1 the admissible list is reordered to place 'go to countertop 2' first and the observation text explicitly states the butterknife is on countertop 2. The mechanism (revealing/highlighting the butterknife's surface location) is the same across all doses; only its coverage/salience grows.",
+            "optimizer_call_index": 1,
+            "parent_candidate_id": null,
+            "privilege": [],
+            "rejection_reason": "smoke at d=1 raised AttributeError: '_State' object has no attribute 'goal_text'",
+            "remaining_calls": 1,
+            "remaining_policy": 20,
+            "requested_operation": "PROPOSE",
+            "solvability": null,
+            "source_artifact": "candidate_129_I_C1.py.txt",
+            "source_sha256": "58529c8cffb9de778977d1984e0ee4a49dd4353512f38b49fe7be88004fc6008",
+            "structural": [
+              "smoke at d=1 raised AttributeError: '_State' object has no attribute 'goal_text'"
+            ]
+          },
+          {
+            "candidate_id": "129:C2:d1caa3b5014b7c637fd72f44a28cfe198878acfb8fb89fea42af38d2fd4f2466",
+            "category": "STRUCTURAL_FAIL",
+            "endpoint": null,
+            "mechanism": "Re-rank the admissible command list by pushing non-countertop container navigation (go to cabinet N, go to drawer N, open/close/examine cabinet/drawer) to the back while promoting countertop navigation and take commands to the front; additionally append a goal-substep reminder that the target is a countertop. Higher DOSE removes more distractor container commands from the front and raises salience of the countertop reminder.",
+            "optimizer_call_index": 2,
+            "parent_candidate_id": "129:C1:58529c8cffb9de778977d1984e0ee4a49dd4353512f38b49fe7be88004fc6008",
+            "privilege": [],
+            "rejection_reason": "smoke at d=1 raised AttributeError: '_State' object has no attribute 'goal_text'",
+            "remaining_calls": 0,
+            "remaining_policy": 20,
+            "requested_operation": "REPAIR_CODE",
+            "solvability": null,
+            "source_artifact": "candidate_129_I_C2.py.txt",
+            "source_sha256": "d1caa3b5014b7c637fd72f44a28cfe198878acfb8fb89fea42af38d2fd4f2466",
+            "structural": [
+              "smoke at d=1 raised AttributeError: '_State' object has no attribute 'goal_text'"
+            ]
+          }
+        ],
+        "confirmation": null,
+        "control": null,
+        "designer_inputs": [
+          {
+            "arm": "I",
+            "call_index": 2,
+            "evidence_sha256": "7be6dd40eb294d716d2ae8758564615c9173ffb9083856b3df24aac0ee4ecc33",
+            "feedback_supplied": false,
+            "independently_constructed_match": true,
+            "previous_source_sha256": "58529c8cffb9de778977d1984e0ee4a49dd4353512f38b49fe7be88004fc6008",
+            "request_sha256": "9c4ebf8f058728b0d299f3137b4a82d8a2d315695a3b5c32dd2eabba5585f8b7",
+            "requested_operation": "INDEPENDENT_PROPOSAL"
+          }
+        ],
+        "feedback": [],
+        "gate": "invalid / privilege_fail",
+        "logical_rollouts": 0,
+        "physical_rollouts": 0,
+        "reason": "smoke at d=1 raised AttributeError: '_State' object has no attribute 'goal_text'",
+        "search_accepted": false,
+        "status": "unresolved"
+      }
+    },
+    "c1_category": "STRUCTURAL_FAIL",
+    "reference_available": true,
+    "status": "completed",
+    "task": "129"
+  }
+]

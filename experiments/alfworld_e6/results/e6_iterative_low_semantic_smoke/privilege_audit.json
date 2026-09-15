@@ -1,0 +1,124 @@
+{
+  "final_correctness": "IMPLEMENTATION_FAILURE",
+  "reason": "Advertised/real env_state fields missing from structural smoke fixture caused false rejection; independent reproduction confirms.",
+  "observed_policy_privilege_leak": false,
+  "scope": "Manual source/reference review plus zero-policy-call evidence; no general isolation claim and no counterfactual admission claim.",
+  "physical_designer_calls": 7,
+  "physical_policy_calls": 0,
+  "physical_confirmation_calls": 0,
+  "actual_semantic_screen_results": {
+    "UNCERTAIN": 1,
+    "PASS": 0,
+    "FAIL": 0
+  },
+  "structural_defect_reproduction": "/tmp/semantic_smoke_actual_candidate_repro.json",
+  "candidates": [
+    {
+      "task": 114,
+      "arm": "D",
+      "optimizer_call_index": 1,
+      "candidate_id": "114:C1:db95316167cc2b07f14d783004e3f1782e6a8de5900cc0c4bc9027bc3bee4954",
+      "source_sha256": "db95316167cc2b07f14d783004e3f1782e6a8de5900cc0c4bc9027bc3bee4954",
+      "manual_source_finding": "NO_CONCRETE_PRIVILEGE_LEAK_IN_SOURCE",
+      "note": "Generic cloth/clean/sink/toilet prerequisite reminder and current admissible cloth-command ranking; no cloth@shelf1 encoding.",
+      "actual_structural": [],
+      "actual_privilege": [
+        "semantic_privilege_uncertain: {\"findings\": [{\"activation\": \"task=114; episode=1204829a62; step=0; dose=0.0625; hooks=filter_observation,policy_formatter,same_original_state\", \"candidate_evidence\": [\"final_prompt: 'Remember: get a cloth, clean it at a sink, then put it in the toilet.'\"], \"decision\": \"UNCERTAIN\", \"information\": \"Changed text has unsupported or ungrounded semantics\", \"kind\": \"UNSUPPORTED\", \"public_evidence_check\": \"Not established\", \"reference_evidence\": []}, {\"activation\": \"task=114; episode=1204829a62; step=0; dose=0.0625; hooks=filter_observation,policy_formatter,same_original_state\", \"candidate_evidence\": [\"observation.text: 'Remember: get a cloth, clean it at a sink, then put it in the toilet.'\"], \"decision\": \"UNCERTAIN\", \"information\": \"Changed text has unsupported or ungrounded semantics\", \"kind\": \"UNSUPPORTED\", \"public_evidence_check\": \"Not established\", \"reference_evidence\": []}, {\"activation\": \"task=114; episode=1204829a62; step=1; dose=0.0625; hooks=filter_action,modify_transition,filter_observation,policy_formatter,same_original_state\", \"candidate_evidence\": [\"final_prompt: 'Remember: get a cloth, clean it at a sink, then put it in the toilet.'\"], \"decision\": \"UNCERTAIN\", \"information\": \"Changed text has unsupported or ungrounded semantics\", \"kind\": \"UNSUPPORTED\", \"public_evidence_check\": \"Not established\", \"reference_evidence\": []}], \"gate_input_sha256\": \"41b02ba0995fd28db309acbf89fd51cdea7e24198459222122bae65db74efbc9\", \"gate_version\": \"alfworld-semantic-screen-v1\"}"
+      ],
+      "solvability": null,
+      "endpoint": null
+    },
+    {
+      "task": 126,
+      "arm": "D",
+      "optimizer_call_index": 1,
+      "candidate_id": "126:C1:1b682d5d2c0844c09f735f21a59989c4773c363faf46a0242791471fb7c4992d",
+      "source_sha256": "1b682d5d2c0844c09f735f21a59989c4773c363faf46a0242791471fb7c4992d",
+      "manual_source_finding": "EXPLICIT_REFERENCE_LOCATION_DISCLOSURE_BLOCKED",
+      "note": "TARGET_HINTS directly associates go/open microwave1 with the potato being there. Frozen reference locates potato1 inside microwave1; lexical gate rejected before policy.",
+      "actual_structural": [],
+      "actual_privilege": [
+        "reference action embedded: 'go to microwave 1'",
+        "privileged constants from the reference: ['potato 1']"
+      ],
+      "solvability": null,
+      "endpoint": null
+    },
+    {
+      "task": 126,
+      "arm": "D",
+      "optimizer_call_index": 2,
+      "candidate_id": "126:C2:ee62c351c25cdb805f849447db5ac28dfad0678ef2e60aa460133a5c9fe220d8",
+      "source_sha256": "ee62c351c25cdb805f849447db5ac28dfad0678ef2e60aa460133a5c9fe220d8",
+      "manual_source_finding": "NO_CONCRETE_PRIVILEGE_LEAK_IN_SOURCE",
+      "note": "Generic find/take/cool/put subgoal reminders triggered by public last_action_was_effective; no microwave location. Falsely rejected by incomplete structural smoke state.",
+      "actual_structural": [
+        "smoke at d=1 raised AttributeError: '_State' object has no attribute 'last_action_was_effective'"
+      ],
+      "actual_privilege": [],
+      "solvability": null,
+      "endpoint": null
+    },
+    {
+      "task": 126,
+      "arm": "I",
+      "optimizer_call_index": 2,
+      "candidate_id": "126:C2:fcc0fb5f0c6752fcbdb7c5caa1dbf40316af158fb6ca1ff9406d5636438c9bcb",
+      "source_sha256": "fcc0fb5f0c6752fcbdb7c5caa1dbf40316af158fb6ca1ff9406d5636438c9bcb",
+      "manual_source_finding": "REFERENCE_LOCATION_HINT_AND_RANKING_BLOCKED",
+      "note": "Microwave1 annotations and prioritization disclose the privileged potato/microwave association; lexical gate rejected before policy.",
+      "actual_structural": [],
+      "actual_privilege": [
+        "reference action embedded: 'go to microwave 1'",
+        "privileged constants from the reference: ['potato 1']"
+      ],
+      "solvability": null,
+      "endpoint": null
+    },
+    {
+      "task": 129,
+      "arm": "D",
+      "optimizer_call_index": 1,
+      "candidate_id": "129:C1:58529c8cffb9de778977d1984e0ee4a49dd4353512f38b49fe7be88004fc6008",
+      "source_sha256": "58529c8cffb9de778977d1984e0ee4a49dd4353512f38b49fe7be88004fc6008",
+      "manual_source_finding": "EXPLICIT_REFERENCE_LOCATION_DISCLOSURE_BLOCKED",
+      "note": "Countertop2 priority and butterknife-on-countertop hint encode privileged location. Actual gate stopped on incomplete structural smoke state before privilege evaluation.",
+      "actual_structural": [
+        "smoke at d=1 raised AttributeError: '_State' object has no attribute 'goal_text'"
+      ],
+      "actual_privilege": [],
+      "solvability": null,
+      "endpoint": null
+    },
+    {
+      "task": 129,
+      "arm": "D",
+      "optimizer_call_index": 2,
+      "candidate_id": "129:C2:2bd72ab1ed262ae77872625ed18a629b146be97d0159ac43b8e772b195c099e9",
+      "source_sha256": "2bd72ab1ed262ae77872625ed18a629b146be97d0159ac43b8e772b195c099e9",
+      "manual_source_finding": "EXPLICIT_REFERENCE_LOCATION_DISCLOSURE_BLOCKED",
+      "note": "Literal butterknife-on-countertop2 hint and navigation priority; lexical gate rejected before policy.",
+      "actual_structural": [],
+      "actual_privilege": [
+        "reference action embedded: 'go to countertop 2'"
+      ],
+      "solvability": null,
+      "endpoint": null
+    },
+    {
+      "task": 129,
+      "arm": "I",
+      "optimizer_call_index": 2,
+      "candidate_id": "129:C2:d1caa3b5014b7c637fd72f44a28cfe198878acfb8fb89fea42af38d2fd4f2466",
+      "source_sha256": "d1caa3b5014b7c637fd72f44a28cfe198878acfb8fb89fea42af38d2fd4f2466",
+      "manual_source_finding": "REFERENCE_LOCATION_CLAIM_REQUIRES_REVIEW_BUT_NEVER_REACHED_POLICY",
+      "note": "Source tells learner to find butterknife on a countertop and suppresses cabinet/drawer search. Public goal names countertop as destination, which alone does not establish current location. Structural smoke-state error stopped evaluation; no semantic verdict was obtained.",
+      "actual_structural": [
+        "smoke at d=1 raised AttributeError: '_State' object has no attribute 'goal_text'"
+      ],
+      "actual_privilege": [],
+      "solvability": null,
+      "endpoint": null
+    }
+  ]
+}

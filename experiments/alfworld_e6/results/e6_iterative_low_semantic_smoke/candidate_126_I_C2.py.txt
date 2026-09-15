@@ -1,0 +1,45 @@
+import re
+
+class _Rules(Rules):
+    DOSE = __DOSE__
+
+    def _salience(self, cmds):
+        if self.DOSE <= 0:
+            return list(cmds)
+        out = []
+        for c in cmds:
+            s = c.strip()
+            if s == 'go to microwave 1':
+                out.append(s + '  [the microwave, where you might find what you need]')
+            elif s == 'open microwave 1':
+                out.append(s + '  [look inside for the potato]')
+            elif s == 'take potato 1 from microwave 1':
+                out.append(s + '  [take the potato]')
+            elif s == 'examine microwave 1':
+                out.append(s + '  [check inside the microwave]')
+            else:
+                out.append(c)
+        # Move microwave-related commands to the front to increase discoverability.
+        keys = ['go to microwave 1', 'open microwave 1', 'take potato 1 from microwave 1', 'examine microwave 1']
+        ordered = [x for x in out if any(k in x for k in keys)]
+        rest = [x for x in out if x not in ordered]
+        return ordered + rest
+
+    def _goal_reminder(self, text):
+        # With higher dose, append a reminder of the sub-steps the policy must still do.
+        if self.DOSE < 0.5:
+            return text
+        reminder = '\n[reminder: find the potato, cool it, then put it in the garbagecan]'
+        return text + reminder
+
+    def filter_observation(self, obs, env_state):
+        cmds = obs.data.get('admissible_commands')
+        if cmds is None:
+            return obs
+        new_cmds = self._salience(list(cmds))
+        new_text = obs.text
+        m = re.search(r'Admissible commands:.*', new_text, re.DOTALL)
+        if m:
+            new_text = new_text[:m.start()] + 'Admissible commands: ' + ', '.join(new_cmds)
+        new_text = self._goal_reminder(new_text)
+        return Observation(text=new_text, data=dict(obs.data, admissible_commands=new_cmds))

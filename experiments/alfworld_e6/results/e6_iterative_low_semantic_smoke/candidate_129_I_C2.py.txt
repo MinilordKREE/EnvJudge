@@ -1,0 +1,54 @@
+import re
+
+class _Rules(Rules):
+    DOSE = __DOSE__
+
+    def _is_countertop_cmd(self, cmd):
+        return 'countertop' in (cmd or '')
+
+    def _is_container_cmd(self, cmd):
+        c = cmd or ''
+        return (c.startswith('go to cabinet') or c.startswith('go to drawer')
+                or c.startswith('open cabinet') or c.startswith('open drawer')
+                or c.startswith('close cabinet') or c.startswith('close drawer')
+                or c.startswith('examine cabinet') or c.startswith('examine drawer'))
+
+    def filter_observation(self, obs, env_state):
+        if 'butterknife' not in (env_state.goal_text or '').lower():
+            return obs
+        if self.DOSE <= 0.0:
+            return obs
+
+        text = obs.text
+        data = obs.data
+        cmds = list(data.get('admissible_commands') or []) if data else []
+
+        # Reminder of the goal's sub-steps; salience grows with DOSE.
+        reminder = "Reminder: find the butterknife on a countertop, take it, clean it, then put it on a countertop."
+        if self.DOSE >= 0.5:
+            lines = text.split('\n')
+            if lines and lines[0].startswith('Task:'):
+                if 'Reminder:' not in lines[0]:
+                    lines[0] = lines[0] + '  ' + reminder
+                    text = '\n'.join(lines)
+            elif 'Reminder:' not in text:
+                text = text.rstrip() + '\n\n' + reminder
+        else:
+            if 'Reminder:' not in text:
+                text = text.rstrip() + '\n\n' + reminder
+
+        # Reorder: countertop commands first, container commands last.
+        # The fraction of distractor container commands demoted grows with DOSE.
+        counter = [c for c in cmds if self._is_countertop_cmd(c)]
+        container = [c for c in cmds if self._is_container_cmd(c)]
+        other = [c for c in cmds if not self._is_countertop_cmd(c) and not self._is_container_cmd(c)]
+
+        # Demote a DOSE-scaled fraction of container commands to the very end.
+        n_demote = int(round(len(container) * self.DOSE))
+        demoted = container[-n_demote:] if n_demote else []
+        kept_container = container[:-n_demote] if n_demote else container
+
+        new_cmds = counter + other + kept_container + demoted
+        new_data = dict(data) if data else {}
+        new_data['admissible_commands'] = new_cmds
+        return Observation(text=text, data=new_data)

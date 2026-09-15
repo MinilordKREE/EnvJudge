@@ -1,0 +1,40 @@
+import re
+
+class _Rules(Rules):
+    DOSE = __DOSE__
+
+    def filter_observation(self, obs, env_state):
+        # DOSE == 0: unchanged environment
+        if self.DOSE <= 0.0:
+            return obs
+
+        text = obs.text
+        data = obs.data
+        cmds = list(data.get('admissible_commands') or []) if data else []
+
+        hint = "Hint: the butterknife is on countertop 2."
+
+        # Increasing salience of the hint with DOSE.
+        if self.DOSE < 0.5:
+            # Low dose: append a short reminder.
+            if 'Hint:' not in text:
+                text = text.rstrip() + '\n\n' + hint
+        else:
+            # High dose: place the hint right after the task line.
+            lines = text.split('\n')
+            if lines and lines[0].startswith('Task:'):
+                if 'Hint:' not in lines[0]:
+                    lines[0] = lines[0] + '  ' + hint
+                    text = '\n'.join(lines)
+            elif 'Hint:' not in text:
+                text = text.rstrip() + '\n\n' + hint
+
+        # Reorder admissible commands to promote 'go to countertop 2'.
+        target = 'go to countertop 2'
+        if target in cmds:
+            cmds = [c for c in cmds if c != target]
+            cmds.insert(0, target)
+
+        new_data = dict(data) if data else {}
+        new_data['admissible_commands'] = cmds
+        return Observation(text=text, data=new_data)
