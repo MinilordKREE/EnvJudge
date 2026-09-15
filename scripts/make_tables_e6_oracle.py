@@ -62,9 +62,28 @@ def _assist_rows(arm: str) -> dict[str, dict[str, Any]]:
             rows[t]["families"] = e.get("families", [])
             rows[t]["families_rejected"] = e.get("rejected", [])
             rows[t]["mode"] = "oracle"
+    # the confirm summary keys an environment by the PROCESS id (O1 / O2), not by the alias;
+    # attach the K16 record and re-derive the six-level class (prereg: primary = search accept
+    # AND p16 in B_L)
+    conf_path = er.RUNS / er.CONFIRM_ID / "confirm_summary.json"
+    conf = json.loads(conf_path.read_text()) if conf_path.exists() else {}
     for r in rows.values():
         r["arm"] = "O"
         r["process"] = ids[arm]
+        acc = r.get("accepted")
+        if acc and f"{arm}:{acc['id']}" in conf:
+            r["confirm"] = conf[f"{arm}:{acc['id']}"]
+        if r.get("outcome") == "accepted":
+            c = r.get("confirm") or {}
+            r["cls"] = (
+                "k16_confirmed_target"
+                if c.get("in_band_t")
+                else (
+                    "k16_confirmed_learnable"
+                    if c.get("in_band_l")
+                    else "search_accepted_k16_failed"
+                )
+            )
     return rows
 
 

@@ -1,0 +1,981 @@
+{
+ "rows": {
+  "85": {
+   "task": "85",
+   "arm": "O",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "outcome": "dropped",
+   "reason": "no_leverage",
+   "n_search": 14,
+   "reference": {
+    "available": true,
+    "n_steps": 15,
+    "reference_id": "dfd8a9f55d7edf28"
+   },
+   "designer_called": false,
+   "probe_rollouts": 4,
+   "category": "dead",
+   "guards": [
+    {
+     "family": "explored_receptacle_pruning",
+     "ok": true,
+     "source": "oracle"
+    }
+   ],
+   "leverage_by_family": {
+    "explored_receptacle_pruning": false
+   },
+   "no_leverage_families": [
+    "explored_receptacle_pruning"
+   ],
+   "d1_measurements": [
+    {
+     "family": "explored_receptacle_pruning",
+     "d": 1.0,
+     "s": 0,
+     "n": 4,
+     "verdict": "too_hard"
+    }
+   ],
+   "leverage": false,
+   "cls": "no_leverage",
+   "resolution": {
+    "explored_receptacle_pruning": {
+     "probes": 1,
+     "dead": true,
+     "easy": false,
+     "in_band": false,
+     "intermediate_probes": 0,
+     "regimes": [
+      "too_hard"
+     ]
+    }
+   },
+   "intermediate_regime": false,
+   "families": [
+    {
+     "name": "explored_receptacle_pruning",
+     "axis": "O",
+     "mechanism": "class S: Exploration memory: the policy keeps returning to receptacles whose contents it has already seen; support = removing already-inspected, tomato-free receptacles from the navigation choices while no tomato is in hand.",
+     "why": "All 10 failures open the fridge first, then walk the 23 cabinets and the drawers (re-visiting the fridge 5-15 times); 9 of 10 never visit diningtable 1, the only surface holding a tomato; the one rollout that reaches it (F6, step 45) takes the tomato and runs out of steps.",
+     "source": "oracle",
+     "code_sha256": "e5534269381e3916"
+    }
+   ],
+   "families_rejected": [],
+   "mode": "oracle",
+   "process": "e6-oa-O1"
+  },
+  "86": {
+   "task": "86",
+   "arm": "O",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "outcome": "dropped",
+   "reason": "no_leverage",
+   "n_search": 14,
+   "reference": {
+    "available": true,
+    "n_steps": 48,
+    "reference_id": "ee9795388eadfd8f"
+   },
+   "designer_called": false,
+   "probe_rollouts": 4,
+   "category": "dead",
+   "guards": [
+    {
+     "family": "goal_decomposition_annotation",
+     "ok": true,
+     "source": "oracle"
+    }
+   ],
+   "leverage_by_family": {
+    "goal_decomposition_annotation": false
+   },
+   "no_leverage_families": [
+    "goal_decomposition_annotation"
+   ],
+   "d1_measurements": [
+    {
+     "family": "goal_decomposition_annotation",
+     "d": 1.0,
+     "s": 0,
+     "n": 4,
+     "verdict": "too_hard"
+    }
+   ],
+   "leverage": false,
+   "cls": "no_leverage",
+   "resolution": {
+    "goal_decomposition_annotation": {
+     "probes": 1,
+     "dead": true,
+     "easy": false,
+     "in_band": false,
+     "intermediate_probes": 0,
+     "regimes": [
+      "too_hard"
+     ]
+    }
+   },
+   "intermediate_regime": false,
+   "families": [
+    {
+     "name": "goal_decomposition_annotation",
+     "axis": "O",
+     "mechanism": "class G: Goal decomposition: the policy does not map the goal wording to the object type it must pick up and the transformation it must apply; support = spelling the goal as its sub-steps in the observation.",
+     "why": "All 10 failures open cabinets 1-26 and the drawers for 50 steps; every rollout visits countertop 1 and SEES 'a plate 1' among 11 objects there (step ~28) and never takes it; no rollout heats anything; 'hot plate' is never decomposed into plate -> heat -> place.",
+     "source": "oracle",
+     "code_sha256": "70992eda167f2199"
+    }
+   ],
+   "families_rejected": [],
+   "mode": "oracle",
+   "process": "e6-oa-O1"
+  },
+  "92": {
+   "task": "92",
+   "arm": "O",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "outcome": "dropped",
+   "reason": "no_leverage",
+   "n_search": 14,
+   "reference": {
+    "available": true,
+    "n_steps": 48,
+    "reference_id": "f262be947e751751"
+   },
+   "designer_called": false,
+   "probe_rollouts": 4,
+   "category": "dead",
+   "guards": [
+    {
+     "family": "precondition_gating",
+     "ok": true,
+     "source": "oracle"
+    }
+   ],
+   "leverage_by_family": {
+    "precondition_gating": false
+   },
+   "no_leverage_families": [
+    "precondition_gating"
+   ],
+   "d1_measurements": [
+    {
+     "family": "precondition_gating",
+     "d": 1.0,
+     "s": 0,
+     "n": 4,
+     "verdict": "too_hard"
+    }
+   ],
+   "leverage": false,
+   "cls": "no_leverage",
+   "resolution": {
+    "precondition_gating": {
+     "probes": 1,
+     "dead": true,
+     "easy": false,
+     "in_band": false,
+     "intermediate_probes": 0,
+     "regimes": [
+      "too_hard"
+     ]
+    }
+   },
+   "intermediate_regime": false,
+   "families": [
+    {
+     "name": "precondition_gating",
+     "axis": "A",
+     "mechanism": "class P: The policy treats 'use desklamp' as the completing action regardless of what it holds; support = rejecting that action while no cellphone is in hand, with the goal precondition as the reason.",
+     "why": "All 10 failures go to desk 1 at step 1, 'use desklamp 1' at step 2 (the lamp is there, the cellphone is not), then alternate look / examine desk 1 / use desklamp 1 for the remaining 48 steps; at most one drawer is ever opened; no rollout holds a cellphone.",
+     "source": "oracle",
+     "code_sha256": "796a166826347706"
+    }
+   ],
+   "families_rejected": [],
+   "mode": "oracle",
+   "process": "e6-oa-O1"
+  },
+  "97": {
+   "task": "97",
+   "arm": "O",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "outcome": "dropped",
+   "reason": "exhausted",
+   "n_search": 30,
+   "reference": {
+    "available": true,
+    "n_steps": 14,
+    "reference_id": "668481dd071db81b"
+   },
+   "designer_called": false,
+   "probe_rollouts": 20,
+   "category": "dead",
+   "guards": [
+    {
+     "family": "precondition_gating",
+     "ok": true,
+     "source": "oracle"
+    }
+   ],
+   "leverage_by_family": {
+    "precondition_gating": true
+   },
+   "dose_control": [
+    {
+     "family": "precondition_gating",
+     "status": "exhausted",
+     "lo": 0.0625,
+     "hi": 0.125,
+     "history": [
+      {
+       "d": 1.0,
+       "s": 4,
+       "n": 4,
+       "verdict": "too_easy"
+      },
+      {
+       "d": 0.5,
+       "s": 4,
+       "n": 4,
+       "verdict": "too_easy"
+      },
+      {
+       "d": 0.25,
+       "s": 4,
+       "n": 4,
+       "verdict": "too_easy"
+      },
+      {
+       "d": 0.125,
+       "s": 4,
+       "n": 4,
+       "verdict": "too_easy"
+      },
+      {
+       "d": 0.0625,
+       "s": 0,
+       "n": 4,
+       "verdict": "too_hard"
+      }
+     ]
+    }
+   ],
+   "leverage": true,
+   "cls": "leveraged_unresolved",
+   "resolution": {
+    "precondition_gating": {
+     "probes": 5,
+     "dead": true,
+     "easy": true,
+     "in_band": false,
+     "intermediate_probes": 0,
+     "regimes": [
+      "too_easy",
+      "too_hard"
+     ]
+    }
+   },
+   "intermediate_regime": false,
+   "families": [
+    {
+     "name": "precondition_gating",
+     "axis": "A",
+     "mechanism": "class P: The policy skips the required state change ('clean'); support = rejecting the placing action while the held potato has not been cleaned, with the missing step as the reason.",
+     "why": "All 10 failures take potato 1 from the fridge by step 4 and move it to the garbagecan by step 6 without cleaning it; 9 of 10 then loop take / move / inventory / examine garbagecan for ~45 steps; 2 rollouts pass the sinkbasin without using it; no rollout issues 'clean potato'.",
+     "source": "oracle",
+     "code_sha256": "dc89dcd9b1f4dc2e"
+    }
+   ],
+   "families_rejected": [],
+   "mode": "oracle",
+   "process": "e6-oa-O1"
+  },
+  "99": {
+   "task": "99",
+   "arm": "O",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "outcome": "accepted",
+   "reason": "",
+   "n_search": 22,
+   "reference": {
+    "available": true,
+    "n_steps": 6,
+    "reference_id": "035e5edc4496bd6c"
+   },
+   "designer_called": false,
+   "probe_rollouts": 12,
+   "category": "accepted",
+   "accepted": {
+    "id": "99:precondition_gating:0.5",
+    "family": "precondition_gating",
+    "d": 0.5,
+    "p_hat": 0.625
+   },
+   "guards": [
+    {
+     "family": "precondition_gating",
+     "ok": true,
+     "source": "oracle"
+    }
+   ],
+   "leverage_by_family": {
+    "precondition_gating": true
+   },
+   "dose_control": [
+    {
+     "family": "precondition_gating",
+     "status": "accepted",
+     "lo": 0.0,
+     "hi": 1.0,
+     "history": [
+      {
+       "d": 1.0,
+       "s": 4,
+       "n": 4,
+       "verdict": "too_easy"
+      },
+      {
+       "d": 0.5,
+       "s": 5,
+       "n": 8,
+       "verdict": "in_band"
+      }
+     ]
+    }
+   ],
+   "leverage": true,
+   "cls": "k16_confirmed_learnable",
+   "resolution": {
+    "precondition_gating": {
+     "probes": 2,
+     "dead": false,
+     "easy": true,
+     "in_band": true,
+     "intermediate_probes": 1,
+     "regimes": [
+      "in_band",
+      "too_easy"
+     ]
+    }
+   },
+   "intermediate_regime": true,
+   "families": [
+    {
+     "name": "precondition_gating",
+     "axis": "A",
+     "mechanism": "class P: Same as task 92: the completing action is issued without the object in hand and the policy then idles; support = rejecting 'use desklamp' while no pillow is in hand, with the precondition as the reason.",
+     "why": "All 10 failures visit desk 1, desk 2, shelf 1, shelf 2, 'use desklamp 1' at step 7 and then 'look' 14-39 times in a row (a few re-visit shelf 3 and use the lamp again); bed 1, the only receptacle with a pillow, is never visited; no rollout holds a pillow.",
+     "source": "oracle",
+     "code_sha256": "d5a0e8fd494405f0"
+    }
+   ],
+   "families_rejected": [],
+   "mode": "oracle",
+   "process": "e6-oa-O2",
+   "confirm": {
+    "task": "99",
+    "successes": 6,
+    "n": 16,
+    "errors": 0,
+    "p16": 0.375,
+    "learnable": true,
+    "arm": "O2",
+    "t": null,
+    "in_band_l": true,
+    "in_band_t": false
+   }
+  },
+  "107": {
+   "task": "107",
+   "arm": "O",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "outcome": "dropped",
+   "reason": "exhausted",
+   "n_search": 30,
+   "reference": {
+    "available": true,
+    "n_steps": 8,
+    "reference_id": "21384dd67635b33d"
+   },
+   "designer_called": false,
+   "probe_rollouts": 20,
+   "category": "dead",
+   "guards": [
+    {
+     "family": "precondition_gating",
+     "ok": true,
+     "source": "oracle"
+    }
+   ],
+   "leverage_by_family": {
+    "precondition_gating": true
+   },
+   "dose_control": [
+    {
+     "family": "precondition_gating",
+     "status": "exhausted",
+     "lo": 0.9375,
+     "hi": 1.0,
+     "history": [
+      {
+       "d": 1.0,
+       "s": 4,
+       "n": 4,
+       "verdict": "too_easy"
+      },
+      {
+       "d": 0.5,
+       "s": 0,
+       "n": 4,
+       "verdict": "too_hard"
+      },
+      {
+       "d": 0.75,
+       "s": 0,
+       "n": 4,
+       "verdict": "too_hard"
+      },
+      {
+       "d": 0.875,
+       "s": 0,
+       "n": 4,
+       "verdict": "too_hard"
+      },
+      {
+       "d": 0.9375,
+       "s": 0,
+       "n": 4,
+       "verdict": "too_hard"
+      }
+     ]
+    }
+   ],
+   "leverage": true,
+   "cls": "leveraged_unresolved",
+   "resolution": {
+    "precondition_gating": {
+     "probes": 5,
+     "dead": true,
+     "easy": true,
+     "in_band": false,
+     "intermediate_probes": 0,
+     "regimes": [
+      "too_easy",
+      "too_hard"
+     ]
+    }
+   },
+   "intermediate_regime": false,
+   "families": [
+    {
+     "name": "precondition_gating",
+     "axis": "A",
+     "mechanism": "class P: Same as tasks 92 / 99: premature completing action, then idling; support = rejecting 'use desklamp' while no newspaper is in hand, with the precondition as the reason.",
+     "why": "All 10 failures go to sidetable 1 (the desklamp's sidetable) at step 1, use the desklamp by step 2-12 and then alternate examine sidetable 1 / look / use desklamp 1 for the rest of the episode; sidetables 2-5 are never visited; no rollout holds a newspaper.",
+     "source": "oracle",
+     "code_sha256": "3cd952c0a4cf71c4"
+    }
+   ],
+   "families_rejected": [],
+   "mode": "oracle",
+   "process": "e6-oa-O2"
+  },
+  "109": {
+   "task": "109",
+   "arm": "O",
+   "regime": "zero",
+   "p_hat": 0.0,
+   "n_est": 10,
+   "outcome": "dropped",
+   "reason": "no_leverage",
+   "n_search": 14,
+   "reference": {
+    "available": true,
+    "n_steps": 7,
+    "reference_id": "7448258a444bff1b"
+   },
+   "designer_called": false,
+   "probe_rollouts": 4,
+   "category": "dead",
+   "guards": [
+    {
+     "family": "explored_receptacle_pruning",
+     "ok": true,
+     "source": "oracle"
+    }
+   ],
+   "leverage_by_family": {
+    "explored_receptacle_pruning": false
+   },
+   "no_leverage_families": [
+    "explored_receptacle_pruning"
+   ],
+   "d1_measurements": [
+    {
+     "family": "explored_receptacle_pruning",
+     "d": 1.0,
+     "s": 0,
+     "n": 4,
+     "verdict": "too_hard"
+    }
+   ],
+   "leverage": false,
+   "cls": "no_leverage",
+   "resolution": {
+    "explored_receptacle_pruning": {
+     "probes": 1,
+     "dead": true,
+     "easy": false,
+     "in_band": false,
+     "intermediate_probes": 0,
+     "regimes": [
+      "too_hard"
+     ]
+    }
+   },
+   "intermediate_regime": false,
+   "families": [
+    {
+     "name": "explored_receptacle_pruning",
+     "axis": "O",
+     "mechanism": "class S: Exploration memory (as task 85): the policy fixates on the appliance named by the transformation ('cool' -> fridge) and re-inspects it; support = removing already-inspected, lettuce-free receptacles from the navigation choices while no lettuce is in hand (the fridge returns once the lettuce is held).",
+     "why": "All 10 failures open the fridge at step 2 and then alternate fridge / cabinet N / examine fridge for 50 steps (the fridge is re-visited 15-25 times per rollout); sinkbasin 1, the surface holding the lettuce, is reached by one rollout (F2, step 46), which takes and cools the lettuce and runs out of steps.",
+     "source": "oracle",
+     "code_sha256": "c685b2d9c4506195"
+    }
+   ],
+   "families_rejected": [],
+   "mode": "oracle",
+   "process": "e6-oa-O2"
+  }
+ },
+ "gates": {
+  "O1_method_version_runtime": true,
+  "O1_manifest_oracle": true,
+  "O1_shared_estimate_identical": true,
+  "O1_shared_reference_identical": true,
+  "O1_no_designer_call": true,
+  "O1_one_family_per_task": true,
+  "O1_family_sha_frozen": true,
+  "O1_search_le_cap": true,
+  "O1_no_fallback": true,
+  "O1_first_probe_is_d1": true,
+  "O1_no_axis_bypass": true,
+  "O1_no_setup_prefix": true,
+  "O1_reference_only_on_zero": true,
+  "O1_reference_leakage": true,
+  "O1_audit": {
+   "tasks": {
+    "85": {
+     "available": true,
+     "reason": "pass",
+     "reference_id": "dfd8a9f55d7edf28",
+     "provenance_intact": true,
+     "designer_record": false,
+     "reference_cuts": [],
+     "reference_steps": 15,
+     "prefixes_by_provenance": {
+      "failure": 0,
+      "reference": 0
+     },
+     "independent_overlap": 0,
+     "leaks": []
+    },
+    "86": {
+     "available": true,
+     "reason": "pass",
+     "reference_id": "ee9795388eadfd8f",
+     "provenance_intact": true,
+     "designer_record": false,
+     "reference_cuts": [],
+     "reference_steps": 48,
+     "prefixes_by_provenance": {
+      "failure": 0,
+      "reference": 0
+     },
+     "independent_overlap": 0,
+     "leaks": []
+    },
+    "92": {
+     "available": true,
+     "reason": "pass",
+     "reference_id": "f262be947e751751",
+     "provenance_intact": true,
+     "designer_record": false,
+     "reference_cuts": [],
+     "reference_steps": 48,
+     "prefixes_by_provenance": {
+      "failure": 0,
+      "reference": 0
+     },
+     "independent_overlap": 0,
+     "leaks": []
+    },
+    "97": {
+     "available": true,
+     "reason": "pass",
+     "reference_id": "668481dd071db81b",
+     "provenance_intact": true,
+     "designer_record": false,
+     "reference_cuts": [],
+     "reference_steps": 14,
+     "prefixes_by_provenance": {
+      "failure": 0,
+      "reference": 0
+     },
+     "independent_overlap": 0,
+     "leaks": []
+    }
+   },
+   "ok": true,
+   "expert_recomputed": false
+  },
+  "O2_method_version_runtime": true,
+  "O2_manifest_oracle": true,
+  "O2_shared_estimate_identical": true,
+  "O2_shared_reference_identical": true,
+  "O2_no_designer_call": true,
+  "O2_one_family_per_task": true,
+  "O2_family_sha_frozen": true,
+  "O2_search_le_cap": true,
+  "O2_no_fallback": true,
+  "O2_first_probe_is_d1": true,
+  "O2_no_axis_bypass": true,
+  "O2_no_setup_prefix": true,
+  "O2_reference_only_on_zero": true,
+  "O2_reference_leakage": true,
+  "O2_audit": {
+   "tasks": {
+    "99": {
+     "available": true,
+     "reason": "pass",
+     "reference_id": "035e5edc4496bd6c",
+     "provenance_intact": true,
+     "designer_record": false,
+     "reference_cuts": [],
+     "reference_steps": 6,
+     "prefixes_by_provenance": {
+      "failure": 0,
+      "reference": 0
+     },
+     "independent_overlap": 0,
+     "leaks": []
+    },
+    "107": {
+     "available": true,
+     "reason": "pass",
+     "reference_id": "21384dd67635b33d",
+     "provenance_intact": true,
+     "designer_record": false,
+     "reference_cuts": [],
+     "reference_steps": 8,
+     "prefixes_by_provenance": {
+      "failure": 0,
+      "reference": 0
+     },
+     "independent_overlap": 0,
+     "leaks": []
+    },
+    "109": {
+     "available": true,
+     "reason": "pass",
+     "reference_id": "7448258a444bff1b",
+     "provenance_intact": true,
+     "designer_record": false,
+     "reference_cuts": [],
+     "reference_steps": 7,
+     "prefixes_by_provenance": {
+      "failure": 0,
+      "reference": 0
+     },
+     "independent_overlap": 0,
+     "leaks": []
+    }
+   },
+   "ok": true,
+   "expert_recomputed": false
+  },
+  "every_task_has_a_row": true,
+  "method_unmodified": true,
+  "all_pass": true
+ },
+ "counts": {
+  "reference_unavailable": 0,
+  "no_leverage": 4,
+  "leveraged_unresolved": 2,
+  "search_accepted_k16_failed": 0,
+  "k16_confirmed_learnable": 1,
+  "k16_confirmed_target": 0,
+  "search_accepted": 1,
+  "k16_learnable": 1,
+  "k16_target": 0,
+  "leverage": 3,
+  "leverage_to_accept": 0.3333333333333333,
+  "leverage_to_k16": 0.3333333333333333,
+  "budget": 0,
+  "probe_rollouts": 68,
+  "valid_families": 7,
+  "rejected_families": 0,
+  "valid_family_rate": 1.0,
+  "solvable_rate": 1.0,
+  "d1_leverage_rate": 0.42857142857142855,
+  "dose_order_violation": 0,
+  "no_valid_proposal": 0,
+  "uncertified": 0,
+  "exhausted": 2,
+  "intermediate_regime_tasks": 1,
+  "available": 7,
+  "unique_doses": {
+   "85": [
+    1.0
+   ],
+   "86": [
+    1.0
+   ],
+   "92": [
+    1.0
+   ],
+   "97": [
+    0.0625,
+    0.125,
+    0.25,
+    0.5,
+    1.0
+   ],
+   "99": [
+    0.5,
+    1.0
+   ],
+   "107": [
+    0.5,
+    0.75,
+    0.875,
+    0.9375,
+    1.0
+   ],
+   "109": [
+    1.0
+   ]
+  },
+  "d1_leverage_tasks": 3
+ },
+ "decision": {
+  "n_tasks": 7,
+  "available": 7,
+  "d1_leverage": 3,
+  "k16_learnable": 1,
+  "k16_target": 0,
+  "search_accepted": 1,
+  "decision": "ASSISTIVE_RULES_ACTUATOR_NOT_SUPPORTED"
+ },
+ "decomposition": [
+  {
+   "task": "85",
+   "generated": {
+    "valid": false,
+    "leverage": false,
+    "accepted": false,
+    "k16": false,
+    "cls": "no_leverage"
+   },
+   "oracle": {
+    "available": true,
+    "leverage": false,
+    "accepted": false,
+    "k16": false,
+    "cls": "no_leverage"
+   },
+   "interpretation": "both generated and oracle have no leverage"
+  },
+  {
+   "task": "86",
+   "generated": {
+    "valid": true,
+    "leverage": false,
+    "accepted": false,
+    "k16": false,
+    "cls": "no_leverage"
+   },
+   "oracle": {
+    "available": true,
+    "leverage": false,
+    "accepted": false,
+    "k16": false,
+    "cls": "no_leverage"
+   },
+   "interpretation": "both generated and oracle have no leverage"
+  },
+  {
+   "task": "92",
+   "generated": {
+    "valid": true,
+    "leverage": true,
+    "accepted": true,
+    "k16": false,
+    "cls": "search_accepted_k16_failed"
+   },
+   "oracle": {
+    "available": true,
+    "leverage": false,
+    "accepted": false,
+    "k16": false,
+    "cls": "no_leverage"
+   },
+   "interpretation": "oracle has no leverage (generated had)"
+  },
+  {
+   "task": "97",
+   "generated": {
+    "valid": true,
+    "leverage": true,
+    "accepted": false,
+    "k16": false,
+    "cls": "leveraged_unresolved"
+   },
+   "oracle": {
+    "available": true,
+    "leverage": true,
+    "accepted": false,
+    "k16": false,
+    "cls": "leveraged_unresolved"
+   },
+   "interpretation": "oracle has leverage but controller cannot land"
+  },
+  {
+   "task": "99",
+   "generated": {
+    "valid": false,
+    "leverage": false,
+    "accepted": false,
+    "k16": false,
+    "cls": "no_leverage"
+   },
+   "oracle": {
+    "available": true,
+    "leverage": true,
+    "accepted": true,
+    "k16": true,
+    "cls": "k16_confirmed_learnable"
+   },
+   "interpretation": "oracle successfully delivers useful environment (generated did not)"
+  },
+  {
+   "task": "107",
+   "generated": {
+    "valid": true,
+    "leverage": true,
+    "accepted": false,
+    "k16": false,
+    "cls": "leveraged_unresolved"
+   },
+   "oracle": {
+    "available": true,
+    "leverage": true,
+    "accepted": false,
+    "k16": false,
+    "cls": "leveraged_unresolved"
+   },
+   "interpretation": "oracle has leverage but controller cannot land"
+  },
+  {
+   "task": "109",
+   "generated": {
+    "valid": false,
+    "leverage": false,
+    "accepted": false,
+    "k16": false,
+    "cls": "no_leverage"
+   },
+   "oracle": {
+    "available": true,
+    "leverage": false,
+    "accepted": false,
+    "k16": false,
+    "cls": "no_leverage"
+   },
+   "interpretation": "both generated and oracle have no leverage"
+  }
+ ],
+ "spend": {
+  "e6-oa-O1": 2.06,
+  "e6-oa-O2": 2.07,
+  "e6-oa-confirm": 0.52,
+  "e6-oa-offline": 0
+ },
+ "phase34": {
+  "A": {
+   "reference_unavailable": 1,
+   "no_leverage": 0,
+   "leveraged_unresolved": 6,
+   "search_accepted_k16_failed": 1,
+   "k16_confirmed_learnable": 0,
+   "k16_confirmed_target": 0,
+   "search_accepted": 1,
+   "k16_learnable": 0,
+   "k16_target": 0,
+   "leverage": 7,
+   "leverage_to_accept": 0.14285714285714285,
+   "leverage_to_k16": 0.0,
+   "budget": 3,
+   "probe_rollouts": 136,
+   "resolution_limited": 3,
+   "final_gaps": {
+    "99": [
+     2,
+     3
+    ],
+    "107": [
+     4,
+     5
+    ],
+    "109": [
+     1,
+     2
+    ]
+   },
+   "intermediate_regime_tasks": 6
+  },
+  "B": {
+   "reference_unavailable": 1,
+   "no_leverage": 4,
+   "leveraged_unresolved": 2,
+   "search_accepted_k16_failed": 1,
+   "k16_confirmed_learnable": 0,
+   "k16_confirmed_target": 0,
+   "search_accepted": 1,
+   "k16_learnable": 0,
+   "k16_target": 0,
+   "leverage": 3,
+   "leverage_to_accept": 0.3333333333333333,
+   "leverage_to_k16": 0.0,
+   "budget": 1,
+   "probe_rollouts": 44,
+   "valid_families": 7,
+   "rejected_families": 4,
+   "valid_family_rate": 0.6363636363636364,
+   "solvable_rate": 1.0,
+   "d1_leverage_rate": 0.4,
+   "dose_order_violation": 0,
+   "no_valid_proposal": 3,
+   "uncertified": 0,
+   "exhausted": 0,
+   "intermediate_regime_tasks": 3
+  },
+  "decision": "RULE_GENERATION_FAILURE"
+ }
+}

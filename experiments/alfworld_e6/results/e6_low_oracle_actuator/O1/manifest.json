@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "run_id": "e6-oa-O1",
+  "created_at": "2026-09-15T06:29:24.907416Z",
+  "seed": 0,
+  "config_sha256": "e2bdb451edfecc2b846bda25e94ad4b461a79ce243fe336f4311436cc662f67d",
+  "config_schema_version": 1,
+  "aea_config_sha256": "99f9a649255dc13da64f61367ecdb824871c360ff181f112986712dd669c484a",
+  "config_path": null,
+  "git_sha": "c2e2284fef7b317945f0bf0a2594d28dd6f23849",
+  "git_dirty": false,
+  "envharness_sha": "c2e2284fef7b317945f0bf0a2594d28dd6f23849",
+  "aea_version": "0.1.0",
+  "python_version": "3.12.9",
+  "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+  "out_dir": "/home/kree/work/EnvJudge-aea-llm/runs/e6-oa-O1",
+  "extra": {
+    "experiment": "oracle_actuator_ceiling",
+    "prereg": "experiments/alfworld_e6/PREREG_LOW_ORACLE_ACTUATOR.md",
+    "prereg_sha": "978e2ac",
+    "method_sha": "23e87aa",
+    "src_aea_tree": "2204da1cde5d7202+DIRTY",
+    "src_aea_unmodified_vs_method_sha": true,
+    "method_version": "llm_v1_assistive_rules",
+    "aea_config": {
+      "schema_version": 4,
+      "method_version": "llm_v1_assistive_rules",
+      "band_t": [
+        0.4,
+        0.6
+      ],
+      "band_l": [
+        0.2,
+        0.8
+      ],
+      "k": 16,
+      "accept": [
+        3,
+        5
+      ],
+      "probe": [
+        4,
+        8
+      ],
+      "cap": 30,
+      "impl": {
+        "batch_first": 4,
+        "batch_next": 2,
+        "confidence": 0.9,
+        "max_bisections": 4,
+        "order_tolerance": 0.375,
+        "warm_start_min_history": 3,
+        "proposer_cap": 2,
+        "n_failed_rollouts": 3,
+        "max_candidates": 6,
+        "stage_budget": 100,
+        "oracle_attempts": 3,
+        "oracle_max_steps": 50,
+        "policy_max_steps": 50
+      }
+    },
+    "tasks": [
+      85,
+      86,
+      92,
+      97,
+      99,
+      107,
+      109
+    ],
+    "cap_usd": 30.0,
+    "policy_endpoint_pin": "alibaba",
+    "arm": "O1",
+    "stage": "arms",
+    "shared_run": "e6-ar-shared",
+    "oracle_actuators_sha256_16": {
+      "85": "e5534269381e3916",
+      "86": "70992eda167f2199",
+      "92": "796a166826347706",
+      "97": "dc89dcd9b1f4dc2e",
+      "99": "d5a0e8fd494405f0",
+      "107": "3cd952c0a4cf71c4",
+      "109": "c685b2d9c4506195"
+    },
+    "shared_evidence_sha256_16": {
+      "shared.jsonl": "db9b24199a639a05",
+      "traces.jsonl": "0f64825dc44b7127",
+      "privileged_references.jsonl": "956ea3c52337544f"
+    },
+    "actuator_freeze_commit": "23e87aa",
+    "prereg_commit": "978e2ac"
+  }
+}

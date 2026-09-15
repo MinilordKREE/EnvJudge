@@ -1,0 +1,14 @@
+{
+ "O2:99:precondition_gating:0.5": {
+  "task": "99",
+  "successes": 6,
+  "n": 16,
+  "errors": 0,
+  "p16": 0.375,
+  "learnable": true,
+  "arm": "O2",
+  "t": null,
+  "in_band_l": true,
+  "in_band_t": false
+ }
+}

@@ -1,0 +1,3 @@
+task_id,budget,phase,n,refunded
+109,search,dose:explored_receptacle_pruning,4,0
+109,search,estimate,10,0

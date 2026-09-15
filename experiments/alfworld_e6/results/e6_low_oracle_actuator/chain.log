@@ -1,0 +1,15 @@
+probe start 2026-09-15T06:29:19Z
+PROBE_OK provider=Alibaba
+probe exit 0 2026-09-15T06:29:23Z
+arms start 2026-09-15T06:29:23Z
+arms exit O1=0 O2=0 2026-09-15T06:50:34Z
+confirm start 2026-09-15T06:50:34Z
+{"spend_check": "confirm", "usd": 4.13, "ts": "2026-09-15T06:50:36Z"}
+{"spend_check": "confirm O2:99:precondition_gating:0.5", "usd": 4.13, "ts": "2026-09-15T06:50:36Z"}
+{"confirm": "O2:99:precondition_gating:0.5", "task": "99", "successes": 6, "n": 16, "errors": 0, "p16": 0.375, "learnable": true}
+{"stage": "confirm", "envs": 1, "usd": 0.52}
+confirm exit 0 2026-09-15T06:53:17Z
+{"decision": {"n_tasks": 7, "available": 7, "d1_leverage": 3, "k16_learnable": 0, "k16_target": 0, "search_accepted": 1, "decision": "ASSISTIVE_RULES_ACTUATOR_NOT_SUPPORTED"}, "counts": {"available": 7, "search_accepted": 1, "k16_learnable": 0, "k16_target": 0, "leverage": 3, "d1_leverage_tasks": 3, "probe_rollouts": 68}}
+tables exit 0 2026-09-15T06:53:19Z
+{"usd": 4.65, "cap": 30.0, "by_run": {"e6-oa-O1": 2.06, "e6-oa-O2": 2.07, "e6-oa-confirm": 0.52, "e6-oa-offline": 0}, "ts": "2026-09-15T06:53:21Z"}
+E6 oracle actuator done 2026-09-15T06:53:22Z
