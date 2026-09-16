@@ -1,0 +1,313 @@
+#!/usr/bin/env python3
+"""Independent prompt-3 final Phase-A audit. Reads only; output contains metadata.
+
+Prepared without execution against absent results. Uses the launcher only to bind
+read-only paths and verify preserved carryover/copied inputs. No run_stage calls."""
+from __future__ import annotations
+
+import collections
+from decimal import Decimal
+import subprocess
+import hashlib
+import json
+import math
+import os
+from pathlib import Path
+import sys
+import time
+
+os.environ['LITELLM_LOCAL_MODEL_COST_MAP'] = 'True'
+os.environ['PYTHONDONTWRITEBYTECODE'] = '1'
+os.environ['GIT_OPTIONAL_LOCKS'] = '0'
+ROOT = Path('/home/kree/work/EnvJudge-aea-llm')
+sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / 'src'))
+import scripts.e6_iterative_low_llm_judge as d
+import scripts.e6_iterative_low_llm_judge_prompt3 as launcher
+from aea.core.hashing import sha256_of
+from aea.llm.client import build_wire_request
+from aea.llm.pricing import load_pricing
+from aea.llm.types import Attribution, ChatMessage, ChatRequest
+from aea.privilege_judge import (JudgeConfig, JudgeRecord, JUDGE_PROMPT, JUDGE_TOOL_NAME,
+                                PrivilegeDecision, PrivilegeJudgeInput, canonical_json, judge_tool)
+
+
+
+def run_final_audit():
+    OUT = Path('/tmp/llm_judge_prompt3_phase_a_final_audit.json')
+    V = d.VALIDATION
+    VALIDATION_LIMIT = float(launcher.VALIDATION_REMAINING_USD)
+    OLD_PRIVATE = ROOT / 'runs/e6-iterative-low-llm-judge-prompt2/private'
+    OLD_COMMIT = "cf3273cad9f5b6283dc0e8381a072dffc07b53de"
+    checks = {}
+
+
+    def check(name, condition):
+        checks[name] = bool(condition)
+
+
+    def sha(data):
+        return hashlib.sha256(data).hexdigest()
+
+
+    def read_json(path):
+        return json.loads(path.read_bytes())
+
+
+    def rows(path):
+        return [json.loads(line) for line in path.read_bytes().splitlines() if line.strip()] if path.exists() else []
+
+
+    def close(a, b):
+        return math.isfinite(a) and math.isfinite(b) and math.isclose(a, b, rel_tol=0, abs_tol=1e-9)
+
+
+    def inventory():
+        return {str(p.relative_to(ROOT)): sha(p.read_bytes()) for p in V.rglob('*')
+                if p.is_file() and 'raw_probes' not in p.relative_to(V).parts}
+
+
+    carryover = launcher.verify_carryover()
+    launcher.verify_copied_inputs()
+    old_baseline = read_json(d.FROZEN / 'preservation_baseline.json')
+    check('preservation_baseline_frozen_hash', sha((d.FROZEN/'preservation_baseline.json').read_bytes()) ==
+          'fd9f9d0131c43cc22cf265a9bf63c8b2c9abc3994f35320a220991330415154b')
+    check('preservation_baseline_commit', old_baseline['baseline_commit'] == OLD_COMMIT)
+    old_inventory = old_baseline['private_inventory']
+    old_report_hashes = {}
+    for path,record in old_baseline['tracked_historical_artifacts'].items():
+        payload = (ROOT/path).read_bytes()
+        check('old_tracked_preserved_'+path, sha(payload) == record['sha256'])
+        old_report_hashes[path] = sha(payload)
+    check('all64_tracked_historical_artifacts', len(old_report_hashes) == 64)
+    check('old_private145_snapshot_binding', len(old_inventory) == 145 and
+          sha(canonical_json(old_inventory).encode()) == old_baseline['private_inventory_sha256'])
+    check('old_private145_files_preserved_before_audit', all((ROOT/path).is_file() and sha((ROOT/path).read_bytes()) == info['sha256']
+          for path,info in old_inventory.items()))
+    check('old_tmp_auditor_sources_preserved', all(Path(path).is_file() and sha(Path(path).read_bytes()) == expected
+          for path,expected in old_baseline['old_tmp_auditor_hashes'].items()))
+    old_requests = rows(OLD_PRIVATE/'validation/judge_requests/requests.jsonl')
+    old_full = rows(OLD_PRIVATE/'validation/judgments.jsonl')
+    check('old21_request_and_judgment_rows', len(old_requests) == len(old_full) == 21)
+    check('exact_remaining_and_combined_budgets', launcher.PRIOR_COMMITTED_USD == Decimal('0.72355888')
+          and launcher.VALIDATION_REMAINING_USD == Decimal('2.27644112')
+          and d.STAGE_LIMITS == {'validation':2.27644112,'engineering':17.0}
+          and launcher.PRIOR_COMMITTED_USD+launcher.VALIDATION_REMAINING_USD+Decimal('17') == Decimal('20'))
+    start_files = inventory()
+    cases = d.verify_validation_inputs()
+    check('exact_old21_case_rows_preserved', cases == read_json(launcher.OLD_FROZEN/'validation_manifest.json')['cases'])
+    config = JudgeConfig()
+    pricing = load_pricing(ROOT / 'configs/privilege_judge_pricing.yaml')
+    result = read_json(V / 'result.json')
+    freeze = result['freeze']
+    # Post-run metadata reports may legitimately be newly untracked under FROZEN.
+    # Verify the actual immutable startup bindings, not a pre-dispatch clean-tree
+    # predicate that also rejects these new report files.
+    source_manifest = read_json(d.FROZEN / 'source_manifest.json')
+    check('recorded_source_runtime_freeze_matches_current', d.source_hashes() == source_manifest['source_hashes'])
+    for name, expected in freeze['input_hashes'].items():
+        path = d.FROZEN / name
+        committed = d.git('show', f"{freeze['prereg_commit']}:{path.relative_to(ROOT)}")
+        check('recorded_frozen_artifact_' + name, d.digest(path.read_text()) == expected
+              and path.read_text().strip() == committed.strip())
+    check('recorded_prereg_hash', d.digest(d.VALIDATION_PREREG.read_text()) == freeze['prereg_sha256'])
+    d.git('merge-base', '--is-ancestor', freeze['prereg_commit'], 'origin/aea-llm-vnext')
+    check('recorded_prereg_was_published', True)
+    full = rows(V / 'judgments.jsonl')
+    requests = rows(V / 'judge_requests/requests.jsonl')
+    responses = rows(V / 'judge_requests/responses.jsonl')
+    ledger = rows(V / 'ledger.judge.jsonl')
+    attempts = rows(V / 'cap.attempts.jsonl')
+    denials = rows(V / 'cap.denials.jsonl')
+    cap = read_json(V / 'cap.json')
+    calls = [r for r in ledger if r['event'] == 'call']
+    check('all21_result_full_request_response_call_rows', all(len(x) == 21 for x in (cases, result['outcomes'], full, requests, responses, calls)))
+    check('ordered_cases_exact', [r['case_id'] for r in full] == [r['case_id'] for r in cases])
+    check('result_freeze_exact', result['freeze'] == freeze)
+    case_reports = []
+    request_models = []
+    reserved_bounds = []
+    for index, (case, row, compact, raw_request, raw_response, call) in enumerate(zip(cases, full, result['outcomes'], requests, responses, calls, strict=True), 1):
+        key = f'case{index:02}'
+        record = JudgeRecord.model_validate(row['result'])
+        source_file = d.private_input_path(case)
+        evidence = PrivilegeJudgeInput.model_validate_json(source_file.read_text())
+        payload = canonical_json(evidence.model_dump(mode='json'))
+        expected_request = ChatRequest(model=config.model, temperature=config.temperature, seed=config.seed,
+                                      max_tokens=config.max_tokens, thinking=config.thinking,
+                                      attribution=Attribution(phase='judge_validation', budget='none', arm=d.ARM, task_id=str(case['task_id'])),
+                                      messages=(ChatMessage(role='system', content=JUDGE_PROMPT), ChatMessage(role='user', content=payload)),
+                                      tools=(judge_tool(),), tool_choice={'type': 'function', 'function': {'name': JUDGE_TOOL_NAME}})
+        request_models.append(expected_request)
+        paired_old = old_requests[index-1]
+        restored = expected_request.model_dump(mode='json')
+        restored['messages'][0]['content'] = paired_old['messages'][0]['content']
+        check(key+'_paired_request_only_system_prompt_differs', restored == paired_old and
+              expected_request.messages[0].content != paired_old['messages'][0]['content'])
+        old_request_model = ChatRequest.model_validate(paired_old)
+        old_wire = build_wire_request(old_request_model,config.llm_config())
+        changed_wire = build_wire_request(expected_request,config.llm_config())
+        changed_wire['messages'][0]['content'] = old_wire['messages'][0]['content']
+        check(key+'_paired_wire_only_system_prompt_differs', changed_wire == old_wire)
+        check(key+'_paired_input_source_settings_same', record.source_sha256 == old_full[index-1]['result']['source_sha256']
+              and record.input_sha256 == old_full[index-1]['result']['input_sha256']
+              and record.schema_sha256 == old_full[index-1]['result']['schema_sha256']
+              and record.config_sha256 == old_full[index-1]['result']['config_sha256'])
+        check(key+'_exact_frozen_request', record.request == expected_request and raw_request == expected_request.model_dump(mode='json'))
+        check(key+'_response_equal', record.response is not None and raw_response == record.response.model_dump(mode='json'))
+        check(key+'_source_input_bindings', record.source_sha256 == case['source_sha256'] == d.digest(evidence.candidate_artifact)
+              and record.input_sha256 == d.digest(payload) and sha(source_file.read_bytes()) == case['input_file_sha256'])
+        check(key+'_prompt_schema_config_bindings', record.prompt_sha256 == d.digest(JUDGE_PROMPT)
+              and record.schema_sha256 == d.digest(canonical_json(judge_tool()))
+              and record.config_sha256 == d.digest(canonical_json({'judge': config.model_dump(mode='json'), 'client': config.llm_config().model_dump(mode='json')})))
+        expected_request_hash = sha256_of({'provider': config.provider, 'request': expected_request.model_dump()})
+        check(key+'_request_response_hashes', record.request_sha256 == record.response.request_sha256 == expected_request_hash
+              and record.response_sha256 == sha256_of(record.response.model_dump()))
+        check(key+'_reported_model_provider', record.response.model in config.accepted_response_models
+              and record.response.provider in (None, 'deepseek', 'DeepSeek'))
+        check(key+'_full_compact_exact', row['full_judge_record_sha256'] == d.digest(row['result'])
+              and compact == {**row, 'result': {k:v for k,v in row['result'].items() if k not in ('request','response')}})
+        check(key+'_role_label_exact', row['case_id'] == case['case_id'] and row['role'] == case['role'] and row['expected_verdict'] == case['expected_verdict'])
+        tool_valid = False
+        try:
+            tool = record.response.tool_calls[0]
+            parsed = PrivilegeDecision.model_validate(tool.arguments)
+            tool_valid = (record.response.finish_reason == 'tool_calls' and len(record.response.tool_calls) == 1
+                          and tool.name == JUDGE_TOOL_NAME and parsed == record.decision
+                          and not (parsed.verdict == 'PASS' and parsed.leak_type != 'NONE')
+                          and not (parsed.verdict == 'FAIL' and parsed.leak_type == 'NONE'))
+        except Exception:
+            pass
+        check(key+'_ledger_binding', call['request_sha256'] == expected_request_hash and call['phase'] == 'judge_validation'
+              and call['budget'] == 'none' and call['arm'] == d.ARM and call['task_id'] == str(case['task_id'])
+              and call['model'] == config.model and call['seed'] == 0
+              and call['prompt_tokens'] == record.response.usage.prompt_tokens and call['completion_tokens'] == record.response.usage.completion_tokens
+              and close(call['usd'], pricing.cost(config.model, record.response.usage, record.response.created_at).usd))
+        wire = build_wire_request(expected_request, config.llm_config())
+        reserve = ((len(json.dumps(wire, ensure_ascii=False).encode()) + 4096) * d.RATES[config.model][0]
+                   + config.max_tokens * d.RATES[config.model][1]) / 1_000_000
+        reserved_bounds.append(reserve)
+        op = read_json(V / 'operations' / f'judge-{index:02}.json')
+        check(key+'_operation_completed', op['status'] == 'completed' and op['metadata']['case'] == case and op['metadata']['freeze'] == freeze)
+        case_reports.append({'case_id': case['case_id'], 'role': case['role'], 'expected_verdict': case['expected_verdict'],
+                             'actual_verdict': record.verdict, 'leak_type': record.decision.leak_type,
+                             'leakage_score': record.decision.leakage_score, 'tool_schema_valid': tool_valid,
+                             'generated_uncertainty': record.generated_uncertainty is not None,
+                             'source_sha256': record.source_sha256, 'input_sha256': record.input_sha256,
+                             'request_sha256': record.request_sha256, 'response_sha256': record.response_sha256,
+                             'raw_record_sha256': d.digest(row['result'])})
+
+    check('exact21_unique_operation_files', sorted(p.name for p in (V/'operations').glob('*.json')) == [f'judge-{i:02}.json' for i in range(1,22)])
+    computed = d.validation_decision(cases, result['outcomes'], result.get('interruption'))
+    check('driver_result_recomputed', all(result[k] == value for k,value in computed.items()))
+    check('cap_matches_result', cap == result['cap'])
+    check('validation_cap_namespace', cap['stage'] == 'validation' and cap['limit_usd'] == VALIDATION_LIMIT and cap['cap_path'] == str((V/'cap.json').resolve()))
+
+    pending = {}; reserved = []; terminal = {}; running_actual = running_uncertain = 0.0
+    for index, event in enumerate(attempts):
+        eid = event['attempt']; status = event['status']; key = f'physical_event{index:03}'
+        check(key+'_attribution', event['stage'] == 'validation' and event['model'] == config.model and event['seed'] == 0
+              and event['attribution']['arm'] == d.ARM and event['attribution']['phase'] == 'judge_validation'
+              and event['attribution']['budget'] == 'none')
+        amount = event['reserved_usd']
+        check(key+'_finite_nonnegative', type(amount) in (int,float) and math.isfinite(amount) and amount >= 0)
+        if status == 'reserved':
+            check(key+'_fresh_attempt', eid not in pending and eid not in terminal)
+            check(key+'_reserve_before_dispatch_under_remaining_cap', running_actual + running_uncertain + sum(pending.values()) + amount < VALIDATION_LIMIT)
+            pending[eid] = amount; reserved.append(event)
+        else:
+            check(key+'_one_terminal_with_prior_reservation', eid in pending and eid not in terminal and close(pending.get(eid,-1),amount))
+            pending.pop(eid, None); terminal[eid] = event
+            if status == 'returned':
+                running_actual += event['conservative_usd']
+                check(key+'_returned_cost', type(event['input_tokens']) is int and type(event['output_tokens']) is int
+                      and event['input_tokens'] >= 0 and 0 <= event['output_tokens'] <= config.max_tokens
+                      and close(event['conservative_usd'], max(float(event.get('upstream_usd') or 0),
+                           (event['input_tokens']*d.RATES[config.model][0] + event['output_tokens']*d.RATES[config.model][1])/1_000_000))
+                      and event['conservative_usd'] <= amount + 1e-9)
+            elif status in ('ambiguous_failure','invalid_usage'):
+                running_uncertain += amount
+            else:
+                check(key+'_known_terminal_type', False)
+    check('physical_count_matches_cap', len(reserved) == cap['attempts'])
+    check('all_physical_attempts_closed', not pending and not cap['inflight'] and len(terminal) == len(reserved))
+    check('actual_and_uncertain_reconciled', close(running_actual,cap['actual_usd']) and close(running_uncertain,cap['uncertain_usd']))
+    check('no_accounting_flags_and_cap_remaining', not any(cap.get(k) for k in ('stopped','bound_violation','accounting_error')) and running_actual + running_uncertain < VALIDATION_LIMIT)
+    check('no_denials', not denials)
+    check('no_terminal_logical_failures', all(r['event'] in ('call','infra_retry') for r in ledger)
+          and all(t['status'] in ('returned','ambiguous_failure') for t in terminal.values()))
+    expected_attempts = sum(r['attempt'] for r in calls)
+    check('logical_retry_counts_reconcile_physical', expected_attempts == len(reserved)
+          and sum(r['event']=='infra_retry' for r in ledger) == expected_attempts-len(calls))
+    cursor = 0
+    for index,(call,expected,request) in enumerate(zip(calls,reserved_bounds,request_models,strict=True),1):
+        count = call['attempt']
+        check(f'logical_request{index:02}_attempt_count', type(count) is int and count >= 1)
+        group = reserved[cursor:cursor+count]
+        check(f'logical_request{index:02}_all_physical_bounds', len(group) == count and all(
+              close(event['reserved_usd'],expected) and event['attribution'] == request.attribution.model_dump(mode='json')
+              for event in group))
+        check(f'logical_request{index:02}_final_attempt_returned', bool(group) and terminal[group[-1]['attempt']]['status']=='returned')
+        cursor += count
+    check('all_physical_reservations_assigned_once', cursor == len(reserved))
+    check('ledger_total_below_conservative_total', sum(r['usd'] for r in calls) <= running_actual + 1e-9)
+    engineering_paid = [str(p.relative_to(ROOT)) for pattern in ('cap.json','cap.attempts.jsonl','ledger*.jsonl','operations/*.json','saved_replay.json','results.json') for p in d.RUN.glob(pattern)]
+    check('no_engineering_dispatch', not engineering_paid)
+    check('no_frozen_passing_validation_or_engineering_prereg', not (d.FROZEN/'validation_result.json').exists() and not d.PREREG.exists())
+    check('private_audit_inputs_stable_during_read', start_files == inventory())
+    check('old_private145_files_preserved_after_audit', all((ROOT/path).is_file() and sha((ROOT/path).read_bytes()) == info['sha256']
+          for path,info in old_inventory.items()))
+    new_committed = Decimal(str(cap['actual_usd'])) + Decimal(str(cap['uncertain_usd'])) + sum((Decimal(str(v)) for v in cap['inflight'].values()),Decimal(0))
+    combined_validation = launcher.PRIOR_COMMITTED_USD + new_committed
+    check('new_validation_committed_within_remaining_bound', new_committed <= launcher.VALIDATION_REMAINING_USD)
+    check('old_plus_new_validation_within3', combined_validation <= Decimal('3'))
+    check('old_plus_new_plus_engineering_allowance_within20', combined_validation+Decimal('17') <= Decimal('20'))
+    failures = [name for name, ok in checks.items() if not ok]
+    regressions = [r for r in case_reports if r['role']=='regression']
+    schema_count = sum(r['tool_schema_valid'] and not r['generated_uncertainty'] for r in case_reports)
+    acceptance = not failures and schema_count == 21 and computed['decision']=='JUDGE_GATE_READY'
+    report = {'schema': 'independent_prompt3_phase_a_audit_v1', 'integrity_status': 'PASS' if not failures else 'FAIL',
+              'gate_ready': acceptance, 'recorded_decision': result['decision'], 'checked_at_unix': time.time(),
+              'frozen': freeze, 'script_sha256': sha(Path(__file__).read_bytes()), 'check_count': len(checks),
+              'checks': checks, 'failures': failures, 'completed': len(case_reports), 'schema_valid_without_generated_uncertainty': schema_count,
+              'regression_matches': sum(r['expected_verdict']==r['actual_verdict'] for r in regressions),
+              'regression_count':len(regressions), 'repeats':computed['repeats'], 'mismatches':computed['mismatches'],
+              'case_metadata':case_reports, 'physical_attempts':len(reserved), 'ledger_calls':len(calls),
+              'ledger_events':dict(collections.Counter(r['event'] for r in ledger)), 'returned_ledger_usd':sum(r['usd'] for r in calls),
+              'conservative_actual_usd':running_actual, 'uncertain_usd':running_uncertain, 'inflight_count':len(pending),
+              'sum_all_reservations_usd':sum(r['reserved_usd'] for r in reserved), 'validation_limit_usd':VALIDATION_LIMIT,
+              'prior_validation_committed_usd':str(launcher.PRIOR_COMMITTED_USD),
+              'prior_validation_runs':carryover['prior_runs'],
+              'combined_validation_committed_usd':str(combined_validation),
+              'combined_with_engineering_allowance_usd':str(combined_validation+Decimal('17')),
+              'old_private_preservation_count':len(old_inventory), 'old_tracked_report_hashes':old_report_hashes,
+              'old_preservation_baseline_sha256':sha((d.FROZEN/'preservation_baseline.json').read_bytes()),
+              'carryover_sha256':sha((d.FROZEN/'carryover.json').read_bytes()),
+              'copied_inputs_sha256':sha((d.FROZEN/'copied_private_inputs.json').read_bytes()),
+              'combined_experiment_limit_usd':20.0, 'engineering_dispatch_count':len(engineering_paid),
+              'artifact_hashes':start_files, 'no_api_policy_environment_calls_by_auditor':True,
+              'interpretation':'Phase B requires integrity PASS and full21-schema/label/repeat acceptance. Saved inspections remain unlabeled; old failed validation remains unchanged.'}
+    OUT.write_text(json.dumps(report,indent=2,sort_keys=True)+'\n')
+    print(json.dumps({k:report[k] for k in ('integrity_status','gate_ready','check_count','completed','schema_valid_without_generated_uncertainty','regression_matches','regression_count','physical_attempts','returned_ledger_usd','conservative_actual_usd','uncertain_usd','engineering_dispatch_count')} | {'output':str(OUT),'sha256':sha(OUT.read_bytes()),'failures':failures}))
+    return report
+
+
+def main():
+    if not (launcher.VALIDATION/'result.json').exists():
+        print(json.dumps({'integrity_status':'NOT_RUN','gate_ready':False,'reason':'No prompt3 result exists; auditor performed no run.'}))
+        return 2
+    try:
+        with launcher.bound_driver():
+            report = run_final_audit()
+    except Exception as exc:
+        # No exception text: schema exceptions can contain privileged input snippets.
+        safe={'integrity_status':'INCOMPLETE','gate_ready':False,'error_type':type(exc).__name__,
+              'reason':'Full independent final audit did not complete; no Phase B admission.'}
+        Path('/tmp/llm_judge_prompt3_phase_a_incomplete_audit.json').write_text(json.dumps(safe,indent=2)+'\n')
+        print(json.dumps(safe))
+        return 2
+    return 0 if report['integrity_status'] == 'PASS' else 1
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

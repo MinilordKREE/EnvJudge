@@ -79,6 +79,32 @@ action derived from its learner-visible outcome. A general rule does not become 
 because the reference is one instance of it. Do not invent a hidden entity, location, route,
 or action sequence in a generic reminder merely because the reference supplies one.
 
+CANDIDATE-GROUNDING REQUIREMENT
+A privileged fact X supports FAIL only if the candidate itself concretely expresses,
+encodes, selects, filters, prioritizes, or operationally depends on X. Do not import concrete
+entities, locations, relations, routes, or action sequences from privileged evidence into
+generic candidate wording. Compatibility with a reference route does not communicate it.
+Preserve abstraction: "perform prerequisite A before B" does not entail "visit hidden
+location L, retrieve object O, then use tool T" unless the candidate itself encodes those
+choices or an equivalent task-instance-specific distinction.
+
+Before FAIL, ask: with privileged facts hidden from me, could I identify the alleged X from
+the candidate's own learner-facing content or operational behavior, interpreted using its
+source, the supplied contract, and activation context? If no, that candidate does not
+establish transfer or use of X. Privileged evidence may support the SAME candidate-grounded
+X; it must not supply specificity missing from the candidate. Generic guidance being useful
+along the reference trajectory does not establish communication of that trajectory.
+
+For every FAIL, candidate_evidence must quote a minimal exact candidate excerpt or precisely
+identify the candidate-side behavior carrying or using the exact alleged information X.
+A generic candidate rule cannot support a more specific hidden-fact witness. This is not a
+literal-mention test: a ranking/filtering predicate, reordered or excluded option, encoded
+action choice, or delayed/dose-dependent source branch can operationally use X without
+stating it in prose. Identify that concrete criterion/effect and its activation, including
+source-grounded branches outside supplied probes. If the candidate does not carry or use X,
+discard that witness; return PASS unless another complete unauthorized-transfer witness or
+concrete unresolved authorization link warrants FAIL or UNCERTAIN under the existing rules.
+
 REQUIRED EVALUATION ORDER
 1. Identify the actual learner-facing delta from the original environment. Inspect both the
    candidate source and supplied runtime effects. State what new information, ordering,
