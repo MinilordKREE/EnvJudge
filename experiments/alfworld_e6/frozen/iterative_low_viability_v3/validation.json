@@ -1,0 +1,47 @@
+{
+  "API_calls": 0,
+  "audit_status": "PASS",
+  "core_raw_path_count": 96,
+  "core_rows_equal_prior_committed_evidence": true,
+  "ending_safety": {
+    "/home/kree/work/EnvJudge": {
+      "HEAD": "f97260589475bf4412f2310b1dfbcc1c34816547",
+      "branch": "main",
+      "status_short_raw": " ? third_party/envharness\n"
+    },
+    "/home/kree/work/EnvJudge-aea-llm": {
+      "HEAD": "6fbf237f749e48e099bd75ea5a9c79b8d2cdc94e",
+      "branch": "aea-llm-vnext",
+      "status_short_raw": ""
+    }
+  },
+  "environment_resets": 0,
+  "generic_seed_domains_sha256": "4dcf2b21a727f1f7924971362346500cfa34071fe3b1e50ef1351c57a367eeb1",
+  "main_writes": 0,
+  "new_artifact_sha256": {
+    "USED_TASKS_AUDIT.md": "4233180ab97c3f83d41be4cfb941537e548b1f0e532f1d0a42c5774789cc5005",
+    "build_viability_topup_audit.py.txt": "6c804fa43f5f7089a8ac6b46203984ab8ca9f534a22d31ff811b7c8ce5096520",
+    "core_manifest.json": "c25cab9b7cab7777310b7b8f4947ef3a423f0a51d6ce7701f3e58549c684c42a",
+    "cost_basis.json": "1b7b8969021090d2b7b0e0a02abca8e599945107499f8fef702f5ac205eefcac",
+    "finalize_viability_topup_audit.py.txt": "6864d940c4443884be8a4cfa95fb5f76f58cb969e56bde8a3a96e432a9370655",
+    "generic_seed_domains.json": "4dcf2b21a727f1f7924971362346500cfa34071fe3b1e50ef1351c57a367eeb1",
+    "source_inventory.json": "fb0837fbadd8668605008d59b02c77c605012ef39b3fb799fbe57e7a9ae4807e",
+    "starting_baseline.json": "77d3a690c10f2454b2d505d67fc3875fba83afa3aa63f47240fa1277cc67182c",
+    "used_task_audit.json": "1d8e571d57a5c67d2b82e4d200022908fb1d76c5423fc817ee4fcfc30de181df"
+  },
+  "new_unclassified_generic_seed_path_pairs": [],
+  "prior_generic_seed_domains_sha256": "4dcf2b21a727f1f7924971362346500cfa34071fe3b1e50ef1351c57a367eeb1",
+  "research_writes": 0,
+  "starting_safety": {
+    "/home/kree/work/EnvJudge": {
+      "HEAD": "f97260589475bf4412f2310b1dfbcc1c34816547",
+      "branch": "main",
+      "status_short_raw": " ? third_party/envharness\n"
+    },
+    "/home/kree/work/EnvJudge-aea-llm": {
+      "HEAD": "6fbf237f749e48e099bd75ea5a9c79b8d2cdc94e",
+      "branch": "aea-llm-vnext",
+      "status_short_raw": ""
+    }
+  }
+}

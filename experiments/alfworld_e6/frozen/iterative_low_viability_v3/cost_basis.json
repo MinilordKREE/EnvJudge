@@ -1,0 +1,51 @@
+{
+  "adaptation_confirmation_committed_cost_cap_usd": 25.0,
+  "additional_topup_screening_cap_usd": 4.0,
+  "cap_increase_after_adaptation_starts": false,
+  "completion_guaranteed": false,
+  "continuation_combined_ceiling_usd": 29.0,
+  "designer_peak_conservative_return_usd": 0.01711512,
+  "historical_v2_screening_included_in_continuation_cap": false,
+  "historical_v2_screening_spend_is_sunk": true,
+  "interpretation": "Separate USD25 adaptation/confirmation hard cap rounds above the measured core maximum-count retry-inclusive projection of USD24.0152928293 (184 policy episodes plus12 designer calls at recent peak conservative return). The120adaptation+64confirmation weighted typical projection is separately reported. Failed-request reservations remain committed exposure. This is a measured planning scenario, not a completion guarantee or statistical upper bound. USD4 top-up +USD25 adaptation =USD29 continuation ceiling; prior USD7.994786072 screening is sunk and reported separately. No cap increase after adaptation starts.",
+  "maximum_adaptation_policy_episodes": 120,
+  "maximum_confirmation_policy_episodes": 64,
+  "maximum_designer_calls": 12,
+  "planning": {
+    "adaptation_120_returned_usd": 11.396531965000001,
+    "all184_at_recent_core_committed_mean_plus12designer_usd": 24.015292829333337,
+    "confirmation_64_returned_usd": 5.615349102628572,
+    "core_maximum_184_failed_reservations_usd": 6.335229043,
+    "core_maximum_184_returned_policy_usd": 17.474682346333335,
+    "designer_12_at_peak_return_usd": 0.20538144000000003,
+    "headroom_above_core_maximum_retry_inclusive_projection_usd": 0.9847071706666632,
+    "remaining_failed_reservation_and_variability_allowance_usd": 7.782737492371428,
+    "subtotal_before_failed_reservations_usd": 17.217262507628572,
+    "weighted_typical_failed_reservations_usd": 5.802848921628571,
+    "weighted_typical_total_including_failed_reservations_usd": 23.020111429257142
+  },
+  "prior_v2_screening_committed_usd": 7.994786072,
+  "recent_all_valid_policy": {
+    "committed_per_episode_usd": 0.11385198295714287,
+    "episodes": 70,
+    "returned_per_episode_usd": 0.08773982972857143,
+    "returned_usd": 6.1417880810000005,
+    "uncertain_per_episode_usd": 0.026112153228571428,
+    "uncertain_usd": 1.827850726
+  },
+  "recent_core_ZERO_policy": {
+    "committed_per_episode_usd": 0.12940169233333335,
+    "episodes": 48,
+    "returned_per_episode_usd": 0.09497109970833334,
+    "returned_usd": 4.558612786,
+    "uncertain_per_episode_usd": 0.034430592625,
+    "uncertain_usd": 1.652668446
+  },
+  "recent_designer_calls": 7,
+  "recommendation_usd": 25.0,
+  "schema": "aea-topup-separate-adaptation-cost-plan-v1",
+  "source_sha256": {
+    "runs/e6-iterative-low-semantic-smoke/cap.attempts.jsonl": "4edc4d0ee538502f2a6e48c88ae4b24385f306483227a6bbe212eb99d3acb6f7",
+    "runs/e6-iterative-low-viability-v2/cap.attempts.jsonl": "d32f236948eabb5ae82939f17105b44d33580c67dc6da5384d7354068e257e56"
+  }
+}

@@ -1,0 +1,176 @@
+#!/usr/bin/env python3
+"""Read-only top-up audit. Stdlib + local Git; outputs only new /tmp files."""
+import ast
+import collections
+import gzip
+import hashlib
+import json
+import os
+from pathlib import Path
+import random
+import re
+import subprocess
+import time
+
+ROOT = Path('/home/kree/work/EnvJudge-aea-llm')
+MAIN = Path('/home/kree/work/EnvJudge')
+OUT = Path('/tmp/viability_topup_audit')
+PRIOR_COMMIT = '6fbf237f749e48e099bd75ea5a9c79b8d2cdc94e'
+V2 = 'runs/e6-iterative-low-viability-v2/'
+RESULT = 'experiments/alfworld_e6/results/iterative_low_viability_v2/'
+PRIOR_AUDIT = 'experiments/alfworld_e6/frozen/iterative_low_viability_v2/used_task_audit.json'
+INVENTORY = Path('/tmp/viability_v2_used_task_audit/source_inventory.json')
+FIELD = re.compile(rb'(?<![\\\w])["\'](task_id|task|rollout_seed|reset_seed|seed)["\']\s*:\s*["\']?([0-9]+)(?=["\',}\]\s])')
+PATH_TASK = re.compile(r'(?:^|/)(?:task[-_]|privileged_reference_)(\d+)(?=[/._]|$)')
+
+
+def sha(blob): return hashlib.sha256(blob).hexdigest()
+def digest(obj): return sha(json.dumps(obj, sort_keys=True).encode())
+def git(root, *args):
+    return subprocess.check_output(['git', *args], cwd=root, env={**os.environ,'GIT_OPTIONAL_LOCKS':'0'})
+def dump(name, obj):
+    with (OUT/name).open('x') as stream: json.dump(obj,stream,indent=2,sort_keys=True); stream.write('\n')
+def hashpath(path):
+    h=hashlib.sha256()
+    with path.open('rb') as stream:
+        for data in iter(lambda:stream.read(1024*1024),b''):h.update(data)
+    return h.hexdigest()
+def safety():
+    return {str(p):{'HEAD':git(p,'rev-parse','HEAD').decode().strip(), 'branch':git(p,'branch','--show-current').decode().strip(),'status_short_raw':git(p,'status','--short').decode()} for p in [MAIN,ROOT]}
+def committed(name):
+    data=(ROOT/name).read_bytes(); assert data==git(ROOT,'show',PRIOR_COMMIT+':'+name),name;return data
+
+OUT.mkdir(exist_ok=False)
+started=time.time(); initial=safety(); assert initial[str(ROOT)]['HEAD']==PRIOR_COMMIT
+prior_blob=committed(PRIOR_AUDIT); prior=json.loads(prior_blob)
+old_blob=INVENTORY.read_bytes();assert sha(old_blob)==prior['full_current_scan']['source_inventory_sha256']
+old=json.loads(old_blob);old_index={(r['worktree'],r['path']):r for r in old['sources']}
+snapshot_ns=INVENTORY.stat().st_mtime_ns
+# Enumerate the full previous scope; existing old bytes are rehashed if size or
+# filesystem modification/change timestamps are later than the prior snapshot.
+# Exact whole-run/history preservation is separately checked below by SHA256.
+selected=[]
+for root in [MAIN,ROOT]:
+    for directory in ['runs','experiments']:
+        selected.extend((root,p) for p in (root/directory).rglob('*') if p.is_file())
+    for directory in ['tests/integration','tests/fixtures','scripts','docs/pilots']:
+        selected.extend((root,p) for p in (root/directory).rglob('*') if p.is_file() and p.suffix in ['.py','.json','.jsonl','.md','.sh'])
+    for relative in ['src/aea/session.py','src/aea/substrate.py','third_party/envharness/envharness/bridges/alfworld/bridge.py']:
+        p=root/relative
+        if p.is_file():selected.append((root,p))
+records=[];changed=[];added=[];rehashed=[];seen=set();reused=0
+for root,p in sorted(set(selected),key=lambda item:str(item[1])):
+    key=(root.name,str(p.relative_to(root)));seen.add(key);stat=p.stat(); previous=old_index.get(key)
+    if previous and stat.st_size==previous['bytes'] and max(stat.st_mtime_ns,stat.st_ctime_ns)<=snapshot_ns:
+        records.append(previous);reused+=1;continue
+    blob=p.read_bytes();checksum=sha(blob)
+    if previous and checksum==previous['sha256']:
+        records.append(previous);rehashed.append({'worktree':key[0],'path':key[1],'sha256':checksum});continue
+    scan=gzip.decompress(blob) if p.suffix=='.gz' else blob
+    fields=collections.defaultdict(set)
+    for m in FIELD.finditer(scan):fields[m[1].decode()].add(int(m[2]))
+    record={'worktree':key[0],'path':key[1],'bytes':len(blob),'sha256':checksum,'numeric_fields':{k:sorted(v) for k,v in fields.items()},'path_task_ids':sorted({int(m[1]) for m in PATH_TASK.finditer(key[1])})}
+    records.append(record)
+    (changed if previous else added).append({'worktree':key[0],'path':key[1],'sha256':checksum,**({'prior_sha256':previous['sha256']} if previous else {})})
+removed=[{'worktree':k[0],'path':k[1],'sha256':v['sha256']} for k,v in old_index.items() if k not in seen]
+assert not removed,removed
+assert not changed,changed
+inventory={'schema':'topup-incremental-consumption-inventory-v1','prior_inventory_sha256':sha(old_blob),'prior_snapshot_mtime_ns':snapshot_ns,'source_count':len(records),'source_bytes':sum(r['bytes'] for r in records),'metadata_reused_sources':reused,'rehashed_unchanged_sources':rehashed,'changed_sources':changed,'added_sources':added,'removed_sources':removed,'sources':records}
+dump('source_inventory.json',inventory)
+used=set(prior['used_task_ids']); actual=set();labels=set();witnesses=[];bare=collections.defaultdict(set)
+for r in records:
+    path=r['path']
+    if not path.startswith(('runs/','experiments/','docs/pilots/e1pilot/','docs/pilots/eobs/')):continue
+    if any(s in path for s in ['/tests/','/.venv/','/site-packages/']):continue
+    if Path(path).suffix not in {'.json','.jsonl','.gz','.with_errors','.crashed'}:continue
+    f=r.get('numeric_fields',{}); ids=set(f.get('rollout_seed',[]))|set(f.get('reset_seed',[]))
+    tags=set(f.get('task_id',[]))|set(f.get('task',[]))|set(r.get('path_task_ids',[]));actual.update(ids);labels.update(tags)
+    if ids-set(prior['used_task_ids']): witnesses.append({'worktree':r['worktree'],'path':path,'sha256':r['sha256'],'actual_bridge_seeds':sorted(ids)})
+    for n in f.get('seed',[]):bare[n].add(r['worktree']+'/'+path)
+used.update(actual)
+assert labels<=used, sorted(labels-used)
+# Do not count bare request RNG seeds, even when their values are >162.
+other_bare={str(k):sorted(v) for k,v in sorted(bare.items()) if k not in used}
+dump('generic_seed_domains.json',other_bare)
+never=[];i=0
+while len(never)<10:
+    if i not in used:never.append(i)
+    i+=1
+# Confirm all new task consumption from real original traces, not report labels.
+screen_blob=(ROOT/(V2+'screening.json')).read_bytes();screen=json.loads(screen_blob)
+assert screen['status']=='SCREENING_COST_LIMIT' and screen['qualified']==[154,158,159]
+assert set(map(int,screen['tasks']))==set(range(150,163))
+all_traces=[];trace_ids=set()
+for key,row in screen['tasks'].items():
+    task=int(key)
+    for rec in row['episodes']:
+        name=V2+rec['trace_file'];blob=(ROOT/name).read_bytes();traces=json.loads(blob)
+        assert sha(blob)==rec['file_sha256'] and digest(traces)==rec['trace_sha256']
+        t=traces[0];assert len(traces)==1 and t['rollout_seed']==task and t['task_id']=='alfworld-corpus-ours-release'
+        assert t['episode_id'] not in trace_ids;trace_ids.add(t['episode_id'])
+        all_traces.append({'path':name,'sha256':sha(blob),'episode_id':t['episode_id'],'task_id':task,'is_valid':rec['is_valid']})
+assert set(used)==set(range(163)),sorted(used)
+assert never==list(range(163,173))
+assert screen['tasks']['162']['valid_episodes']==11 and screen['tasks']['162']['status']=='INFRA_INCONCLUSIVE'
+
+# Verify entire prior published report/run manifest and every committed result file.
+manifest_blob=committed(RESULT+'artifact_manifest.json');manifest=json.loads(manifest_blob)
+for item in manifest['files']:assert hashpath(ROOT/item['path'])==item['sha256'],item['path']
+tracked=[p for p in git(ROOT,'ls-tree','-r','--name-only',PRIOR_COMMIT).decode().splitlines() if (ROOT/p).is_file()]
+tracked_hashes={p:hashpath(ROOT/p) for p in tracked}
+# Exact selected original files bound at V2 start, including prior historic roots.
+oldbase=json.loads(Path('/tmp/viability_v2_baseline.json').read_text())
+for name,expected in {**oldbase['files'],**oldbase['historical_run_files']}.items():assert hashpath(ROOT/name)==expected,name
+historical={}
+for directory in ['runs/e6-iterative-low-smoke','runs/e6-iterative-low-semantic-smoke','runs/e6-iterative-low-viability','runs/e6-iterative-low-viability-v2']:
+    historical.update({str(p.relative_to(ROOT)):hashpath(p) for p in (ROOT/directory).rglob('*') if p.is_file()})
+for name in git(ROOT,'ls-tree','-r','--name-only',PRIOR_COMMIT,'--',RESULT,'experiments/alfworld_e6/ITERATIVE_LOW_VIABILITY_V2_REPORT.md').decode().splitlines():committed(name)
+assert initial[str(MAIN)]['HEAD']==oldbase['main_head'] and initial[str(MAIN)]['status_short_raw']==oldbase['main_status']
+assert not git(ROOT,'diff',PRIOR_COMMIT,'--')
+baseline={'schema':'aea-topup-starting-preservation-v1','prior_commit':PRIOR_COMMIT,'starting_safety':initial,'worktrees':git(ROOT,'worktree','list').decode(),'files':tracked_hashes,'historical_run_files':historical,'prior_v2_manifest_sha256':sha(manifest_blob),'prior_v2_manifest_files_verified':len(manifest['files']),'prior_v2_full_run_file_count':sum(p.startswith(V2) for p in historical),'main_preexisting_submodule_status_preserved':True}
+dump('starting_baseline.json',baseline)
+
+# Reuse committed task rows exactly; verify all16 and exact three-trace selection.
+evidence_name=RESULT+'screening_qualified_evidence.json';evidence_blob=committed(evidence_name);evidence=json.loads(evidence_blob)
+assert evidence['screening_sha256']==sha(screen_blob)
+core_hashes={};corechecks=[]
+for item in evidence['tasks']:
+    task=item['task_id'];assert task in [154,158,159]
+    traces=[]
+    for rec in screen['tasks'][str(task)]['episodes']:
+        name=V2+rec['trace_file'];raw=(ROOT/name).read_bytes();trace=json.loads(raw)[0]
+        assert rec['is_valid'] and not trace['success'] and not trace['error'] and trace['steps']
+        traces.append(trace);core_hashes[name]=sha(raw)
+    assert len(traces)==16
+    chosen=random.Random(task).sample(traces,3);indices=[traces.index(t)+1 for t in chosen]
+    assert item['all_original_episode_ids']==[t['episode_id'] for t in traces]
+    assert item['all_original_trace_sha256']==[digest(t) for t in traces]
+    assert item['original_zero_evidence_sha256']==digest(traces)
+    assert item['evidence_ids']==[t['episode_id'] for t in chosen]
+    assert item['selected_trace_sha256']==[digest(t) for t in chosen]
+    assert item['evidence_sha256']==digest(chosen) and item['selected_valid_indices']==indices
+    for entry in item['valid_original_artifacts']:
+        name=V2+entry['path'];core_hashes[name]=hashpath(ROOT/name);assert core_hashes[name]==entry['file_sha256']
+    corechecks.append({'task_id':task,'valid_originals':16,'selected_valid_indices':indices,'evidence_sha256':item['evidence_sha256']})
+core={'schema':'aea-iterative-low-frozen-three-task-core-v1','prior_commit':PRIOR_COMMIT,'prior_screening_path':V2+'screening.json','prior_screening_sha256':sha(screen_blob),'prior_qualified_evidence_path':evidence_name,'prior_qualified_evidence_sha256':sha(evidence_blob),'tasks':evidence['tasks'],'raw_file_hashes':core_hashes}
+dump('core_manifest.json',core)
+
+# Planning from actual conservative physical returns and retained reservations.
+attempts=[json.loads(line) for line in (ROOT/(V2+'cap.attempts.jsonl')).read_text().splitlines()]
+valid_phases={r['phase'] for task in screen['tasks'].values() for r in task['episodes'] if r['is_valid']}
+core_phases={r['phase'] for task in [154,158,159] for r in screen['tasks'][str(task)]['episodes']}
+def metrics(phases):
+    matching=[a for a in attempts if a['attribution']['phase'] in phases]
+    actual=sum(a.get('conservative_usd',0) for a in matching if a['status']=='returned')
+    uncertain=sum(a['reserved_usd'] for a in matching if a['status']!='returned')
+    return {'episodes':len(phases),'returned_usd':actual,'uncertain_usd':uncertain,'returned_per_episode_usd':actual/len(phases),'uncertain_per_episode_usd':uncertain/len(phases),'committed_per_episode_usd':(actual+uncertain)/len(phases)}
+core_cost=metrics(core_phases);all_cost=metrics(valid_phases)
+designer_path='runs/e6-iterative-low-semantic-smoke/cap.attempts.jsonl';designer=[json.loads(l) for l in (ROOT/designer_path).read_text().splitlines()];designer=[a for a in designer if a['model']=='deepseek-v4-pro']
+designer_peak=max(a['conservative_usd'] for a in designer if a['status']=='returned')
+adapt=120*core_cost['returned_per_episode_usd'];confirm=64*all_cost['returned_per_episode_usd'];design=12*designer_peak;subtotal=adapt+confirm+design
+cost={'schema':'aea-topup-separate-adaptation-cost-plan-v1','recommendation_usd':20.0,'additional_topup_screening_cap_usd':4.0,'historical_v2_screening_spend_is_sunk':True,'maximum_adaptation_policy_episodes':120,'maximum_confirmation_policy_episodes':64,'maximum_designer_calls':12,'recent_core_ZERO_policy':core_cost,'recent_all_valid_policy':all_cost,'recent_designer_calls':len(designer),'designer_peak_conservative_return_usd':designer_peak,'planning':{'adaptation_120_returned_usd':adapt,'confirmation_64_returned_usd':confirm,'designer_12_at_peak_return_usd':design,'subtotal_before_failed_reservations_usd':subtotal,'remaining_failed_reservation_and_variability_allowance_usd':20-subtotal,'all184_at_recent_core_committed_mean_plus12designer_usd':184*core_cost['committed_per_episode_usd']+design},'completion_guaranteed':False,'interpretation':'USD20 is a lightweight separate hard budget, not a guarantee of completing all logical maxima. Recent ZERO retry exposure could exhaust it. Stop inconclusive if the frozen cap prevents sufficient evaluation; never increase after adaptation starts. Top-up USD4 is a separate ledger/cap.','source_sha256':{V2+'cap.attempts.jsonl':hashpath(ROOT/(V2+'cap.attempts.jsonl')),designer_path:hashpath(ROOT/designer_path)}}
+dump('cost_basis.json',cost)
+audit={'schema':'aea-alfworld-used-bridge-seeds-topup-v1','audit_status':'PASS_FROZEN_BEFORE_TOPUP_SCREENING','prior_commit':PRIOR_COMMIT,'starting_safety':initial,'start_id':never[0],'smallest_never_used':never[0],'never_used_ids':never,'used_task_ids':sorted(used),'prior_audit_path':PRIOR_AUDIT,'prior_audit_sha256':sha(prior_blob),'new_consumed_task_ids':list(range(150,163)),'new_actual_trace_count':len(all_traces),'new_actual_traces':all_traces,'new_consumption_witnesses':witnesses,'prior_full_inventory_sha256':sha(old_blob),'incremental_inventory_sha256':hashpath(OUT/'source_inventory.json'),'incremental_scope':{'source_count':len(records),'source_bytes':inventory['source_bytes'],'prior_sources_reused_after_unchanged_size_and_pre_snapshot_mtime_ctime':reused,'prior_sources_rehashed_unchanged':len(rehashed),'added_sources':len(added),'changed_prior_sources':0,'removed_prior_sources':0},'starting_baseline_sha256':hashpath(OUT/'starting_baseline.json'),'core_manifest_sha256':hashpath(OUT/'core_manifest.json'),'core_checks':corechecks,'cost_basis_sha256':hashpath(OUT/'cost_basis.json'),'reproduction_script_sha256':hashpath(Path(__file__)),'domain_rules':['Numeric rollout_seed/reset_seed in actual recorded train execution is the bridge ID. task_id in original Trace is a corpus label.','Prospective pool IDs and code/unit literals do not constitute environment use.','Bare ChatRequest seed, sampling/selection RNG seed, training RNG, and held-out evaluation seeds are separate domains; not added as train consumption.','Prior historical/integration/domain classifications are retained via the frozen prior audit. All new trainIDs150..162 have actual original trace witnesses.','Do not resume162: all150..162 are consumed, including partial162=0/11 INFRA_INCONCLUSIVE.'],'limits':['Efficient incremental scan reuses archived extraction for same-size sources whose modification/change timestamps predate the prior full SHA inventory. It does not claim a new full12GB cryptographic reread. New/metadata-changed files are fully hashed and rescanned.','Every current tracked original file and all four old iterative run trees are independently SHA256-bound in the new safety baseline; earlier baseline hashes and all published V2 manifest hashes are verified.','No absence claim about unrecorded activity outside the declared worktrees. No task semantics were used to choose IDs.'],'execution':{'API_calls':0,'environment_resets':0,'research_writes':0,'main_writes':0}}
+dump('used_task_audit.json',audit)
+(OUT/'USED_TASKS_AUDIT.md').write_text(f'''# Top-up bridge-seed audit\n\nSmallest unused ID: **{never[0]}**. Preregistered maximum10 ascending IDs: **{never[0]}–{never[-1]}**.\n\nPrior audit binds0–149. The71 original V2 executions bind150–162, including162's incomplete0/11. Actual trace IDs, not task semantics or bare RNG seeds, determine consumption. Three prior ZERO task rows and their seeded evidence remain exact committed bytes/content from {PRIOR_COMMIT}.\n\nCore selected valid indices:154={corechecks[0]['selected_valid_indices']},158={corechecks[1]['selected_valid_indices']},159={corechecks[2]['selected_valid_indices']}. All48 originals and48 aliases are SHA-bound.\n\nRead-only inventory: {len(records):,} current files; {reused:,} metadata-unchanged prior extractions reused; {len(rehashed):,} prior files rehashed unchanged; {len(added):,} additions hashed/scanned. Prior published V2 manifest ({len(manifest['files'])}files) and original safety hashes all verified. Full new safety baseline covers {len(tracked_hashes)} tracked files and {len(historical)} old iterative run files.\n\nThis incremental audit relies on filesystem mtime/ctime/size for ancient unchanged archive reuse; it is not a fresh12GB cryptographic scan. Core, historical run, tracked research, and published manifest preservation are independently hash-checked. No env/model/network calls or repository mutations.\n\nSeparate USD20 adaptation/confirmation hard cap: estimated120 adaptation+64 confirmation+12designer returned cost${subtotal:.6f}; failed-reservation allowance${20-subtotal:.6f}. Recent core retry exposure at full184episode maximum projects${cost['planning']['all184_at_recent_core_committed_mean_plus12designer_usd']:.6f}; completion is not guaranteed. No automatic increase.\n''')
+print(json.dumps({'status':'PASS','start_id':never[0],'never_used_ids':never,'core_checks':corechecks,'hashes':{n:hashpath(OUT/n) for n in ['used_task_audit.json','core_manifest.json','starting_baseline.json','cost_basis.json']},'elapsed_seconds':time.time()-started},indent=2))

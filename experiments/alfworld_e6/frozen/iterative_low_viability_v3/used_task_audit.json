@@ -1,0 +1,1914 @@
+{
+  "adaptation_confirmation_committed_cost_cap_usd": 25.0,
+  "additional_topup_screening_cap_usd": 4.0,
+  "audit_status": "PASS_FROZEN_BEFORE_TOPUP_SCREENING",
+  "continuation_combined_ceiling_usd": 29.0,
+  "core_checks": [
+    {
+      "evidence_sha256": "d4b442dff2c824f6d42a22114448f92ca178ddba2b5d0a5ee7f14c2a2b8e735f",
+      "selected_valid_indices": [
+        7,
+        14,
+        13
+      ],
+      "task_id": 154,
+      "valid_originals": 16
+    },
+    {
+      "evidence_sha256": "46b84d32279a0843d6a64bd73ae49d005f776f8f913fc9f76ab5c5254deb7445",
+      "selected_valid_indices": [
+        8,
+        15,
+        14
+      ],
+      "task_id": 158,
+      "valid_originals": 16
+    },
+    {
+      "evidence_sha256": "55a935664362fa036ea6ab84853661a3437cb8e9571626706bb97c44e9517b0a",
+      "selected_valid_indices": [
+        13,
+        3,
+        11
+      ],
+      "task_id": 159,
+      "valid_originals": 16
+    }
+  ],
+  "core_manifest_sha256": "c25cab9b7cab7777310b7b8f4947ef3a423f0a51d6ce7701f3e58549c684c42a",
+  "cost_basis_sha256": "1b7b8969021090d2b7b0e0a02abca8e599945107499f8fef702f5ac205eefcac",
+  "domain_rules": [
+    "Numeric rollout_seed/reset_seed in actual recorded train execution is the bridge ID. task_id in original Trace is a corpus label.",
+    "Prospective pool IDs and code/unit literals do not constitute environment use.",
+    "Bare ChatRequest seed, sampling/selection RNG seed, training RNG, and held-out evaluation seeds are separate domains; not added as train consumption.",
+    "Prior historical/integration/domain classifications are retained via the frozen prior audit. All new trainIDs150..162 have actual original trace witnesses.",
+    "Do not resume162: all150..162 are consumed, including partial162=0/11 INFRA_INCONCLUSIVE."
+  ],
+  "execution": {
+    "API_calls": 0,
+    "environment_resets": 0,
+    "main_writes": 0,
+    "research_writes": 0
+  },
+  "incremental_inventory_sha256": "fb0837fbadd8668605008d59b02c77c605012ef39b3fb799fbe57e7a9ae4807e",
+  "incremental_scope": {
+    "added_sources": 394,
+    "changed_prior_sources": 0,
+    "prior_sources_rehashed_unchanged": 0,
+    "prior_sources_reused_after_unchanged_size_and_pre_snapshot_mtime_ctime": 55970,
+    "removed_prior_sources": 0,
+    "source_bytes": 12739805044,
+    "source_count": 56364
+  },
+  "limits": [
+    "Efficient incremental scan reuses archived extraction for same-size sources whose modification/change timestamps predate the prior full SHA inventory. It does not claim a new full12GB cryptographic reread. New/metadata-changed files are fully hashed and rescanned.",
+    "Every current tracked original file and all four old iterative run trees are independently SHA256-bound in the new safety baseline; earlier baseline hashes and all published V2 manifest hashes are verified.",
+    "No absence claim about unrecorded activity outside the declared worktrees. No task semantics were used to choose IDs."
+  ],
+  "never_used_ids": [
+    163,
+    164,
+    165,
+    166,
+    167,
+    168,
+    169,
+    170,
+    171,
+    172
+  ],
+  "new_actual_trace_count": 71,
+  "new_actual_traces": [
+    {
+      "episode_id": "54c39b5875",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-150/original-execution-01.json",
+      "sha256": "2f1ba9b0053ffb817b505078465a0a1560c1908c34ecac7278352e2c25686796",
+      "task_id": 150
+    },
+    {
+      "episode_id": "f375113998",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-151/original-execution-01.json",
+      "sha256": "670a9149155ea977a61cd2c9d992b2b95218b2214d0e65b3c6bdaf37a4400bf7",
+      "task_id": 151
+    },
+    {
+      "episode_id": "7c23e465f2",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-152/original-execution-01.json",
+      "sha256": "2961c40d15f26c980c14fe849f7ccae5557db9d547e03cb5eee8448c59de4d8b",
+      "task_id": 152
+    },
+    {
+      "episode_id": "c38c119c5a",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-153/original-execution-01.json",
+      "sha256": "c06f05243af9caca2448a5a5d149f4ab4fbbe5f5481fb2b954f8d0fec0d3d442",
+      "task_id": 153
+    },
+    {
+      "episode_id": "40ebdf19ee",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-154/original-execution-01.json",
+      "sha256": "c5a1e7271a8c4499bda547576566e696f88b94911552cc7d21907f075bbd69fd",
+      "task_id": 154
+    },
+    {
+      "episode_id": "05169ff974",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-154/original-execution-02.json",
+      "sha256": "56ba9d151d3a5be61c25c3820093a9d4adb15e83410d107d72cf5e9cdfca6af1",
+      "task_id": 154
+    },
+    {
+      "episode_id": "2b9ff50ee9",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-154/original-execution-03.json",
+      "sha256": "10215ecd0a45b5c0dc11d75e98a9ff6d18a2153d6be02cecf1bf018fe2bb0d7c",
+      "task_id": 154
+    },
+    {
+      "episode_id": "786aa2a2eb",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-154/original-execution-04.json",
+      "sha256": "53e5d3e5e604a789f2052f7b0f18cf728b0ee6cade0ab3ebb2a8ffe3d8da1378",
+      "task_id": 154
+    },
+    {
+      "episode_id": "32345e4509",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-154/original-execution-05.json",
+      "sha256": "476efb348b9ce0270e6848d0734431d48a2e08cf8c7e0d8ca81ce9c4dc7343fa",
+      "task_id": 154
+    },
+    {
+      "episode_id": "0ce66c4d40",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-154/original-execution-06.json",
+      "sha256": "291afb1d3986111718d0d9834ab575e17dbb7d3d3029067bb13f8e6298468147",
+      "task_id": 154
+    },
+    {
+      "episode_id": "01485264d7",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-154/original-execution-07.json",
+      "sha256": "f3bb3ff2ef4ec5b04042289ad521c8b47b6089ad25943be802fa5d5e2fcab7c4",
+      "task_id": 154
+    },
+    {
+      "episode_id": "9c5a9463fc",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-154/original-execution-08.json",
+      "sha256": "8318f9d15c182157865d2d30f84eca037e8d1430eb828a75d5802b7019373c3b",
+      "task_id": 154
+    },
+    {
+      "episode_id": "f350a0387e",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-154/original-execution-09.json",
+      "sha256": "5736248cb1445834de9a9511abc77b8958bae4b7444c691e0473de8fa3ce3245",
+      "task_id": 154
+    },
+    {
+      "episode_id": "f0a0254593",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-154/original-execution-10.json",
+      "sha256": "033400e895eab366e0941d253a00bd0905c78b923b18be4af9222b1f8d99237a",
+      "task_id": 154
+    },
+    {
+      "episode_id": "80088b0d7f",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-154/original-execution-11.json",
+      "sha256": "52ff28722c8181a4f277437f5887bece24f8f6fa3deecf27e59f464b7c210ed5",
+      "task_id": 154
+    },
+    {
+      "episode_id": "7564bebd16",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-154/original-execution-12.json",
+      "sha256": "f60f789f38754d1ed0100c5acce6ccf8b63b853646fd7285963452905479389a",
+      "task_id": 154
+    },
+    {
+      "episode_id": "5cabc8ef59",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-154/original-execution-13.json",
+      "sha256": "bec3e543f9326f23093a1e282be2f12e5d9958161fab31b8136c6f3b03284314",
+      "task_id": 154
+    },
+    {
+      "episode_id": "cae8a438ba",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-154/original-execution-14.json",
+      "sha256": "5997852f5f6b2f80230d3cf470bbd30dbae5f844324730719f529345d3e0ce66",
+      "task_id": 154
+    },
+    {
+      "episode_id": "5a3fedcae4",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-154/original-execution-15.json",
+      "sha256": "308efcdcccb972ddf6937a68d7fbe96281daa71307b1e30ce0407495411ec6e8",
+      "task_id": 154
+    },
+    {
+      "episode_id": "3f1fd7d315",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-154/original-execution-16.json",
+      "sha256": "1b99b17fdbd9633a6e72e6fa29c8efaae18c07aed1db9636716a415d25a90ade",
+      "task_id": 154
+    },
+    {
+      "episode_id": "0690e24a46",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-155/original-execution-01.json",
+      "sha256": "ddc557f3f1cca1a74f172f5da2844c96960b3be2be32534d3b3e1816cef2cf25",
+      "task_id": 155
+    },
+    {
+      "episode_id": "cde6e7cc46",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-155/original-execution-02.json",
+      "sha256": "6234adeab8b2fa42071a1f361a89080e0b930da914db3457b1d2fb58dd4deffb",
+      "task_id": 155
+    },
+    {
+      "episode_id": "18bba72f6c",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-156/original-execution-01.json",
+      "sha256": "8c3f4ca9b1c70a4fc9bf576af35d770ee898df3e368a25a3c4bd1584135ba825",
+      "task_id": 156
+    },
+    {
+      "episode_id": "6286181b1b",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-157/original-execution-01.json",
+      "sha256": "3c58e1db80cd24f63c4d658c3476cd7859bbf4cf9104d4a69e0ba89fe11ced44",
+      "task_id": 157
+    },
+    {
+      "episode_id": "e9f40a461f",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-158/original-execution-01.json",
+      "sha256": "99e2d4327b80d820429d1d66002c762994922ea3cff0c3d028b31bedfa73433d",
+      "task_id": 158
+    },
+    {
+      "episode_id": "75358f0045",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-158/original-execution-02.json",
+      "sha256": "3950eaedced4b64ea74fca77fe3327ff97c2b3efc73bbb92fac4a70fd6ceeb11",
+      "task_id": 158
+    },
+    {
+      "episode_id": "ddb6731652",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-158/original-execution-03.json",
+      "sha256": "071f42db4953a93aa0c454b673fce779811e92c99aa720ad2d2d60f89c2819cc",
+      "task_id": 158
+    },
+    {
+      "episode_id": "2d6637e6c6",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-158/original-execution-04.json",
+      "sha256": "6bbc0732e74912400c60735ba9ec0aeeab9f0221c6754f4bae2ff4b1db395ecc",
+      "task_id": 158
+    },
+    {
+      "episode_id": "a0b978c74e",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-158/original-execution-05.json",
+      "sha256": "89658bbceae387f5147b506df8906c705926a929ceb8e4ecb651e3aa24a5a8bc",
+      "task_id": 158
+    },
+    {
+      "episode_id": "25b057e6f9",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-158/original-execution-06.json",
+      "sha256": "d2aba3a37976b1eac9c711c874e748283e49fb1cadc7a63f2a43d747b6045253",
+      "task_id": 158
+    },
+    {
+      "episode_id": "ac39742da2",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-158/original-execution-07.json",
+      "sha256": "e3c8da21ca078b67731bea8c5c579bd63ba29bfbca717450080315c063acf1d9",
+      "task_id": 158
+    },
+    {
+      "episode_id": "7f461cecb1",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-158/original-execution-08.json",
+      "sha256": "021e48daa08a1581e023303422edc47d315dfad635b2c2b569c8ad490add21af",
+      "task_id": 158
+    },
+    {
+      "episode_id": "93b2ceb16e",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-158/original-execution-09.json",
+      "sha256": "c0623d992553a62340eb19abdf6556f3df529a5937714c9a0283e4cab6604a64",
+      "task_id": 158
+    },
+    {
+      "episode_id": "e30d962087",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-158/original-execution-10.json",
+      "sha256": "041eb92a87dcb42c4fb5385aa6e9470a402200c6d011a51573046d339ab66374",
+      "task_id": 158
+    },
+    {
+      "episode_id": "2d4ba8de76",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-158/original-execution-11.json",
+      "sha256": "5176c8febe573e0c4f06bbcf42ab8370b93c5d9f40da8296d9cd25ae0be8b5e3",
+      "task_id": 158
+    },
+    {
+      "episode_id": "4950d0f1e2",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-158/original-execution-12.json",
+      "sha256": "49acc9978fae373b150937260ed4c3764b8b99700b7cf2932182768c8d16a9ef",
+      "task_id": 158
+    },
+    {
+      "episode_id": "2484859d1d",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-158/original-execution-13.json",
+      "sha256": "d0c53584eb28cb5ffe9be0bdb5c756f2c91dad5fa6553957cafe9894d96b1c7e",
+      "task_id": 158
+    },
+    {
+      "episode_id": "50434a07d4",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-158/original-execution-14.json",
+      "sha256": "6b2972f52bf42f0a720885a75c0cb5972f47135e43e118b99beeb535327a4c10",
+      "task_id": 158
+    },
+    {
+      "episode_id": "7729b3343a",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-158/original-execution-15.json",
+      "sha256": "ee162f4930ed3f4d4106b6cf9c39b678563d7af1f18965963e8bc520126b6e35",
+      "task_id": 158
+    },
+    {
+      "episode_id": "d7edd539a1",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-158/original-execution-16.json",
+      "sha256": "f49637b05e120c182d1702c450a573e4c57ff8350610236a15b44a318a4d5285",
+      "task_id": 158
+    },
+    {
+      "episode_id": "49bd6ad258",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-159/original-execution-01.json",
+      "sha256": "61688460de2328582f876ddafc62fa8531a0bf65969df3fd410b1d1b9baae801",
+      "task_id": 159
+    },
+    {
+      "episode_id": "70bc6bb99a",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-159/original-execution-02.json",
+      "sha256": "b965e23b13730daf6c360604bbaf0496c37a08dc7c3bfc6d3f4532fa12240613",
+      "task_id": 159
+    },
+    {
+      "episode_id": "f3583ad1e1",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-159/original-execution-03.json",
+      "sha256": "d9013c3f78346cf3eaa18e0d636cf384b31dad264cecb88c464c5e5d2d2e93e9",
+      "task_id": 159
+    },
+    {
+      "episode_id": "8fc43183bc",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-159/original-execution-04.json",
+      "sha256": "b7c23baf2dc81d940c30bf0dc89f33c396574adf2517f0a5a3e256de92b98ff8",
+      "task_id": 159
+    },
+    {
+      "episode_id": "84adb0c864",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-159/original-execution-05.json",
+      "sha256": "16d20e6f59dc2597ebb8be96cabc5175242964ca24bd993c0724bcfdb80292fb",
+      "task_id": 159
+    },
+    {
+      "episode_id": "ad4d822e71",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-159/original-execution-06.json",
+      "sha256": "20ac003f08c80c5efe6147e3c1e50e84a752328c1a1f237b68a8b4060df71579",
+      "task_id": 159
+    },
+    {
+      "episode_id": "bce953fc60",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-159/original-execution-07.json",
+      "sha256": "f732e8f8e7420e93b50055baa717eb55d303ef075e4601e9fb6df18e5a5557bc",
+      "task_id": 159
+    },
+    {
+      "episode_id": "13c8e98707",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-159/original-execution-08.json",
+      "sha256": "dc66ece5b500f6ebf8677533305029987cf53f789d15c72731c12b92145254f4",
+      "task_id": 159
+    },
+    {
+      "episode_id": "bb714ad561",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-159/original-execution-09.json",
+      "sha256": "ab2dfb41086660326be2a06735507030f0b180c1c394825580731f45a35bcc6c",
+      "task_id": 159
+    },
+    {
+      "episode_id": "4f5db14177",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-159/original-execution-10.json",
+      "sha256": "70aaa2aa1ff6072acec28433528c11bd228000bcd5c008af105d3a92f3cc5830",
+      "task_id": 159
+    },
+    {
+      "episode_id": "45c3700f83",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-159/original-execution-11.json",
+      "sha256": "80ccc3b9a844b6f4ba767fbcf9ff0133e16c56a3d8e8e66d9604af906e53205e",
+      "task_id": 159
+    },
+    {
+      "episode_id": "67cb7a7275",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-159/original-execution-12.json",
+      "sha256": "14a3e9b86f481758b75fee57f5e9745d225c25d348ecc29fcdbd40a18fa4a605",
+      "task_id": 159
+    },
+    {
+      "episode_id": "e0fc323400",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-159/original-execution-13.json",
+      "sha256": "d328f7f19c4423490b9d5a4c21029dbeec67c9f93db4cc9182c390d33b4cd0c4",
+      "task_id": 159
+    },
+    {
+      "episode_id": "ca5e8badd0",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-159/original-execution-14.json",
+      "sha256": "d182d5c333d40f461f06f639565c8662269469eae9963a270fa58405c5f0f418",
+      "task_id": 159
+    },
+    {
+      "episode_id": "a590e7c873",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-159/original-execution-15.json",
+      "sha256": "3c318cfba4b5f569c397476f49261d01839b6113a47f21918595bcecc35eb95d",
+      "task_id": 159
+    },
+    {
+      "episode_id": "9f3e4b74ed",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-159/original-execution-16.json",
+      "sha256": "71362da8f85b40547148b053a43230e7ee2b0d16646e74f2e1888a56ef66eec1",
+      "task_id": 159
+    },
+    {
+      "episode_id": "c9997c7534",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-160/original-execution-01.json",
+      "sha256": "b24e3d840cde237643535038ceb326bb626d659dafcb359d972df8aac7d6aadf",
+      "task_id": 160
+    },
+    {
+      "episode_id": "40be37f1d6",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-160/original-execution-02.json",
+      "sha256": "cf4a27a36b742093cfd07933f939a0abaecc6b8821afae15e9ffdd8e10fb426a",
+      "task_id": 160
+    },
+    {
+      "episode_id": "54468ccb0f",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-161/original-execution-01.json",
+      "sha256": "cbe9393a754fc15d9ec37613673a74607628180625f1ba7d29804f6415f35df1",
+      "task_id": 161
+    },
+    {
+      "episode_id": "85eca54b60",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-162/original-execution-01.json",
+      "sha256": "cd7050d3b2884c9dbf16f62c99fa5f949b8f4954a81c75d50230606c2757d1c7",
+      "task_id": 162
+    },
+    {
+      "episode_id": "c22c84ce1a",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-162/original-execution-02.json",
+      "sha256": "3814501448bbb3666812bc4595bef732a1a07b4f536f5ed8132fe7980e25bc88",
+      "task_id": 162
+    },
+    {
+      "episode_id": "234fec7013",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-162/original-execution-03.json",
+      "sha256": "635eb9f403dcde126fdfcd3a39be78d73d5f3b77982fb3d5a444b30245b415c0",
+      "task_id": 162
+    },
+    {
+      "episode_id": "d867b4d073",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-162/original-execution-04.json",
+      "sha256": "ae1d0e591b25f5cf5e7d40fc32b53bbce5924fbbc7dbd41e3346afe1a9012aee",
+      "task_id": 162
+    },
+    {
+      "episode_id": "7e4040a0cc",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-162/original-execution-05.json",
+      "sha256": "fa7645f8b17e1b61ad117b716eccbb765b1631eac04786526f025091efe3c4f2",
+      "task_id": 162
+    },
+    {
+      "episode_id": "c3a81df753",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-162/original-execution-06.json",
+      "sha256": "e32ee124847b8cd40a629f9a7b8b24b133dc6ba1ed71bd47342d6cb6f8c52dee",
+      "task_id": 162
+    },
+    {
+      "episode_id": "1814c7a3d4",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-162/original-execution-07.json",
+      "sha256": "aecb15e9968d5dee913cbf065a44bd6144750e28d9a0b1f49a1895b430731b08",
+      "task_id": 162
+    },
+    {
+      "episode_id": "c591684088",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-162/original-execution-08.json",
+      "sha256": "37439aa2c6d0408fddf7881f8bbd08953571742e241f73e1231d1fc684321878",
+      "task_id": 162
+    },
+    {
+      "episode_id": "e049f79400",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-162/original-execution-09.json",
+      "sha256": "04f5bfe2820d917b05b21751aa135b4a0e810a6e2d3966e265bdaf988e714516",
+      "task_id": 162
+    },
+    {
+      "episode_id": "c19738ec84",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-162/original-execution-10.json",
+      "sha256": "70ab8e2ca1e7742e6301c7fcced94038c84b4e5e3a9735240a1770c35d85f99b",
+      "task_id": 162
+    },
+    {
+      "episode_id": "286e05ba00",
+      "is_valid": true,
+      "path": "runs/e6-iterative-low-viability-v2/task-162/original-execution-11.json",
+      "sha256": "b6b615e5085f95d146b3082947c3a1b2042510fef1c74dc218a713ce39161854",
+      "task_id": 162
+    },
+    {
+      "episode_id": "e1352d4c35",
+      "is_valid": false,
+      "path": "runs/e6-iterative-low-viability-v2/task-162/original-execution-12.json",
+      "sha256": "c14146c44a30da2ed68ade54f78927ec6945a9bfa7408f26df5b3cab071ad94f",
+      "task_id": 162
+    }
+  ],
+  "new_consumed_task_ids": [
+    150,
+    151,
+    152,
+    153,
+    154,
+    155,
+    156,
+    157,
+    158,
+    159,
+    160,
+    161,
+    162
+  ],
+  "new_consumption_witnesses": [
+    {
+      "actual_bridge_seeds": [
+        150
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-150/original-01.json",
+      "sha256": "2f1ba9b0053ffb817b505078465a0a1560c1908c34ecac7278352e2c25686796",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        150
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-150/original-execution-01.json",
+      "sha256": "2f1ba9b0053ffb817b505078465a0a1560c1908c34ecac7278352e2c25686796",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        151
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-151/original-01.json",
+      "sha256": "670a9149155ea977a61cd2c9d992b2b95218b2214d0e65b3c6bdaf37a4400bf7",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        151
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-151/original-execution-01.json",
+      "sha256": "670a9149155ea977a61cd2c9d992b2b95218b2214d0e65b3c6bdaf37a4400bf7",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        152
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-152/original-01.json",
+      "sha256": "2961c40d15f26c980c14fe849f7ccae5557db9d547e03cb5eee8448c59de4d8b",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        152
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-152/original-execution-01.json",
+      "sha256": "2961c40d15f26c980c14fe849f7ccae5557db9d547e03cb5eee8448c59de4d8b",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        153
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-153/original-01.json",
+      "sha256": "c06f05243af9caca2448a5a5d149f4ab4fbbe5f5481fb2b954f8d0fec0d3d442",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        153
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-153/original-execution-01.json",
+      "sha256": "c06f05243af9caca2448a5a5d149f4ab4fbbe5f5481fb2b954f8d0fec0d3d442",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        154
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-154/original-01.json",
+      "sha256": "c5a1e7271a8c4499bda547576566e696f88b94911552cc7d21907f075bbd69fd",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        154
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-154/original-02.json",
+      "sha256": "56ba9d151d3a5be61c25c3820093a9d4adb15e83410d107d72cf5e9cdfca6af1",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        154
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-154/original-03.json",
+      "sha256": "10215ecd0a45b5c0dc11d75e98a9ff6d18a2153d6be02cecf1bf018fe2bb0d7c",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        154
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-154/original-04.json",
+      "sha256": "53e5d3e5e604a789f2052f7b0f18cf728b0ee6cade0ab3ebb2a8ffe3d8da1378",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        154
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-154/original-05.json",
+      "sha256": "476efb348b9ce0270e6848d0734431d48a2e08cf8c7e0d8ca81ce9c4dc7343fa",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        154
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-154/original-06.json",
+      "sha256": "291afb1d3986111718d0d9834ab575e17dbb7d3d3029067bb13f8e6298468147",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        154
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-154/original-07.json",
+      "sha256": "f3bb3ff2ef4ec5b04042289ad521c8b47b6089ad25943be802fa5d5e2fcab7c4",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        154
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-154/original-08.json",
+      "sha256": "8318f9d15c182157865d2d30f84eca037e8d1430eb828a75d5802b7019373c3b",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        154
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-154/original-09.json",
+      "sha256": "5736248cb1445834de9a9511abc77b8958bae4b7444c691e0473de8fa3ce3245",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        154
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-154/original-10.json",
+      "sha256": "033400e895eab366e0941d253a00bd0905c78b923b18be4af9222b1f8d99237a",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        154
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-154/original-11.json",
+      "sha256": "52ff28722c8181a4f277437f5887bece24f8f6fa3deecf27e59f464b7c210ed5",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        154
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-154/original-12.json",
+      "sha256": "f60f789f38754d1ed0100c5acce6ccf8b63b853646fd7285963452905479389a",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        154
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-154/original-13.json",
+      "sha256": "bec3e543f9326f23093a1e282be2f12e5d9958161fab31b8136c6f3b03284314",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        154
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-154/original-14.json",
+      "sha256": "5997852f5f6b2f80230d3cf470bbd30dbae5f844324730719f529345d3e0ce66",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        154
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-154/original-15.json",
+      "sha256": "308efcdcccb972ddf6937a68d7fbe96281daa71307b1e30ce0407495411ec6e8",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        154
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-154/original-16.json",
+      "sha256": "1b99b17fdbd9633a6e72e6fa29c8efaae18c07aed1db9636716a415d25a90ade",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        154
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-154/original-execution-01.json",
+      "sha256": "c5a1e7271a8c4499bda547576566e696f88b94911552cc7d21907f075bbd69fd",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        154
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-154/original-execution-02.json",
+      "sha256": "56ba9d151d3a5be61c25c3820093a9d4adb15e83410d107d72cf5e9cdfca6af1",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        154
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-154/original-execution-03.json",
+      "sha256": "10215ecd0a45b5c0dc11d75e98a9ff6d18a2153d6be02cecf1bf018fe2bb0d7c",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        154
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-154/original-execution-04.json",
+      "sha256": "53e5d3e5e604a789f2052f7b0f18cf728b0ee6cade0ab3ebb2a8ffe3d8da1378",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        154
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-154/original-execution-05.json",
+      "sha256": "476efb348b9ce0270e6848d0734431d48a2e08cf8c7e0d8ca81ce9c4dc7343fa",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        154
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-154/original-execution-06.json",
+      "sha256": "291afb1d3986111718d0d9834ab575e17dbb7d3d3029067bb13f8e6298468147",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        154
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-154/original-execution-07.json",
+      "sha256": "f3bb3ff2ef4ec5b04042289ad521c8b47b6089ad25943be802fa5d5e2fcab7c4",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        154
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-154/original-execution-08.json",
+      "sha256": "8318f9d15c182157865d2d30f84eca037e8d1430eb828a75d5802b7019373c3b",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        154
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-154/original-execution-09.json",
+      "sha256": "5736248cb1445834de9a9511abc77b8958bae4b7444c691e0473de8fa3ce3245",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        154
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-154/original-execution-10.json",
+      "sha256": "033400e895eab366e0941d253a00bd0905c78b923b18be4af9222b1f8d99237a",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        154
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-154/original-execution-11.json",
+      "sha256": "52ff28722c8181a4f277437f5887bece24f8f6fa3deecf27e59f464b7c210ed5",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        154
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-154/original-execution-12.json",
+      "sha256": "f60f789f38754d1ed0100c5acce6ccf8b63b853646fd7285963452905479389a",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        154
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-154/original-execution-13.json",
+      "sha256": "bec3e543f9326f23093a1e282be2f12e5d9958161fab31b8136c6f3b03284314",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        154
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-154/original-execution-14.json",
+      "sha256": "5997852f5f6b2f80230d3cf470bbd30dbae5f844324730719f529345d3e0ce66",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        154
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-154/original-execution-15.json",
+      "sha256": "308efcdcccb972ddf6937a68d7fbe96281daa71307b1e30ce0407495411ec6e8",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        154
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-154/original-execution-16.json",
+      "sha256": "1b99b17fdbd9633a6e72e6fa29c8efaae18c07aed1db9636716a415d25a90ade",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        155
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-155/original-01.json",
+      "sha256": "ddc557f3f1cca1a74f172f5da2844c96960b3be2be32534d3b3e1816cef2cf25",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        155
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-155/original-02.json",
+      "sha256": "6234adeab8b2fa42071a1f361a89080e0b930da914db3457b1d2fb58dd4deffb",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        155
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-155/original-execution-01.json",
+      "sha256": "ddc557f3f1cca1a74f172f5da2844c96960b3be2be32534d3b3e1816cef2cf25",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        155
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-155/original-execution-02.json",
+      "sha256": "6234adeab8b2fa42071a1f361a89080e0b930da914db3457b1d2fb58dd4deffb",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        156
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-156/original-01.json",
+      "sha256": "8c3f4ca9b1c70a4fc9bf576af35d770ee898df3e368a25a3c4bd1584135ba825",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        156
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-156/original-execution-01.json",
+      "sha256": "8c3f4ca9b1c70a4fc9bf576af35d770ee898df3e368a25a3c4bd1584135ba825",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        157
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-157/original-01.json",
+      "sha256": "3c58e1db80cd24f63c4d658c3476cd7859bbf4cf9104d4a69e0ba89fe11ced44",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        157
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-157/original-execution-01.json",
+      "sha256": "3c58e1db80cd24f63c4d658c3476cd7859bbf4cf9104d4a69e0ba89fe11ced44",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        158
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-158/original-01.json",
+      "sha256": "99e2d4327b80d820429d1d66002c762994922ea3cff0c3d028b31bedfa73433d",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        158
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-158/original-02.json",
+      "sha256": "3950eaedced4b64ea74fca77fe3327ff97c2b3efc73bbb92fac4a70fd6ceeb11",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        158
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-158/original-03.json",
+      "sha256": "071f42db4953a93aa0c454b673fce779811e92c99aa720ad2d2d60f89c2819cc",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        158
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-158/original-04.json",
+      "sha256": "6bbc0732e74912400c60735ba9ec0aeeab9f0221c6754f4bae2ff4b1db395ecc",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        158
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-158/original-05.json",
+      "sha256": "89658bbceae387f5147b506df8906c705926a929ceb8e4ecb651e3aa24a5a8bc",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        158
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-158/original-06.json",
+      "sha256": "d2aba3a37976b1eac9c711c874e748283e49fb1cadc7a63f2a43d747b6045253",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        158
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-158/original-07.json",
+      "sha256": "e3c8da21ca078b67731bea8c5c579bd63ba29bfbca717450080315c063acf1d9",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        158
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-158/original-08.json",
+      "sha256": "021e48daa08a1581e023303422edc47d315dfad635b2c2b569c8ad490add21af",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        158
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-158/original-09.json",
+      "sha256": "c0623d992553a62340eb19abdf6556f3df529a5937714c9a0283e4cab6604a64",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        158
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-158/original-10.json",
+      "sha256": "041eb92a87dcb42c4fb5385aa6e9470a402200c6d011a51573046d339ab66374",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        158
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-158/original-11.json",
+      "sha256": "5176c8febe573e0c4f06bbcf42ab8370b93c5d9f40da8296d9cd25ae0be8b5e3",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        158
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-158/original-12.json",
+      "sha256": "49acc9978fae373b150937260ed4c3764b8b99700b7cf2932182768c8d16a9ef",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        158
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-158/original-13.json",
+      "sha256": "d0c53584eb28cb5ffe9be0bdb5c756f2c91dad5fa6553957cafe9894d96b1c7e",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        158
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-158/original-14.json",
+      "sha256": "6b2972f52bf42f0a720885a75c0cb5972f47135e43e118b99beeb535327a4c10",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        158
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-158/original-15.json",
+      "sha256": "ee162f4930ed3f4d4106b6cf9c39b678563d7af1f18965963e8bc520126b6e35",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        158
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-158/original-16.json",
+      "sha256": "f49637b05e120c182d1702c450a573e4c57ff8350610236a15b44a318a4d5285",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        158
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-158/original-execution-01.json",
+      "sha256": "99e2d4327b80d820429d1d66002c762994922ea3cff0c3d028b31bedfa73433d",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        158
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-158/original-execution-02.json",
+      "sha256": "3950eaedced4b64ea74fca77fe3327ff97c2b3efc73bbb92fac4a70fd6ceeb11",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        158
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-158/original-execution-03.json",
+      "sha256": "071f42db4953a93aa0c454b673fce779811e92c99aa720ad2d2d60f89c2819cc",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        158
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-158/original-execution-04.json",
+      "sha256": "6bbc0732e74912400c60735ba9ec0aeeab9f0221c6754f4bae2ff4b1db395ecc",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        158
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-158/original-execution-05.json",
+      "sha256": "89658bbceae387f5147b506df8906c705926a929ceb8e4ecb651e3aa24a5a8bc",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        158
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-158/original-execution-06.json",
+      "sha256": "d2aba3a37976b1eac9c711c874e748283e49fb1cadc7a63f2a43d747b6045253",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        158
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-158/original-execution-07.json",
+      "sha256": "e3c8da21ca078b67731bea8c5c579bd63ba29bfbca717450080315c063acf1d9",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        158
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-158/original-execution-08.json",
+      "sha256": "021e48daa08a1581e023303422edc47d315dfad635b2c2b569c8ad490add21af",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        158
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-158/original-execution-09.json",
+      "sha256": "c0623d992553a62340eb19abdf6556f3df529a5937714c9a0283e4cab6604a64",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        158
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-158/original-execution-10.json",
+      "sha256": "041eb92a87dcb42c4fb5385aa6e9470a402200c6d011a51573046d339ab66374",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        158
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-158/original-execution-11.json",
+      "sha256": "5176c8febe573e0c4f06bbcf42ab8370b93c5d9f40da8296d9cd25ae0be8b5e3",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        158
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-158/original-execution-12.json",
+      "sha256": "49acc9978fae373b150937260ed4c3764b8b99700b7cf2932182768c8d16a9ef",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        158
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-158/original-execution-13.json",
+      "sha256": "d0c53584eb28cb5ffe9be0bdb5c756f2c91dad5fa6553957cafe9894d96b1c7e",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        158
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-158/original-execution-14.json",
+      "sha256": "6b2972f52bf42f0a720885a75c0cb5972f47135e43e118b99beeb535327a4c10",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        158
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-158/original-execution-15.json",
+      "sha256": "ee162f4930ed3f4d4106b6cf9c39b678563d7af1f18965963e8bc520126b6e35",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        158
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-158/original-execution-16.json",
+      "sha256": "f49637b05e120c182d1702c450a573e4c57ff8350610236a15b44a318a4d5285",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        159
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-159/original-01.json",
+      "sha256": "61688460de2328582f876ddafc62fa8531a0bf65969df3fd410b1d1b9baae801",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        159
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-159/original-02.json",
+      "sha256": "b965e23b13730daf6c360604bbaf0496c37a08dc7c3bfc6d3f4532fa12240613",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        159
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-159/original-03.json",
+      "sha256": "d9013c3f78346cf3eaa18e0d636cf384b31dad264cecb88c464c5e5d2d2e93e9",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        159
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-159/original-04.json",
+      "sha256": "b7c23baf2dc81d940c30bf0dc89f33c396574adf2517f0a5a3e256de92b98ff8",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        159
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-159/original-05.json",
+      "sha256": "16d20e6f59dc2597ebb8be96cabc5175242964ca24bd993c0724bcfdb80292fb",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        159
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-159/original-06.json",
+      "sha256": "20ac003f08c80c5efe6147e3c1e50e84a752328c1a1f237b68a8b4060df71579",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        159
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-159/original-07.json",
+      "sha256": "f732e8f8e7420e93b50055baa717eb55d303ef075e4601e9fb6df18e5a5557bc",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        159
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-159/original-08.json",
+      "sha256": "dc66ece5b500f6ebf8677533305029987cf53f789d15c72731c12b92145254f4",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        159
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-159/original-09.json",
+      "sha256": "ab2dfb41086660326be2a06735507030f0b180c1c394825580731f45a35bcc6c",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        159
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-159/original-10.json",
+      "sha256": "70aaa2aa1ff6072acec28433528c11bd228000bcd5c008af105d3a92f3cc5830",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        159
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-159/original-11.json",
+      "sha256": "80ccc3b9a844b6f4ba767fbcf9ff0133e16c56a3d8e8e66d9604af906e53205e",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        159
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-159/original-12.json",
+      "sha256": "14a3e9b86f481758b75fee57f5e9745d225c25d348ecc29fcdbd40a18fa4a605",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        159
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-159/original-13.json",
+      "sha256": "d328f7f19c4423490b9d5a4c21029dbeec67c9f93db4cc9182c390d33b4cd0c4",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        159
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-159/original-14.json",
+      "sha256": "d182d5c333d40f461f06f639565c8662269469eae9963a270fa58405c5f0f418",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        159
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-159/original-15.json",
+      "sha256": "3c318cfba4b5f569c397476f49261d01839b6113a47f21918595bcecc35eb95d",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        159
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-159/original-16.json",
+      "sha256": "71362da8f85b40547148b053a43230e7ee2b0d16646e74f2e1888a56ef66eec1",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        159
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-159/original-execution-01.json",
+      "sha256": "61688460de2328582f876ddafc62fa8531a0bf65969df3fd410b1d1b9baae801",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        159
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-159/original-execution-02.json",
+      "sha256": "b965e23b13730daf6c360604bbaf0496c37a08dc7c3bfc6d3f4532fa12240613",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        159
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-159/original-execution-03.json",
+      "sha256": "d9013c3f78346cf3eaa18e0d636cf384b31dad264cecb88c464c5e5d2d2e93e9",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        159
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-159/original-execution-04.json",
+      "sha256": "b7c23baf2dc81d940c30bf0dc89f33c396574adf2517f0a5a3e256de92b98ff8",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        159
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-159/original-execution-05.json",
+      "sha256": "16d20e6f59dc2597ebb8be96cabc5175242964ca24bd993c0724bcfdb80292fb",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        159
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-159/original-execution-06.json",
+      "sha256": "20ac003f08c80c5efe6147e3c1e50e84a752328c1a1f237b68a8b4060df71579",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        159
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-159/original-execution-07.json",
+      "sha256": "f732e8f8e7420e93b50055baa717eb55d303ef075e4601e9fb6df18e5a5557bc",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        159
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-159/original-execution-08.json",
+      "sha256": "dc66ece5b500f6ebf8677533305029987cf53f789d15c72731c12b92145254f4",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        159
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-159/original-execution-09.json",
+      "sha256": "ab2dfb41086660326be2a06735507030f0b180c1c394825580731f45a35bcc6c",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        159
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-159/original-execution-10.json",
+      "sha256": "70aaa2aa1ff6072acec28433528c11bd228000bcd5c008af105d3a92f3cc5830",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        159
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-159/original-execution-11.json",
+      "sha256": "80ccc3b9a844b6f4ba767fbcf9ff0133e16c56a3d8e8e66d9604af906e53205e",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        159
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-159/original-execution-12.json",
+      "sha256": "14a3e9b86f481758b75fee57f5e9745d225c25d348ecc29fcdbd40a18fa4a605",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        159
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-159/original-execution-13.json",
+      "sha256": "d328f7f19c4423490b9d5a4c21029dbeec67c9f93db4cc9182c390d33b4cd0c4",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        159
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-159/original-execution-14.json",
+      "sha256": "d182d5c333d40f461f06f639565c8662269469eae9963a270fa58405c5f0f418",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        159
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-159/original-execution-15.json",
+      "sha256": "3c318cfba4b5f569c397476f49261d01839b6113a47f21918595bcecc35eb95d",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        159
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-159/original-execution-16.json",
+      "sha256": "71362da8f85b40547148b053a43230e7ee2b0d16646e74f2e1888a56ef66eec1",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        160
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-160/original-01.json",
+      "sha256": "b24e3d840cde237643535038ceb326bb626d659dafcb359d972df8aac7d6aadf",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        160
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-160/original-02.json",
+      "sha256": "cf4a27a36b742093cfd07933f939a0abaecc6b8821afae15e9ffdd8e10fb426a",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        160
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-160/original-execution-01.json",
+      "sha256": "b24e3d840cde237643535038ceb326bb626d659dafcb359d972df8aac7d6aadf",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        160
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-160/original-execution-02.json",
+      "sha256": "cf4a27a36b742093cfd07933f939a0abaecc6b8821afae15e9ffdd8e10fb426a",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        161
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-161/original-01.json",
+      "sha256": "cbe9393a754fc15d9ec37613673a74607628180625f1ba7d29804f6415f35df1",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        161
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-161/original-execution-01.json",
+      "sha256": "cbe9393a754fc15d9ec37613673a74607628180625f1ba7d29804f6415f35df1",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        162
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-162/original-01.json",
+      "sha256": "cd7050d3b2884c9dbf16f62c99fa5f949b8f4954a81c75d50230606c2757d1c7",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        162
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-162/original-02.json",
+      "sha256": "3814501448bbb3666812bc4595bef732a1a07b4f536f5ed8132fe7980e25bc88",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        162
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-162/original-03.json",
+      "sha256": "635eb9f403dcde126fdfcd3a39be78d73d5f3b77982fb3d5a444b30245b415c0",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        162
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-162/original-04.json",
+      "sha256": "ae1d0e591b25f5cf5e7d40fc32b53bbce5924fbbc7dbd41e3346afe1a9012aee",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        162
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-162/original-05.json",
+      "sha256": "fa7645f8b17e1b61ad117b716eccbb765b1631eac04786526f025091efe3c4f2",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        162
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-162/original-06.json",
+      "sha256": "e32ee124847b8cd40a629f9a7b8b24b133dc6ba1ed71bd47342d6cb6f8c52dee",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        162
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-162/original-07.json",
+      "sha256": "aecb15e9968d5dee913cbf065a44bd6144750e28d9a0b1f49a1895b430731b08",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        162
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-162/original-08.json",
+      "sha256": "37439aa2c6d0408fddf7881f8bbd08953571742e241f73e1231d1fc684321878",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        162
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-162/original-09.json",
+      "sha256": "04f5bfe2820d917b05b21751aa135b4a0e810a6e2d3966e265bdaf988e714516",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        162
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-162/original-10.json",
+      "sha256": "70ab8e2ca1e7742e6301c7fcced94038c84b4e5e3a9735240a1770c35d85f99b",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        162
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-162/original-11.json",
+      "sha256": "b6b615e5085f95d146b3082947c3a1b2042510fef1c74dc218a713ce39161854",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        162
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-162/original-execution-01.json",
+      "sha256": "cd7050d3b2884c9dbf16f62c99fa5f949b8f4954a81c75d50230606c2757d1c7",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        162
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-162/original-execution-02.json",
+      "sha256": "3814501448bbb3666812bc4595bef732a1a07b4f536f5ed8132fe7980e25bc88",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        162
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-162/original-execution-03.json",
+      "sha256": "635eb9f403dcde126fdfcd3a39be78d73d5f3b77982fb3d5a444b30245b415c0",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        162
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-162/original-execution-04.json",
+      "sha256": "ae1d0e591b25f5cf5e7d40fc32b53bbce5924fbbc7dbd41e3346afe1a9012aee",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        162
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-162/original-execution-05.json",
+      "sha256": "fa7645f8b17e1b61ad117b716eccbb765b1631eac04786526f025091efe3c4f2",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        162
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-162/original-execution-06.json",
+      "sha256": "e32ee124847b8cd40a629f9a7b8b24b133dc6ba1ed71bd47342d6cb6f8c52dee",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        162
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-162/original-execution-07.json",
+      "sha256": "aecb15e9968d5dee913cbf065a44bd6144750e28d9a0b1f49a1895b430731b08",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        162
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-162/original-execution-08.json",
+      "sha256": "37439aa2c6d0408fddf7881f8bbd08953571742e241f73e1231d1fc684321878",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        162
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-162/original-execution-09.json",
+      "sha256": "04f5bfe2820d917b05b21751aa135b4a0e810a6e2d3966e265bdaf988e714516",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        162
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-162/original-execution-10.json",
+      "sha256": "70ab8e2ca1e7742e6301c7fcced94038c84b4e5e3a9735240a1770c35d85f99b",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        162
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-162/original-execution-11.json",
+      "sha256": "b6b615e5085f95d146b3082947c3a1b2042510fef1c74dc218a713ce39161854",
+      "worktree": "EnvJudge-aea-llm"
+    },
+    {
+      "actual_bridge_seeds": [
+        162
+      ],
+      "path": "runs/e6-iterative-low-viability-v2/task-162/original-execution-12.json",
+      "sha256": "c14146c44a30da2ed68ade54f78927ec6945a9bfa7408f26df5b3cab071ad94f",
+      "worktree": "EnvJudge-aea-llm"
+    }
+  ],
+  "prior_audit_path": "experiments/alfworld_e6/frozen/iterative_low_viability_v2/used_task_audit.json",
+  "prior_audit_sha256": "0a1e90a825018b4a07a276fb9a170f8e37e8215cccde9603a0b05c36be03f835",
+  "prior_commit": "6fbf237f749e48e099bd75ea5a9c79b8d2cdc94e",
+  "prior_full_inventory_sha256": "1e7a11e1573fdf3ff42dd8e73f0eb682685656afe49ff8b26c73168bff7e8ee8",
+  "reproduction_script_sha256": {
+    "build_viability_topup_audit.py.txt": "6c804fa43f5f7089a8ac6b46203984ab8ca9f534a22d31ff811b7c8ce5096520",
+    "finalize_viability_topup_audit.py.txt": "6864d940c4443884be8a4cfa95fb5f76f58cb969e56bde8a3a96e432a9370655"
+  },
+  "schema": "aea-alfworld-used-bridge-seeds-topup-v1",
+  "smallest_never_used": 163,
+  "start_id": 163,
+  "starting_baseline_sha256": "77d3a690c10f2454b2d505d67fc3875fba83afa3aa63f47240fa1277cc67182c",
+  "starting_safety": {
+    "/home/kree/work/EnvJudge": {
+      "HEAD": "f97260589475bf4412f2310b1dfbcc1c34816547",
+      "branch": "main",
+      "status_short_raw": " ? third_party/envharness\n"
+    },
+    "/home/kree/work/EnvJudge-aea-llm": {
+      "HEAD": "6fbf237f749e48e099bd75ea5a9c79b8d2cdc94e",
+      "branch": "aea-llm-vnext",
+      "status_short_raw": ""
+    }
+  },
+  "used_task_ids": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79,
+    80,
+    81,
+    82,
+    83,
+    84,
+    85,
+    86,
+    87,
+    88,
+    89,
+    90,
+    91,
+    92,
+    93,
+    94,
+    95,
+    96,
+    97,
+    98,
+    99,
+    100,
+    101,
+    102,
+    103,
+    104,
+    105,
+    106,
+    107,
+    108,
+    109,
+    110,
+    111,
+    112,
+    113,
+    114,
+    115,
+    116,
+    117,
+    118,
+    119,
+    120,
+    121,
+    122,
+    123,
+    124,
+    125,
+    126,
+    127,
+    128,
+    129,
+    130,
+    131,
+    132,
+    133,
+    134,
+    135,
+    136,
+    137,
+    138,
+    139,
+    140,
+    141,
+    142,
+    143,
+    144,
+    145,
+    146,
+    147,
+    148,
+    149,
+    150,
+    151,
+    152,
+    153,
+    154,
+    155,
+    156,
+    157,
+    158,
+    159,
+    160,
+    161,
+    162
+  ]
+}

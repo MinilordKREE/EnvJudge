@@ -1,0 +1,48 @@
+#!/usr/bin/env python3
+"""Finalize prospective offline audit at authorized USD25 adaptation cap.
+
+Only /tmp audit artifacts are written. Keeps the uncommitted USD20 planning
+snapshot separately; no method, experiment, prior report or raw run changes.
+"""
+import hashlib
+import json
+from pathlib import Path
+import shutil
+
+OUT=Path('/tmp/viability_topup_audit')
+DRAFT=Path('/tmp/viability_topup_audit_draft20')
+DRAFT.mkdir(exist_ok=False)
+
+def sha(path):return hashlib.sha256(path.read_bytes()).hexdigest()
+def write(path,obj):path.write_text(json.dumps(obj,indent=2,sort_keys=True)+'\n')
+for name in ['cost_basis.json','used_task_audit.json','USED_TASKS_AUDIT.md']:
+    shutil.copyfile(OUT/name,DRAFT/name)
+cost=json.loads((OUT/'cost_basis.json').read_text())
+core=cost['recent_core_ZERO_policy']; overall=cost['recent_all_valid_policy']; plan=cost['planning']
+cost['recommendation_usd']=25.0
+cost['adaptation_confirmation_committed_cost_cap_usd']=25.0
+cost['continuation_combined_ceiling_usd']=29.0
+cost['prior_v2_screening_committed_usd']=7.994786072
+cost['historical_v2_screening_included_in_continuation_cap']=False
+cost['cap_increase_after_adaptation_starts']=False
+plan['remaining_failed_reservation_and_variability_allowance_usd']=25-plan['subtotal_before_failed_reservations_usd']
+plan['weighted_typical_failed_reservations_usd']=120*core['uncertain_per_episode_usd']+64*overall['uncertain_per_episode_usd']
+plan['weighted_typical_total_including_failed_reservations_usd']=plan['subtotal_before_failed_reservations_usd']+plan['weighted_typical_failed_reservations_usd']
+plan['core_maximum_184_returned_policy_usd']=184*core['returned_per_episode_usd']
+plan['core_maximum_184_failed_reservations_usd']=184*core['uncertain_per_episode_usd']
+plan['headroom_above_core_maximum_retry_inclusive_projection_usd']=25-plan['all184_at_recent_core_committed_mean_plus12designer_usd']
+cost['interpretation']='Separate USD25 adaptation/confirmation hard cap rounds above the measured core maximum-count retry-inclusive projection of USD24.0152928293 (184 policy episodes plus12 designer calls at recent peak conservative return). The120adaptation+64confirmation weighted typical projection is separately reported. Failed-request reservations remain committed exposure. This is a measured planning scenario, not a completion guarantee or statistical upper bound. USD4 top-up +USD25 adaptation =USD29 continuation ceiling; prior USD7.994786072 screening is sunk and reported separately. No cap increase after adaptation starts.'
+write(OUT/'cost_basis.json',cost)
+shutil.copyfile('/tmp/build_viability_topup_audit.py',OUT/'build_viability_topup_audit.py.txt')
+shutil.copyfile(__file__,OUT/'finalize_viability_topup_audit.py.txt')
+audit=json.loads((OUT/'used_task_audit.json').read_text())
+audit['cost_basis_sha256']=sha(OUT/'cost_basis.json')
+audit['reproduction_script_sha256']={'build_viability_topup_audit.py.txt':sha(OUT/'build_viability_topup_audit.py.txt'),'finalize_viability_topup_audit.py.txt':sha(OUT/'finalize_viability_topup_audit.py.txt')}
+audit['adaptation_confirmation_committed_cost_cap_usd']=25.0
+audit['additional_topup_screening_cap_usd']=4.0
+audit['continuation_combined_ceiling_usd']=29.0
+write(OUT/'used_task_audit.json',audit)
+text=(OUT/'USED_TASKS_AUDIT.md').read_text().split('Separate USD20')[0]
+text+=f'''Separate adaptation/confirmation hard cap: **USD25**. Top-up cap: **USD4**. Combined continuation ceiling: **USD29**. Prior USD7.994786072 is sunk cost reported separately.\n\nMeasured120adaptation+64confirmation+12designer returned cost: USD{plan['subtotal_before_failed_reservations_usd']:.9f}. Remaining reservation/variability allowance: USD{plan['remaining_failed_reservation_and_variability_allowance_usd']:.9f}. Weighted typical failed-reservation exposure: USD{plan['weighted_typical_failed_reservations_usd']:.9f}; retry-inclusive total: USD{plan['weighted_typical_total_including_failed_reservations_usd']:.9f}. All184policy episodes at recent core ZERO retry-inclusive mean plus12designer peak returns: USD{plan['all184_at_recent_core_committed_mean_plus12designer_usd']:.9f}. USD25 rounds above this measured maximum-count scenario; it is not a guaranteed completion bound. Never increase after adaptation starts.\n'''
+(OUT/'USED_TASKS_AUDIT.md').write_text(text)
+print(json.dumps({'status':'FINALIZED','hashes':{p.name:sha(p) for p in OUT.iterdir() if p.name not in ['source_inventory.json','generic_seed_domains.json']},'cost_plan':plan},indent=2))
