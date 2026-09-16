@@ -1,0 +1,42 @@
+{
+  "audit_stage": "Before publication sanitization; retained as earlier offline implementation evidence.",
+  "driver_sha256": "4305c2ba554c2ef7244524efc27b1acf8d3303ef5f57fc90853afdc978904a75",
+  "helpers": {
+    "assert_fresh_episode_ids": {
+      "byte_identical": true,
+      "new_sha256": "15c194d37bcdd00abad0fc53a240c7ed1d327dcd4b358a6c8e9bdb6592c7e12e",
+      "v3_sha256": "15c194d37bcdd00abad0fc53a240c7ed1d327dcd4b358a6c8e9bdb6592c7e12e"
+    },
+    "confirm": {
+      "byte_identical": true,
+      "new_sha256": "4e81957cfcb4eb676b2b53c9a5f3eb63f59c1c1ba284113e85d57257c4941ff4",
+      "v3_sha256": "4e81957cfcb4eb676b2b53c9a5f3eb63f59c1c1ba284113e85d57257c4941ff4"
+    },
+    "require_pass": {
+      "byte_identical": true,
+      "new_sha256": "347bbb1505e1302ef6e3607bba25339c38d918a9a855622e4d637ce88a6aea5e",
+      "v3_sha256": "347bbb1505e1302ef6e3607bba25339c38d918a9a855622e4d637ce88a6aea5e"
+    },
+    "run_task": {
+      "admission_class_binding": "ScreenedLowOptimizer aliases new JudgedLowOptimizer; no old grammar admission",
+      "new_sha256": "43d76c51c70065b9ee96df99b1526857c382fdd53e3b8fb4077c2c6a0d9271d3",
+      "only_change_old_terminal_uncertain_clause": true,
+      "v3_sha256": "c016def80a55112c7d53dac8986ba39edcc25467715efe60f8bda1d71ee3daeb"
+    },
+    "scoped_three_call_budget": {
+      "byte_identical": true,
+      "new_sha256": "e57dfaa1a51df65d92ebd540f1f0a58655bc0154e33ce1cf7820beccb1c9b9f6",
+      "v3_sha256": "e57dfaa1a51df65d92ebd540f1f0a58655bc0154e33ce1cf7820beccb1c9b9f6"
+    },
+    "validate_traces": {
+      "byte_identical": true,
+      "new_sha256": "5e29b66e570d2fcb5d287a04996526cf8349ef6bd4d9192d3d5601a3984f868c",
+      "v3_sha256": "5e29b66e570d2fcb5d287a04996526cf8349ef6bd4d9192d3d5601a3984f868c"
+    }
+  },
+  "offline_preflight_fix": "verified_originals enforces singleton-list archive shape, uses exact original16 manifest IDs/hash/aggregate; no paid run preceded fix",
+  "offline_tests_passed": 49,
+  "publication_followup": "publication_preflight.json",
+  "source_edits": "new driver only; production changes owned/reviewed separately",
+  "test_sha256": "750e681e6e39c5739b1f51d8e3278caaadbca94b00dd3d04cb11c1f6b5a6c023"
+}

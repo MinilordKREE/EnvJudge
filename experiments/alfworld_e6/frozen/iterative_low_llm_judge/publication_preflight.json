@@ -1,0 +1,54 @@
+{
+  "dedicated_driver_tests_passed": 99,
+  "engineering_paid_calls": 0,
+  "engineering_spend_usd": 0,
+  "final_commit_audit": "Must PASS on exact amended HEAD before push; final result stays in local private audit store.",
+  "format": "PASS",
+  "input_audit": {
+    "checks": 914755,
+    "sha256": "636a8afc5ba6df8b8f43d2bead56257cbed7216dbffe7132f55bcf9081445410",
+    "status": "PASS"
+  },
+  "input_manifest_sha256": "d41c397eeea1afc435e7050ee73171f84f4296ebe622e8843bb112102f3e7b2c",
+  "integration": "Prior implementation preflight: 10 passed, 1 optional Ray skip; unchanged environment/method modules were not rerun for storage-only sanitization.",
+  "method": "All src files unchanged from local implementation; 15 execution/decision/accounting driver bodies byte-identical, see publication_storage_method_audit.json.",
+  "mypy": "PASS src/tests and strict driver",
+  "outgoing_parent": "2295d1524798af9bdd17d1955082109a8b56a1bc",
+  "pre_commit": {
+    "all_files": true,
+    "log_sha256": "942760896d97dc0fb37822af66b9af50173e00e0c0a27e600036b165e43aef9f",
+    "status": "PASS"
+  },
+  "private_storage": {
+    "all_gitignored": true,
+    "files_present": 44,
+    "frozen_physical_validation_cases": 21,
+    "frozen_unique_judge_inputs": 17,
+    "migrated_original_files": 40,
+    "original_file_bytes_preserved": true,
+    "tracked_private_files": 0
+  },
+  "publication_scanner": {
+    "fingerprints": 501,
+    "full_history_cache_sha256": "487046aef0f7fc0cf58985896d8eec2860d8b8a9b882b566edae15dbe4c21c93",
+    "prior_blobs_searched": 3046,
+    "prior_objects_searched": 4430,
+    "selfchecks_passed": 94,
+    "sha256": "d94ace3bf272d1c6be743123a4f6ae8262e0f68aa741bd3884e5b6f9833c50d3",
+    "unsanitized_positive_control_sensitive_paths": 19
+  },
+  "ruff": "PASS",
+  "scope": "Publication-only sanitization; no paid validation authorized or started.",
+  "source_manifest_sha256": "518f992089a6c4fc9ef72748ea25f5dc0700be06952a05d6e3b6c3857c10ecf1",
+  "source_sha256": "129344ad6f30e2838f726f435cd3090aa95f2e034d93e7f6c03ff90cc8240c12",
+  "strict_export_review": "PASS: non-metadata values rejected before public serialization; no rejected contents in error messages.",
+  "superseded_local_commit": "ff8c633506b535442e854bbb2122568ee315464e",
+  "test_sha256": "4b856e27f7dd41473661d9460d00398399426159fc3e703921080a0e8a7bea70",
+  "unit": {
+    "integration_deselected": 11,
+    "passed": 607
+  },
+  "validation_manifest_sha256": "04e9e309810e4ac881c0b8c4f1e3234101d3fbcc474021a1ae14fee12a2d5e32",
+  "validation_paid_calls": 0,
+  "validation_spend_usd": 0
+}

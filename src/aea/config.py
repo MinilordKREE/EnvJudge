@@ -61,6 +61,7 @@ class AEAConfig(StrictModel):
         "llm_v1_assistive_rules",
         "llm_v2_iterative_low",
         "llm_v2_iterative_low_semantic_gate",
+        "llm_v2_iterative_low_llm_judge",
     ] = "v0.4"
     """Which method the controller runs. ``v0.4`` (default; a config without the field is v0.4)
     is the box of docs/spec/AEA_v0.4.md unchanged; ``llm_v1`` (docs/spec/AEA_llm_v1.md) replaces
@@ -77,7 +78,10 @@ class AEAConfig(StrictModel):
     bounded two-call LOW DESIGN, followed by
     frozen-family CONTROL; HIGH/MID remain llm_v1. The explicit
     ``llm_v2_iterative_low_semantic_gate`` adds independent offline semantic screening
-    before certification, keeping that optimizer unchanged. Same schema: the field has a default."""
+    before certification, keeping that optimizer unchanged.
+    ``llm_v2_iterative_low_llm_judge`` replaces that local screen with an independent
+    benchmark-general LLM judge; FAIL and UNCERTAIN permit bounded redesign.
+    Same schema: the field has a default."""
     band_t: tuple[float, float] = (0.4, 0.6)
     """Target band B_T: the accept range is B_T expressed at ``probe[1]`` rollouts."""
     band_l: tuple[float, float] = (0.2, 0.8)

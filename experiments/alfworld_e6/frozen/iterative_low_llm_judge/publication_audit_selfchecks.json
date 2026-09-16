@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "checks": 94,
+  "failures": 0,
+  "script_sha256": "d94ace3bf272d1c6be743123a4f6ae8262e0f68aa741bd3884e5b6f9833c50d3",
+  "covered": [
+    "saved source raw/JSON-escaped twice/Python repr",
+    "reference structures under reordered/indented JSON",
+    "compact action arrays and Python route list literals",
+    "embedded exact saved159C2 positive control",
+    "replacement synthetic159C2 negative control",
+    "single ubiquitous action negative control",
+    "credential positive control"
+  ],
+  "all_payloads_in_memory": true
+}

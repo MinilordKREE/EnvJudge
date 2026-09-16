@@ -1,0 +1,75 @@
+{
+  "audit_stage": "Before publication sanitization; retained as earlier offline implementation evidence.",
+  "driver_mypy": "PASS: strict new driver, follow-imports=silent; imported archived scripts retain pre-existing type diagnostics",
+  "format": "PASS",
+  "integration": {
+    "passed": 10,
+    "skip": "optional Ray-dependent corpus loader",
+    "skipped": 1
+  },
+  "logs": {
+    "controller_after_import_fix": {
+      "file": "preflight_logs/controller_after_import_fix.txt",
+      "sha256": "c4b808d34f4db00b333696dec1f3a43a2887d8bfe0cb7af07a3cb98ff43a7830"
+    },
+    "driver_mypy": {
+      "file": "preflight_logs/driver_mypy.txt",
+      "sha256": "5d4b6d285b77932e3d08212c3b4974d0a803f98ec60408ac6ccf6a063fa6c19e"
+    },
+    "format": {
+      "file": "preflight_logs/format.txt",
+      "sha256": "d7c211682ac4a89663dc79f242647c3da0b4c4dc492b512acf58d7f76cf9b71c"
+    },
+    "integration": {
+      "file": "preflight_logs/integration.txt",
+      "sha256": "22e007f3d71bcffe72a114d57d635ec254c0705aea5495ab4eb53c4773835d56"
+    },
+    "mypy": {
+      "file": "preflight_logs/mypy.txt",
+      "sha256": "a7c4aae49ff9d21cbf4edf1b955366f4cb545b2dbf41b63329a9f1c16b3b0c5d"
+    },
+    "old_semantic_benchmark": {
+      "file": "preflight_logs/old_semantic_benchmark.txt",
+      "sha256": "8ff74b8cf0870f9eaa4625d1d1d7839e00f4bf610c7b44cbd3deb5c0c6494615"
+    },
+    "pre_commit": {
+      "file": "preflight_logs/pre_commit.txt",
+      "sha256": "942760896d97dc0fb37822af66b9af50173e00e0c0a27e600036b165e43aef9f"
+    },
+    "ruff": {
+      "file": "preflight_logs/ruff.txt",
+      "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+    },
+    "unit": {
+      "file": "preflight_logs/unit.txt",
+      "sha256": "e6e97a558566d22844c326422f899ac12a6af9b5709f3cf867d03e160146e6f9"
+    }
+  },
+  "mypy": "PASS: default project src/tests (105 files)",
+  "old_semantic_benchmark": {
+    "FAIL": 9,
+    "PASS": 3,
+    "UNCERTAIN": 2,
+    "all_matched": true
+  },
+  "paid_calls_before_preflight": 0,
+  "pre_commit": "PASS",
+  "preservation": {
+    "checks": 2839,
+    "failures": [],
+    "main": {
+      "HEAD": "f97260589475bf4412f2310b1dfbcc1c34816547\n",
+      "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": " ? third_party/envharness\n"
+    },
+    "passed": true,
+    "starting_research_HEAD": "2295d1524798af9bdd17d1955082109a8b56a1bc"
+  },
+  "publication_followup": "publication_preflight.json",
+  "ruff": "PASS",
+  "starting_HEAD": "2295d1524798af9bdd17d1955082109a8b56a1bc",
+  "unit": {
+    "integration_deselected": 11,
+    "passed": 557
+  }
+}

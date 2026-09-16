@@ -77,7 +77,9 @@ from aea.io import (
     write_corpus_entry,
 )
 from aea.llm.types import Attribution, BudgetName, ChatRequest, ChatResponse
+from aea.llm_privilege_low import JudgedLowOptimizer, LLMLowPrivilegeScreen
 from aea.low_optimizer import Feedback, LowEnvironmentOptimizer, propose_low
+from aea.privilege_judge import PrivilegeJudge
 from aea.rules_control import assist_bracket
 from aea.semantic_low import LowPrivilegeScreen, ScreenedLowOptimizer
 from aea.session import SESSION_LOCK, Session
@@ -162,8 +164,10 @@ class Controller:
         leverage: LeverageTable | None = None,
         reference: ReferenceProvider | None = None,
         assist_provider: AssistProvider | None = None,
+        privilege_judge: PrivilegeJudge | None = None,
     ) -> None:
         self.config = config
+        self._privilege_judge = privilege_judge
         self.reference = reference
         """``llm_v1`` LOW only: the privileged reference provider (None = failure-only mode)."""
         self.assist_provider = assist_provider
@@ -429,6 +433,7 @@ class Controller:
         return self.config.method_version.startswith("llm_v1") or self.config.method_version in (
             "llm_v2_iterative_low",
             "llm_v2_iterative_low_semantic_gate",
+            "llm_v2_iterative_low_llm_judge",
         )
 
     def _harden(self, task: TaskRef, est: EstimateResult) -> TaskOutcome:
@@ -616,6 +621,7 @@ class Controller:
         if self.config.method_version in (
             "llm_v2_iterative_low",
             "llm_v2_iterative_low_semantic_gate",
+            "llm_v2_iterative_low_llm_judge",
         ):
             return self._stage_iterative_low(task, est)
         if self.config.method_version == "llm_v1_stage_control":
@@ -983,9 +989,13 @@ class Controller:
             )
         evidence = serialize_low(failures, est.p_hat, est.n, reference, rich=True)
         ctx = FamilyContext(task.task_id, ())
-        privilege_screen: LowPrivilegeScreen | None = None
-        if self.config.method_version == "llm_v2_iterative_low_semantic_gate":
-            privilege_screen = LowPrivilegeScreen(
+        privilege_screen: LowPrivilegeScreen | LLMLowPrivilegeScreen | None = None
+        llm_screen: LLMLowPrivilegeScreen | None = None
+        if self.config.method_version in (
+            "llm_v2_iterative_low_semantic_gate",
+            "llm_v2_iterative_low_llm_judge",
+        ):
+            screen_kwargs: dict[str, Any] = dict(
                 task_id=task.task_id,
                 reference=reference,
                 designer_evidence=serialize_low(failures, est.p_hat, est.n, None).text,
@@ -994,9 +1004,20 @@ class Controller:
                 open_original_session=lambda: self.substrate.open_session(task, None, None),
                 max_bisections=self.config.impl.max_bisections,
                 max_steps=self.config.impl.policy_max_steps,
-                audit_dir=self.run_dir / "semantic_privilege_inputs",
+                audit_dir=self.run_dir
+                / (
+                    "llm_privilege_inputs"
+                    if self.config.method_version == "llm_v2_iterative_low_llm_judge"
+                    else "semantic_privilege_inputs"
+                ),
                 record=lambda record: self._append(
-                    self.run_dir / "semantic_privilege.jsonl", record
+                    self.run_dir
+                    / (
+                        "llm_privilege.jsonl"
+                        if self.config.method_version == "llm_v2_iterative_low_llm_judge"
+                        else "semantic_privilege.jsonl"
+                    ),
+                    record,
                 ),
                 task_prompt=str(getattr(self.substrate, "task_prompt", "")),
                 action_format=str(
@@ -1005,6 +1026,18 @@ class Controller:
                     )
                 ),
             )
+
+            if self.config.method_version == "llm_v2_iterative_low_llm_judge":
+                judge = self._privilege_judge
+                if judge is None:
+                    factory = getattr(self.substrate, "privilege_judge", None)
+                    if not callable(factory):
+                        raise InfraError("independent privilege judge unavailable", kind="config")
+                    judge = factory(self._attr(task, "privilege_judge", "none"))
+                llm_screen = LLMLowPrivilegeScreen(judge=judge, **screen_kwargs)
+                privilege_screen = llm_screen
+            else:
+                privilege_screen = LowPrivilegeScreen(**screen_kwargs)
 
         def propose(feedback: Feedback | None, index: int) -> dict[str, Any]:
             args = propose_low(
@@ -1027,6 +1060,8 @@ class Controller:
             return args
 
         def certify(candidate: Candidate) -> Solvable:
+            if llm_screen is not None:
+                llm_screen.require_pass_candidate(candidate, 1.0)
             with SESSION_LOCK:
                 return solvable(
                     candidate,
@@ -1059,8 +1094,18 @@ class Controller:
             "remaining": lambda: self.budget.account(task.task_id).remaining(),
             "endpoint_reserve": 2 * self.config.probe[1],
         }
-        optimizer = (
-            ScreenedLowOptimizer(
+        optimizer: LowEnvironmentOptimizer
+        if llm_screen is not None:
+            optimizer = JudgedLowOptimizer(
+                evidence,
+                failures,
+                reference,
+                task_goal(failures),
+                screen=llm_screen.screen,
+                **optimizer_kwargs,
+            )
+        elif isinstance(privilege_screen, LowPrivilegeScreen):
+            optimizer = ScreenedLowOptimizer(
                 evidence,
                 failures,
                 reference,
@@ -1068,11 +1113,10 @@ class Controller:
                 screen=privilege_screen.screen,
                 **optimizer_kwargs,
             )
-            if privilege_screen is not None
-            else LowEnvironmentOptimizer(
+        else:
+            optimizer = LowEnvironmentOptimizer(
                 evidence, failures, reference, task_goal(failures), **optimizer_kwargs
             )
-        )
         try:
             result = optimizer.run()
         finally:

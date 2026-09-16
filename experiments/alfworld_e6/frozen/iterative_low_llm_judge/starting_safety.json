@@ -1,0 +1,14 @@
+{
+  "created_at": "2026-09-16T13:33:26.519504+00:00",
+  "research": {
+    "HEAD": "2295d1524798af9bdd17d1955082109a8b56a1bc\n",
+    "branch": "aea-llm-vnext\n",
+    "status": "",
+    "worktrees": "/home/kree/work/EnvJudge          f972605 [main]\n/home/kree/work/EnvJudge-aea-llm  2295d15 [aea-llm-vnext]\n"
+  },
+  "main": {
+    "HEAD": "f97260589475bf4412f2310b1dfbcc1c34816547\n",
+    "status": " ? third_party/envharness\n",
+    "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

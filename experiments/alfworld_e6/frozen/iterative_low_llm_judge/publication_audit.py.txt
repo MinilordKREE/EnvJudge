@@ -1,0 +1,395 @@
+#!/usr/bin/env python3
+"""Read-only Git publication audit; sensitive search patterns stay in /tmp.
+
+This is a targeted fingerprint screen, not a proof of arbitrary data isolation.
+It reads an explicitly retained unpublished archive and historical local benchmark
+references, then checks HEAD, the index, the worktree, and every outgoing object.
+The output contains hashes/paths/categories only, never matched content.
+"""
+from __future__ import annotations
+
+import argparse
+import ast
+import collections
+import gzip
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+import subprocess
+import tempfile
+import time
+
+
+DEFAULT_ARCHIVE = "ff8c633506b535442e854bbb2122568ee315464e"
+PREFIX = "experiments/alfworld_e6/frozen/iterative_low_llm_judge/"
+
+
+def sha(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
+
+
+def canonical(value: object) -> bytes:
+    return json.dumps(value, sort_keys=True, ensure_ascii=False, separators=(",", ":")).encode()
+
+
+def walk(value: object):
+    yield value
+    if isinstance(value, dict):
+        for child in value.values():
+            yield from walk(child)
+    elif isinstance(value, list):
+        for child in value:
+            yield from walk(child)
+
+
+class Audit:
+    def __init__(self, root: Path, archive: str):
+        self.root = root
+        self.archive = archive
+        self.fingerprints: dict[str, dict] = {}
+        self.variants: dict[bytes, set[str]] = collections.defaultdict(set)
+        self.references: dict[str, set[str]] = collections.defaultdict(set)
+        self.action_sequences: dict[str, set[str]] = collections.defaultdict(set)
+        self.sources: dict[str, set[str]] = collections.defaultdict(set)
+        self.provenance: list[dict] = []
+
+    def git(self, *args: str, input_data: bytes | None = None) -> bytes:
+        return subprocess.check_output(["git", "-C", str(self.root), *args], input=input_data,
+                                       stderr=subprocess.PIPE,
+                                       env={**os.environ, "GIT_OPTIONAL_LOCKS": "0"})
+
+    def add(self, value: str, category: str, provenance: str, minimum: int = 80):
+        if len(value) < minimum or len(set(value.split())) < 5:
+            return
+        data = value.encode()
+        fid = sha(category.encode() + b"\0" + data)
+        rec = self.fingerprints.setdefault(fid, {
+            "category": category, "content_sha256": sha(data), "utf8_bytes": len(data),
+            "provenance": [],
+        })
+        if provenance not in rec["provenance"]:
+            rec["provenance"].append(provenance)
+        variants = {data}
+        for ascii_mode in (False, True):
+            encoded = value
+            for _ in range(2):
+                encoded = json.dumps(encoded, ensure_ascii=ascii_mode)[1:-1]
+                variants.add(encoded.encode())
+        variants.add(repr(value)[1:-1].encode())
+        for variant in variants:
+            self.variants[variant].add(fid)
+
+    def add_reference(self, obj: dict, provenance: str):
+        actions, steps = obj.get("actions"), obj.get("steps")
+        if isinstance(actions, list) and isinstance(steps, list) and len(actions) >= 2:
+            self.references[sha(canonical({"actions": actions, "steps": steps}))].add(provenance)
+            self.action_sequences[sha(canonical(actions))].add(provenance)
+            # Whole sequences avoid treating a ubiquitous single action as private.
+            self.add(json.dumps(actions, ensure_ascii=False), "reference_action_sequence", provenance, 35)
+            self.add(json.dumps(actions, ensure_ascii=False, separators=(",", ":")),
+                     "reference_action_sequence", provenance, 35)
+        for value in walk(obj):
+            if isinstance(value, str):
+                self.add(value, "reference_observation_or_text", provenance)
+
+    def add_source(self, source: str, provenance: str):
+        self.add(source, "saved_candidate_source", provenance)
+        try:
+            normalized = ast.dump(ast.parse(source), include_attributes=False)
+            self.sources[sha(normalized.encode())].add(provenance)
+        except SyntaxError:
+            pass
+        # Long task-bearing comments/statements also catch copied source excerpts.
+        for line in source.splitlines():
+            if any(word in line.lower() for word in ("bread", "potato", "pillow", "reference", "hint", "remind")):
+                self.add(line.strip(), "saved_candidate_source_excerpt", provenance, 80)
+
+    def load_fingerprints(self):
+        paths = self.git("ls-tree", "-r", "--name-only", self.archive, PREFIX).decode().splitlines()
+        for path in paths:
+            if "/judge_inputs/" not in path and not path.endswith("saved_candidates.json"):
+                continue
+            data = self.git("show", f"{self.archive}:{path}")
+            obj = json.loads(data)
+            self.provenance.append({"kind": "retained_unpublished_commit", "path": path,
+                                    "sha256": sha(data), "bytes": len(data)})
+            if isinstance(obj, dict) and "privileged_reference" in obj:
+                self.add_reference(obj["privileged_reference"], path)
+                for key in ("candidate_artifact", "designer_evidence_summary", "learner_authorized_evidence",
+                            "optional_runtime_surface_deltas"):
+                    for value in walk(obj.get(key)):
+                        if isinstance(value, str):
+                            self.add(value, "archived_raw_judge_input", path)
+                    if key == "candidate_artifact" and isinstance(obj.get(key), str):
+                        self.add_source(obj[key], path)
+            if path.endswith("saved_candidates.json"):
+                for value in walk(obj):
+                    if isinstance(value, dict) and isinstance(value.get("rules_code"), str):
+                        self.add_source(value["rules_code"], path)
+                    elif isinstance(value, str):
+                        self.add(value, "saved_candidate_metadata", path)
+        for task, run in ((110, "e6-iterative-low-smoke"), (154, "e6-iterative-low-viability-v3"),
+                          (159, "e6-iterative-low-viability-v3")):
+            path = f"runs/{run}/task-{task}/privileged_reference.json"
+            file = self.root / path
+            if not file.is_file():
+                raise RuntimeError("required_archived_reference_missing")
+            data = file.read_bytes()
+            obj = json.loads(data)
+            self.add_reference(obj, path)
+            self.provenance.append({"kind": "preserved_local_reference", "path": path,
+                                    "sha256": sha(data), "bytes": len(data)})
+
+    def detect(self, data: bytes) -> dict:
+        matches = set()
+        for pattern, ids in self.variants.items():
+            if pattern in data:
+                matches.update(ids)
+        structured, sequences, sources, parsed = [], [], [], None
+        try:
+            parsed = json.loads(data)
+        except (ValueError, UnicodeDecodeError):
+            pass
+        if parsed is not None:
+            for value in walk(parsed):
+                if isinstance(value, list) and len(value) >= 2 and all(isinstance(x, str) for x in value):
+                    digest = sha(canonical(value))
+                    if digest in self.action_sequences:
+                        sequences.append(digest)
+                if isinstance(value, dict) and "actions" in value and "steps" in value:
+                    digest = sha(canonical({"actions": value["actions"], "steps": value["steps"]}))
+                    if digest in self.references:
+                        structured.append(digest)
+                if isinstance(value, str) and "class _Rules" in value:
+                    self.detect_source(value, sources)
+        if b"class _Rules" in data or (parsed is None and (b"[" in data or b"(" in data)):
+            try:
+                tree = ast.parse(data.decode())
+                self.detect_source(data.decode(), sources)
+                for node in ast.walk(tree):
+                    if isinstance(node, (ast.List, ast.Tuple)):
+                        try:
+                            literal = ast.literal_eval(node)
+                            if len(literal) >= 2 and all(isinstance(x, str) for x in literal):
+                                digest = sha(canonical(list(literal)))
+                                if digest in self.action_sequences:
+                                    sequences.append(digest)
+                        except (ValueError, TypeError):
+                            pass
+                    if isinstance(node, ast.Constant) and isinstance(node.value, str) and "class _Rules" in node.value:
+                        self.detect_source(node.value, sources)
+            except (SyntaxError, UnicodeDecodeError):
+                pass
+        credentials = {
+            "openai_style_key": rb"\bsk-(?:proj-)?[A-Za-z0-9_-]{20,}",
+            "github_token": rb"\b(?:gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,})",
+            "aws_access_key": rb"\b(?:AKIA|ASIA)[A-Z0-9]{16}\b",
+            "private_key_header": rb"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----",
+            "bearer_literal": rb"(?i)\bBearer [A-Za-z0-9_.-]{24,}",
+        }
+        return {"fingerprint_ids": sorted(matches), "structured_reference_sha256": sorted(set(structured)),
+                "normalized_reference_action_sequence_sha256": sorted(set(sequences)),
+                "normalized_candidate_ast_sha256": sorted(set(sources)),
+                "credential_marker_categories": sorted(k for k, v in credentials.items() if re.search(v, data))}
+
+    def detect_source(self, value: str, out: list):
+        try:
+            digest = sha(ast.dump(ast.parse(value), include_attributes=False).encode())
+            if digest in self.sources:
+                out.append(digest)
+        except SyntaxError:
+            pass
+
+    def object_inventory(self, revision: str, *, blobs_only: bool = True) -> tuple[dict[str, str], dict[str, int]]:
+        rows = self.git("rev-list", "--objects", revision).decode().splitlines()
+        names = {}
+        for row in rows:
+            oid, _, path = row.partition(" ")
+            names[oid] = path
+        checked = self.git("cat-file", "--batch-check=%(objectname) %(objecttype) %(objectsize)",
+                           input_data=("\n".join(names) + "\n").encode()).decode().splitlines()
+        blobs = {bits[0]: int(bits[2]) for row in checked if (bits := row.split())[1] == "blob" or not blobs_only}
+        return {oid: names[oid] for oid in blobs}, blobs
+
+    def prior_hits(self, base: str, wanted: set[str]) -> dict:
+        names, sizes = self.object_inventory(base)
+        selected = {pattern: ids & wanted for pattern, ids in self.variants.items() if ids & wanted}
+        # git grep uses native multi-pattern matching over all reachable prior blobs.
+        # Only hashes are returned. Multiline patterns use a long anchor and exact
+        # verification below; the temporary pattern file is never a repository file.
+        anchors = set()
+        for pattern in selected:
+            lines = [line for line in pattern.splitlines() if len(line) >= 40]
+            if lines:
+                anchors.add(max(lines, key=len)[:160])
+        matches = set()
+        if anchors:
+            with tempfile.NamedTemporaryFile(prefix="publication-patterns-", dir="/tmp") as handle:
+                handle.write(b"\n".join(sorted(anchors)) + b"\n")
+                handle.flush()
+                ids = list(names)
+                for start in range(0, len(ids), 200):
+                    result = subprocess.run(["git", "-C", str(self.root), "grep", "-a", "-l", "-F", "-f",
+                                             handle.name, *ids[start:start + 200]], stdout=subprocess.PIPE,
+                                            stderr=subprocess.PIPE)
+                    if result.returncode not in (0, 1):
+                        raise RuntimeError("prior_history_search_failed")
+                    matches.update(result.stdout.decode().splitlines())
+        witnesses = collections.defaultdict(list)
+        for oid in sorted(matches):
+            data = self.git("cat-file", "blob", oid)
+            seen = set()
+            for pattern, ids in selected.items():
+                if pattern in data:
+                    seen.update(ids)
+            for fid in seen:
+                witnesses[fid].append({"git_blob_oid": oid, "historical_path": names[oid]})
+        all_names, all_sizes = self.object_inventory(base, blobs_only=False)
+        for oid in all_names.keys() - names.keys():
+            data = self.git("cat-file", "-p", oid)
+            seen = set()
+            for pattern, ids in selected.items():
+                if pattern in data:
+                    seen.update(ids)
+            for fid in seen:
+                witnesses[fid].append({"git_nonblob_oid": oid, "historical_path": all_names[oid]})
+        return {"reachable_prior_blob_count": len(names), "reachable_prior_blob_bytes": sum(sizes.values()),
+                "reachable_prior_object_count": len(all_names), "reachable_prior_object_bytes": sum(all_sizes.values()),
+                "anchor_matching_blob_count": len(matches), "fingerprint_witnesses": dict(witnesses)}
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--repo", default="/home/kree/work/EnvJudge-aea-llm")
+    ap.add_argument("--archive", default=DEFAULT_ARCHIVE)
+    ap.add_argument("--base", default="origin/aea-llm-vnext")
+    ap.add_argument("--head", default="HEAD")
+    ap.add_argument("--output", default="/tmp/llm_judge_publication_audit.json")
+    ap.add_argument("--history-cache", default="/tmp/llm_judge_publication_history_cache.json",
+                    help="Reuse a completed full-history scan only for identical origin/corpus hashes")
+    ap.add_argument("--skip-history-search", action="store_true", help="Intermediate use only; never yields publication PASS")
+    args = ap.parse_args()
+    output = Path(args.output).resolve()
+    if not output.is_relative_to(Path("/tmp")):
+        raise SystemExit("Audit output must stay under /tmp")
+    audit = Audit(Path(args.repo).resolve(), args.archive)
+    base = audit.git("rev-parse", args.base).decode().strip()
+    head = audit.git("rev-parse", args.head).decode().strip()
+    status_start = audit.git("status", "--porcelain=v1", "--untracked-files=all")
+    audit.load_fingerprints()
+    findings, inventory, cache = [], [], {}
+
+    def inspect(data: bytes, scope: str, path: str, oid: str | None = None):
+        digest = sha(data)
+        result = cache.get(digest)
+        if result is None:
+            result = audit.detect(data)
+            if data.startswith(b"\x1f\x8b"):
+                decoded = gzip.decompress(data)
+                nested = audit.detect(decoded)
+                for key in result:
+                    result[key] = sorted(set(result[key]) | set(nested[key]))
+            cache[digest] = result
+        row = {"scope": scope, "path": path, "git_blob_oid": oid, "sha256": digest, "bytes": len(data)}
+        inventory.append(row)
+        if any(result.values()):
+            findings.append({**row, **result})
+
+    changed = audit.git("diff", "--name-only", "--diff-filter=ACMRT", base, head).decode().splitlines()
+    for path in changed:
+        oid = audit.git("rev-parse", f"{head}:{path}").decode().strip()
+        inspect(audit.git("cat-file", "blob", oid), "new_HEAD_tree", path, oid)
+    outgoing, sizes = audit.object_inventory(f"{base}..{head}")
+    for oid, path in outgoing.items():
+        inspect(audit.git("cat-file", "blob", oid), "all_outgoing_history_blobs", path, oid)
+    outgoing_all, all_sizes = audit.object_inventory(f"{base}..{head}", blobs_only=False)
+    for oid in outgoing_all.keys() - outgoing.keys():
+        inspect(audit.git("cat-file", "-p", oid), "all_outgoing_nonblob_objects",
+                outgoing_all[oid] or f"git-object/{oid}", oid)
+    staged = audit.git("diff", "--cached", "--name-only", "--diff-filter=ACMRT", base).decode().splitlines()
+    for path in staged:
+        oid = audit.git("rev-parse", f":{path}").decode().strip()
+        inspect(audit.git("cat-file", "blob", oid), "index_vs_origin", path, oid)
+    worktree = set(audit.git("diff", "--name-only", "--diff-filter=ACMRT", base).decode().splitlines())
+    worktree.update(audit.git("ls-files", "--others", "--exclude-standard").decode().splitlines())
+    for path in sorted(worktree):
+        file = audit.root / path
+        if file.is_file():
+            inspect(file.read_bytes(), "current_worktree_or_untracked", path)
+    wanted = {fid for row in findings for fid in row["fingerprint_ids"]}
+    history_cache = Path(args.history_cache).resolve()
+    if not history_cache.is_relative_to(Path("/tmp")):
+        raise RuntimeError("history_cache_must_stay_under_tmp")
+    corpus_hash = sha(canonical(sorted((sha(pattern), sorted(ids)) for pattern, ids in audit.variants.items())))
+    cache_data = json.loads(history_cache.read_bytes()) if history_cache.is_file() else {}
+    cache_valid = (cache_data.get("schema") == "full_history_fingerprint_search_v1"
+                   and cache_data.get("origin_commit") == base
+                   and cache_data.get("fingerprint_corpus_sha256") == corpus_hash
+                   and cache_data.get("searched_fingerprint_ids") == sorted(audit.fingerprints))
+    if args.skip_history_search:
+        history = {"not_run": True}
+    elif cache_valid:
+        history = cache_data["history"]
+        history["cache_reused"] = True
+        history["cache_sha256"] = sha(history_cache.read_bytes())
+    else:
+        history = audit.prior_hits(base, set(audit.fingerprints))
+        cache_data = {"schema": "full_history_fingerprint_search_v1", "origin_commit": base,
+                      "fingerprint_corpus_sha256": corpus_hash, "searched_fingerprint_ids": sorted(audit.fingerprints),
+                      "created_at_unix": time.time(), "history": history}
+        history_cache.write_text(json.dumps(cache_data, indent=2, sort_keys=True) + "\n")
+        history["cache_reused"] = False
+        history["cache_sha256"] = sha(history_cache.read_bytes())
+    history["searched_fingerprint_count"] = 0 if args.skip_history_search else len(audit.fingerprints)
+    history["search_scope"] = "all_known_fingerprints_against_all_reachable_prior_objects"
+    prior_ids = set(history.get("fingerprint_witnesses", {}))
+    for row in findings:
+        row["preexisting_public_fingerprint_count"] = len(set(row["fingerprint_ids"]) & prior_ids)
+        row["not_found_in_prior_history_count"] = len(set(row["fingerprint_ids"]) - prior_ids)
+    status_end = audit.git("status", "--porcelain=v1", "--untracked-files=all")
+    worktree_unchanged = all((audit.root / row["path"]).is_file()
+                            and sha((audit.root / row["path"]).read_bytes()) == row["sha256"]
+                            for row in inventory if row["scope"] == "current_worktree_or_untracked")
+    index_unchanged = all(audit.git("rev-parse", f":{row['path']}").decode().strip() == row["git_blob_oid"]
+                          for row in inventory if row["scope"] == "index_vs_origin")
+    stable = (status_start == status_end and audit.git("rev-parse", args.head).decode().strip() == head
+              and worktree_unchanged and index_unchanged)
+    commit_ids = audit.git("rev-list", f"{base}..{head}").decode().splitlines()
+    result = {
+        "schema": "llm_judge_publication_audit_v1", "checked_at_unix": time.time(),
+        "status": "FAIL" if findings else ("INCOMPLETE" if args.skip_history_search or not stable else "PASS"),
+        "archive_commit": audit.archive, "origin_baseline_commit": base, "audited_head_commit": head,
+        "script_sha256": sha(Path(__file__).read_bytes()), "stable_snapshot": stable,
+        "outgoing_commits": commit_ids, "outgoing_blob_count": len(outgoing),
+        "outgoing_object_count": len(outgoing_all), "outgoing_object_bytes": sum(all_sizes.values()),
+        "outgoing_blob_bytes": sum(sizes.values()), "scope_counts": dict(collections.Counter(r["scope"] for r in inventory)),
+        "fingerprint_count": len(audit.fingerprints), "reference_structure_count": len(audit.references),
+        "reference_action_sequence_count": len(audit.action_sequences),
+        "normalized_saved_candidate_count": len(audit.sources), "source_provenance": audit.provenance,
+        "findings": findings, "finding_count": len(findings),
+        "sensitive_paths": sorted({r["path"] for r in findings}), "prior_history_search": history,
+        "matched_fingerprints": {fid: audit.fingerprints[fid] for fid in sorted(wanted)},
+        "inventory": inventory,
+        "policy": "New changed/outgoing archived raw payload matches fail even if matching material is already public; unchanged prior historical paths are not publication additions.",
+        "limitations": ["Fingerprint screen cannot prove absence of paraphrases or arbitrary encodings.",
+                       "Detects raw, JSON-escaped once/twice, Python repr, normalized saved-source AST, and gzip-decoded content.",
+                       "Short ubiquitous actions are excluded; complete multi-action sequences and reference structures are screened.",
+                       "The origin ref is a local cached ref; this audit makes no network calls.",
+                       "Concurrent index/worktree mutation requires a rerun against the final amended commit."],
+    }
+    output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
+    print(json.dumps({"status": result["status"], "output": str(output), "output_sha256": sha(output.read_bytes()),
+                      "finding_count": len(findings), "sensitive_paths": result["sensitive_paths"],
+                      "stable_snapshot": stable}, sort_keys=True))
+    return 1 if findings else (2 if result["status"] != "PASS" else 0)
+
+
+if __name__ == "__main__":
+    try:
+        raise SystemExit(main())
+    except (RuntimeError, subprocess.CalledProcessError, ValueError, OSError) as exc:
+        # Exception text may contain content; report only its class.
+        print(json.dumps({"status": "AUDIT_ERROR", "error_type": type(exc).__name__}))
+        raise SystemExit(2)

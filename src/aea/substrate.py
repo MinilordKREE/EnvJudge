@@ -31,6 +31,7 @@ from aea.llm.ledger import Ledger
 from aea.llm.pricing import CostBreakdown, PricingTable, load_pricing
 from aea.llm.types import Attribution, ChatRequest, ChatResponse, Usage
 from aea.policy_skills import inject
+from aea.privilege_judge import JudgeConfig, LLMPrivilegeJudge, PrivilegeJudge
 from aea.runner import AeaSubprocessRunner, dispatch, episode_spec, ledger_path_for_process
 from aea.session import Session, open_session
 from aea.settings import load_settings
@@ -95,6 +96,7 @@ class AeaSubstrate:
                 ledger=self.ledger,
                 pricing=self.pricing,
             )
+        self._judge_client: OpenAICompatibleClient | None = None
         self._gamefiles: dict[str, str] = {}
 
     # -- Substrate protocol ---------------------------------------------------------
@@ -175,6 +177,28 @@ class AeaSubstrate:
     def designer_model(self) -> str:
         return self._designer_model
 
+    def privilege_judge(self, attribution: Attribution) -> PrivilegeJudge:
+        """Separate client and fresh context; no designer request/history is reused."""
+        config = JudgeConfig()
+        if self._judge_client is None:
+            llm = config.llm_config()
+            key = load_settings().require(llm.api_key_env.lower())
+            self._judge_client = OpenAICompatibleClient(
+                config=llm,
+                transport=make_openai_transport(
+                    api_key=key, base_url=llm.base_url, timeout_s=llm.timeout_s
+                ),
+                ledger=self.ledger,
+                pricing=load_pricing(Path("configs/privilege_judge_pricing.yaml")),
+            )
+        client = self._judge_client
+
+        def complete(request: ChatRequest) -> ChatResponse:
+            with attributed(request.attribution, request.seed):
+                return client.complete(request)
+
+        return LLMPrivilegeJudge(complete, config=config, attribution=attribution)
+
     def has_oracle(self) -> bool:
         return True  # ALFWorld ships a handcoded expert (read through the session's proxy)
 
@@ -192,7 +216,12 @@ def reference_provider(
     with ``task_id`` / ``seed``)."""
     if not (
         config.method_version.startswith("llm_v1")
-        or config.method_version in ("llm_v2_iterative_low", "llm_v2_iterative_low_semantic_gate")
+        or config.method_version
+        in (
+            "llm_v2_iterative_low",
+            "llm_v2_iterative_low_semantic_gate",
+            "llm_v2_iterative_low_llm_judge",
+        )
     ):
         return None
     return ExpertReference(

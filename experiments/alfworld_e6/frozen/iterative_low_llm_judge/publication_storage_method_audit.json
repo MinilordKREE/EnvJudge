@@ -1,0 +1,24 @@
+{
+  "base_commit": "ff8c633506b535442e854bbb2122568ee315464e",
+  "driver_sha256": "129344ad6f30e2838f726f435cd3090aa95f2e034d93e7f6c03ff90cc8240c12",
+  "test_sha256": "4b856e27f7dd41473661d9460d00398399426159fc3e703921080a0e8a7bea70",
+  "protected_bodies_byte_identical": {
+    "config": true,
+    "CappedTransport": true,
+    "cap_lock": true,
+    "initialize_cap": true,
+    "check_cap": true,
+    "cost_check": true,
+    "make_judge": true,
+    "capture_failures": true,
+    "verified_originals": true,
+    "validation_decision": true,
+    "run_task": true,
+    "confirm": true,
+    "scoped_three_call_budget": true,
+    "require_pass": true,
+    "decision_for": true
+  },
+  "dedicated_tests_passed": 99,
+  "change_scope": "private artifact storage plus strict public metadata export validation only; judge/model/labels/policy/criteria unchanged"
+}

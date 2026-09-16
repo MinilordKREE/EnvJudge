@@ -1,0 +1,57 @@
+[
+  {
+    "path": "src/aea/privilege_judge.py",
+    "sha256": "691bc91f7999eec0d1e691dd32a1d962582e6b663e4a17fa205171da84abc869",
+    "unchanged_from_local_implementation": true
+  },
+  {
+    "path": "src/aea/llm_privilege_low.py",
+    "sha256": "aa2406d3ecc55ee216d94127062e95125d340fdd24084ffe927cf70fddd57913",
+    "unchanged_from_local_implementation": true
+  },
+  {
+    "path": "src/aea/low_optimizer.py",
+    "sha256": "7c23cffc2d3cff5dc64a6dcf1aa8d4f0ca622de4309367e0aff03091a842b749",
+    "unchanged_from_local_implementation": true
+  },
+  {
+    "path": "src/aea/controller.py",
+    "sha256": "4abb80e5c1e31cc2c4bd360386bc9df58b88a30bca23f87de2feb8bbeeea3485",
+    "unchanged_from_local_implementation": true
+  },
+  {
+    "path": "src/aea/designer.py",
+    "sha256": "3f0185ac12291a753d0de54b2996baf93e0b8073db8f6ef0e5aaa3be9c2e2b65",
+    "unchanged_from_local_implementation": true
+  },
+  {
+    "path": "src/aea/substrate.py",
+    "sha256": "2357074344b3b5540ff3ca2e26dead4d7175d9359fcc3c717a156c80e8a37635",
+    "unchanged_from_local_implementation": true
+  },
+  {
+    "path": "src/aea/rules_control.py",
+    "sha256": "a325ab786c7a7d94d1035f5c4717ada0fe4ebe32401c84b1d93673962a87b653",
+    "unchanged_from_local_implementation": true
+  },
+  {
+    "path": "src/aea/evaluate.py",
+    "sha256": "c16ed353e610d2e4a730ca4de7d072b79c2d60388f528f3999d7701c074e1a07",
+    "unchanged_from_local_implementation": true
+  },
+  {
+    "path": "src/aea/witness.py",
+    "sha256": "f287954433d79a6d6087d31e76473b3a18f6de7f7f4724321d18057bf236b5ae",
+    "unchanged_from_local_implementation": true
+  },
+  {
+    "path": "src/aea/config.py",
+    "sha256": "ee3fd9919d4d45d6a11b518f69af0b330ac01c442f15ab5d16a3bd41a328c843",
+    "unchanged_from_local_implementation": true
+  },
+  {
+    "path": "configs/privilege_judge_pricing.yaml",
+    "sha256": "f54f67cb3a6af8565a801fdc47204d5a605f343bf785203fd25fba4900037c21",
+    "unchanged_from_local_implementation": true
+  }
+]

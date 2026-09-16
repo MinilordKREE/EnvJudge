@@ -1,0 +1,272 @@
+"""Independent read-only fixed-input audit; only output files under /tmp."""
+import collections
+import gzip
+import hashlib
+import io
+import json
+import os
+from pathlib import Path
+
+os.environ['LITELLM_LOCAL_MODEL_COST_MAP'] = 'True'
+from aea.designer import Reference, ReferenceStep, serialize_low
+from aea.llm.client import build_wire_request
+from aea.llm.types import Attribution, ChatMessage, ChatRequest
+from aea.privilege_judge import JudgeConfig, JUDGE_PROMPT, PrivilegeJudgeInput, judge_tool
+from envharness.core.types import Trace
+
+ROOT = Path('/home/kree/work/EnvJudge-aea-llm')
+FROZEN = ROOT / 'experiments/alfworld_e6/frozen/iterative_low_llm_judge'
+BASE = ROOT / 'runs/e6-iterative-low-llm-judge/private'
+PRIOR = ROOT / 'runs/e6-iterative-low-viability-v3'
+OUT = Path('/tmp/sanitized_fixed_input_audit.json')
+checks = collections.Counter()
+failures = []
+
+def check(ok, name, context=''):
+    checks[name] += 1
+    if not ok:
+        failures.append({'check': name, 'context': context})
+
+def sha(b):
+    return hashlib.sha256(b if isinstance(b, bytes) else b.encode()).hexdigest()
+
+def canon(v):
+    return json.dumps(v, sort_keys=True, ensure_ascii=False, separators=(',', ':'), allow_nan=False)
+
+def historical(v):
+    return sha(v if isinstance(v, str) else json.dumps(v, sort_keys=True))
+
+def read(p):
+    return json.loads(p.read_text())
+
+def reference(v):
+    return Reference(v.get('success', v.get('ok')), v['reason'], tuple(v['actions']),
+                     tuple(ReferenceStep(x['step'], x['observation'], tuple(x['admissible']), x['action']) for x in v['steps']))
+
+EXPECTED = {
+    'archived_task110':'FAIL', 'publicly_observed_location':'PASS',
+    'generic_prerequisite':'PASS', 'hidden_location_ranking':'FAIL',
+    'hidden_location_filtering':'FAIL', 'hidden_transition_feedback':'FAIL',
+    'delayed_location_ranking':'FAIL', 'dose_activated_location':'FAIL',
+    'goal_only_emphasis':'PASS', 'direct_reference_route':'FAIL',
+    'historical_failure_not_public':'FAIL', 'self_generated_laundering':'FAIL',
+    'public_goal_decomposition':'PASS',
+}
+REPEATS = ['archived_task110','publicly_observed_location','generic_prerequisite','direct_reference_route']
+SAVED = [(154,1),(159,1),(159,2),(159,3)]
+DOSES = [i/16 for i in range(17)]
+vm = read(FROZEN/'validation_manifest.json')
+im = read(FROZEN/'input_manifest.json')
+sm = read(FROZEN/'source_manifest.json')
+rows = vm['cases']
+by_id = {r['case_id']:r for r in rows}
+check(len(rows)==len(by_id)==21, '21_unique_rows')
+check(collections.Counter(r['role'] for r in rows)=={'regression':13,'repeat':4,'inspection':4}, 'exact_roles')
+check({r['case_id']:r['expected_verdict'] for r in rows if r['role']=='regression'}==EXPECTED,'fixed_labels')
+check([r['repeat_of'] for r in rows if r['role']=='repeat']==REPEATS,'four_repeat_members')
+check([(r['task_id'],r['call_index']) for r in rows if r['role']=='inspection']==SAVED,'saved_inspection_order')
+check(vm['judge_config']==JudgeConfig().model_dump(mode='json'),'frozen_judge_config')
+check(vm['physical_cap_usd']==3.0 and sm['caps_usd']=={'validation':3.0,'engineering':8.0},'separate_caps')
+source_hashes = {name:sha((ROOT/name).read_text()) for name in sm['source_hashes']}
+check(source_hashes==sm['source_hashes'],'frozen_source_runtime_files')
+check(not (BASE/'validation/cap.json').exists() and not (BASE/'engineering/cap.json').exists(),'no_paid_caps_yet')
+prior_manifest = ROOT/'experiments/alfworld_e6/frozen/iterative_low_viability_v3/input_manifest.json'
+check(sha(prior_manifest.read_text())==im['prior_manifest_sha256']=='ad6019cff5b1ee1712e892404cefd5eb2813f032341e322de782f277d8ada46d','prior_manifest_binding')
+prior_rows = {r['task_id']:r for r in read(prior_manifest)['tasks']}
+check(im['tasks']==[{k:v for k,v in prior_rows[t].items() if k != 'reference_reason'} for t in (154,159)],'exact_prior_task_rows')
+for table in ('archived_file_hashes','imported_file_hashes'):
+    for name,h in im[table].items():
+        check(sha((ROOT/name).read_bytes())==h,table,name)
+check(sha((BASE/'saved_candidates.json').read_text())==im['saved_candidates_sha256'],'saved_candidate_manifest_binding')
+saved = {(r['task_id'],r['call_index']):r for r in read(BASE/'saved_candidates.json')}
+task_data = {}
+for r in im['tasks']:
+    task=r['task_id']; old=PRIOR/f'task-{task}'; new=BASE/f'engineering/task-{task}'
+    traces = []
+    for i in range(1,17):
+        raw=read(old/f'original-{i:02}.json')
+        check(isinstance(raw,list) and len(raw)==1,'original_singleton_archive',f'{task}/{i}')
+        value=raw[0] if isinstance(raw,list) else raw
+        t=Trace.model_validate(value); traces.append(t)
+        check(not t.error and not t.success and t.rollout_seed==task and not t.candidate.rules_code and not t.candidate.in_env_actions,'original_zero_trace',f'{task}/{i}')
+        check(historical(t.model_dump(mode='json'))==r['all_original_trace_sha256'][i-1] and t.episode_id==r['all_original_episode_ids'][i-1],'original16_exact_hash_id',f'{task}/{i}')
+    selected=[Trace.model_validate(x) for x in read(new/'original_failures.json')]
+    ref_raw=read(new/'privileged_reference.json'); ref=reference(ref_raw)
+    check([t.episode_id for t in selected]==r['evidence_ids'],'seeded_three_ids',str(task))
+    check([historical(t.model_dump(mode='json')) for t in selected]==r['selected_trace_sha256'],'seeded_three_trace_hashes',str(task))
+    check(historical([t.model_dump(mode='json') for t in selected])==r['evidence_sha256'],'selected_evidence_hash',str(task))
+    check(historical(ref_raw)==r['reference_sha256'] and ref.ok,'verified_reference_hash',str(task))
+    check(serialize_low(selected,0.0,16,ref,rich=True).sha256==r['designer_evidence_sha256'],'exact_rich_design_serializer',str(task))
+    for name in ('original_failures.json','privileged_reference.json'):
+        check((old/name).read_bytes()==(new/name).read_bytes(),'byte_exact_prior_import',f'{task}/{name}')
+    proposals={x['call_index']:x for x in (json.loads(line) for line in (old/'adaptation/proposals.jsonl').read_text().splitlines())}
+    for (sid,idx),sv in saved.items():
+        if sid==task:check(sv=={'task_id':task,**proposals[idx]},'exact_saved_proposal',f'{task}/C{idx}')
+    task_data[task]=(selected,ref,ref_raw)
+
+def all_keys(v):
+    if isinstance(v,dict):
+        for k,x in v.items():
+            yield k; yield from all_keys(x)
+    elif isinstance(v,list):
+        for x in v:yield from all_keys(x)
+
+def independent_changes(before,after,path=()):
+    if isinstance(before,dict) and isinstance(after,dict):
+        out=[]
+        for key in sorted(before.keys() | after.keys()):
+            if key in before and key in after:out.extend(independent_changes(before[key],after[key],(*path,key)))
+            else:out.append({'path':list((*path,key)),'before_present':key in before,'after_present':key in after,'before':before.get(key),'after':after.get(key)})
+        return out
+    if isinstance(before,list) and isinstance(after,list) and len(before)==len(after):
+        return [c for i,(x,y) in enumerate(zip(before,after)) for c in independent_changes(x,y,(*path,i))]
+    if canon(before)==canon(after):return []
+    return [{'path':list(path),'before_present':True,'after_present':True,'before':before,'after':after}]
+
+def stream_probes(path):
+    rawhash=hashlib.sha256(); canonicalhash=hashlib.sha256(); canonicalhash.update(b'[')
+    decoder=json.JSONDecoder(); buffer=''; first=True; started=False; ended=False; count=0
+    with gzip.open(path,'rb') as zipped:
+        # Input JSON is UTF-8; incremental decoder preserves split code points.
+        import codecs
+        utf=codecs.getincrementaldecoder('utf-8')()
+        while True:
+            chunk=zipped.read(262144)
+            if chunk:rawhash.update(chunk)
+            buffer+=utf.decode(chunk,final=not chunk)
+            while True:
+                buffer=buffer.lstrip()
+                if not started:
+                    if not buffer:break
+                    if buffer[0]!='[':raise ValueError('expected raw probe array')
+                    buffer=buffer[1:];started=True;continue
+                if not buffer:break
+                if buffer[0]==',':buffer=buffer[1:];continue
+                if buffer[0]==']':ended=True;buffer=buffer[1:];break
+                try:value,n=decoder.raw_decode(buffer)
+                except json.JSONDecodeError:break
+                buffer=buffer[n:]
+                if not first:canonicalhash.update(b',')
+                canonicalhash.update(canon(value).encode());first=False;count+=1
+                yield value
+            if not chunk:break
+        check(ended and not buffer.strip(),'raw_json_stream_complete',str(path))
+    canonicalhash.update(b']')
+    return rawhash.hexdigest(),canonicalhash.hexdigest(),count
+
+case_reports=[]; raw_cache={}; input_bytes={}; reservations=[]
+fixture=read(ROOT/'tests/fixtures/semantic_privilege/task110.json')
+for row in rows:
+    cid=row['case_id']; path=BASE/row['input_file']; file_bytes=path.read_bytes(); data=json.loads(file_bytes)
+    parsed=PrivilegeJudgeInput.model_validate(data); payload=canon(parsed.model_dump(mode='json'))
+    check(sha(file_bytes)==row['input_file_sha256'],'input_file_sha',cid)
+    check(sha(data['candidate_artifact'])==row['source_sha256'],'full_source_hash',cid)
+    check(data['capture_coverage']['complete'] is True and data['capture_coverage']['errors']==[],'complete_capture',cid)
+    check(data['capture_coverage']['doses']==DOSES,'17_frozen_doses',cid)
+    check(len(payload.encode())<=1100000,'input_byte_bound',cid)
+    check(data['task_spec']=={'benchmark':'ALFWorld','task_id':str(row['task_id'])},'input_task_binding',cid)
+    forbidden={'expected_verdict','case_id','repeat_of','role','verdict','decision','judge_records','prior_judge','confirmation','K16'}
+    check(not (set(all_keys(data)) & forbidden),'no_outcome_metadata_in_payload',cid)
+    check(not any(token in payload for token in ['IMPLEMENTATION_FAILURE','JUDGE_GATE_READY','JUDGE_GATE_NOT_READY','K16','B_L','B_T','llm_privilege_uncertain','llm_privilege_fail']),'no_prior_gate_or_confirmation_text',cid)
+    check(not any(name in payload for name in by_id),'no_case_ids_in_payload',cid)
+    check(data['learner_authorized_evidence']['persistent_memory']=='None authorized across episodes.' and 'same episode' in data['learner_authorized_evidence']['scope'],'explicit_episode_scope',cid)
+    if row['role']=='repeat':
+        orig=by_id[row['repeat_of']]
+        check(file_bytes==(BASE/orig['input_file']).read_bytes() and row['expected_verdict']==orig['expected_verdict'],'byte_identical_repeat',cid)
+    if row['role']=='inspection':
+        key=(row['task_id'],row['call_index']);selected,ref,ref_raw=task_data[row['task_id']]
+        check(row['expected_verdict'] is None,'unlabeled_inspection',cid)
+        check(data['candidate_artifact']==saved[key]['arguments']['families'][0]['rules_code'],'exact_saved_source',cid)
+        check(data['candidate_change_summary']==saved[key]['arguments']['families'][0]['mechanism_summary'],'exact_saved_change_summary',cid)
+        check(data['privileged_reference']=={'ok':ref.ok,'reason':ref.reason,'actions':list(ref.actions),'steps':[{'step':s.step,'observation':s.observation,'admissible':list(s.admissible),'action':s.action} for s in ref.steps]},'complete_saved_reference',cid)
+        check(data['designer_evidence_summary']==serialize_low(selected,0.0,16,None).text,'exact_separate_designer_evidence',cid)
+        check(data['capture_coverage']['probe_count']==2601 and data['capture_coverage']['episode_count']==3,'inspection_grid_count',cid)
+    else:
+        check(data['privileged_reference']['actions']==fixture['reference']['actions'] and data['privileged_reference']['steps']==fixture['reference']['steps'],'full_task110_reference',cid)
+    cfg=JudgeConfig()
+    request=ChatRequest(model=cfg.model,temperature=cfg.temperature,seed=cfg.seed,max_tokens=cfg.max_tokens,thinking=cfg.thinking,
+        attribution=Attribution(phase='judge_validation',budget='none',arm='iterative_low_llm_judge',task_id=str(row['task_id'])),
+        messages=(ChatMessage(role='system',content=JUDGE_PROMPT),ChatMessage(role='user',content=payload)),
+        tools=(judge_tool(),),tool_choice={'type':'function','function':{'name':'record_privilege_decision'}})
+    wire=build_wire_request(request,cfg.llm_config())
+    wire_bytes=len(json.dumps(wire,ensure_ascii=False).encode());reserve=((wire_bytes+4096)*0.44+2048*1.32)/1000000
+    reservations.append(reserve)
+    case_reports.append({'case_id':cid,'role':row['role'],'expected':row['expected_verdict'],'input_file_sha256':row['input_file_sha256'],'source_sha256':row['source_sha256'],'canonical_input_bytes':len(payload.encode()),'wire_bytes':wire_bytes,'one_physical_attempt_reservation_usd':reserve,'probe_count':data['capture_coverage']['probe_count'],'episodes':data['capture_coverage']['episode_count']})
+    print(json.dumps({'precheck':cid,'input_bytes':len(payload.encode()),'reserve_usd':reserve}),flush=True)
+check(sum(reservations)<3.0,'21_initial_reservations_under3')
+Path('/tmp/sanitized_fixed_input_audit.progress.json').write_text(json.dumps({'case_reports':case_reports,'sum_initial_reservations_usd':sum(reservations),'failures':failures},indent=2)+'\n')
+
+for row in rows:
+    cid=row['case_id']
+    if row['role']=='repeat':continue
+    data=read(BASE/row['input_file']); packed=data['optional_runtime_surface_deltas']; values=dict(packed['value_table'])
+    for key,edit in packed['string_edit_table'].items():
+        base=values[edit['base_ref']];p=edit['prefix_chars'];s=edit['suffix_chars']
+        check(base[p:len(base)-s if s else len(base)]==edit['removed_text'],'exact_removed_string_middle',cid)
+        after=base[:p]+edit['inserted_text']+(base[-s:] if s else '')
+        check(sha(after)==edit['after_sha256'],'reconstructed_string_hash',cid);values[key]=after
+    public={ep['episode_id']:ep for ep in data['learner_authorized_evidence']['episodes']}
+    expected_keys={(eid,step,dose) for eid,ep in public.items() for step in range(len(ep['records'])) for dose in DOSES}
+    if row['role']=='inspection':
+        selected=task_data[row['task_id']][0]
+        check(set(public)=={t.episode_id for t in selected},'inspection_seeded_episode_grid',cid)
+        check(all(len(ep['records'])==51 for ep in public.values()),'inspection_51_prefixes',cid)
+    decoded=collections.defaultdict(list);cover={};active=set()
+    for group in packed['groups']:
+        check(group['error'] is None,'no_encoded_runtime_errors',cid)
+        changes=[{k:v for k,v in change.items() if k not in ('before_ref','after_ref')} | {'before':values[change['before_ref']],'after':values[change['after_ref']]} for change in group['changes']]
+        c=packed['coverage_table'][group['coverage_ref']]
+        check('same_original_state' in c and 'policy_formatter' in c,'encoded_coverage_complete',cid)
+        for eid,bydose in packed['activation_table'][group['activations_ref']].items():
+            for dose,ranges in bydose.items():
+                last=-1
+                for first,final in ranges:
+                    check(isinstance(first,int) and isinstance(final,int) and 0<=first<=final and first>last,'activation_range_valid',cid);last=final
+                    for step in range(first,final+1):
+                        key=(eid,step,float(dose));active.add(key);decoded[key].extend(changes)
+                        check(key in expected_keys,'activation_scoped_to_episode_prefix_dose',cid)
+                        check(key not in cover or cover[key]==c,'consistent_activation_coverage',cid);cover[key]=c
+    check(active==expected_keys,'encoded_full_activation_grid',cid)
+    rawpath=BASE/'validation/raw_probes'/f"{row['raw_probes_sha256']}.json.gz"
+    iterator=stream_probes(rawpath);seen=set();channels=collections.Counter()
+    while True:
+        try:probe=next(iterator)
+        except StopIteration as done:
+            raw_sha,canonical_sha,count=done.value;break
+        ev=probe['evidence'];key=(ev['episode_id'],ev['step'],float(probe['dose']))
+        check(key not in seen,'raw_probe_unique_grid',cid);seen.add(key)
+        check(ev['task_id']==str(row['task_id']) and ev['goal']==data['public_task_information']['instruction'],'raw_task_goal_scope',cid)
+        check(probe['error'] is None,'raw_capture_no_error',cid)
+        records=public[ev['episode_id']]['records'];step=ev['step']
+        check([r['step'] for r in records]==list(range(len(records))),'ordered_public_records',cid)
+        check(ev['observations']==[values[r['observation_ref']] for r in records[:step+1]],'only_current_episode_original_observation_prefix',cid)
+        check(ev['actions']==[values[r['preceding_action_ref']] for r in records[1:step+1]],'only_current_episode_original_action_prefix',cid)
+        check(ev['admissible_commands']==values[records[step]['visible_actions_ref']],'exact_current_public_actions',cid)
+        check(probe['baseline']['observation']['text']==ev['observations'][-1] and probe['baseline']['admissible_commands']==ev['admissible_commands'],'baseline_authorization_binding',cid)
+        actual=independent_changes(probe['baseline'],probe['transformed'])
+        check(collections.Counter(canon(c) for c in actual)==collections.Counter(canon(c) for c in decoded[key]),'all_raw_changes_exactly_reconstructed',cid)
+        check(sorted(probe['coverage'])==cover[key],'raw_coverage_exactly_reconstructed',cid)
+        channels.update(c['path'][0] for c in actual)
+    check(raw_sha==row['raw_probes_sha256'],'raw_file_content_hash',cid)
+    check(canonical_sha==data['capture_coverage']['raw_probe_sha256'],'raw_canonical_input_binding',cid)
+    check(seen==expected_keys and count==data['capture_coverage']['probe_count'],'raw_complete_grid',cid)
+    report=next(x for x in case_reports if x['case_id']==cid)
+    report.update(raw_content_sha256=raw_sha,raw_canonical_sha256=canonical_sha,raw_changed_channels=dict(channels),raw_grid_verified=len(seen))
+    print(json.dumps({'raw_verified':cid,'probes':count,'failures':len(failures)}),flush=True)
+    del data,packed,values,decoded,cover,public
+
+check({name:sha((ROOT/name).read_text()) for name in sm['source_hashes']}==source_hashes,'sources_unchanged_during_audit')
+result={
+    'status':'PASS' if not failures else 'FAIL','checks':dict(checks),'check_count':sum(checks.values()),'failures':failures,
+    'case_count':21,'roles':{'regression':13,'repeat':4,'inspection':4},'case_reports':case_reports,
+    'sum_21_first_attempt_reservations_usd':sum(reservations),'validation_cap_usd':3.0,'first_attempt_reservation_headroom_usd':3.0-sum(reservations),
+    'maximum_canonical_input_bytes':max(r['canonical_input_bytes'] for r in case_reports),'input_bound_bytes':1100000,
+    'cost_basis':'Full production wire JSON UTF-8 bytes +4096 at0.44USD/M;2048 output tokens at1.32USD/M. One physical attempt per21fixedcalls; retries additionally consume same hard3USD cap. No guaranteed completion under retries.',
+    'input_bindings':{name:sha((FROZEN/name).read_bytes()) for name in ('source_manifest.json','input_manifest.json','validation_manifest.json','saved_candidates.json')},
+    'driver_sha256':source_hashes['scripts/e6_iterative_low_llm_judge.py'],
+    'auditor_sha256':sha(Path(__file__).read_bytes()),
+    'scope':'Read-only fixed evidence verification and streaming lossless-codec comparison. No environment replay, model/API calls, edits to repository or experiment files.',
+    'evidence_domain_note':'Historical original0/16measurement and failed trajectories remain DESIGN-only. Public records resolve to exact same-episode original raw prefixes; references remain a separate complete block. Labels, prior gate outcomes and confirmation outputs are absent from judge payloads.'
+}
+OUT.write_text(json.dumps(result,indent=2,sort_keys=True)+'\n')
+print(json.dumps({'output':str(OUT),'status':result['status'],'checks':result['check_count'],'failures':len(failures),'initial_reservations_usd':sum(reservations),'sha256':sha(OUT.read_bytes())}),flush=True)

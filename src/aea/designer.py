@@ -25,6 +25,7 @@ Evidence serialisation is LLM-free and deterministic under :class:`EvidenceBound
 
 from __future__ import annotations
 
+import ast
 import hashlib
 import json
 import re
@@ -1052,6 +1053,135 @@ def identity_at_zero(template: str, *, task_id: str = "0") -> list[str]:
 _GOAL_TOKENS = re.compile(r"[a-z]+ \d+")
 
 
+def _binds_name(node: ast.AST, name: str) -> bool:
+    """Include binding forms whose identifiers are not ast.Name(Store) nodes."""
+    if isinstance(node, ast.Name):
+        return node.id == name and not isinstance(node.ctx, ast.Load)
+    if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+        return node.name == name
+    if isinstance(node, ast.arg):
+        return node.arg == name
+    if isinstance(node, ast.alias):
+        return (node.asname or node.name.split(".")[0]) == name
+    if isinstance(node, (ast.ExceptHandler, ast.MatchAs, ast.MatchStar)):
+        return node.name == name
+    if isinstance(node, ast.MatchMapping):
+        return node.rest == name
+    return False
+
+
+def _response_passthrough_offsets(template: str) -> set[int]:
+    """Recognize only direct, unmodified transition-response copies, without executing code.
+
+    This narrow lexical exception does not infer aliases or prove general program safety.
+    Unsupported provenance keeps the original rejection. All protected fields must be copied
+    together; a public observation edit cannot authorize a reward/verifier/termination edit.
+    """
+    try:
+        tree = ast.parse(template)
+    except SyntaxError:
+        return set()
+    parents = {child: node for node in ast.walk(tree) for child in ast.iter_child_nodes(node)}
+    # The constructor must still be the public EnvResponse symbol from the Rules loader.
+    if any(
+        _binds_name(node, "EnvResponse")
+        or (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id in {"globals", "locals", "vars", "exec", "eval"}
+        )
+        for node in ast.walk(tree)
+    ):
+        return set()
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Name) or node.id != "EnvResponse":
+            continue
+        parent = parents.get(node)
+        if isinstance(parent, ast.Call) and parent.func is node:
+            continue
+        if isinstance(parent, ast.arg) and parent.annotation is node:
+            continue
+        if isinstance(parent, (ast.FunctionDef, ast.AsyncFunctionDef)) and parent.returns is node:
+            continue
+        return set()  # No constructor aliasing, mutation or escape to another function.
+    protected = {"reward", "terminated", "truncated", "info"}
+    offsets: set[int] = set()
+    lines = template.splitlines(keepends=True)
+    for cls in tree.body:
+        if not isinstance(cls, ast.ClassDef) or cls.name != "_Rules" or cls.decorator_list:
+            continue
+        for hook in cls.body:
+            if not isinstance(hook, ast.FunctionDef) or hook.name != "modify_transition":
+                continue
+            args = [*hook.args.posonlyargs, *hook.args.args]
+            if len(args) != 4 or hook.decorator_list or hook.args.vararg or hook.args.kwarg:
+                continue
+            raw = args[2].arg  # Rules invokes (self, action, raw_response, env_state).
+            nodes = [node for statement in hook.body for node in ast.walk(statement)]
+            if any(
+                _binds_name(node, raw)
+                or isinstance(
+                    node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Lambda)
+                )
+                for node in nodes
+            ):
+                continue
+            # No aliases, callbacks, dynamic lookups or mutation of response/info. Observation
+            # reads may feed a new Observation; protected fields only feed their matching keyword.
+            trusted = True
+            for node in nodes:
+                if not isinstance(node, ast.Name) or node.id != raw:
+                    continue
+                parent = parents.get(node)
+                if isinstance(parent, ast.Return):
+                    continue
+                if not isinstance(parent, ast.Attribute) or not isinstance(parent.ctx, ast.Load):
+                    trusted = False
+                    break
+                if parent.attr == "observation":
+                    continue
+                keyword = parents.get(parent)
+                call = parents.get(keyword) if keyword is not None else None
+                if not (
+                    parent.attr in protected
+                    and isinstance(keyword, ast.keyword)
+                    and keyword.arg == parent.attr
+                    and isinstance(call, ast.Call)
+                    and isinstance(call.func, ast.Name)
+                    and call.func.id == "EnvResponse"
+                    and isinstance(parents.get(call), ast.Return)
+                ):
+                    trusted = False
+                    break
+            if not trusted:
+                continue
+            for node in nodes:
+                if not (
+                    isinstance(node, ast.Call)
+                    and isinstance(node.func, ast.Name)
+                    and node.func.id == "EnvResponse"
+                    and isinstance(parents.get(node), ast.Return)
+                    and not node.args
+                    and len(node.keywords) == 5
+                    and {kw.arg for kw in node.keywords} == protected | {"observation"}
+                ):
+                    continue
+                fields = [kw for kw in node.keywords if kw.arg in protected]
+                if not all(
+                    isinstance(kw.value, ast.Attribute)
+                    and isinstance(kw.value.value, ast.Name)
+                    and kw.value.value.id == raw
+                    and kw.value.attr == kw.arg
+                    for kw in fields
+                ):
+                    continue
+                for kw in fields:
+                    # AST columns count UTF-8 bytes; regex positions count Unicode characters.
+                    prefix = lines[kw.lineno - 1].encode()[: kw.col_offset].decode()
+                    offsets.add(sum(map(len, lines[: kw.lineno - 1])) + len(prefix))
+    return offsets
+
+
 def privilege_check(
     template: str,
     *,
@@ -1059,12 +1189,13 @@ def privilege_check(
     failures: Sequence[Trace],
     goal: str,
 ) -> list[str]:
-    """Structural (no AST engine, no LLM judge): the code must not carry reference actions, a
+    """Cheap checks, with a narrow AST response-copy exception: no reference actions, a
     replay, a verifier / reward shortcut, or an object token that only the privileged reference
     exposes (present in the reference observations, absent from the goal and from every
     observation the policy itself saw)."""
     reasons: list[str] = []
     body = template
+    passthrough = _response_passthrough_offsets(body)
     for a in reference.actions:
         # only task-specific actions (naming a numbered object / receptacle) count: generic
         # verbs such as `look` or `inventory` are the policy's own vocabulary
@@ -1075,11 +1206,12 @@ def privilege_check(
         (r"\.step\(", "calls step on the inner environment (disguised Stage)"),
         (r"\bwon\s*=", "sets won"),
         (r"\bsuccess\W*[=:]\s*True", "sets success"),
-        (r"terminated\s*=\s*True", "terminates the episode"),
-        (r"\breward\s*=", "changes the reward"),
+        (r"\bterminated\s*=", "terminates the episode"),
+        (r"\btruncated\s*=", "changes episode truncation"),
+        (r"\breward\s*(?:\*\*|//|<<|>>|[-+*/%&|^])?=", "changes the reward"),
         (r"in_env_actions", "uses Setup replay"),
     ):
-        if re.search(pat, body):
+        if any(match.start() not in passthrough for match in re.finditer(pat, body)):
             reasons.append(why)
     seen = set(_GOAL_TOKENS.findall(goal.lower()))
     for t in failures:

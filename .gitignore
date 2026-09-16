@@ -28,3 +28,7 @@ docs/pilots/e1pilot/work/
 
 # Temporary / scratch run outputs
 scratch/**/work/
+
+# Privileged LLM-judge payloads stay local, including the obsolete public layout.
+/experiments/alfworld_e6/frozen/iterative_low_llm_judge/judge_inputs/
+/runs/e6-iterative-low-llm-judge/private/
