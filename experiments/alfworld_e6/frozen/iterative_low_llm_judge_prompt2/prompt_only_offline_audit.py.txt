@@ -1,0 +1,180 @@
+#!/usr/bin/env python3
+"""Offline prompt-only revision audit. No transports, environments, or policy calls."""
+from __future__ import annotations
+
+import ast
+from collections import Counter
+from decimal import Decimal
+import hashlib
+import json
+import os
+from pathlib import Path
+import subprocess
+import sys
+import time
+
+ROOT = Path('/home/kree/work/EnvJudge-aea-llm')
+BEFORE = '3f78d28a785739f1a218b1535a2408d3ad4e069b'
+EXPECTED_PROMPT = 'baf48d254f9200dc64e884f97985c6dcbe2a357cee5b596174f9ab70d14b38f8'
+MOD = 'src/aea/privilege_judge.py'
+F = ROOT / 'experiments/alfworld_e6/frozen/iterative_low_llm_judge'
+PRIVATE = ROOT / 'runs/e6-iterative-low-llm-judge/private'
+VALIDATION = PRIVATE / 'validation'
+OUT = Path('/tmp/llm_judge_prompt_revision_audit.json')
+os.environ['LITELLM_LOCAL_MODEL_COST_MAP'] = 'True'
+os.environ['PYTHONDONTWRITEBYTECODE'] = '1'
+os.environ['GIT_OPTIONAL_LOCKS'] = '0'
+sys.path[:0] = [str(ROOT), str(ROOT / 'src')]
+from aea.core.hashing import sha256_of
+from aea.llm.client import build_wire_request
+from aea.llm.types import Attribution, ChatMessage, ChatRequest
+from aea.privilege_judge import JudgeConfig, JUDGE_PROMPT, JUDGE_TOOL_NAME, PrivilegeJudgeInput, canonical_json, judge_tool
+
+
+def sha(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def git(*args):
+    return subprocess.check_output(['git', '-C', str(ROOT), *args], env={**os.environ, 'GIT_OPTIONAL_LOCKS': '0'})
+
+
+def old(path):
+    return git('show', BEFORE + ':' + path)
+
+
+def read_json(path):
+    return json.loads(path.read_bytes())
+
+
+def rows(path):
+    return [json.loads(line) for line in path.read_bytes().splitlines() if line.strip()]
+
+
+def full_private_inventory():
+    return {str(p.relative_to(ROOT)): {'sha256':sha(p.read_bytes()), 'bytes':p.stat().st_size}
+            for p in sorted(PRIVATE.rglob('*')) if p.is_file()}
+
+
+checks = {}
+
+
+def check(name, condition):
+    checks[name] = bool(condition)
+
+
+starting_private = full_private_inventory()
+old_tree = ast.parse(old(MOD)); new_tree = ast.parse((ROOT/MOD).read_bytes())
+
+
+def remove_prompt(tree):
+    values = []
+    for node in tree.body:
+        if isinstance(node, ast.Assign) and any(isinstance(t,ast.Name) and t.id == 'JUDGE_PROMPT' for t in node.targets):
+            values.append(ast.literal_eval(node.value))
+            node.value = ast.Constant('PROMPT_AUDIT_SENTINEL')
+    return values
+
+
+old_prompts = remove_prompt(old_tree); new_prompts = remove_prompt(new_tree)
+check('single_old_and_new_prompt_assignment', len(old_prompts) == len(new_prompts) == 1)
+old_prompt = old_prompts[0]; new_prompt = new_prompts[0]
+check('module_ast_only_JUDGE_PROMPT_changed', ast.dump(old_tree,include_attributes=False) == ast.dump(new_tree,include_attributes=False))
+check('expected_new_prompt_hash', sha(new_prompt.encode()) == EXPECTED_PROMPT)
+check('loaded_prompt_matches_source', JUDGE_PROMPT == new_prompt)
+check('prompt_changed', old_prompt != new_prompt)
+source_diff = git('diff','--name-only',BEFORE,'--','src').decode().splitlines()
+check('only_production_source_change_is_prompt_module', source_diff == [MOD])
+for name in ('scripts/e6_iterative_low_llm_judge.py', 'configs/privilege_judge_pricing.yaml', 'configs/pricing.yaml'):
+    check('unchanged_' + name, (ROOT/name).read_bytes() == old(name))
+
+fixed = ['input_manifest.json','validation_manifest.json','saved_candidates.json','validation_failed_result.json','phase_a_independent_audit.json']
+for name in fixed:
+    check('unchanged_frozen_' + name, (F/name).read_bytes() == old(str((F/name).relative_to(ROOT))))
+vm = read_json(F/'validation_manifest.json'); im = read_json(F/'input_manifest.json')
+config = JudgeConfig()
+check('judge_model_config_unchanged', config.model_dump(mode='json') == vm['judge_config'])
+check('exact21_roles', len(vm['cases']) == 21 and Counter(c['role'] for c in vm['cases']) == {'regression':13,'repeat':4,'inspection':4})
+check('exact17_frozen_private_inputs', len({c['input_file_sha256'] for c in vm['cases']}) == 17)
+check('saved_candidate_file_unchanged', sha((PRIVATE/'saved_candidates.json').read_bytes()) == im['saved_candidates_sha256'])
+check('all_archived_imports_unchanged', all(sha((ROOT/path).read_bytes()) == expected for key in ('archived_file_hashes','imported_file_hashes') for path,expected in im[key].items()))
+
+old_audit = read_json(F/'phase_a_independent_audit.json')
+check('all30_old_phaseA_audited_artifacts_unchanged', len(old_audit['artifact_hashes']) == 30 and
+      all(sha((ROOT/path).read_bytes()) == expected for path,expected in old_audit['artifact_hashes'].items()))
+old_requests = rows(VALIDATION/'judge_requests/requests.jsonl')
+old_judgments = rows(VALIDATION/'judgments.jsonl')
+old_responses = rows(VALIDATION/'judge_requests/responses.jsonl')
+check('old21_completed_records_preserved', len(old_requests) == len(old_judgments) == len(old_responses) == 21)
+request_reports = []; new_reservations = []; old_reservations = []
+for index,(case,old_request,old_judgment) in enumerate(zip(vm['cases'],old_requests,old_judgments,strict=True),1):
+    prefix = f'request{index:02}'
+    payload_path = PRIVATE/case['input_file']
+    evidence = PrivilegeJudgeInput.model_validate_json(payload_path.read_text())
+    payload = canonical_json(evidence.model_dump(mode='json'))
+    check(prefix+'_input_candidate_unchanged', sha(payload_path.read_bytes()) == case['input_file_sha256'] and sha(evidence.candidate_artifact.encode()) == case['source_sha256'])
+    expected = ChatRequest(model=config.model,temperature=config.temperature,seed=config.seed,max_tokens=config.max_tokens,thinking=config.thinking,
+                           attribution=Attribution(phase='judge_validation',budget='none',arm='iterative_low_llm_judge',task_id=str(case['task_id'])),
+                           messages=(ChatMessage(role='system',content=JUDGE_PROMPT),ChatMessage(role='user',content=payload)),
+                           tools=(judge_tool(),),tool_choice={'type':'function','function':{'name':JUDGE_TOOL_NAME}})
+    old_model = ChatRequest.model_validate(old_request)
+    new_dump = expected.model_dump(mode='json')
+    restored = json.loads(json.dumps(new_dump)); restored['messages'][0]['content'] = old_prompt
+    check(prefix+'_only_system_prompt_differs', restored == old_request and new_dump != old_request)
+    check(prefix+'_old_system_exact', old_request['messages'][0]['content'] == old_prompt)
+    check(prefix+'_input_tool_schema_and_settings_identical', expected.messages[1:] == old_model.messages[1:]
+          and expected.tools == old_model.tools and expected.attribution == old_model.attribution
+          and expected.model == old_model.model and expected.max_tokens == old_model.max_tokens
+          and expected.temperature == old_model.temperature and expected.seed == old_model.seed
+          and expected.thinking == old_model.thinking)
+    old_hash = sha256_of({'provider':config.provider,'request':old_model.model_dump()})
+    new_hash = sha256_of({'provider':config.provider,'request':expected.model_dump()})
+    check(prefix+'_old_request_hash_bound_and_new_changed', old_hash == old_judgment['result']['request_sha256'] and old_hash != new_hash)
+    check(prefix+'_old_config_and_output_schema_bound', old_judgment['result']['config_sha256'] == sha(canonical_json({'judge':config.model_dump(mode='json'),'client':config.llm_config().model_dump(mode='json')}).encode())
+          and old_judgment['result']['schema_sha256'] == sha(canonical_json(judge_tool()).encode()))
+    old_wire = build_wire_request(old_model,config.llm_config()); new_wire = build_wire_request(expected,config.llm_config())
+    restored_wire = json.loads(json.dumps(new_wire)); restored_wire['messages'][0]['content'] = old_prompt
+    check(prefix+'_wire_only_system_prompt_differs', restored_wire == old_wire)
+    old_bytes = len(json.dumps(old_wire,ensure_ascii=False).encode()); new_bytes = len(json.dumps(new_wire,ensure_ascii=False).encode())
+    old_reserve = (Decimal(old_bytes+4096)*Decimal('.44')+Decimal(2048)*Decimal('1.32'))/Decimal(1_000_000)
+    new_reserve = (Decimal(new_bytes+4096)*Decimal('.44')+Decimal(2048)*Decimal('1.32'))/Decimal(1_000_000)
+    old_reservations.append(old_reserve); new_reservations.append(new_reserve)
+    request_reports.append({'case_id':case['case_id'],'role':case['role'],'expected_verdict':case['expected_verdict'],
+                            'source_sha256':case['source_sha256'],'input_file_sha256':case['input_file_sha256'],
+                            'old_request_sha256':old_hash,'new_expected_request_sha256':new_hash,
+                            'old_wire_bytes':old_bytes,'new_wire_bytes':new_bytes,
+                            'old_first_attempt_reservation_usd':str(old_reserve),'new_first_attempt_reservation_usd':str(new_reserve)})
+by_id={r['case_id']:r for r in request_reports}
+check('four_repeat_request_identities_unchanged', sum(bool(c.get('repeat_of')) for c in vm['cases']) == 4 and all(
+    by_id[c['case_id']]['new_expected_request_sha256'] == by_id[c['repeat_of']]['new_expected_request_sha256']
+    for c in vm['cases'] if c.get('repeat_of')))
+
+old_cap = read_json(VALIDATION/'cap.json')
+spent = Decimal(str(old_cap['actual_usd'])) + Decimal(str(old_cap['uncertain_usd'])) + sum((Decimal(str(x)) for x in old_cap['inflight'].values()),Decimal(0))
+remaining = Decimal(3)-spent; engineering = Decimal(17)
+check('historical_committed_cost_exact', spent == Decimal('0.35856656'))
+check('historical_failed_terminal_run_preserved', read_json(VALIDATION/'result.json')['decision'] == 'JUDGE_GATE_NOT_READY'
+      and old_cap['attempts'] == 21 and old_cap['uncertain_usd'] == 0 and not old_cap['inflight'])
+check('remaining_validation_2_64143344', remaining == Decimal('2.64143344'))
+check('combined_budget_with_sunk_cost20', spent+remaining+engineering == Decimal(20))
+check('all21_new_first_reservations_fit_remaining_validation', sum(new_reservations,Decimal(0)) < remaining)
+check('no_engineering_dispatch', not any((PRIVATE/'engineering'/p).exists() for p in ('cap.json','saved_replay.json','results.json','ledger.judge.jsonl')))
+ending_private = full_private_inventory()
+check('all_starting_private_file_bytes_unchanged_during_audit', all(ending_private.get(path) == info for path,info in starting_private.items()))
+failures=[name for name,ok in checks.items() if not ok]
+result={'schema':'offline_prompt_revision_audit_v1','status':'PASS' if not failures else 'FAIL','checked_at_unix':time.time(),
+        'baseline_commit':BEFORE,'current_head':git('rev-parse','HEAD').decode().strip(),'script_sha256':sha(Path(__file__).read_bytes()),
+        'check_count':len(checks),'checks':checks,'failures':failures,'old_prompt_sha256':sha(old_prompt.encode()),'new_prompt_sha256':sha(new_prompt.encode()),
+        'old_module_sha256':sha(old(MOD)),'new_module_sha256':sha((ROOT/MOD).read_bytes()),'requests':request_reports,
+        'old_phaseA_audit_sha256':sha((F/'phase_a_independent_audit.json').read_bytes()),'private_starting_file_count':len(starting_private),
+        'private_starting_bytes':sum(x['bytes'] for x in starting_private.values()),'private_starting_inventory':starting_private,
+        'private_starting_inventory_sha256':sha(canonical_json(starting_private).encode()),
+        'private_new_paths_during_audit':sorted(set(ending_private)-set(starting_private)),
+        'old_committed_usd':str(spent),'remaining_validation_usd':str(remaining),'engineering_limit_usd':str(engineering),'combined_limit_usd':'20',
+        'old21_first_reservations_usd':str(sum(old_reservations,Decimal(0))),'new21_first_reservations_usd':str(sum(new_reservations,Decimal(0))),
+        'new_first_reservation_headroom_usd':str(remaining-sum(new_reservations,Decimal(0))),
+        'limitations':['No API, environment, policy, or candidate execution.','Logical and wire requests built locally only; expected hashes are not dispatched calls.',
+                       'New operational namespace/launcher deliberately outside this audit scope.','Previously audited30 terminal artifacts and frozen inputs are historically bound; full private inventory additionally freezes85 current files for subsequent preservation checks.',
+                       'Physical retries additionally consume the remaining validation allowance; completion is not guaranteed.']}
+OUT.write_text(json.dumps(result,indent=2,sort_keys=True)+'\n')
+print(json.dumps({k:result[k] for k in ('status','check_count','failures','old_prompt_sha256','new_prompt_sha256','old_committed_usd','remaining_validation_usd','engineering_limit_usd','new21_first_reservations_usd','private_starting_file_count')} | {'output':str(OUT),'sha256':sha(OUT.read_bytes())}))

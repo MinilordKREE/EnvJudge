@@ -1,0 +1,15 @@
+{
+  "combined_cap_usd": 20.0,
+  "engineering_cap_usd": 17.0,
+  "prior_commit": "244f0f1446d3b6a4911a9514ea8bc4976f99c0da",
+  "prior_committed_usd": 0.35856656,
+  "prior_validation_attempts_path": "runs/e6-iterative-low-llm-judge/private/validation/cap.attempts.jsonl",
+  "prior_validation_attempts_sha256": "184cbf13c04179494a68d16338ff8190e4d852585165a1bc06920ed81ed243c0",
+  "prior_validation_cap_path": "runs/e6-iterative-low-llm-judge/private/validation/cap.json",
+  "prior_validation_cap_sha256": "bca032ebd7e36104f21b171fe67e88d9b9d5ce248e5a3bae44b7aa9807e5069e",
+  "prior_validation_result_path": "runs/e6-iterative-low-llm-judge/private/validation/result.json",
+  "prior_validation_result_sha256": "c0391b4feeb85edcb55cc66c631dc42620bf9a40e5476108c74c3c5a687c826b",
+  "schema_version": 1,
+  "validation_envelope_usd": 3.0,
+  "validation_remaining_usd": 2.64143344
+}

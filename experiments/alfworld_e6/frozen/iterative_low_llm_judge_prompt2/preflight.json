@@ -1,0 +1,33 @@
+{
+  "all21_schema_audit_required_before_freeze": true,
+  "before_first_prompt2_api_call": true,
+  "combined_ceiling_usd": 20.0,
+  "default_repository_mypy_checked_files": 106,
+  "engineering_ceiling_usd": 17.0,
+  "format": "PASS",
+  "full_unit_passed": 640,
+  "independent_launcher_review": "PASS",
+  "independent_metadata_privacy_review": "PASS",
+  "independent_prompt_review": "PASS",
+  "integration_deselected": 11,
+  "launcher_sha256": "f800c01b747bd6fb4785ca672f54a62b00135d0eba3615baaca5a9949c7f1307",
+  "launcher_tests_sha256": "b52ce22e91153e5362a9b88ba95f7f665dca6a247f56d79c22ab863f7b533ed1",
+  "logs_sha256": {
+    "precommit.txt": "942760896d97dc0fb37822af66b9af50173e00e0c0a27e600036b165e43aef9f",
+    "unit640.txt": "fc7ba26a5958851ae22f366e30b4dbccdeead612d0cce081b33580548b61a312"
+  },
+  "new_physical_api_calls": 0,
+  "new_validation_ceiling_usd": 2.64143344,
+  "old_conservative_committed_usd": 0.35856656,
+  "post_run_auditor_sha256": "a19e296f34ffa3086c2545f415ce6643cb1ec7789cf9d6144d8ebd4ef3ea477d",
+  "post_test_import_maintenance_launcher_tests_passed": 33,
+  "precommit": "PASS",
+  "preservation_checks_passed": 2838,
+  "prompt_only_independent_checks_passed": 176,
+  "prompt_sha256": "baf48d254f9200dc64e884f97985c6dcbe2a357cee5b596174f9ab70d14b38f8",
+  "ruff": "PASS",
+  "runtime_experimental_change": "JUDGE_PROMPT only",
+  "source_manifest_sha256": "bea5125d4de264d89aae53f091b1e791c0b60f364f6a802961ee2e00a8c6ccde",
+  "status": "PASS",
+  "test_import_maintenance": "A test-only dynamic module import follows the existing repository test pattern and prevents mypy from newly traversing legacy script imports. No runtime code changed; the 33 affected tests and default repository mypy were rechecked."
+}
