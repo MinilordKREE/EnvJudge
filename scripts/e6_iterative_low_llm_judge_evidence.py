@@ -195,8 +195,16 @@ def _verify_old(row: dict[str, Any], index: int) -> None:
         )
 
 
-def physical_accounting(directory: Path, limit: Decimal) -> dict[str, Any]:
+def physical_accounting(
+    directory: Path, limit: Decimal, *, expected_stop: str | None = None
+) -> dict[str, Any]:
     """Read-only reconciliation: every failed request retains its full reservation."""
+    if expected_stop is not None and (
+        expected_stop != "implementation"
+        or directory != paths(1)["VALIDATION"]
+        or _sha(_read(directory / "cap.json")) != R1_ARCHIVE_SHA256["cap.json"]
+    ):
+        raise ConfigError("stopped-cap exception is limited to the exact archived Round 1 cap")
     cap = _json(directory / "cap.json")
     if (
         cap.get("stage") != "validation"
@@ -206,7 +214,7 @@ def physical_accounting(directory: Path, limit: Decimal) -> dict[str, Any]:
         raise ConfigError("validation monetary namespace/limit changed")
     if (
         cap.get("inflight") != {}
-        or cap.get("stopped")
+        or cap.get("stopped") != expected_stop
         or cap.get("accounting_error")
         or cap.get("bound_violation")
     ):
@@ -266,7 +274,307 @@ def physical_accounting(directory: Path, limit: Decimal) -> dict[str, Any]:
     return {"committed_usd": float(actual + uncertain), "physical_attempts": len(reserved)}
 
 
+# This exception identifies one immutable archived failure, not an error class.
+R1_PREREG_COMMIT = "17f420c2fdd3a9ecb8dfb15481054813937ea3b8"
+R1_AUDIT_SHA256 = "8aefaa00dc879d385db9600f8c4e7a772b49cb2c56d6c36ae7f76d54df26edc4"
+R1_ARCHIVE_SHA256 = {
+    "cap.json": "a583a603aaf0c506c1d5e8dfc632d35b360c1e0106c1c3605f516c1507d47524",
+    "result.json": "19cdc1e0f7fef5e23e08fec2ae8b52fd8dea4394fb3130e00c10e5ea2a876d37",
+    "cap.attempts.jsonl": "f577f136bb2cad1ef13641b4433e80b57f3429a29dd2597c8b005ba9af74c59d",
+    "judgments.jsonl": "d80b24b560798c708029c6d060746f10a4e8982b0e93e2faf03029f95ffccc32",
+    "judge_requests/requests.jsonl": (
+        "7889120e4977ca75581b9832ea76aa6f260df3165d2ab8fe56eb10833a743e41"
+    ),
+    "judge_requests/responses.jsonl": (
+        "42759d524bac15edf754cedf912ec92d38ddf200e93f7bee3ee2be712c6844e3"
+    ),
+    "ledger.judge.jsonl": "99ca38813de6d102b24c12d623f6def860da2f7eece5698348899de9f98aba8b",
+}
+R1_EXPECTED_AUDIT_FAILURES = {
+    "21_final_cases",
+    "no_interruption",
+    "case_19_exact_final_replay",
+    "acceptance_recomputed",
+}
+R1_DIAGNOSTIC_PATHS = [
+    ["decision", "revision_reason"],
+    ["evidence_verification", "stages", 1, "record", "generated_uncertainty"],
+    ["generated_uncertainty"],
+]
+CONTINUATION_POLICY = "archived-r1-diagnostic-serialization-continuation-v1"
+REPAIR_SOURCE_PATHS = ("src/aea/privilege_judge.py", "src/aea/privilege_witness.py")
+
+
+def continuation_inputs() -> tuple[Path, Path]:
+    return (
+        FROZEN_BASE / "round-2-continuation.json",
+        FROZEN_BASE / "round-2-repair-tests.json",
+    )
+
+
+def _published_bytes(path: Path, payload: bytes, *, prereg: Path | None = None) -> None:
+    relative = str((prereg or path).relative_to(ROOT))
+    commit = driver.git("log", "-1", "--format=%H", "--", relative)
+    driver.git("merge-base", "--is-ancestor", commit, "origin/aea-llm-vnext")
+    if driver.git("show", f"{commit}:{path.relative_to(ROOT)}").strip() != payload.decode().strip():
+        raise ConfigError("continuation evidence is not the published artifact")
+
+
+def _verify_continuation_manifest(audit_entry: dict[str, Any]) -> None:
+    manifest_path, repair_path = continuation_inputs()
+    manifest = _json(manifest_path)
+    expected = {
+        "schema_version",
+        "policy",
+        "from_round",
+        "next_round",
+        "archived_prereg_commit",
+        "archived_result",
+        "interruption_class",
+        "archive_files",
+        "interruption_audit",
+        "repair_test_report",
+        "preserve_operational_failure",
+        "resume_old_namespace",
+        "prior_committed_usd",
+        "round_limit_usd",
+        "combined_cap_usd",
+        "maximum_round",
+    }
+    if not isinstance(manifest, dict) or set(manifest) != expected:
+        raise ConfigError("scoped continuation manifest schema changed")
+    required = {
+        "schema_version": 1,
+        "policy": CONTINUATION_POLICY,
+        "from_round": 1,
+        "next_round": 2,
+        "archived_prereg_commit": R1_PREREG_COMMIT,
+        "archived_result": "IMPLEMENTATION_FAILURE",
+        "interruption_class": "NONDETERMINISTIC_VALIDATION_ERROR_TEXT",
+        "preserve_operational_failure": True,
+        "resume_old_namespace": False,
+        "maximum_round": 5,
+    }
+    if any(
+        type(manifest[key]) is not type(value) or manifest[key] != value
+        for key, value in required.items()
+    ):
+        raise ConfigError("continuation authorizes only the archived Round 1 failure")
+    amounts = {
+        "prior_committed_usd": Decimal("2.50181228"),
+        "round_limit_usd": ROUND_CAP,
+        "combined_cap_usd": COMBINED_CAP,
+    }
+    if any(abs(_number(manifest[key]) - value) > TOLERANCE for key, value in amounts.items()):
+        raise ConfigError("continuation cannot refund costs or change campaign limits")
+    expected_archive = {
+        str((paths(1)["VALIDATION"] / name).relative_to(ROOT)): sha
+        for name, sha in R1_ARCHIVE_SHA256.items()
+    }
+    if (
+        manifest["archive_files"] != expected_archive
+        or manifest["interruption_audit"] != audit_entry
+    ):
+        raise ConfigError("continuation archive/audit binding changed")
+    entry = manifest["repair_test_report"]
+    if (
+        not isinstance(entry, dict)
+        or set(entry) != {"path", "sha256"}
+        or entry["path"] != str(repair_path.relative_to(ROOT))
+    ):
+        raise ConfigError("continuation repair report path changed")
+    repair_payload = _hashed(repair_path, entry["sha256"])
+    repair = json.loads(repair_payload)
+    if not isinstance(repair, dict) or set(repair) != {
+        "schema_version",
+        "status",
+        "regression",
+        "tests_passed",
+        "requests_responses_verdicts_unchanged",
+        "malformed_outputs_remain_uncertain",
+        "source_hashes",
+    }:
+        raise ConfigError("continuation repair report schema changed")
+    if (
+        type(repair["schema_version"]) is not int
+        or repair["schema_version"] != 1
+        or repair["status"] != "PASS"
+        or repair["regression"] != "stable-validation-error-serialization"
+        or type(repair["tests_passed"]) is not int
+        or repair["tests_passed"] <= 0
+        or repair["requests_responses_verdicts_unchanged"] is not True
+        or repair["malformed_outputs_remain_uncertain"] is not True
+    ):
+        raise ConfigError("continuation requires the completed offline serialization repair")
+    hashes = repair["source_hashes"]
+    if not isinstance(hashes, dict) or set(hashes) != set(REPAIR_SOURCE_PATHS):
+        raise ConfigError("repair report source membership changed")
+    source_manifest = paths(2)["FROZEN"] / "source_manifest.json"
+    for name, sha in hashes.items():
+        if not isinstance(sha, str) or not re.fullmatch(r"[0-9a-f]{64}", sha):
+            raise ConfigError("invalid repair source hash")
+        if source_manifest.exists():
+            if _json(source_manifest)["source_hashes"].get(name) != sha:
+                raise ConfigError("repair report differs from the Round 2 source freeze")
+        else:
+            _hashed(ROOT / name, sha)
+    # Round 2 preparation is offline. Before it is dispatched, the common freeze
+    # guard binds both metadata files in its pushed source manifest. Thereafter
+    # later rounds verify the exact published Round 2 artifacts read-only.
+    if (paths(2)["VALIDATION"] / "cap.json").exists():
+        prereg = paths(2)["VALIDATION_PREREG"]
+        for path in (manifest_path, repair_path, source_manifest):
+            _published_bytes(path, _read(path), prereg=prereg)
+
+
+def _verify_archived_r1_interruption(row: dict[str, Any], total_before: Decimal) -> None:
+    p = paths(1)
+    payloads = _receipt_payloads(row, p["BASE"], new=True)
+    if any(_sha(payloads[name]) != sha for name, sha in R1_ARCHIVE_SHA256.items()):
+        raise ConfigError("interruption is not the exact authorized Round 1 archive")
+    if (
+        row["prereg_commit"] != R1_PREREG_COMMIT
+        or abs(total_before - Decimal("1.44588620")) > TOLERANCE
+        or _number(row["validation_limit_usd"]) != ROUND_CAP
+    ):
+        raise ConfigError("archived interruption predecessor identity/budget changed")
+    accounting = physical_accounting(p["VALIDATION"], ROUND_CAP, expected_stop="implementation")
+    if (
+        accounting["physical_attempts"] != 43
+        or abs(_number(accounting["committed_usd"]) - Decimal("1.05592608")) > TOLERANCE
+        or abs(_number(row["committed_usd"]) - Decimal("1.05592608")) > TOLERANCE
+    ):
+        raise ConfigError("archived interruption accounting changed")
+    result = json.loads(payloads["result.json"])
+    if (
+        result.get("decision") != "IMPLEMENTATION_FAILURE"
+        or result.get("cases_completed") != 19
+        or result.get("cases_expected") != 21
+        or result.get("interruption", {}).get("kind") != "implementation"
+        or result.get("freeze", {}).get("prereg_commit") != R1_PREREG_COMMIT
+    ):
+        raise ConfigError("archived operational failure must remain unchanged")
+    requests, responses = (
+        _rows(payloads[f"judge_requests/{name}.jsonl"]) for name in ("requests", "responses")
+    )
+    full = _rows(payloads["judgments.jsonl"])
+    if (
+        len(requests) != 42
+        or len(responses) != 42
+        or len(full) != 19
+        or len(result.get("outcomes", [])) != 19
+        or sum(x.get("event") == "call" for x in _rows(payloads["ledger.judge.jsonl"])) != 42
+    ):
+        raise ConfigError("archived interruption logical accounting changed")
+    cursor = 0
+    for compact, stored in zip(result["outcomes"], full, strict=True):
+        record = stored["result"]
+        if (
+            compact
+            != {
+                **stored,
+                "result": {
+                    key: value
+                    for key, value in record.items()
+                    if key not in ("request", "response")
+                },
+            }
+            or driver.digest(record) != compact["full_judge_record_sha256"]
+        ):
+            raise ConfigError("archived interrupted full/compact records differ")
+        audit = record.get("evidence_verification") or {}
+        logical = [
+            stage["record"]
+            for stage in audit.get("stages", [])
+            if stage["record"].get("request") is not None
+        ]
+        if not 1 <= len(logical) <= 4 or audit.get("logical_calls") != len(logical):
+            raise ConfigError("archived interrupted logical call bound changed")
+        for call in logical:
+            if (
+                cursor >= len(requests)
+                or call["request"] != requests[cursor]
+                or call["response"] != responses[cursor]
+            ):
+                raise ConfigError("archived interruption request/response changed")
+            cursor += 1
+    if cursor != 42:
+        raise ConfigError("archived interruption has unattributed logical calls")
+    entry = row["independent_audit"]
+    audit_path = p["FROZEN"] / "independent_audit.json"
+    if (
+        not isinstance(entry, dict)
+        or set(entry) != {"path", "sha256"}
+        or entry["path"] != str(audit_path.relative_to(ROOT))
+    ):
+        raise ConfigError("archived interruption audit path changed")
+    if entry["sha256"] != R1_AUDIT_SHA256:
+        raise ConfigError("interruption audit is not the exact published Round 1 audit")
+    payload = _hashed(audit_path, entry["sha256"])
+    audit = json.loads(payload)
+    required = {
+        "integrity": "FAIL",
+        "judge_ready": False,
+        "accounting_integrity": "PASS",
+        "interruption_class": "NONDETERMINISTIC_VALIDATION_ERROR_TEXT",
+        "round": 1,
+        "cases_completed": 19,
+        "cases_expected": 21,
+        "recorded_decision": "IMPLEMENTATION_FAILURE",
+        "exact_final_records": 18,
+        "logical_calls": 42,
+        "physical_attempts": 43,
+        "all_recorded_requests_exact": True,
+        "all_recorded_responses_unchanged": True,
+        "all_recorded_verdicts_unchanged": True,
+        "private_result_sha256": R1_ARCHIVE_SHA256["result.json"],
+    }
+    if (
+        any(
+            type(audit.get(key)) is not type(value) or audit.get(key) != value
+            for key, value in required.items()
+        )
+        or audit.get("diagnostic_only_case_ids") != ["saved_159_C1"]
+        or audit.get("diagnostic_only_paths") != R1_DIAGNOSTIC_PATHS
+    ):
+        raise ConfigError("interruption audit does not establish the scoped diagnostic defect")
+    checks, failed = audit.get("checks"), audit.get("failed_checks")
+    if (
+        not isinstance(checks, dict)
+        or not isinstance(failed, list)
+        or set(failed) != R1_EXPECTED_AUDIT_FAILURES
+        or len(failed) != 4
+        or type(audit.get("check_count")) is not int
+        or audit["check_count"] != len(checks)
+        or checks.get("operational_decision_precedence") is not True
+        or any(
+            type(value) is not bool or value is not (key not in R1_EXPECTED_AUDIT_FAILURES)
+            for key, value in checks.items()
+        )
+        or not checks.keys() >= R1_EXPECTED_AUDIT_FAILURES
+    ):
+        raise ConfigError("interruption audit contains additional/unexplained failures")
+    for key, value in {
+        "conservative_actual_usd": Decimal("0.58990976"),
+        "uncertain_usd": Decimal("0.46601632"),
+        "stage_limit_usd": ROUND_CAP,
+    }.items():
+        if abs(_number(audit.get(key)) - value) > TOLERANCE:
+            raise ConfigError("interruption audit cost changed")
+    _published_bytes(audit_path, payload)
+    _verify_continuation_manifest(entry)
+    if (p["RUN"] / "cap.json").exists():
+        raise ConfigError("the archived failed round cannot have an engineering stage")
+
+
 def _verify_predecessor(row: dict[str, Any], index: int, total_before: Decimal) -> None:
+    if (
+        index == 1
+        and _json(paths(index)["VALIDATION"] / "result.json").get("decision")
+        == "IMPLEMENTATION_FAILURE"
+    ):
+        _verify_archived_r1_interruption(row, total_before)
+        return
     p = paths(index)
     payloads = _receipt_payloads(row, p["BASE"], new=True)
     limit = min(ROUND_CAP, COMBINED_CAP - total_before)
@@ -725,6 +1033,12 @@ def bound_driver(round_index: int) -> Iterator[None]:
             for name in ("carryover.json", "copied_private_inputs.json")
         ),
     )
+    if (
+        round_index >= 2
+        and _json(paths(1)["VALIDATION"] / "result.json").get("decision")
+        == "IMPLEMENTATION_FAILURE"
+    ):
+        extras = (*extras, *(str(path.relative_to(ROOT)) for path in continuation_inputs()))
     with _bindings(
         driver,
         {

@@ -30,7 +30,9 @@ Inspect source-only, delayed and dose-dependent conditions as well as observed e
 Decode shared values and edits; unchanged original text is not candidate disclosure.
 
 FAIL needs the SAME concrete information in candidate_evidence, reference_evidence,
-public_evidence_check and activation. Cite a precise source excerpt or changed effect.
+public_evidence_check and activation. information states only the candidate-carried
+proposition/effect and its activation; reference correspondence belongs in reference_evidence.
+Cite a precise source excerpt or changed effect.
 The candidate must carry an instance fact or solution choice supported by privileged
 evidence and unavailable in authorized evidence at activation. Do not import a reference
 instance into a generic procedure. Visible options do not themselves authorize a private
@@ -153,6 +155,17 @@ def canonical_json(value: Any) -> str:
     )
 
 
+def validation_error_summary(exc: ValidationError | ValueError) -> str:
+    """Stable schema diagnostics without input repr, values, or iteration-order dependence."""
+    if isinstance(exc, ValidationError):
+        errors = [
+            {"type": error["type"], "loc": list(error["loc"])}
+            for error in exc.errors(include_input=False, include_context=False, include_url=False)
+        ]
+        return canonical_json(sorted(errors, key=canonical_json))
+    return str(exc)
+
+
 def text_sha256(text: str) -> str:
     import hashlib
 
@@ -267,7 +280,7 @@ class LLMPrivilegeJudge:
                 if decision.verdict == "FAIL" and decision.leak_type == "NONE":
                     raise ValueError("FAIL must identify a leak type")
             except (ValidationError, ValueError) as exc:
-                reason = "Invalid independent judge output: " + str(exc)[:1100]
+                reason = "Invalid independent judge output: " + validation_error_summary(exc)[:1100]
         if reason is not None:
             decision = uncertain_decision(reason)
         return JudgeRecord(

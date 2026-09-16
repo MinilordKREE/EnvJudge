@@ -92,3 +92,32 @@ verification records and decision prose remain local and gitignored. Public expo
 explicit metadata allowlists; retain hashes, counts, enum outcomes and synthetic tests.
 Audit git diff/show and the publication history before each push. Earlier results,
 including IMPLEMENTATION_FAILURE, remain unchanged.
+
+## Round 2 repair and explicit continuation amendment
+
+Round 1 stopped as preregistered after 19/21 cases with IMPLEMENTATION_FAILURE. Its
+published result, cap and raw artifacts remain immutable. The exact-record discrepancy
+was insertion-order-sensitive Pydantic error rendering; requests, responses and verdicts
+were unchanged. The frozen audit records the discrepancy rather than declaring success.
+
+The user's instruction permits another unsuccessful-round attempt, up to five. This
+amendment permits a new round 2 only after a narrowly identified, hash-bound offline
+repair of that archived failure. It does not resume round 1, waive its error, or create a
+general interrupted-run exception. The launcher requires the exact seven archived files,
+published failure audit, continuation manifest and source-bound synthetic repair tests.
+All USD1.05592608 from round 1, including its failed-request reservation, carries forward;
+cumulative prior spending is USD2.50181228. The USD20 ceiling and USD2.50 per-round cap stay.
+Other operational interruptions still stop the campaign. Complete unsuccessful rounds
+may advance under the existing rule; audited success stops validation and permits Phase B.
+
+The repair renders schema errors from stable error types and field paths, without input
+value representations. For checker readability, copied runtime groups and changed leaves
+show their actual array indices. The original evidence remains intact and unmodified;
+these coordinates add no task facts and do not correct invalid model citations. Strict
+anchor checks, schemas, model/settings and the four-call protocol remain unchanged.
+
+The short prompt revision keeps the candidate-carried proposition separate from its
+reference provenance, requests minimal sufficient citations, and distinguishes ordinary
+prerequisites applied to public goals from hidden instance-selection criteria. No task
+examples are added. Underlying 21-case input bytes/order/labels remain unchanged. This is
+continued engineering on reused validation cases, not a new validation dataset.

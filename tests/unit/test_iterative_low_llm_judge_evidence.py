@@ -614,3 +614,396 @@ def test_failed_main_exits_two_without_private_prose_or_engineering(
     assert campaign.main() == 2
     assert "PRIVATE_CANARY" not in capsys.readouterr().out
     assert not campaign.paths(1)["RUN"].exists()
+
+
+@pytest.fixture
+def interrupted_r1(campaign: Any, monkeypatch: pytest.MonkeyPatch) -> Any:
+    prepared(campaign)
+    p = completed_round(campaign, actual=0.58990976, uncertain=0.46601632)
+    fake_git(campaign, monkeypatch)
+    requests: list[dict[str, Any]] = []
+    responses: list[dict[str, Any]] = []
+    full: list[dict[str, Any]] = []
+    compact: list[dict[str, Any]] = []
+    for index in range(19):
+        calls: list[dict[str, Any]] = []
+        for _ in range(3 if index < 4 else 2):
+            request = {"synthetic_request": len(requests)}
+            response = {"synthetic_response": len(responses)}
+            requests.append(request)
+            responses.append(response)
+            calls.append({"kind": "draft", "record": {"request": request, "response": response}})
+        record = {
+            "request": calls[-1]["record"]["request"],
+            "response": calls[-1]["record"]["response"],
+            "decision": {"verdict": "UNCERTAIN"},
+            "evidence_verification": {"logical_calls": len(calls), "stages": calls},
+        }
+        row = {
+            "case_id": "saved_159_C1" if index == 18 else f"case-{index}",
+            "result": record,
+            "full_judge_record_sha256": campaign.driver.digest(record),
+        }
+        full.append(row)
+        compact.append(
+            {
+                **row,
+                "result": {
+                    key: value
+                    for key, value in record.items()
+                    if key not in ("request", "response")
+                },
+            }
+        )
+    assert len(requests) == 42
+    directory = p["VALIDATION"]
+    journal(directory / "judge_requests/requests.jsonl", requests)
+    journal(directory / "judge_requests/responses.jsonl", responses)
+    journal(directory / "judgments.jsonl", full)
+    journal(
+        directory / "ledger.judge.jsonl",
+        [{"event": "call"} for _ in requests] + [{"event": "infra_retry"}],
+    )
+    attribution = {
+        "phase": "judge_validation",
+        "arm": campaign.driver.ARM,
+        "budget": "none",
+        "task_id": "154",
+    }
+    rows: list[dict[str, Any]] = []
+    for index in range(43):
+        fields = {
+            "attempt": str(index),
+            "model": "deepseek-v4-flash",
+            "stage": "validation",
+            "attribution": attribution,
+            "seed": 0,
+            "reserved_usd": 0.46601632 if index == 0 else 0.6,
+        }
+        terminal = (
+            {**fields, "status": "ambiguous_failure"}
+            if index == 0
+            else {
+                **fields,
+                "status": "returned",
+                "conservative_usd": 0.58990976 if index == 1 else 0.0,
+            }
+        )
+        rows.extend([{**fields, "status": "reserved"}, terminal])
+    journal(directory / "cap.attempts.jsonl", rows)
+    put(
+        directory / "cap.json",
+        {
+            "stage": "validation",
+            "limit_usd": 2.5,
+            "cap_path": str(directory / "cap.json"),
+            "actual_usd": 0.58990976,
+            "uncertain_usd": 0.46601632,
+            "inflight": {},
+            "attempts": 43,
+            "stopped": "implementation",
+        },
+    )
+    result = {
+        "decision": "IMPLEMENTATION_FAILURE",
+        "cases_completed": 19,
+        "cases_expected": 21,
+        "interruption": {
+            "kind": "implementation",
+            "reason": "synthetic diagnostic order",
+            "type": "ConfigError",
+        },
+        "outcomes": compact,
+        "freeze": {"prereg_commit": campaign.R1_PREREG_COMMIT},
+    }
+    result_sha = put(directory / "result.json", result)
+    checks = dict.fromkeys(campaign.R1_EXPECTED_AUDIT_FAILURES, False)
+    checks["operational_decision_precedence"] = True
+    audit = {
+        "schema_version": 1,
+        "round": 1,
+        "integrity": "FAIL",
+        "judge_ready": False,
+        "accounting_integrity": "PASS",
+        "interruption_class": "NONDETERMINISTIC_VALIDATION_ERROR_TEXT",
+        "recorded_decision": "IMPLEMENTATION_FAILURE",
+        "cases_completed": 19,
+        "cases_expected": 21,
+        "exact_final_records": 18,
+        "logical_calls": 42,
+        "physical_attempts": 43,
+        "all_recorded_requests_exact": True,
+        "all_recorded_responses_unchanged": True,
+        "all_recorded_verdicts_unchanged": True,
+        "private_result_sha256": result_sha,
+        "diagnostic_only_case_ids": ["saved_159_C1"],
+        "diagnostic_only_paths": campaign.R1_DIAGNOSTIC_PATHS,
+        "checks": checks,
+        "check_count": len(checks),
+        "failed_checks": sorted(campaign.R1_EXPECTED_AUDIT_FAILURES),
+        "conservative_actual_usd": 0.58990976,
+        "uncertain_usd": 0.46601632,
+        "stage_limit_usd": 2.5,
+    }
+    audit_path = p["FROZEN"] / "independent_audit.json"
+    audit_sha = put(audit_path, audit)
+    hashes = {
+        name: hashlib.sha256((directory / name).read_bytes()).hexdigest()
+        for name in campaign.NEW_RECEIPT_FILES
+    }
+    monkeypatch.setattr(campaign, "R1_ARCHIVE_SHA256", hashes)
+    monkeypatch.setattr(campaign, "R1_AUDIT_SHA256", audit_sha)
+    source_hashes = {}
+    for name in campaign.REPAIR_SOURCE_PATHS:
+        source_hashes[name] = put(
+            campaign.ROOT / name, {"synthetic": "fixed deterministic error serialization"}
+        )
+    manifest_path, repair_path = campaign.continuation_inputs()
+    repair_sha = put(
+        repair_path,
+        {
+            "schema_version": 1,
+            "status": "PASS",
+            "regression": "stable-validation-error-serialization",
+            "tests_passed": 4,
+            "requests_responses_verdicts_unchanged": True,
+            "malformed_outputs_remain_uncertain": True,
+            "source_hashes": source_hashes,
+        },
+    )
+    put(
+        manifest_path,
+        {
+            "schema_version": 1,
+            "policy": campaign.CONTINUATION_POLICY,
+            "from_round": 1,
+            "next_round": 2,
+            "archived_prereg_commit": campaign.R1_PREREG_COMMIT,
+            "archived_result": "IMPLEMENTATION_FAILURE",
+            "interruption_class": "NONDETERMINISTIC_VALIDATION_ERROR_TEXT",
+            "archive_files": {
+                str((directory / name).relative_to(campaign.ROOT)): sha
+                for name, sha in hashes.items()
+            },
+            "interruption_audit": {
+                "path": str(audit_path.relative_to(campaign.ROOT)),
+                "sha256": audit_sha,
+            },
+            "repair_test_report": {
+                "path": str(repair_path.relative_to(campaign.ROOT)),
+                "sha256": repair_sha,
+            },
+            "preserve_operational_failure": True,
+            "resume_old_namespace": False,
+            "prior_committed_usd": 2.50181228,
+            "round_limit_usd": 2.5,
+            "combined_cap_usd": 20.0,
+            "maximum_round": 5,
+        },
+    )
+    return campaign
+
+
+def test_exact_archived_interruption_continues_only_new_round_with_all_costs(
+    interrupted_r1: Any,
+) -> None:
+    campaign = interrupted_r1
+    old = {
+        path: path.read_bytes()
+        for key in ("BASE", "FROZEN")
+        for path in campaign.paths(1)[key].rglob("*")
+        if path.is_file()
+    }
+    campaign.prepare_round(2)
+    carry = campaign.verify_carryover(2)
+    assert carry["prior_committed_usd"] == pytest.approx(2.50181228)
+    assert carry["validation_round_cap_usd"] == 2.5
+    assert {path: path.read_bytes() for path in old} == old
+    with campaign.bound_driver(2):
+        for path in campaign.continuation_inputs():
+            assert str(path.relative_to(campaign.ROOT)) in campaign.driver.FROZEN_INPUTS
+    assert not (campaign.paths(2)["VALIDATION"] / "cap.json").exists()
+    with pytest.raises(ConfigError, match="already prepared"):
+        campaign.prepare_round(2)
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("from_round", 2),
+        ("next_round", 3),
+        ("resume_old_namespace", True),
+        ("preserve_operational_failure", False),
+        ("archived_result", "JUDGE_GATE_NOT_READY"),
+        ("interruption_class", "PROVIDER_TIMEOUT"),
+        ("prior_committed_usd", 1.4458862),
+        ("round_limit_usd", 3.0),
+        ("maximum_round", 6),
+    ],
+)
+def test_narrow_continuation_manifest_cannot_expand_scope(
+    interrupted_r1: Any, field: str, value: Any
+) -> None:
+    campaign = interrupted_r1
+    path, _ = campaign.continuation_inputs()
+    manifest = json.loads(path.read_bytes())
+    manifest[field] = value
+    put(path, manifest)
+    with pytest.raises(ConfigError):
+        campaign.prepare_round(2)
+    assert not campaign.paths(2)["BASE"].exists()
+
+
+@pytest.mark.parametrize("kind", ["manifest", "repair", "audit", "unpublished"])
+def test_missing_or_unpublished_continuation_proof_stops(
+    interrupted_r1: Any, monkeypatch: pytest.MonkeyPatch, kind: str
+) -> None:
+    campaign = interrupted_r1
+    manifest, repair = campaign.continuation_inputs()
+    if kind == "manifest":
+        manifest.unlink()
+    elif kind == "repair":
+        repair.unlink()
+    elif kind == "audit":
+        (campaign.paths(1)["FROZEN"] / "independent_audit.json").unlink()
+    else:
+
+        def unpublished(*args: Any) -> str:
+            raise ConfigError("unpublished audit")
+
+        monkeypatch.setattr(campaign.driver, "git", unpublished)
+    with pytest.raises(ConfigError):
+        campaign.prepare_round(2)
+    assert not campaign.paths(2)["BASE"].exists()
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        "cap.json",
+        "result.json",
+        "cap.attempts.jsonl",
+        "judgments.jsonl",
+        "judge_requests/requests.jsonl",
+        "judge_requests/responses.jsonl",
+        "ledger.judge.jsonl",
+    ],
+)
+def test_even_rehashed_different_interruption_archive_stops(interrupted_r1: Any, name: str) -> None:
+    campaign = interrupted_r1
+    path = campaign.paths(1)["VALIDATION"] / name
+    path.write_bytes(path.read_bytes() + b" ")
+    # prepare constructs new receipt hashes itself; immutable approved hashes still win.
+    with pytest.raises(ConfigError, match="exact authorized"):
+        campaign.prepare_round(2)
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        "promote_integrity",
+        "ready",
+        "new_failure",
+        "relabel_failure",
+        "wrong_case",
+        "changed_requests",
+        "missing_precedence",
+    ],
+)
+def test_truthful_failure_audit_cannot_be_promoted_or_broadened(
+    interrupted_r1: Any, monkeypatch: pytest.MonkeyPatch, change: str
+) -> None:
+    campaign = interrupted_r1
+    path = campaign.paths(1)["FROZEN"] / "independent_audit.json"
+    audit = json.loads(path.read_bytes())
+    if change == "promote_integrity":
+        audit["integrity"] = "PASS"
+    elif change == "ready":
+        audit["judge_ready"] = True
+    elif change == "new_failure":
+        audit["checks"]["unexplained"] = False
+        audit["failed_checks"].append("unexplained")
+        audit["check_count"] += 1
+    elif change == "relabel_failure":
+        audit["recorded_decision"] = "JUDGE_GATE_NOT_READY"
+    elif change == "wrong_case":
+        audit["diagnostic_only_case_ids"] = ["saved_154_C1"]
+    elif change == "changed_requests":
+        audit["all_recorded_requests_exact"] = False
+    else:
+        audit["checks"]["operational_decision_precedence"] = False
+    sha = put(path, audit)
+    monkeypatch.setattr(campaign, "R1_AUDIT_SHA256", sha)
+    manifest, _ = campaign.continuation_inputs()
+    row = json.loads(manifest.read_bytes())
+    row["interruption_audit"]["sha256"] = sha
+    put(manifest, row)
+    with pytest.raises(ConfigError):
+        campaign.prepare_round(2)
+
+
+@pytest.mark.parametrize(
+    "change", ["failed", "zero_tests", "unsafe_pass", "changed_verdict", "wrong_source"]
+)
+def test_repair_report_requires_pass_with_exact_source_binding(
+    interrupted_r1: Any, change: str
+) -> None:
+    campaign = interrupted_r1
+    manifest, repair = campaign.continuation_inputs()
+    report = json.loads(repair.read_bytes())
+    if change == "failed":
+        report["status"] = "FAIL"
+    elif change == "zero_tests":
+        report["tests_passed"] = 0
+    elif change == "unsafe_pass":
+        report["malformed_outputs_remain_uncertain"] = False
+    elif change == "changed_verdict":
+        report["requests_responses_verdicts_unchanged"] = False
+    else:
+        report["source_hashes"][campaign.REPAIR_SOURCE_PATHS[0]] = "f" * 64
+    sha = put(repair, report)
+    row = json.loads(manifest.read_bytes())
+    row["repair_test_report"]["sha256"] = sha
+    put(manifest, row)
+    with pytest.raises(ConfigError):
+        campaign.prepare_round(2)
+
+
+def test_stopped_cap_exception_cannot_apply_to_any_other_cap(interrupted_r1: Any) -> None:
+    campaign = interrupted_r1
+    path = campaign.paths(1)["VALIDATION"]
+    with pytest.raises(ConfigError):
+        campaign.physical_accounting(path, Decimal("2.5"))
+    assert (
+        campaign.physical_accounting(path, Decimal("2.5"), expected_stop="implementation")[
+            "physical_attempts"
+        ]
+        == 43
+    )
+    with pytest.raises(ConfigError):
+        campaign.physical_accounting(path, Decimal("2.5"), expected_stop="cost_cap")
+    with pytest.raises(ConfigError):
+        campaign.physical_accounting(
+            campaign.paths(2)["VALIDATION"], Decimal("2.5"), expected_stop="implementation"
+        )
+
+
+def test_next_interruption_does_not_inherit_r1_exception(interrupted_r1: Any) -> None:
+    campaign = interrupted_r1
+    campaign.prepare_round(2)
+    p = completed_round(campaign, index=2)
+    result_path = p["VALIDATION"] / "result.json"
+    row = json.loads(result_path.read_bytes())
+    row["decision"] = "IMPLEMENTATION_FAILURE"
+    row["interruption"] = {"kind": "implementation"}
+    put(result_path, row)
+    # Bind the prior repair source manifest now that Round 2 has a paid-cap marker.
+    _, repair_path = campaign.continuation_inputs()
+    put(
+        p["FROZEN"] / "source_manifest.json",
+        {"source_hashes": json.loads(repair_path.read_bytes())["source_hashes"]},
+    )
+    p["VALIDATION_PREREG"].write_text("synthetic published preregistration")
+    with pytest.raises(ConfigError):
+        campaign.prepare_round(3)
+    assert not campaign.paths(3)["BASE"].exists()
