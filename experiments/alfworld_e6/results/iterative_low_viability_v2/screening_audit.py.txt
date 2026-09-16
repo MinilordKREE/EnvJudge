@@ -1,0 +1,825 @@
+#!/usr/bin/env python3
+"""Read-only live/final audit for corrected iterative LOW viability V2 screening.
+
+Standard-library only: no application imports, APIs, environment resets, run
+mutations, retries, or implicit resume. Optional new audit JSON is written only
+under /tmp. A successful audit is not a LOW viability claim.
+"""
+
+from __future__ import annotations
+
+import argparse
+import collections
+import hashlib
+import json
+import math
+import os
+import re
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+ROOT = Path("/home/kree/work/EnvJudge-aea-llm")
+TASKS = list(range(150, 170))
+VALIDATOR = "bec74ed8a6ff40e119b2299c92b07b8602ff5fef"
+BASE_DRIVER_SHA = "21e3a91c2a598385e2ed8c27fdeab0584015874d3c5411260a00f6bc042f839c"
+MODEL = "qwen/qwen3-8b"
+PHASE = re.compile(r"^screen:(\d+):valid:(\d+):attempt:(\d+)$")
+OP = re.compile(r"^screen-(\d+)-valid-(\d+)-attempt-(\d+)\.json$")
+EPS = 1e-8
+FATAL = (
+    "provider_mismatch",
+    "pricing_mismatch",
+    "smoke_bound_error",
+    "ConfigError",
+    "RulesCodeError",
+)
+ERROR_PREFIXES = (
+    "subprocess timeout",
+    "subprocess exit ",
+    "subprocess produced no Trace JSON",
+    "policy.act raised:",
+    "env.reset raised:",
+    "env.step raised:",
+)
+
+
+def digest(value):
+    blob = value.encode() if isinstance(value, str) else json.dumps(value, sort_keys=True).encode()
+    return hashlib.sha256(blob).hexdigest()
+
+
+def verify_freeze(root, freeze, read, check):
+    """Validate actual frozen bytes and local git provenance without network access."""
+    check(freeze.get("implementation_sha") == VALIDATOR, "frozen_implementation")
+    check(freeze.get("validator_fidelity_sha") == VALIDATOR, "frozen_validator")
+    check(freeze.get("base_driver_sha256") == BASE_DRIVER_SHA, "historical_base_driver_binding")
+    check(
+        freeze.get("semantic_gate_version") == "alfworld-semantic-screen-v1", "frozen_gate_version"
+    )
+    prereg = "experiments/alfworld_e6/PREREG_ITERATIVE_LOW_VIABILITY_POOL_V2.md"
+    frozen_dir = "experiments/alfworld_e6/frozen/iterative_low_viability_v2/"
+    expected = dict(freeze.get("frozen_config_hashes", {}))
+    expected.update(
+        {
+            "scripts/e6_iterative_low_viability_v2.py": freeze.get("driver_sha256"),
+            "scripts/e6_iterative_low_viability.py": BASE_DRIVER_SHA,
+            "src/aea/semantic_privilege.py": freeze.get("semantic_gate_sha256"),
+            prereg: freeze.get("prereg_sha256"),
+        }
+    )
+    expected.update(
+        {frozen_dir + name: value for name, value in freeze.get("input_hashes", {}).items()}
+    )
+    runtime_path = root / (frozen_dir + "runtime_hashes.json")
+    if runtime_path.exists():
+        runtime = json.loads(read(runtime_path))
+        expected.update(runtime)
+        check(
+            all(
+                any(name.endswith("/" + required) for name in runtime)
+                for required in [
+                    "bridge.py",
+                    "rules.py",
+                    "code_loader.py",
+                    "policy.py",
+                    "runner.py",
+                    "episode_worker.py",
+                ]
+            ),
+            "complete_runtime_manifest",
+        )
+    else:
+        check(False, "runtime_manifest_present")
+    for name, checksum in expected.items():
+        path = root / name
+        check(
+            path.exists() and hashlib.sha256(read(path)).hexdigest() == checksum,
+            "frozen_source_hash",
+            name,
+        )
+    audit_path = root / (frozen_dir + "used_task_audit.json")
+    if audit_path.exists():
+        used = json.loads(read(audit_path))
+        check(
+            used.get("never_used_ids") == TASKS and used.get("start_id") == 150,
+            "frozen_task_universe_and_order",
+        )
+    env = {**os.environ, "GIT_OPTIONAL_LOCKS": "0"}
+
+    def git(*args):
+        return subprocess.run(["git", *args], cwd=root, env=env, capture_output=True, check=False)
+
+    commit = freeze.get("prereg_commit", "")
+    check(bool(re.fullmatch(r"[0-9a-f]{40}", commit)), "prereg_commit_identity")
+    if re.fullmatch(r"[0-9a-f]{40}", commit):
+        published = git("merge-base", "--is-ancestor", commit, "origin/aea-llm-vnext")
+        check(published.returncode == 0, "prereg_commit_pushed")
+        prior = git("show", commit + ":" + prereg)
+        check(
+            prior.returncode == 0
+            and hashlib.sha256(prior.stdout).hexdigest() == freeze.get("prereg_sha256"),
+            "prereg_committed_bytes",
+        )
+    production = git("diff", "--exit-code", VALIDATOR, "--", "src/aea")
+    check(production.returncode == 0, "production_method_unchanged")
+    tree = git("rev-parse", VALIDATOR + ":src/aea")
+    check(
+        tree.returncode == 0 and tree.stdout.decode().strip() == freeze.get("source_tree"),
+        "frozen_production_tree",
+    )
+
+
+def audit(root, run):
+    failures, pending, notes, metadata_omissions = [], [], [], []
+    hashes = {}
+    count = 0
+    running = True
+
+    def check(ok, name, detail=None, live=False):
+        nonlocal count
+        count += 1
+        if not ok:
+            (pending if live and running else failures).append({"check": name, "detail": detail})
+
+    def key(path):
+        return str(path.relative_to(root)) if path.is_relative_to(root) else str(path)
+
+    def read(path):
+        blob = path.read_bytes()
+        hashes[key(path)] = hashlib.sha256(blob).hexdigest()
+        return blob
+
+    def jread(path, default=None):
+        return json.loads(read(path)) if path.exists() else default
+
+    def jlines(path):
+        if not path.exists():
+            return []
+        lines = read(path).splitlines()
+        rows = []
+        for n, line in enumerate(lines, 1):
+            if not line.strip():
+                continue
+            try:
+                rows.append(json.loads(line))
+            except json.JSONDecodeError:
+                check(
+                    False,
+                    "complete_jsonl_record",
+                    {"path": key(path), "line": n},
+                    live=n == len(lines),
+                )
+        return rows
+
+    screen = jread(run / "screening.json")
+    if not isinstance(screen, dict):
+        return {
+            "audit_status": "FAIL",
+            "summary": "Missing screening state.",
+            "failures": [{"check": "screening_state_present"}],
+        }
+    status = screen.get("status")
+    running = status == "running"
+    cap = jread(run / "cap.json", {})
+    initial_hashes = {p: hashes.get(key(run / p)) for p in ["screening.json", "cap.json"]}
+    verify_freeze(root, screen.get("freeze", {}), read, check)
+    attempts = jlines(run / "cap.attempts.jsonl")
+    ledger = [r for path in sorted(run.glob("ledger.*.jsonl")) for r in jlines(path)]
+    operations = {}
+    for path in sorted((run / "operations").glob("*.json")):
+        match = OP.fullmatch(path.name)
+        check(match is not None, "screening_only_operation", path.name)
+        if match:
+            operations[tuple(map(int, match.groups()))] = jread(path)
+    rows = screen.get("tasks", {})
+    declared = list(map(int, rows))
+    begun = sorted(set(declared) | {item[0] for item in operations})
+    check(declared == TASKS[: len(declared)], "declared_ascending_task_prefix", declared)
+    check(begun == TASKS[: len(begun)] and len(begun) <= 20, "begun_ascending_task_prefix", begun)
+    check(len(screen.get("qualified", [])) <= 4, "maximum_four_zero_tasks")
+    by_attempt, by_ledger = collections.defaultdict(list), collections.defaultdict(list)
+    for collection, physical in [(attempts, True), (ledger, False)]:
+        for row in collection:
+            attr = row.get("attribution", {}) if physical else row
+            phase = attr.get("phase", "")
+            match = PHASE.fullmatch(phase)
+            check(match is not None, "screening_only_request_phase", phase)
+            check(
+                attr.get("arm") == "screen" and attr.get("budget") == "eval",
+                "screening_only_arm_budget",
+                attr,
+            )
+            if match:
+                task, valid, retry = map(int, match.groups())
+                check(
+                    task in TASKS and 1 <= valid <= 16 and 1 <= retry <= 3,
+                    "request_phase_limits",
+                    phase,
+                )
+                check(str(attr.get("task_id")) == str(task), "request_task_attribution", phase)
+                check((task, valid, retry) in operations, "request_has_dispatched_operation", phase)
+            if physical:
+                check(row.get("phase") == "screening", "physical_screening_phase")
+                by_attempt[phase].append(row)
+            else:
+                by_ledger[phase].append(row)
+    seen, execution_files, aliases = set(), set(), set()
+    invalid_episode_ids = set()
+    summaries, confirmed, completed_phases = [], [], set()
+    records_by_phase = {}
+    expected_next = {}
+    for task in declared:
+        row = rows[str(task)]
+        records = row.get("episodes", [])
+        executions = row.get("executions", -1)
+        check(row.get("task_id") == task, "task_identity", task)
+        check(
+            len(records) <= executions <= len(records) + 1 and 0 <= executions <= 48,
+            "dispatched_completed_execution_counts",
+            {"task": task, "completed": len(records), "executions": executions},
+        )
+        valid_index, slot_attempt = 1, 1
+        valid_indices, recoveries = [], []
+        successes = slot_errors = slot_retries = slot_invalid = 0
+        all_errors = all_retries = invalid = 0
+        success_execution = None
+        exhausted = False
+        for index, record in enumerate(records, 1):
+            phase = f"screen:{task}:valid:{valid_index}:attempt:{slot_attempt}"
+            check(
+                not exhausted and success_execution is None and valid_index <= 16,
+                "no_execution_after_task_terminal_evidence",
+                {"task": task, "execution": index},
+            )
+            check(
+                record.get("index") == index and record.get("execution_index") == index,
+                "consecutive_execution_indices",
+                phase,
+            )
+            check(
+                record.get("target_valid_index") == valid_index
+                and record.get("slot_attempt") == slot_attempt
+                and record.get("phase") == phase,
+                "valid_slot_retry_lineage",
+                phase,
+            )
+            expected_path = f"task-{task}/original-execution-{index:02}.json"
+            check(record.get("trace_file") == expected_path, "execution_trace_path", phase)
+            path = run / expected_path
+            execution_files.add(path)
+            check(path.exists(), "execution_trace_present", phase)
+            if not path.exists():
+                continue
+            blob = read(path)
+            traces = json.loads(blob)
+            check(
+                hashlib.sha256(blob).hexdigest() == record.get("file_sha256"),
+                "exact_execution_file_hash",
+                phase,
+            )
+            check(digest(traces) == record.get("trace_sha256"), "canonical_execution_hash", phase)
+            check(len(traces) == 1, "one_returned_trace_per_execution", phase)
+            if len(traces) != 1:
+                continue
+            trace = traces[0]
+            episode = trace.get("episode_id")
+            check(
+                bool(episode) and episode not in seen,
+                "unique_episode_id_across_all_executions",
+                phase,
+            )
+            seen.add(episode)
+            check(record.get("episode_ids") == [episode], "record_episode_identity", phase)
+            check(trace.get("rollout_seed") == task, "original_bridge_seed", phase)
+            check(
+                trace.get("task_id") == "alfworld-corpus-ours-release",
+                "original_corpus_label",
+                phase,
+            )
+            check(
+                trace.get("iteration_id") == f"{phase}-{task}-0",
+                "execution_iteration_provenance",
+                phase,
+            )
+            candidate = trace.get("candidate", {})
+            check(
+                candidate.get("rules_code") == "" and candidate.get("in_env_actions") == [],
+                "identity_original_candidate",
+                phase,
+            )
+            error = trace.get("error")
+            valid = not bool(error)
+            if not valid:
+                invalid_episode_ids.add(episode)
+            check(
+                not error or not any(x in str(error) for x in FATAL),
+                "no_fatal_provenance_error_trace",
+                phase,
+            )
+            steps = trace.get("steps", [])
+            check(len(steps) <= 50, "frozen_50_step_horizon", phase)
+            if valid:
+                check(
+                    bool(steps) and trace.get("duration_steps") == len(steps),
+                    "valid_completed_episode_length",
+                    phase,
+                )
+            omission = (
+                bool(error)
+                and str(error).startswith(ERROR_PREFIXES)
+                and trace.get("policy_model_id") in ("", None)
+                and not trace.get("success")
+                and trace.get("duration_steps", 0) == len(steps)
+            )
+            check(trace.get("policy_model_id") == MODEL or omission, "frozen_policy_model", phase)
+            if omission:
+                metadata_omissions.append(
+                    {"phase": phase, "field": "policy_model_id", "error": error}
+                )
+            for step in steps:
+                check(
+                    step.get("raw_action") == step.get("filtered_action")
+                    and not step.get("blocked_reason"),
+                    "identity_action_surface",
+                    phase,
+                )
+                check(
+                    step.get("raw_observation") == step.get("filtered_observation"),
+                    "identity_observation_surface",
+                    phase,
+                )
+            physical_errors = sum(
+                r.get("status") in ("ambiguous_failure", "orphan_reconciled")
+                for r in by_attempt[phase]
+            )
+            retries = [
+                r for r in by_ledger[phase] if r.get("event") in ("infra_retry", "infra_failure")
+            ]
+            check(
+                not any(
+                    r.get("error_kind")
+                    in ("provider_mismatch", "pricing_mismatch", "smoke_bound_error")
+                    for r in retries
+                ),
+                "no_fatal_ledger_provenance_error",
+                phase,
+            )
+            expected = {
+                "is_valid": valid,
+                "behavioral_success": bool(trace.get("success")) if valid else None,
+                "successes": int(bool(trace.get("success"))) if valid else 0,
+                "terminal_errors": int(bool(error)),
+                "missing_outcome_reason": error,
+                "physical_provider_errors": physical_errors,
+                "provider_retry_or_failure_events": len(retries),
+            }
+            for name, value in expected.items():
+                check(record.get(name) == value, "record_reconciles_" + name, phase)
+            rollout_rows = [
+                r
+                for r in by_ledger[phase]
+                if r.get("event") == "rollout" and r.get("rollout_uid") == episode
+            ]
+            check(len(rollout_rows) == 1, "one_rollout_ledger_row_per_returned_trace", phase)
+            slot_errors += physical_errors
+            slot_retries += len(retries)
+            all_errors += physical_errors
+            all_retries += len(retries)
+            records_by_phase[phase] = record
+            completed_phases.add(phase)
+            operation = operations.get((task, valid_index, slot_attempt), {})
+            check(
+                operation.get("metadata")
+                == {
+                    "task": task,
+                    "n": 1,
+                    "execution_index": index,
+                    "target_valid_index": valid_index,
+                    "slot_attempt": slot_attempt,
+                },
+                "execution_operation_metadata",
+                phase,
+            )
+            allowed_unfinished = operation.get("status") == "dispatched" and (
+                running
+                or (status in ("INCONCLUSIVE", "SCREENING_COST_LIMIT") and bool(cap.get("stopped")))
+            )
+            check(
+                operation.get("status") in ("completed", "interrupted") or allowed_unfinished,
+                "returned_execution_operation_status",
+                phase,
+            )
+            if valid:
+                alias = run / f"task-{task}/original-{valid_index:02}.json"
+                aliases.add(alias)
+                check(
+                    alias.exists() and read(alias) == blob,
+                    "valid_alias_exact_execution_bytes",
+                    phase,
+                )
+                valid_indices.append(index)
+                successes += int(bool(trace.get("success")))
+                if slot_errors or slot_retries or slot_invalid:
+                    recoveries.append(
+                        {
+                            "status": "RECOVERED_PROVIDER_ERROR",
+                            "valid_index": valid_index,
+                            "episode_id": episode,
+                            "physical_provider_errors": slot_errors,
+                            "provider_retry_or_failure_events": slot_retries,
+                            "failed_episode_executions": slot_invalid,
+                        }
+                    )
+                if trace.get("success"):
+                    success_execution = index
+                valid_index += 1
+                slot_attempt = 1
+                slot_errors = slot_retries = slot_invalid = 0
+            else:
+                invalid += 1
+                slot_invalid += 1
+                slot_attempt += 1
+                if slot_attempt > 3:
+                    exhausted = True
+        expected_next[task] = (
+            valid_index,
+            slot_attempt,
+            successes > 0 or exhausted or len(valid_indices) == 16,
+        )
+        check(
+            row.get("valid_episode_indices") == valid_indices, "valid_execution_index_mapping", task
+        )
+        check(
+            row.get("valid_episodes") == len(valid_indices),
+            "valid_episode_counter_excludes_errors",
+            task,
+        )
+        check(
+            row.get("valid_successes") == successes, "valid_success_counter_excludes_errors", task
+        )
+        check(row.get("recoveries") == recoveries, "slot_recovery_records", task)
+        check(
+            row.get("recovered_provider_errors")
+            == sum(r["physical_provider_errors"] for r in recoveries),
+            "recovered_provider_error_count",
+            task,
+        )
+        check(
+            row.get("recovered_episode_executions")
+            == sum(r["failed_episode_executions"] for r in recoveries),
+            "recovered_execution_count",
+            task,
+        )
+        task_status = row.get("status")
+        if task_status == "CONFIRMED_ZERO":
+            check(
+                len(valid_indices) == 16 and successes == 0 and executions == len(records),
+                "strict_16_valid_zero_qualification",
+                task,
+            )
+            check(row.get("original_k16") == "0/16", "zero_label", task)
+            confirmed.append(task)
+        elif task_status == "NON_ZERO":
+            check(
+                successes == 1 and success_execution == len(records) and executions == len(records),
+                "first_valid_success_stops_task",
+                task,
+            )
+        elif task_status == "INFRA_INCONCLUSIVE":
+            if row.get("infrastructure_reason") == "episode_execution_cap_exhausted":
+                check(
+                    exhausted and successes == 0 and executions == len(records),
+                    "three_invalid_executions_exhaust_slot",
+                    task,
+                )
+            else:
+                check(
+                    status in ("INCONCLUSIVE", "SCREENING_COST_LIMIT") and task == begun[-1],
+                    "global_infra_stop_only_active_task",
+                    task,
+                )
+        elif task_status == "IMPLEMENTATION_FAILURE":
+            check(False, "driver_reported_task_implementation_failure", task)
+        else:
+            check(
+                task_status == "screening" and running,
+                "known_live_task_status",
+                {"task": task, "status": task_status},
+            )
+        if task != begun[-1]:
+            check(
+                task_status in ("CONFIRMED_ZERO", "NON_ZERO")
+                or (
+                    task_status == "INFRA_INCONCLUSIVE"
+                    and row.get("infrastructure_reason") == "episode_execution_cap_exhausted"
+                ),
+                "prior_task_final_before_next_id",
+                task,
+                live=True,
+            )
+        summaries.append(
+            {
+                "task": task,
+                "status": task_status,
+                "executions_dispatched": executions,
+                "executions_returned": len(records),
+                "invalid_executions": invalid,
+                "valid_episodes": len(valid_indices),
+                "valid_successes": successes,
+                "physical_provider_errors": all_errors,
+                "provider_retry_or_failure_events": all_retries,
+                "recovered_provider_errors": row.get("recovered_provider_errors"),
+                "recoveries": len(recoveries),
+            }
+        )
+    check(
+        confirmed == screen.get("qualified", []), "qualified_ids_match_valid_zero_rows", live=True
+    )
+    if len(confirmed) == 4:
+        check(begun[-1] == confirmed[-1], "stop_after_four_confirmed_zeros")
+    if status == "qualified":
+        check(len(confirmed) == 4, "qualified_final_exact_four")
+    if status == "INSUFFICIENT_FRESH_LOW":
+        check(begun == TASKS and len(confirmed) < 4, "insufficient_only_after_twenty_ids")
+    if status in ("INCONCLUSIVE", "SCREENING_COST_LIMIT", "IMPLEMENTATION_FAILURE"):
+        check(
+            bool(screen.get("interruption"))
+            and (run / "STOP.json").exists()
+            and bool(cap.get("stopped")),
+            "global_stop_is_sticky",
+        )
+    if status == "SCREENING_COST_LIMIT":
+        check(
+            screen.get("interruption", {}).get("kind") == "smoke_cost_cap"
+            and cap.get("stopped") in ("screening_cost_cap", "cost_cap"),
+            "global_cost_limit_reason",
+        )
+    if status == "IMPLEMENTATION_FAILURE":
+        check(False, "driver_reported_global_implementation_failure", screen.get("interruption"))
+    dispatched = []
+    for (task, valid, retry), operation in operations.items():
+        check(
+            task in TASKS and 1 <= valid <= 16 and 1 <= retry <= 3,
+            "operation_within_valid_slot_limits",
+            [task, valid, retry],
+        )
+        if operation.get("status") == "dispatched":
+            dispatched.append([task, valid, retry])
+        phase = f"screen:{task}:valid:{valid}:attempt:{retry}"
+        if phase not in completed_phases:
+            wanted_valid, wanted_retry, terminal = expected_next.get(task, (1, 1, False))
+            check(
+                (valid, retry) == (wanted_valid, wanted_retry) and not terminal,
+                "no_dispatch_after_success_zero_or_retry_exhaustion",
+                [task, valid, retry],
+            )
+            check(
+                operation.get("status") != "completed",
+                "completed_operation_has_returned_record",
+                phase,
+                live=True,
+            )
+            expected_index = len(rows.get(str(task), {}).get("episodes", [])) + 1
+            check(
+                operation.get("metadata")
+                == {
+                    "task": task,
+                    "n": 1,
+                    "execution_index": expected_index,
+                    "target_valid_index": valid,
+                    "slot_attempt": retry,
+                },
+                "unfinished_operation_lineage",
+                phase,
+            )
+    check(len(dispatched) <= 1, "one_worker_execution_at_a_time", dispatched)
+    check(
+        not (set(run.glob("task-*/original-execution-*.json")) - execution_files),
+        "all_execution_trace_files_indexed",
+        live=True,
+    )
+    extra_aliases = set(run.glob("task-*/original-[0-9][0-9].json")) - aliases
+    for path in sorted(extra_aliases):
+        batch = jread(path, [])
+        check(
+            len(batch) == 1
+            and not batch[0].get("error")
+            and batch[0].get("episode_id") not in invalid_episode_ids,
+            "invalid_execution_never_gets_valid_alias",
+            key(path),
+        )
+    check(not extra_aliases, "only_valid_outcomes_have_aliases", live=True)
+    forbidden = [
+        str(p.relative_to(run))
+        for p in run.rglob("*")
+        if p.is_file()
+        and (
+            any(
+                w in p.name
+                for w in (
+                    "privileged_reference",
+                    "designer_input",
+                    "designer_request",
+                    "original_failures",
+                )
+            )
+            or p.name in ("input_manifest.json", "prepared.json")
+        )
+    ]
+    check(not forbidden, "no_reference_designer_adaptation_yet", forbidden)
+
+    # Physical attempts and priced calls remain separate; failed reservations
+    # retain full exposure, including orphan settlement of the SAME attempt ID.
+    attempt_ids = [r.get("attempt") for r in attempts]
+    check(
+        all(attempt_ids) and len(attempt_ids) == len(set(attempt_ids)),
+        "unique_settled_physical_attempt_ids",
+    )
+    actual = uncertain = historical_spend = 0.0
+    physical_sigs = collections.Counter()
+    orphan_count = 0
+    for row in attempts:
+        phase = row.get("attribution", {}).get("phase")
+        reserved = float(row.get("reserved_usd", -1))
+        check(row.get("model") == MODEL, "frozen_physical_policy_model")
+        check(math.isfinite(reserved) and reserved > 0, "positive_request_reservation")
+        check(
+            historical_spend + reserved < 8 + EPS,
+            "historical_reservation_within_screening_cap",
+            row.get("attempt"),
+        )
+        if row.get("status") == "returned":
+            cost = max(
+                float(row.get("upstream_usd") or 0),
+                (int(row["input_tokens"]) * 0.117 + int(row["output_tokens"]) * 0.455) / 1_000_000,
+            )
+            check(
+                abs(float(row.get("conservative_usd", -1)) - cost) <= EPS,
+                "physical_returned_cost_recalculation",
+            )
+            check(cost <= reserved + EPS, "returned_cost_within_reservation")
+            actual += cost
+            historical_spend += cost
+            physical_sigs[(phase, row["input_tokens"], row["output_tokens"])] += 1
+        else:
+            check(
+                row.get("status") in ("ambiguous_failure", "orphan_reconciled"),
+                "known_failed_attempt_status",
+            )
+            uncertain += reserved
+            historical_spend += reserved
+            if row.get("status") == "orphan_reconciled":
+                orphan_count += 1
+                check(
+                    row.get("started") is None
+                    and row.get("behavioral_outcome") is None
+                    and row.get("resolution")
+                    == "worker_returned_error_after_exit_or_timeout_kill_and_wait",
+                    "orphan_reconciliation_evidence",
+                )
+                record = records_by_phase.get(phase)
+                check(
+                    record is not None
+                    and record.get("is_valid") is False
+                    and record.get("terminal_errors") == 1,
+                    "orphan_only_after_returned_errored_worker",
+                    phase,
+                    live=True,
+                )
+    calls = [r for r in ledger if r.get("event") == "call"]
+    call_sigs = collections.Counter()
+    ledger_usd = 0.0
+    for row in calls:
+        check(
+            row.get("model") == MODEL and str(row.get("provider")).lower() == "alibaba",
+            "frozen_call_model_provider",
+        )
+        cost = (
+            int(row["prompt_tokens"]) * 0.117 + int(row["completion_tokens"]) * 0.455
+        ) / 1_000_000
+        check(abs(float(row["usd"]) - cost) <= EPS, "priced_call_cost_recalculation")
+        check(
+            row.get("pricing_version") == "openrouter-qwen3-8b-2026-09-07"
+            and bool(row.get("request_sha256")),
+            "priced_call_provenance",
+        )
+        ledger_usd += float(row["usd"])
+        call_sigs[(row["phase"], row["prompt_tokens"], row["completion_tokens"])] += 1
+    check(not (call_sigs - physical_sigs), "all_priced_calls_have_physical_returns", live=True)
+    for (phase, _tin, _tout), n in (physical_sigs - call_sigs).items():
+        record = records_by_phase.get(phase)
+        if record:
+            check(
+                bool(
+                    record.get("terminal_errors") or record.get("provider_retry_or_failure_events")
+                ),
+                "unpriced_return_requires_recorded_failure",
+                {"phase": phase, "count": n},
+            )
+    inflight = cap.get("inflight", {})
+    check(not set(inflight) & set(attempt_ids), "no_double_counted_reconciled_attempt", live=True)
+    check(
+        cap.get("attempts") == len(attempts) + len(inflight),
+        "physical_attempt_count_reconciles",
+        live=True,
+    )
+    check(abs(float(cap.get("actual_usd", -1)) - actual) <= EPS, "cap_actual_reconciles", live=True)
+    check(
+        abs(float(cap.get("uncertain_usd", -1)) - uncertain) <= EPS,
+        "failed_and_orphan_reservations_retained_once",
+        live=True,
+    )
+    check(
+        all(math.isfinite(float(v)) and float(v) > 0 for v in inflight.values()),
+        "inflight_reservations_retained",
+    )
+    committed = (
+        float(cap.get("actual_usd", 0))
+        + float(cap.get("uncertain_usd", 0))
+        + sum(map(float, inflight.values()))
+    )
+    check(
+        cap.get("total_limit_usd") == 20.0 and cap.get("screening_limit_usd") == 8.0,
+        "immutable_8_and_20_caps",
+    )
+    check(0 <= committed < 8 + EPS and committed < 20, "hard_committed_cost_caps", committed)
+    check(not cap.get("bound_violation"), "no_reservation_bound_violation")
+    check(cap.get("phase") in ("screening", "screening_complete"), "no_adaptation_phase_enabled")
+    if cap.get("phase") == "screening_complete":
+        check(
+            abs(float(cap.get("screening_committed_usd", -1)) - committed) <= EPS,
+            "frozen_screening_total",
+        )
+    moved = any(
+        (run / p).exists() and hashlib.sha256((run / p).read_bytes()).hexdigest() != h
+        for p, h in initial_hashes.items()
+    )
+    if moved:
+        notes.append("Live state changed during snapshot; rerun for settled reconciliation.")
+    if inflight:
+        notes.append("All unresolved request reservations remain fully included in committed cost.")
+    if status in ("INCONCLUSIVE", "SCREENING_COST_LIMIT"):
+        notes.append(
+            "Partial valid behavioral evidence is retained; incomplete tasks are never ZERO."
+        )
+    audit_status = "FAIL" if failures else ("PASS_INTERMEDIATE" if running else "PASS")
+    summary = (
+        f"{audit_status}: {len(begun)} IDs begun, {len(seen)} returned executions, "
+        f"{sum(r['valid_episodes'] for r in summaries)} valid episodes, "
+        f"{len(confirmed)} ZERO, ${committed:.8f} committed; "
+        f"{len(failures)} failures, {len(pending)} live-boundary items."
+    )
+    return {
+        "schema": "aea-viability-v2-screen-readonly-audit-v1",
+        "audit_status": audit_status,
+        "screening_status": status,
+        "summary": summary,
+        "checked_at_unix": time.time(),
+        "checks": count,
+        "failures": failures,
+        "pending_live_boundary_checks": pending,
+        "notes": notes,
+        "snapshot_changed": moved,
+        "task_ids_begun": begun,
+        "tasks": summaries,
+        "qualified": confirmed,
+        "all_execution_episode_ids": sorted(seen),
+        "terminal_trace_metadata_omissions": metadata_omissions,
+        "dispatched_operations": dispatched,
+        "physical_attempts_settled": len(attempts),
+        "physical_attempts_inflight": len(inflight),
+        "orphan_reconciled_attempts": orphan_count,
+        "priced_calls": len(calls),
+        "physical_returned_usd": actual,
+        "retained_failed_and_orphan_usd": uncertain,
+        "priced_ledger_usd": ledger_usd,
+        "committed_cap_usd": committed,
+        "cap": cap,
+        "source_sha256": hashes,
+    }
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--root", type=Path, default=ROOT)
+    parser.add_argument("--run", type=Path)
+    parser.add_argument("--output", type=Path)
+    args = parser.parse_args()
+    if args.output and not args.output.resolve().is_relative_to(Path("/tmp")):
+        parser.error("--output must be a new file under /tmp; worktrees are read-only")
+    run = args.run or args.root / "runs/e6-iterative-low-viability-v2"
+    result = audit(args.root.resolve(), run.resolve())
+    text = json.dumps(result, indent=2, sort_keys=True) + "\n"
+    if args.output:
+        with args.output.open("x") as stream:
+            stream.write(text)
+    else:
+        sys.stdout.write(text)
+    sys.stderr.write(result["summary"] + "\n")
+    return 2 if result["audit_status"] == "FAIL" else 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

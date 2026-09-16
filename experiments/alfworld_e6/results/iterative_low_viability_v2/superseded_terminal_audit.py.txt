@@ -1,0 +1,149 @@
+#!/usr/bin/env python3
+"""Independent, read-only final cap/closure/qualified-evidence cross-check."""
+import collections
+import datetime
+import hashlib
+import json
+from decimal import Decimal
+from pathlib import Path
+import sys
+
+ROOT = Path('/home/kree/work/EnvJudge-aea-llm')
+RUN = ROOT / 'runs/e6-iterative-low-viability-v2'
+OUTPUT = Path('/tmp/viability_v2_terminal_supplement_final.json')
+D = Decimal
+failures, sources = [], {}
+checks = 0
+
+
+def read(path):
+    data = path.read_bytes()
+    sources[str(path.relative_to(ROOT)) if path.is_relative_to(ROOT) else str(path)] = hashlib.sha256(data).hexdigest()
+    return data
+
+
+def load(path):
+    return json.loads(read(path), parse_float=D)
+
+
+def rows(path):
+    return [json.loads(line, parse_float=D) for line in read(path).splitlines() if line]
+
+
+def check(ok, label, detail=None):
+    global checks
+    checks += 1
+    if not ok:
+        failures.append({'check': label, 'detail': detail})
+
+
+def timestamp(row):
+    return D(str(datetime.datetime.fromisoformat(row['ts'].replace('Z', '+00:00')).timestamp()))
+
+
+screen = load(RUN / 'screening.json')
+cap = load(RUN / 'cap.json')
+stop = load(RUN / 'STOP.json')
+attempts = rows(RUN / 'cap.attempts.jsonl')
+ledger = [row for path in sorted(RUN.glob('ledger.*.jsonl')) for row in rows(path)]
+ops = {p.name: load(p) for p in (RUN / 'operations').glob('*.json')}
+check(screen['status'] == 'SCREENING_COST_LIMIT', 'terminal_screening_cost_limit')
+check(cap['stopped'] == 'screening_cost_cap' and stop['kind'] == 'smoke_cost_cap', 'sticky_cap_stop')
+check(not cap['inflight'], 'zero_inflight_reservations')
+check(collections.Counter(op['status'] for op in ops.values()) == {'completed': 70, 'interrupted': 1}, 'all_71_operations_closed')
+check(len(attempts) == cap['attempts'] == 3499, 'physical_attempt_count_exact')
+check(len({a['attempt'] for a in attempts}) == len(attempts), 'physical_attempt_ids_unique')
+returned = [a for a in attempts if a['status'] == 'returned']
+failed = [a for a in attempts if a['status'] == 'ambiguous_failure']
+check(len(returned) == 3224 and len(failed) == 275, 'returned_and_failed_physical_counts')
+actual = sum((a['conservative_usd'] for a in returned), D(0))
+uncertain = sum((a['reserved_usd'] for a in failed), D(0))
+ledger_cost = sum((r['usd'] for r in ledger if r['event'] == 'call'), D(0))
+# The frozen driver accumulates IEEE floats. Decimal sums of stored strings make
+# their harmless accumulated rounding explicit instead of silently rounding it.
+tolerance = D('0.0000000001')
+check(abs(actual - cap['actual_usd']) < tolerance, 'all_returned_costs_retained')
+check(abs(uncertain - cap['uncertain_usd']) < tolerance, 'all_failed_reservations_retained_once')
+check(abs(actual - ledger_cost) < tolerance, 'returned_and_priced_ledger_costs_match')
+check(actual + uncertain < D(8) and cap['total_limit_usd'] == D(20), 'caps_8_and_20_unchanged')
+cumulative = D(0)
+max_reservation_exposure = D(0)
+for a in attempts:
+    exposure = cumulative + a['reserved_usd']
+    max_reservation_exposure = max(max_reservation_exposure, exposure)
+    check(exposure <= D(8) + tolerance, 'each_historical_dispatch_reservation_below_cap', a['attempt'])
+    cumulative += a['conservative_usd'] if a['status'] == 'returned' else a['reserved_usd']
+
+cap_denials = [r for r in ledger if r['event'] == 'infra_failure' and r.get('error_kind') == 'smoke_cost_cap']
+check(len(cap_denials) == 1, 'one_terminal_cap_denial')
+denial = cap_denials[0]
+denied_at = timestamp(denial)
+check(denial['phase'] == 'screen:162:valid:12:attempt:1', 'cap_denial_last_slot')
+post_denial_requests = [r for r in ledger if timestamp(r) > denied_at and r['event'] in ('call', 'infra_retry', 'infra_failure')]
+check(not post_denial_requests, 'no_request_events_after_terminal_cap_denial')
+check(all(a['started'] is not None and a['started'] < denied_at for a in attempts), 'no_physical_dispatch_after_denial')
+check(all(op.get('finished', D(0)) < denied_at for op in ops.values() if op['status'] == 'completed'), 'all_other_episodes_finished_before_denial')
+check(set(map(int, screen['tasks'])) == set(range(150, 163)), 'only_ordered_150_through_162_begun')
+check(not (RUN / 'operations/screen-162-valid-12-attempt-2.json').exists(), 'no_episode_retry_after_global_cap')
+check(not any((RUN / f'task-{task}').exists() for task in range(163, 170)), 'no_later_tasks_dispatched')
+
+last_task = screen['tasks']['162']
+last = last_task['episodes'][-1]
+check(last_task['status'] == 'INFRA_INCONCLUSIVE' and last_task['executions'] == 12 and last_task['valid_episodes'] == 11 and last_task['valid_successes'] == 0, 'partial_task_is_not_ZERO')
+check(last['is_valid'] is False and last['behavioral_success'] is None and last['terminal_errors'] == 1, 'final_error_trace_has_no_behavioral_outcome')
+check(last_task['valid_episode_indices'] == list(range(1, 12)) and not (RUN / 'task-162/original-12.json').exists(), 'invalid_execution_excluded_from_valid_indices_and_aliases')
+check(ops['screen-162-valid-12-attempt-1.json']['status'] == 'interrupted', 'cap_interrupted_operation_closed')
+
+qualified = {}
+check(screen['qualified'] == [154, 158, 159], 'exact_three_qualified_tasks')
+for task in screen['qualified']:
+    row = screen['tasks'][str(task)]
+    check(row['status'] == 'CONFIRMED_ZERO' and row['valid_episodes'] == 16 and row['valid_successes'] == 0 and row['executions'] == 16, 'qualified_exact_0_of_16', task)
+    evidence = []
+    for index, record in enumerate(row['episodes'], 1):
+        original = RUN / record['trace_file']
+        raw = read(original)
+        alias = RUN / f'task-{task}/original-{index:02d}.json'
+        check(read(alias) == raw, 'qualified_valid_alias_identical', str(alias))
+        check(record['is_valid'] and record['behavioral_success'] is False and not record['terminal_errors'], 'qualified_valid_behavioral_failure', [task, index])
+        traces = json.loads(raw)
+        check(len(traces) == 1 and traces[0]['success'] is False and not traces[0].get('error'), 'qualified_trace_completed_failure', [task, index])
+        check(traces[0]['rollout_seed'] == task and str(traces[0]['task_id']) == str(task), 'qualified_trace_bridge_identity', [task, index])
+        evidence.append({'valid_index': index, 'episode_id': traces[0]['episode_id'], 'path': str(original.relative_to(ROOT)), 'sha256': hashlib.sha256(raw).hexdigest()})
+    qualified[str(task)] = evidence
+ids = [r['episode_id'] for rows_ in qualified.values() for r in rows_]
+check(len(ids) == len(set(ids)) == 48, '48_unique_qualifying_valid_episodes')
+for name in ['screen_audit', 'preservation']:
+    path = Path('/tmp/viability_v2_screen_audit_final_independent.json' if name == 'screen_audit' else '/tmp/viability_v2_preservation_final_independent.json')
+    prior = load(path)
+    check(prior['audit_status'] == 'PASS' and not prior['failures'], name + '_independent_PASS')
+
+result = {
+    'schema': 'viability-v2-terminal-cap-and-closure-audit-v1',
+    'audit_status': 'FAIL' if failures else 'PASS', 'checks': checks, 'failures': failures,
+    'terminal_status': screen['status'], 'cap_denial_at': denial['ts'],
+    'last_physical_request_started_unix': max(a['started'] for a in attempts),
+    'last_priced_call_at': max(r['ts'] for r in ledger if r['event'] == 'call'),
+    'after_denial_events': dict(collections.Counter(r['event'] for r in ledger if timestamp(r) > denied_at)),
+    'operation_status_counts': dict(collections.Counter(op['status'] for op in ops.values())),
+    'inflight_count': len(cap['inflight']), 'physical_attempts': len(attempts),
+    'returned_physical_attempts': len(returned), 'failed_reservations_retained': len(failed),
+    'decimal_sums_from_stored_numbers': {'returned': actual, 'failed_reservations': uncertain,
+        'committed': actual + uncertain, 'priced_ledger': ledger_cost,
+        'cap_actual_rounding_difference': cap['actual_usd'] - actual,
+        'cap_uncertain_rounding_difference': cap['uncertain_usd'] - uncertain,
+        'maximum_historical_dispatch_reservation_exposure': max_reservation_exposure},
+    'qualified_original_traces': qualified,
+    'last_partial_task': {'task_id': 162, 'valid_failed_episodes': 11, 'executions': 12,
+                         'invalid_final_episode_id': last['episode_ids'][0], 'ZERO': False},
+    'source_sha256': sources, 'script_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+    'limits': ['No dispatch-start timestamp is stored for operation records; no later operation/attempt, final closed state, and provider/ledger timestamps jointly support the stop claim.',
+               'Cap accumulation uses frozen IEEE floats; exact Decimal sums of stored strings expose rounding differences, tested below 1e-10 USD.',
+               'This is partial screening evidence. Three qualified tasks do not satisfy the required four-task sample. No efficacy conclusion is established.'],
+}
+with OUTPUT.open('x') as stream:
+    stream.write(json.dumps(result, indent=2, sort_keys=True, default=str) + '\n')
+sys.stdout.write(f"{result['audit_status']}: {checks} checks; {len(failures)} failures; committed {actual + uncertain}\n")
+if failures:
+    sys.stdout.write(json.dumps(failures, indent=2, default=str) + '\n')
+raise SystemExit(2 if failures else 0)

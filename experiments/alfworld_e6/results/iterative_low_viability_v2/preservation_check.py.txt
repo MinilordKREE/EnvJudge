@@ -1,0 +1,479 @@
+#!/usr/bin/env python3
+"""Read-only V2 starting/ending preservation audit. Stdlib, local Git, /tmp output only.
+
+Checks selected starting hashes and exact historical run file sets. No environment,
+model, network, application imports, repository writes, or full dataset rescan.
+"""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+ROOT = Path("/home/kree/work/EnvJudge-aea-llm")
+MAIN = Path("/home/kree/work/EnvJudge")
+BASELINE = Path("/tmp/viability_v2_baseline.json")
+BASELINE_SHA = "b36955f18f679f19f514f62ba75c4410c5b68584cc3f25b962efcf3ffc415a04"
+START = "d88d2e1b7be3279f89944f155fc41cf1c18a5c2a"
+POOL_COMMIT = "b6cd05418f619ad23318e55916aaae2a96d07875"
+VALIDATOR = "bec74ed8a6ff40e119b2299c92b07b8602ff5fef"
+FROZEN = "experiments/alfworld_e6/frozen/iterative_low_viability_v2/"
+POOL = "experiments/alfworld_e6/PREREG_ITERATIVE_LOW_VIABILITY_POOL_V2.md"
+ADAPT_PREREG = "experiments/alfworld_e6/PREREG_ITERATIVE_LOW_VIABILITY_V2.md"
+RUN = "runs/e6-iterative-low-viability-v2/"
+OLD_ROOTS = (
+    "runs/e6-iterative-low-smoke",
+    "runs/e6-iterative-low-semantic-smoke",
+    "runs/e6-iterative-low-viability",
+)
+FIXED = {
+    "scripts/e6_iterative_low_viability_v2.py": (
+        "c230bcfaea60b3c1b346018a5a7380c96d67c25e4f8fbe75702aef517d6129f4"
+    ),
+    "scripts/e6_iterative_low_viability.py": (
+        "21e3a91c2a598385e2ed8c27fdeab0584015874d3c5411260a00f6bc042f839c"
+    ),
+    "src/aea/semantic_privilege.py": (
+        "ab0ba2aceffd53f408191105a4cfedb2dacc6136bd16defd03d553fad5b5dccd"
+    ),
+    FROZEN
+    + "used_task_audit.json": "0a1e90a825018b4a07a276fb9a170f8e37e8215cccde9603a0b05c36be03f835",
+    FROZEN
+    + "runtime_hashes.json": "490a40c0d9eb2bba5257ae9101af9eaea7ed67019e8d1c9b193e25eceb2de2e4",
+    POOL: "016253fade139b52526fe0248254baddc7ee729d4279f5884d9536d895cd00b4",
+}
+
+
+def sha(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def git(root, *args, allowed=(0,)):
+    proc = subprocess.run(
+        ["git", *args],
+        cwd=root,
+        capture_output=True,
+        check=False,
+        env={**os.environ, "GIT_OPTIONAL_LOCKS": "0"},
+    )
+    if proc.returncode not in allowed:
+        raise RuntimeError(f"Local git {args!r}: {proc.stderr.decode(errors='replace').strip()}")
+    return proc
+
+
+def snapshot(root):
+    return {
+        "HEAD": git(root, "rev-parse", "HEAD").stdout.decode().strip(),
+        "branch": git(root, "branch", "--show-current").stdout.decode().strip(),
+        "status_short_raw": git(root, "status", "--short").stdout.decode(),
+    }
+
+
+def tree(root, commit):
+    result = {}
+    for row in git(root, "ls-tree", "-r", "-z", commit).stdout.split(b"\0"):
+        if row:
+            meta, path = row.split(b"\t", 1)
+            mode, kind, oid = meta.decode().split()
+            result[path.decode()] = {"mode": mode, "type": kind, "object": oid}
+    return result
+
+
+def hash_file(path):
+    digest = hashlib.sha256()
+    before = path.stat()
+    with path.open("rb") as stream:
+        for block in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(block)
+    after = path.stat()
+    if (before.st_size, before.st_mtime_ns, before.st_ino) != (
+        after.st_size,
+        after.st_mtime_ns,
+        after.st_ino,
+    ):
+        raise RuntimeError(f"File changed while hashing: {path}")
+    return digest.hexdigest(), after.st_size
+
+
+def compare_files(root, expected):
+    """Pure filesystem check, reusable in offline synthetic fixtures."""
+    mismatches, observed, total_bytes = [], {}, 0
+    for name, expected_sha in sorted(expected.items()):
+        path = root / name
+        if path.is_symlink():
+            mismatches.append({"path": name, "reason": "unexpected_symlink"})
+            continue
+        if not path.is_file():
+            mismatches.append({"path": name, "reason": "missing"})
+            continue
+        actual, size = hash_file(path)
+        observed[name] = actual
+        total_bytes += size
+        if actual != expected_sha:
+            mismatches.append(
+                {
+                    "path": name,
+                    "reason": "hash_changed",
+                    "expected_sha256": expected_sha,
+                    "actual_sha256": actual,
+                }
+            )
+    return mismatches, observed, total_bytes
+
+
+def old_file_sets(root, expected, roots=OLD_ROOTS):
+    result = []
+    for name in roots:
+        wanted = {p for p in expected if p.startswith(name + "/")}
+        actual = {
+            str(p.relative_to(root))
+            for p in (root / name).rglob("*")
+            if p.is_file() or p.is_symlink()
+        }
+        result.append(
+            {
+                "root": name,
+                "expected_count": len(wanted),
+                "actual_count": len(actual),
+                "missing": sorted(wanted - actual),
+                "unexpected": sorted(actual - wanted),
+            }
+        )
+    return result
+
+
+def audit(root, main, baseline_path):
+    started = time.time()
+    failures, checks, notes = [], 0, []
+
+    def check(ok, label, detail=None):
+        nonlocal checks
+        checks += 1
+        if not ok:
+            failures.append({"check": label, "detail": detail})
+
+    blob = baseline_path.read_bytes()
+    check(sha(blob) == BASELINE_SHA, "starting_baseline_bytes")
+    baseline = json.loads(blob)
+    check(baseline["head"] == START and baseline["status"] == "", "starting_research_clean")
+    initial_research, initial_main = snapshot(root), snapshot(main)
+    starting = {
+        "research": {
+            "HEAD": baseline["head"],
+            "branch": baseline["branch"],
+            "status_short_raw": baseline["status"],
+        },
+        "main": {
+            "HEAD": baseline["main_head"],
+            "branch": "main",
+            "status_short_raw": baseline["main_status"],
+        },
+        "worktrees": baseline["worktrees"],
+        "baseline_sha256": sha(blob),
+        "baseline_file_count": len(baseline["files"]),
+        "historical_run_file_count": len(baseline["historical_run_files"]),
+    }
+    check(initial_main == starting["main"], "main_head_branch_and_status_unchanged", initial_main)
+    check(initial_research["branch"] == baseline["branch"], "research_branch_unchanged")
+    for commit, label in ((START, "starting"), (POOL_COMMIT, "pool_prereg")):
+        check(
+            git(root, "merge-base", "--is-ancestor", commit, "HEAD", allowed=(0, 1)).returncode
+            == 0,
+            label + "_commit_ancestor_of_research_HEAD",
+        )
+    check(
+        git(
+            root, "merge-base", "--is-ancestor", POOL_COMMIT, "origin/aea-llm-vnext", allowed=(0, 1)
+        ).returncode
+        == 0,
+        "pool_prereg_in_local_published_branch",
+    )
+
+    # The supplied baseline selects research directories, omitting some top-level
+    # tracked files. Bind those omitted originals directly to the starting commit.
+    original_tree, pool_tree = tree(root, START), tree(root, POOL_COMMIT)
+    tracked = set(git(root, "ls-files", "-z").stdout.decode().split("\0")) - {""}
+    check(
+        set(original_tree).issubset(tracked),
+        "all_original_paths_still_tracked",
+        sorted(set(original_tree) - tracked),
+    )
+    expected = dict(baseline["files"])
+    supplemental = []
+    for name, item in original_tree.items():
+        if name not in expected and item["type"] == "blob":
+            expected[name] = sha(git(root, "cat-file", "blob", item["object"]).stdout)
+            supplemental.append(name)
+    old_run = baseline["historical_run_files"]
+    check(not (set(expected) & set(old_run)), "tracked_and_historical_inventory_disjoint")
+    expected.update(old_run)
+    preservation_mismatches, observed, byte_count = compare_files(root, expected)
+    check(
+        not preservation_mismatches,
+        "original_tracked_and_historical_hashes",
+        preservation_mismatches,
+    )
+    path_sets = old_file_sets(root, old_run)
+    check(
+        all(not row["missing"] and not row["unexpected"] for row in path_sets),
+        "historical_run_file_sets_exact",
+        path_sets,
+    )
+    head_tree = tree(root, "HEAD")
+    old_tree_changes = [name for name, item in original_tree.items() if head_tree.get(name) != item]
+    check(not old_tree_changes, "original_tracked_git_objects_unchanged", old_tree_changes)
+
+    # Every new file installed before paid screening remains byte-for-byte frozen,
+    # including design notes, tests, and preflight evidence. Later V2 reports may add files.
+    preregistered = {}
+    for name in sorted(set(pool_tree) - set(original_tree)):
+        item = pool_tree[name]
+        if item["type"] == "blob":
+            preregistered[name] = sha(git(root, "cat-file", "blob", item["object"]).stdout)
+    prereg_mismatches, prereg_observed, prereg_bytes = compare_files(root, preregistered)
+    check(not prereg_mismatches, "all_pool_preregistered_new_files_unchanged", prereg_mismatches)
+    check(
+        all(head_tree.get(name) == pool_tree[name] for name in preregistered),
+        "pool_preregistered_git_objects_unchanged",
+    )
+    fixed_mismatches, fixed_observed, fixed_bytes = compare_files(root, FIXED)
+    check(not fixed_mismatches, "independent_frozen_bindings", fixed_mismatches)
+
+    used = json.loads((root / (FROZEN + "used_task_audit.json")).read_bytes())
+    safety = used["starting_safety"]
+    for path, initial in ((str(root), starting["research"]), (str(main), starting["main"])):
+        record = safety.get(path, {})
+        check(
+            record.get("HEAD") == initial["HEAD"]
+            and record.get("branch") == initial["branch"]
+            and record.get("status_short") == initial["status_short_raw"].strip(),
+            "used_audit_starting_safety_consistent",
+            path,
+        )
+    check(
+        used.get("used_task_ids") == list(range(150))
+        and used.get("never_used_ids") == list(range(150, 170)),
+        "frozen_task_audit_universe",
+    )
+    historical_records = used["old_run_starting_baseline"]["v2_starting_old_run_files"]
+    for item in (
+        historical_records
+        + used["previous_screening_preserved"]["old_reports_frozen_inputs_drivers"]
+    ):
+        check(
+            expected.get(item["path"]) == item["sha256"],
+            "historical_audit_and_starting_baseline_agree",
+            item["path"],
+        )
+    for item in used["previous_screening_preserved"]["previous_original_traces"]:
+        check(
+            expected.get(item["path"]) == item["file_sha256"],
+            "previous_original_trace_binding_preserved",
+            item["path"],
+        )
+
+    runtime = json.loads((root / (FROZEN + "runtime_hashes.json")).read_bytes())
+    runtime_mismatches, runtime_observed, runtime_bytes = compare_files(root, runtime)
+    check(not runtime_mismatches, "frozen_runtime_hashes", runtime_mismatches)
+    check(len(runtime) == 7, "runtime_inventory_seven_frozen_sources")
+    production_tree = git(root, "rev-parse", VALIDATOR + ":src/aea").stdout.decode().strip()
+    check(
+        git(root, "rev-parse", "HEAD:src/aea").stdout.decode().strip() == production_tree,
+        "production_tree_unchanged_since_validator",
+    )
+    check(
+        git(root, "diff", "--exit-code", VALIDATOR, "--", "src/aea", allowed=(0, 1)).returncode
+        == 0,
+        "production_worktree_unchanged_since_validator",
+    )
+    untracked_production = git(
+        root, "ls-files", "--others", "--exclude-standard", "--", "src/aea"
+    ).stdout.decode()
+    check(not untracked_production, "no_untracked_production_additions", untracked_production)
+
+    screening = json.loads((root / (RUN + "screening.json")).read_bytes())
+    freeze = screening["freeze"]
+    for key, value in {
+        "implementation_sha": VALIDATOR,
+        "validator_fidelity_sha": VALIDATOR,
+        "prereg_commit": POOL_COMMIT,
+        "prereg_sha256": FIXED[POOL],
+        "driver_sha256": FIXED["scripts/e6_iterative_low_viability_v2.py"],
+        "base_driver_sha256": FIXED["scripts/e6_iterative_low_viability.py"],
+        "base_driver_commit": "d151b150a65f7455084345e4b165b9b62234bd4a",
+        "semantic_gate_sha256": FIXED["src/aea/semantic_privilege.py"],
+        "semantic_gate_version": "alfworld-semantic-screen-v1",
+        "source_tree": production_tree,
+    }.items():
+        check(freeze.get(key) == value, "screening_frozen_binding", key)
+    for name in ("runtime_hashes.json", "used_task_audit.json"):
+        check(
+            freeze.get("input_hashes", {}).get(name) == FIXED[FROZEN + name],
+            "screening_frozen_input_binding",
+            name,
+        )
+    for name, checksum in freeze.get("frozen_config_hashes", {}).items():
+        check(observed.get(name) == checksum, "screening_config_binding", name)
+    check(
+        set(freeze.get("frozen_config_hashes", {}))
+        == {
+            "configs/alfworld_config_100.yaml",
+            "configs/corpus_aea.yaml",
+            "configs/pricing.yaml",
+            "scripts/e3.py",
+            "scripts/e6_iterative_low_smoke.py",
+        },
+        "screening_config_inventory",
+    )
+
+    # Adaptation is conditional; absence is correct if screening never forms four ZERO tasks.
+    adaptation = {"present": (root / ADAPT_PREREG).exists()}
+    if adaptation["present"]:
+        commit = git(root, "log", "-1", "--format=%H", "--", ADAPT_PREREG).stdout.decode().strip()
+        check(bool(commit), "adaptation_prereg_committed")
+        if commit:
+            check(
+                git(
+                    root,
+                    "merge-base",
+                    "--is-ancestor",
+                    commit,
+                    "origin/aea-llm-vnext",
+                    allowed=(0, 1),
+                ).returncode
+                == 0,
+                "adaptation_prereg_locally_published",
+            )
+            committed = git(root, "show", commit + ":" + ADAPT_PREREG).stdout
+            current = (root / ADAPT_PREREG).read_bytes()
+            check(current == committed, "adaptation_prereg_committed_bytes")
+            manifest = root / (FROZEN + "input_manifest.json")
+            check(manifest.is_file(), "adaptation_frozen_manifest_present")
+            if manifest.is_file():
+                content = manifest.read_bytes()
+                check(
+                    content
+                    == git(root, "show", commit + ":" + FROZEN + "input_manifest.json").stdout,
+                    "adaptation_input_manifest_committed_bytes",
+                )
+                check(
+                    (root / (RUN + "input_manifest.json")).read_bytes() == content,
+                    "adaptation_run_and_frozen_manifest_identical",
+                )
+                check(sha(content) in current.decode(), "adaptation_prereg_contains_manifest_hash")
+                adaptation.update({"input_manifest_sha256": sha(content)})
+            adaptation.update({"commit": commit, "prereg_sha256": sha(current)})
+    else:
+        notes.append(
+            "No adaptation preregistration yet; screening-only preservation check applies."
+        )
+
+    ending_research, ending_main = snapshot(root), snapshot(main)
+    check(
+        ending_research == initial_research and ending_main == initial_main,
+        "git_state_stable_during_audit",
+    )
+    ending = {
+        "research": ending_research,
+        "main": ending_main,
+        "worktrees": git(root, "worktree", "list").stdout.decode(),
+    }
+    return {
+        "schema": "iterative-low-viability-v2-preservation-v1",
+        "audit_status": "PASS" if not failures else "FAIL",
+        "checks": checks,
+        "starting_safety": starting,
+        "ending_safety": ending,
+        "failures": failures,
+        "notes": notes,
+        "preservation": {
+            "starting_manifest_files": len(baseline["files"]),
+            "supplemental_original_tracked_files": supplemental,
+            "original_git_tracked_paths_including_gitlink": len(original_tree),
+            "historical_run_files": len(old_run),
+            "historical_file_sets": path_sets,
+            "unique_original_files_hashed": len(observed),
+            "original_bytes_hashed": byte_count,
+            "pool_preregistered_new_files": prereg_observed,
+            "fixed_bindings": fixed_observed,
+            "runtime_sources": runtime_observed,
+            "additional_hash_read_bytes": prereg_bytes + fixed_bytes + runtime_bytes,
+            "new_tracked_paths_after_pool_prereg": sorted(set(head_tree) - set(pool_tree)),
+        },
+        "production_tree": production_tree,
+        "screening_status_observed": screening.get("status"),
+        "screening_freeze": freeze,
+        "adaptation": adaptation,
+        "audit_script_sha256": sha(Path(__file__).read_bytes()),
+        "elapsed_seconds": round(time.time() - started, 3),
+        "limits": [
+            (
+                "No full dataset or 12 GB historical scanner inventory rescan; checks the 2,500 "
+                "starting research hashes, supplemental original Git blobs, and 215 historical "
+                "run hashes/file sets."
+            ),
+            (
+                "Main preservation is HEAD/branch/raw-status equality; selected active "
+                "bridge/runtime files are independently hashed in the research worktree."
+            ),
+            (
+                "Local origin/aea-llm-vnext ancestry is checked without network access; "
+                "no new remote verification is claimed."
+            ),
+            (
+                "V2 execution validity/costs are assessed by the separate screening auditor; "
+                "this report checks preservation and frozen bindings."
+            ),
+            (
+                "Fresh V2 report/artifact additions are allowed; every original tracked path "
+                "and every pool-preregistered file remains exact."
+            ),
+        ],
+    }
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--root", type=Path, default=ROOT)
+    parser.add_argument("--main", type=Path, default=MAIN)
+    parser.add_argument("--baseline", type=Path, default=BASELINE)
+    parser.add_argument("--output", type=Path)
+    args = parser.parse_args()
+    if args.output and (
+        not args.output.resolve().is_relative_to(Path("/tmp")) or args.output.exists()
+    ):
+        parser.error("--output must be a new path under /tmp; existing files are never overwritten")
+    try:
+        result = audit(args.root.resolve(), args.main.resolve(), args.baseline.resolve())
+    except Exception as error:
+        result = {
+            "audit_status": "FAIL",
+            "failures": [
+                {"check": "audit_exception", "detail": f"{type(error).__name__}: {error}"}
+            ],
+            "audit_script_sha256": sha(Path(__file__).read_bytes()),
+        }
+    content = json.dumps(result, indent=2, sort_keys=True) + "\n"
+    if args.output:
+        with args.output.open("x") as stream:
+            stream.write(content)
+    else:
+        sys.stdout.write(content)
+    p = result.get("preservation", {})
+    sys.stderr.write(
+        f"{result['audit_status']}: {result.get('checks', 0)} checks; "
+        f"{p.get('unique_original_files_hashed', 0)} original files; "
+        f"{len(result.get('failures', []))} failures; "
+        f"{result.get('elapsed_seconds', 0)} seconds\n",
+    )
+    raise SystemExit(0 if result["audit_status"] == "PASS" else 2)
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,28 @@
+{
+  "audits": {
+    "physical_audit.json": {
+      "path": "physical_audit.json",
+      "sha256": "090cdcfa489b335213e5c20ae00659853a0571a10f828d0080f821be7b6c1079"
+    },
+    "preservation_audit.json": {
+      "path": "preservation_audit.json",
+      "sha256": "697665a89da85d46ecdf367215f0fc14f456f440d20fb04ffd03fd10f307d7ed"
+    },
+    "screening_audit.json": {
+      "path": "screening_audit.json",
+      "sha256": "16fb89d4e247e3ef186da918f032e88194022a56df5570b5c7ee0c983d922810"
+    },
+    "terminal_audit.json": {
+      "path": "terminal_audit.json",
+      "sha256": "3ee6d8dc0467b6e46a84bc4f9b73c51bcd98d3320ece71c04f91d4a027ad5249"
+    }
+  },
+  "decision": "INCONCLUSIVE",
+  "efficacy_evaluated": false,
+  "primary_K16_B_L": null,
+  "primary_K16_B_T": null,
+  "recommendation": "Stop this run. Keep LOW frozen; review the cost of forming a four-task fresh ZERO input pool before separately preregistering any further paid collection. No LOW mechanism change follows from these data.",
+  "screening_outcome": "SCREENING_COST_LIMIT",
+  "single_blocker": "The fourth confirmed ZERO task was not obtained before the fixed $8 screening committed-cost cap stopped collection. The LOW method itself was never evaluated.",
+  "status": "PASS"
+}

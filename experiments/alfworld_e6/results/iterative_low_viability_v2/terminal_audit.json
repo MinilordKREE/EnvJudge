@@ -1,0 +1,646 @@
+{
+  "after_denial_events": {
+    "rollout": 1
+  },
+  "audit_schema_correction": {
+    "initial_artifact": "/tmp/viability_v2_terminal_supplement_final.json",
+    "initial_sha256": "867b1e427f100f4aca41fd33e7bce381b6ee95d5f93070dd7296db5b80e42be0",
+    "reason": "Initial supplemental checker incorrectly compared the trace corpus-label task_id with the numeric bridge ID. Correct schema is task_id=alfworld-corpus-ours-release and rollout_seed=numeric train bridge ID. No experiment or method artifact changed."
+  },
+  "audit_status": "PASS",
+  "cap_denial_at": "2026-09-16T02:14:32.288837Z",
+  "checks": 3897,
+  "decimal_sums_from_stored_numbers": {
+    "cap_actual_rounding_difference": "-2.134822E-14",
+    "cap_uncertain_rounding_difference": "5.764E-16",
+    "committed": "7.99478607200000047182",
+    "failed_reservations": "1.8316388870000001236",
+    "maximum_historical_dispatch_reservation_exposure": "7.99994562900000047232",
+    "priced_ledger": "6.16314718500000032684",
+    "returned": "6.16314718500000034822"
+  },
+  "exported_qualified_evidence_verified": {
+    "154": {
+      "all_originals": 16,
+      "evidence_ids": [
+        "01485264d7",
+        "cae8a438ba",
+        "5cabc8ef59"
+      ],
+      "selected_valid_indices": [
+        7,
+        14,
+        13
+      ]
+    },
+    "158": {
+      "all_originals": 16,
+      "evidence_ids": [
+        "7f461cecb1",
+        "7729b3343a",
+        "50434a07d4"
+      ],
+      "selected_valid_indices": [
+        8,
+        15,
+        14
+      ]
+    },
+    "159": {
+      "all_originals": 16,
+      "evidence_ids": [
+        "e0fc323400",
+        "f3583ad1e1",
+        "45c3700f83"
+      ],
+      "selected_valid_indices": [
+        13,
+        3,
+        11
+      ]
+    }
+  },
+  "failed_reservations_retained": 275,
+  "failures": [],
+  "global_cap_denial": {
+    "at": "2026-09-16T02:14:32.288837Z",
+    "different_event_from_prior_physical_429": true,
+    "new_paid_cost": 0,
+    "new_physical_attempts": 0
+  },
+  "inflight_count": 0,
+  "last_partial_task": {
+    "ZERO": false,
+    "executions": 12,
+    "invalid_final_episode_id": "e1352d4c35",
+    "task_id": 162,
+    "valid_failed_episodes": 11
+  },
+  "last_physical_request_started_unix": "1789524870.728809",
+  "last_priced_call_at": "2026-09-16T02:14:31.898266Z",
+  "last_slot_physical_429": {
+    "ledger_retry_at": "2026-09-16T02:14:06.000645Z",
+    "physical_attempt_id": "dfb4bb3d7daa487f9580f1b285b5eeaf",
+    "reserved_usd_retained": "0.0037881610000000004"
+  },
+  "limits": [
+    "No dispatch-start timestamp is stored for operation records; no later operation/attempt, final closed state, and provider/ledger timestamps jointly support the stop claim.",
+    "Cap accumulation uses frozen IEEE floats; exact Decimal sums of stored strings expose rounding differences, tested below 1e-10 USD.",
+    "This is partial screening evidence. Three qualified tasks do not satisfy the required four-task sample. No efficacy conclusion is established."
+  ],
+  "operation_status_counts": {
+    "completed": 70,
+    "interrupted": 1
+  },
+  "physical_attempts": 3499,
+  "qualified_original_traces": {
+    "154": [
+      {
+        "episode_id": "40ebdf19ee",
+        "path": "runs/e6-iterative-low-viability-v2/task-154/original-execution-01.json",
+        "sha256": "c5a1e7271a8c4499bda547576566e696f88b94911552cc7d21907f075bbd69fd",
+        "valid_index": 1
+      },
+      {
+        "episode_id": "05169ff974",
+        "path": "runs/e6-iterative-low-viability-v2/task-154/original-execution-02.json",
+        "sha256": "56ba9d151d3a5be61c25c3820093a9d4adb15e83410d107d72cf5e9cdfca6af1",
+        "valid_index": 2
+      },
+      {
+        "episode_id": "2b9ff50ee9",
+        "path": "runs/e6-iterative-low-viability-v2/task-154/original-execution-03.json",
+        "sha256": "10215ecd0a45b5c0dc11d75e98a9ff6d18a2153d6be02cecf1bf018fe2bb0d7c",
+        "valid_index": 3
+      },
+      {
+        "episode_id": "786aa2a2eb",
+        "path": "runs/e6-iterative-low-viability-v2/task-154/original-execution-04.json",
+        "sha256": "53e5d3e5e604a789f2052f7b0f18cf728b0ee6cade0ab3ebb2a8ffe3d8da1378",
+        "valid_index": 4
+      },
+      {
+        "episode_id": "32345e4509",
+        "path": "runs/e6-iterative-low-viability-v2/task-154/original-execution-05.json",
+        "sha256": "476efb348b9ce0270e6848d0734431d48a2e08cf8c7e0d8ca81ce9c4dc7343fa",
+        "valid_index": 5
+      },
+      {
+        "episode_id": "0ce66c4d40",
+        "path": "runs/e6-iterative-low-viability-v2/task-154/original-execution-06.json",
+        "sha256": "291afb1d3986111718d0d9834ab575e17dbb7d3d3029067bb13f8e6298468147",
+        "valid_index": 6
+      },
+      {
+        "episode_id": "01485264d7",
+        "path": "runs/e6-iterative-low-viability-v2/task-154/original-execution-07.json",
+        "sha256": "f3bb3ff2ef4ec5b04042289ad521c8b47b6089ad25943be802fa5d5e2fcab7c4",
+        "valid_index": 7
+      },
+      {
+        "episode_id": "9c5a9463fc",
+        "path": "runs/e6-iterative-low-viability-v2/task-154/original-execution-08.json",
+        "sha256": "8318f9d15c182157865d2d30f84eca037e8d1430eb828a75d5802b7019373c3b",
+        "valid_index": 8
+      },
+      {
+        "episode_id": "f350a0387e",
+        "path": "runs/e6-iterative-low-viability-v2/task-154/original-execution-09.json",
+        "sha256": "5736248cb1445834de9a9511abc77b8958bae4b7444c691e0473de8fa3ce3245",
+        "valid_index": 9
+      },
+      {
+        "episode_id": "f0a0254593",
+        "path": "runs/e6-iterative-low-viability-v2/task-154/original-execution-10.json",
+        "sha256": "033400e895eab366e0941d253a00bd0905c78b923b18be4af9222b1f8d99237a",
+        "valid_index": 10
+      },
+      {
+        "episode_id": "80088b0d7f",
+        "path": "runs/e6-iterative-low-viability-v2/task-154/original-execution-11.json",
+        "sha256": "52ff28722c8181a4f277437f5887bece24f8f6fa3deecf27e59f464b7c210ed5",
+        "valid_index": 11
+      },
+      {
+        "episode_id": "7564bebd16",
+        "path": "runs/e6-iterative-low-viability-v2/task-154/original-execution-12.json",
+        "sha256": "f60f789f38754d1ed0100c5acce6ccf8b63b853646fd7285963452905479389a",
+        "valid_index": 12
+      },
+      {
+        "episode_id": "5cabc8ef59",
+        "path": "runs/e6-iterative-low-viability-v2/task-154/original-execution-13.json",
+        "sha256": "bec3e543f9326f23093a1e282be2f12e5d9958161fab31b8136c6f3b03284314",
+        "valid_index": 13
+      },
+      {
+        "episode_id": "cae8a438ba",
+        "path": "runs/e6-iterative-low-viability-v2/task-154/original-execution-14.json",
+        "sha256": "5997852f5f6b2f80230d3cf470bbd30dbae5f844324730719f529345d3e0ce66",
+        "valid_index": 14
+      },
+      {
+        "episode_id": "5a3fedcae4",
+        "path": "runs/e6-iterative-low-viability-v2/task-154/original-execution-15.json",
+        "sha256": "308efcdcccb972ddf6937a68d7fbe96281daa71307b1e30ce0407495411ec6e8",
+        "valid_index": 15
+      },
+      {
+        "episode_id": "3f1fd7d315",
+        "path": "runs/e6-iterative-low-viability-v2/task-154/original-execution-16.json",
+        "sha256": "1b99b17fdbd9633a6e72e6fa29c8efaae18c07aed1db9636716a415d25a90ade",
+        "valid_index": 16
+      }
+    ],
+    "158": [
+      {
+        "episode_id": "e9f40a461f",
+        "path": "runs/e6-iterative-low-viability-v2/task-158/original-execution-01.json",
+        "sha256": "99e2d4327b80d820429d1d66002c762994922ea3cff0c3d028b31bedfa73433d",
+        "valid_index": 1
+      },
+      {
+        "episode_id": "75358f0045",
+        "path": "runs/e6-iterative-low-viability-v2/task-158/original-execution-02.json",
+        "sha256": "3950eaedced4b64ea74fca77fe3327ff97c2b3efc73bbb92fac4a70fd6ceeb11",
+        "valid_index": 2
+      },
+      {
+        "episode_id": "ddb6731652",
+        "path": "runs/e6-iterative-low-viability-v2/task-158/original-execution-03.json",
+        "sha256": "071f42db4953a93aa0c454b673fce779811e92c99aa720ad2d2d60f89c2819cc",
+        "valid_index": 3
+      },
+      {
+        "episode_id": "2d6637e6c6",
+        "path": "runs/e6-iterative-low-viability-v2/task-158/original-execution-04.json",
+        "sha256": "6bbc0732e74912400c60735ba9ec0aeeab9f0221c6754f4bae2ff4b1db395ecc",
+        "valid_index": 4
+      },
+      {
+        "episode_id": "a0b978c74e",
+        "path": "runs/e6-iterative-low-viability-v2/task-158/original-execution-05.json",
+        "sha256": "89658bbceae387f5147b506df8906c705926a929ceb8e4ecb651e3aa24a5a8bc",
+        "valid_index": 5
+      },
+      {
+        "episode_id": "25b057e6f9",
+        "path": "runs/e6-iterative-low-viability-v2/task-158/original-execution-06.json",
+        "sha256": "d2aba3a37976b1eac9c711c874e748283e49fb1cadc7a63f2a43d747b6045253",
+        "valid_index": 6
+      },
+      {
+        "episode_id": "ac39742da2",
+        "path": "runs/e6-iterative-low-viability-v2/task-158/original-execution-07.json",
+        "sha256": "e3c8da21ca078b67731bea8c5c579bd63ba29bfbca717450080315c063acf1d9",
+        "valid_index": 7
+      },
+      {
+        "episode_id": "7f461cecb1",
+        "path": "runs/e6-iterative-low-viability-v2/task-158/original-execution-08.json",
+        "sha256": "021e48daa08a1581e023303422edc47d315dfad635b2c2b569c8ad490add21af",
+        "valid_index": 8
+      },
+      {
+        "episode_id": "93b2ceb16e",
+        "path": "runs/e6-iterative-low-viability-v2/task-158/original-execution-09.json",
+        "sha256": "c0623d992553a62340eb19abdf6556f3df529a5937714c9a0283e4cab6604a64",
+        "valid_index": 9
+      },
+      {
+        "episode_id": "e30d962087",
+        "path": "runs/e6-iterative-low-viability-v2/task-158/original-execution-10.json",
+        "sha256": "041eb92a87dcb42c4fb5385aa6e9470a402200c6d011a51573046d339ab66374",
+        "valid_index": 10
+      },
+      {
+        "episode_id": "2d4ba8de76",
+        "path": "runs/e6-iterative-low-viability-v2/task-158/original-execution-11.json",
+        "sha256": "5176c8febe573e0c4f06bbcf42ab8370b93c5d9f40da8296d9cd25ae0be8b5e3",
+        "valid_index": 11
+      },
+      {
+        "episode_id": "4950d0f1e2",
+        "path": "runs/e6-iterative-low-viability-v2/task-158/original-execution-12.json",
+        "sha256": "49acc9978fae373b150937260ed4c3764b8b99700b7cf2932182768c8d16a9ef",
+        "valid_index": 12
+      },
+      {
+        "episode_id": "2484859d1d",
+        "path": "runs/e6-iterative-low-viability-v2/task-158/original-execution-13.json",
+        "sha256": "d0c53584eb28cb5ffe9be0bdb5c756f2c91dad5fa6553957cafe9894d96b1c7e",
+        "valid_index": 13
+      },
+      {
+        "episode_id": "50434a07d4",
+        "path": "runs/e6-iterative-low-viability-v2/task-158/original-execution-14.json",
+        "sha256": "6b2972f52bf42f0a720885a75c0cb5972f47135e43e118b99beeb535327a4c10",
+        "valid_index": 14
+      },
+      {
+        "episode_id": "7729b3343a",
+        "path": "runs/e6-iterative-low-viability-v2/task-158/original-execution-15.json",
+        "sha256": "ee162f4930ed3f4d4106b6cf9c39b678563d7af1f18965963e8bc520126b6e35",
+        "valid_index": 15
+      },
+      {
+        "episode_id": "d7edd539a1",
+        "path": "runs/e6-iterative-low-viability-v2/task-158/original-execution-16.json",
+        "sha256": "f49637b05e120c182d1702c450a573e4c57ff8350610236a15b44a318a4d5285",
+        "valid_index": 16
+      }
+    ],
+    "159": [
+      {
+        "episode_id": "49bd6ad258",
+        "path": "runs/e6-iterative-low-viability-v2/task-159/original-execution-01.json",
+        "sha256": "61688460de2328582f876ddafc62fa8531a0bf65969df3fd410b1d1b9baae801",
+        "valid_index": 1
+      },
+      {
+        "episode_id": "70bc6bb99a",
+        "path": "runs/e6-iterative-low-viability-v2/task-159/original-execution-02.json",
+        "sha256": "b965e23b13730daf6c360604bbaf0496c37a08dc7c3bfc6d3f4532fa12240613",
+        "valid_index": 2
+      },
+      {
+        "episode_id": "f3583ad1e1",
+        "path": "runs/e6-iterative-low-viability-v2/task-159/original-execution-03.json",
+        "sha256": "d9013c3f78346cf3eaa18e0d636cf384b31dad264cecb88c464c5e5d2d2e93e9",
+        "valid_index": 3
+      },
+      {
+        "episode_id": "8fc43183bc",
+        "path": "runs/e6-iterative-low-viability-v2/task-159/original-execution-04.json",
+        "sha256": "b7c23baf2dc81d940c30bf0dc89f33c396574adf2517f0a5a3e256de92b98ff8",
+        "valid_index": 4
+      },
+      {
+        "episode_id": "84adb0c864",
+        "path": "runs/e6-iterative-low-viability-v2/task-159/original-execution-05.json",
+        "sha256": "16d20e6f59dc2597ebb8be96cabc5175242964ca24bd993c0724bcfdb80292fb",
+        "valid_index": 5
+      },
+      {
+        "episode_id": "ad4d822e71",
+        "path": "runs/e6-iterative-low-viability-v2/task-159/original-execution-06.json",
+        "sha256": "20ac003f08c80c5efe6147e3c1e50e84a752328c1a1f237b68a8b4060df71579",
+        "valid_index": 6
+      },
+      {
+        "episode_id": "bce953fc60",
+        "path": "runs/e6-iterative-low-viability-v2/task-159/original-execution-07.json",
+        "sha256": "f732e8f8e7420e93b50055baa717eb55d303ef075e4601e9fb6df18e5a5557bc",
+        "valid_index": 7
+      },
+      {
+        "episode_id": "13c8e98707",
+        "path": "runs/e6-iterative-low-viability-v2/task-159/original-execution-08.json",
+        "sha256": "dc66ece5b500f6ebf8677533305029987cf53f789d15c72731c12b92145254f4",
+        "valid_index": 8
+      },
+      {
+        "episode_id": "bb714ad561",
+        "path": "runs/e6-iterative-low-viability-v2/task-159/original-execution-09.json",
+        "sha256": "ab2dfb41086660326be2a06735507030f0b180c1c394825580731f45a35bcc6c",
+        "valid_index": 9
+      },
+      {
+        "episode_id": "4f5db14177",
+        "path": "runs/e6-iterative-low-viability-v2/task-159/original-execution-10.json",
+        "sha256": "70aaa2aa1ff6072acec28433528c11bd228000bcd5c008af105d3a92f3cc5830",
+        "valid_index": 10
+      },
+      {
+        "episode_id": "45c3700f83",
+        "path": "runs/e6-iterative-low-viability-v2/task-159/original-execution-11.json",
+        "sha256": "80ccc3b9a844b6f4ba767fbcf9ff0133e16c56a3d8e8e66d9604af906e53205e",
+        "valid_index": 11
+      },
+      {
+        "episode_id": "67cb7a7275",
+        "path": "runs/e6-iterative-low-viability-v2/task-159/original-execution-12.json",
+        "sha256": "14a3e9b86f481758b75fee57f5e9745d225c25d348ecc29fcdbd40a18fa4a605",
+        "valid_index": 12
+      },
+      {
+        "episode_id": "e0fc323400",
+        "path": "runs/e6-iterative-low-viability-v2/task-159/original-execution-13.json",
+        "sha256": "d328f7f19c4423490b9d5a4c21029dbeec67c9f93db4cc9182c390d33b4cd0c4",
+        "valid_index": 13
+      },
+      {
+        "episode_id": "ca5e8badd0",
+        "path": "runs/e6-iterative-low-viability-v2/task-159/original-execution-14.json",
+        "sha256": "d182d5c333d40f461f06f639565c8662269469eae9963a270fa58405c5f0f418",
+        "valid_index": 14
+      },
+      {
+        "episode_id": "a590e7c873",
+        "path": "runs/e6-iterative-low-viability-v2/task-159/original-execution-15.json",
+        "sha256": "3c318cfba4b5f569c397476f49261d01839b6113a47f21918595bcecc35eb95d",
+        "valid_index": 15
+      },
+      {
+        "episode_id": "9f3e4b74ed",
+        "path": "runs/e6-iterative-low-viability-v2/task-159/original-execution-16.json",
+        "sha256": "71362da8f85b40547148b053a43230e7ee2b0d16646e74f2e1888a56ef66eec1",
+        "valid_index": 16
+      }
+    ]
+  },
+  "returned_physical_attempts": 3224,
+  "schema": "viability-v2-terminal-cap-and-closure-audit-v2",
+  "script_sha256": "2cc68ac3289097406b123c408a26cde62208a5d5c4aec27c946aad0169da4309",
+  "source_sha256": {
+    "/tmp/viability-v2-screening-evidence/screening_qualified_evidence.json": "521e099796a3d97594d54f5f66af68df0827f1fc19d2caa66da145d90f7cdc62",
+    "/tmp/viability_v2_preservation_final_independent.json": "697665a89da85d46ecdf367215f0fc14f456f440d20fb04ffd03fd10f307d7ed",
+    "/tmp/viability_v2_screen_audit_final_independent.json": "16fb89d4e247e3ef186da918f032e88194022a56df5570b5c7ee0c983d922810",
+    "/tmp/viability_v2_terminal_supplement_final.json": "867b1e427f100f4aca41fd33e7bce381b6ee95d5f93070dd7296db5b80e42be0",
+    "runs/e6-iterative-low-viability-v2/STOP.json": "3db99f6d8f96c47aebfa52cc3029ac51d272f3ce569b1909ddf9e82194811d49",
+    "runs/e6-iterative-low-viability-v2/cap.attempts.jsonl": "d32f236948eabb5ae82939f17105b44d33580c67dc6da5384d7354068e257e56",
+    "runs/e6-iterative-low-viability-v2/cap.json": "96d9e769d7c2f475c8b91582ea9783b2c9ef0b92e9cfe0f6ff18d95c5c7c3a27",
+    "runs/e6-iterative-low-viability-v2/ledger.332210.jsonl": "98b26327336d8ddad6a5a1c7aa3c7866a3f0f52512d21b14e7a3f5d01ca8bcf2",
+    "runs/e6-iterative-low-viability-v2/ledger.332308.jsonl": "d301cac5e05b1795604084dd30d3f329b01d2a8a13cbac6ab1a26179cb8f24e3",
+    "runs/e6-iterative-low-viability-v2/ledger.332758.jsonl": "80e119d3cf23d6a60d1122df91dfbf6b19a243530858f878de76dbfde9450f60",
+    "runs/e6-iterative-low-viability-v2/ledger.333025.jsonl": "c9971a58892693c870be80a33c4bc640df4643b0bf5c202286536cc3d1580b63",
+    "runs/e6-iterative-low-viability-v2/ledger.333373.jsonl": "1527552b6cf1578dd7a689f165aff852f6afbdf7e38a382a897e9a744c70917d",
+    "runs/e6-iterative-low-viability-v2/ledger.333980.jsonl": "19ed943d77abe857373e1ed9974d77941474a8a2986444fa8983a0eb1bb53d4c",
+    "runs/e6-iterative-low-viability-v2/ledger.335162.jsonl": "83a331aca27b6bb7f0ec3fbc5028a6255f001ffbd0839e05a4937aa295a569c8",
+    "runs/e6-iterative-low-viability-v2/ledger.336463.jsonl": "1f4589ac98dfafe0d9065fa6f4706d937e861a6eebedcd49c1897258aea637b1",
+    "runs/e6-iterative-low-viability-v2/ledger.337811.jsonl": "21f8ec1e122f18849ee0648559636bbdc7a2ddf2af8fe92b542bc9158e99f093",
+    "runs/e6-iterative-low-viability-v2/ledger.338991.jsonl": "a3294f80ebfe3afcd12d25585ec8c7ef0048f38a7026d5a62b2a134c5d672ce7",
+    "runs/e6-iterative-low-viability-v2/ledger.340406.jsonl": "881816f00dc5ed10793f77e7919a4e299385e0b2aef62281c8200da511e24deb",
+    "runs/e6-iterative-low-viability-v2/ledger.342046.jsonl": "8927760004d41c88fe0a6c32d3d7b32d0815395718c7b4bf57f9d09875c7d686",
+    "runs/e6-iterative-low-viability-v2/ledger.343331.jsonl": "a3f13e40de7533c935b0eb7d5b64a06a58b6a494291f640bb5a2216729786326",
+    "runs/e6-iterative-low-viability-v2/ledger.344608.jsonl": "76d70b9747ad284d4f46248dbb362a60ba61dd80fb073443439a65e53cc31523",
+    "runs/e6-iterative-low-viability-v2/ledger.345718.jsonl": "d145e269b268353c964eccbc400c6e52d6f5d4eaf8d6df6f5efd9de6c34032eb",
+    "runs/e6-iterative-low-viability-v2/ledger.347414.jsonl": "4c4e17ceba0a14f377846b8c86692a079acdb418e5f4a3fa4426301cb4737d42",
+    "runs/e6-iterative-low-viability-v2/ledger.349471.jsonl": "03b66a6815737c9e0e10dbbb702a44d3b282e636648bcde5665381100b4587db",
+    "runs/e6-iterative-low-viability-v2/ledger.351033.jsonl": "20f5a4a8210c98e8959d300ae2005506c5892de9cbae2d3b4303e6510308e974",
+    "runs/e6-iterative-low-viability-v2/ledger.352745.jsonl": "31081d78141d0f1a79ddee152363820018a4235f45fd73ffa98e0f004575e5a2",
+    "runs/e6-iterative-low-viability-v2/ledger.353904.jsonl": "7775235d1cdb79412094420fb4747fa2396c9f87affb93b8717fcface2a3682b",
+    "runs/e6-iterative-low-viability-v2/ledger.355132.jsonl": "0668673da32aa5456bb447652b2bad497cc715f463874f3fac9ef9eeba85e925",
+    "runs/e6-iterative-low-viability-v2/ledger.357771.jsonl": "7edaf1ee3254db9789c259f0dcd7ef1ffbd06ede770b303955e4802951eb6d3c",
+    "runs/e6-iterative-low-viability-v2/ledger.359803.jsonl": "a3221d8663a96371eaf326023d7c64b2e6953bd48a8e30869e6092190fbb34d2",
+    "runs/e6-iterative-low-viability-v2/ledger.360101.jsonl": "7278030d5331949bf4f678a7f3de73513fc6fa9cbd0169d9a496c1d05862df21",
+    "runs/e6-iterative-low-viability-v2/ledger.361097.jsonl": "8b16b36a85f0fa6a3f0ba70e76843d39f5ea2f139657244cd71fb667f26d4bde",
+    "runs/e6-iterative-low-viability-v2/ledger.362049.jsonl": "084027db90317200d5fdf8a04a3a51d1a7feb8eecd4bfe64f1a9dd7567a7cf73",
+    "runs/e6-iterative-low-viability-v2/ledger.363793.jsonl": "dcf6b39c24ea945e198fc45be0e6a8843fdba39cc00caba556cb94276c3f6036",
+    "runs/e6-iterative-low-viability-v2/ledger.365847.jsonl": "22b15a5c621aa23b2eb1d7b4f17499c8dc7e1201a4c9feb841ef8ef834ed5b00",
+    "runs/e6-iterative-low-viability-v2/ledger.367759.jsonl": "751a83453f1c0eb2fa45f8be47f177a6a20cb5d0517dceaea2c6fbf92d41f6b9",
+    "runs/e6-iterative-low-viability-v2/ledger.369107.jsonl": "b5d408b32c891222346f09be68ad8359e0c57357df7a29364658bff7013c08b4",
+    "runs/e6-iterative-low-viability-v2/ledger.370840.jsonl": "866ddae937798628432fce3046f2b6a88e80d23aebd894a62a042dd6fe18a167",
+    "runs/e6-iterative-low-viability-v2/ledger.372581.jsonl": "40282263e30825b079dd12b4187ac0c56d5d44518a282f36b34499d2ef4d946c",
+    "runs/e6-iterative-low-viability-v2/ledger.373915.jsonl": "acbc7c1f73deac336c2f697496682e1dc4554bf64ac10fc40f07b800c1f0147a",
+    "runs/e6-iterative-low-viability-v2/ledger.375601.jsonl": "823ea4da209f89d2adb45e437eea5a409c7c8642beb71d80f44de97fca70e1c8",
+    "runs/e6-iterative-low-viability-v2/ledger.377098.jsonl": "267f1c79d06ac0f24fd5fab894223c13fa6102eac29a7e54375ea1b96f34a9f1",
+    "runs/e6-iterative-low-viability-v2/ledger.378328.jsonl": "5f232d354e0287fd8815e77800f6cfb091fa11e5a67e85cc525bb4f04464a7c2",
+    "runs/e6-iterative-low-viability-v2/ledger.380469.jsonl": "0985c85201cfb918d220841a750b4d1eb71a13366de6da18aca8f64b28b4889b",
+    "runs/e6-iterative-low-viability-v2/ledger.382019.jsonl": "9503c4a2bec6f179a17f27abacd9f02f50da0440ce8d07645b6f33445b0836e9",
+    "runs/e6-iterative-low-viability-v2/ledger.383325.jsonl": "e1c04163409866cc3965847587470de1730152d65dd437fd24c9da886ef33c3c",
+    "runs/e6-iterative-low-viability-v2/ledger.384830.jsonl": "53d78541521b75f62c5267f0fe07721f23fbde9836b52d52a6200ee14afc7cf4",
+    "runs/e6-iterative-low-viability-v2/ledger.386634.jsonl": "cebb0f7b1ceda4641aa1c584da8ef78d63608297dc253584c6d293ef4d8ba75f",
+    "runs/e6-iterative-low-viability-v2/ledger.388100.jsonl": "9f07d4b94a85df6433fbf1d144b2c77cd0e126838405d8fecba4c81b12f841f0",
+    "runs/e6-iterative-low-viability-v2/ledger.389647.jsonl": "2c86ee81869493f9362d75742d5cc602aa2052cff9fc1a88bc1744dbde52c959",
+    "runs/e6-iterative-low-viability-v2/ledger.391272.jsonl": "e3500dec52d8e8a119f3ca59923ba8e8e36e2ad4cb71afecb9f2e85cc8f6a573",
+    "runs/e6-iterative-low-viability-v2/ledger.392879.jsonl": "df1832e917f752598da93c0abb8ea3e461a8808f14b311453c7d03b16f945d1c",
+    "runs/e6-iterative-low-viability-v2/ledger.394313.jsonl": "3a269738f43a5194da61d2ed97febc8514dfb5071d04d8de9f39c3c8218ce0f8",
+    "runs/e6-iterative-low-viability-v2/ledger.396005.jsonl": "f49e3e898ecffbb55050ea802f45b78da601aca880d70e2f975a57ac1344d5f3",
+    "runs/e6-iterative-low-viability-v2/ledger.397711.jsonl": "7b636acc1baae6b1cfc60dbd5052bf6d8bd1401c0a91241a38777439c95bc037",
+    "runs/e6-iterative-low-viability-v2/ledger.399483.jsonl": "3fb8f9146a149339d8a14f8f745a8959645fdbe038f22bc0b0291564ae097644",
+    "runs/e6-iterative-low-viability-v2/ledger.401334.jsonl": "6a4f158865901125215844485a6c215a991b84fe5e647e535ed03f442e3a5ea1",
+    "runs/e6-iterative-low-viability-v2/ledger.403125.jsonl": "29190506c3b8e2149461f5283326998473c7b35ab21518e21726a84c48f48f97",
+    "runs/e6-iterative-low-viability-v2/ledger.404822.jsonl": "b0eeb94f7e08f807b29d5826fd93eeaeeadbed4dd72ffb72f677a35d21ec9553",
+    "runs/e6-iterative-low-viability-v2/ledger.406496.jsonl": "46f649d982da079f2535f94df7b1c2e5d667df52f1148a926707728e28300c08",
+    "runs/e6-iterative-low-viability-v2/ledger.408343.jsonl": "3af79794a62f20cb75156158c86fa2be3296a38e9deba31b54f9ff3a5b3119d9",
+    "runs/e6-iterative-low-viability-v2/ledger.410222.jsonl": "725d1866bcb80993c2fe76739bbb679ab22b91f3349db6b1b61266728e4195bf",
+    "runs/e6-iterative-low-viability-v2/ledger.411940.jsonl": "328ff85d7220942a745ac05356821908136a3055624dc736960e894c118ab985",
+    "runs/e6-iterative-low-viability-v2/ledger.413817.jsonl": "80ecee82dfda38b3fa8d94740dec950a8ee106b49b9f230ee8ed87581540bb46",
+    "runs/e6-iterative-low-viability-v2/ledger.415615.jsonl": "043b5ab3501c0d7d77a4387906ec962ffb847652daddca72d9c6d29b2e66a4ac",
+    "runs/e6-iterative-low-viability-v2/ledger.416993.jsonl": "a53992fe9829d8eb3a419779bd0b1f4cd66d35f8cc4c522372e15e6bf866d66c",
+    "runs/e6-iterative-low-viability-v2/ledger.417636.jsonl": "8085e84d9028213b17e371de1fd016836db349c6e39ade60e44876cc6c64b133",
+    "runs/e6-iterative-low-viability-v2/ledger.418026.jsonl": "61dd16df51333b0d40792c42bc049a6cf3595317ef5c18b618e8621b74bbc164",
+    "runs/e6-iterative-low-viability-v2/ledger.420018.jsonl": "3c715305be5c103d1bffc417a915467128b87c5c72061afe70755fafa252dace",
+    "runs/e6-iterative-low-viability-v2/ledger.421556.jsonl": "61b9960b7100320b89e5110e5b7f67f334fef708b8d00a626090ffe6d3979797",
+    "runs/e6-iterative-low-viability-v2/ledger.422877.jsonl": "5d7f0ac8789e58dc591c7b9c500b0bc8171911f9f75faded0af8c99808672f5c",
+    "runs/e6-iterative-low-viability-v2/ledger.424396.jsonl": "a3c3884c18824d43e4bfd5960fb26e39311611bfc5b12b871092863deef05ce1",
+    "runs/e6-iterative-low-viability-v2/ledger.425757.jsonl": "50d3d2d63eaf55cdaae26494ecfe90014044b0c57afc9fe34615406c3561e8ae",
+    "runs/e6-iterative-low-viability-v2/ledger.427222.jsonl": "84f411c76648ab946ef046db015d6b3f1c210ac1e97a50fe32b676c47a57b9cf",
+    "runs/e6-iterative-low-viability-v2/ledger.428762.jsonl": "7a7bada07cc42ea79e647e5f0eb76a4bb4660d6696c38a7af722523f34020fd3",
+    "runs/e6-iterative-low-viability-v2/ledger.430237.jsonl": "668b026743e229069a98bd2b5b2e99ed353080648848302451a05279037dea93",
+    "runs/e6-iterative-low-viability-v2/ledger.432069.jsonl": "213d202d1a93cbb6f924f3280989a4d933f946e049324f027e9ccf3ef3ac860f",
+    "runs/e6-iterative-low-viability-v2/ledger.433413.jsonl": "3bddc93433861056ed8b7c1e2cb5753f50dcdda83e4d2ab9d8e01804b3964aae",
+    "runs/e6-iterative-low-viability-v2/ledger.434622.jsonl": "0c6f7b75f1e28c3f32099109d969af5a9c0eec8bdb5ab8ff6a6b5b2c11cd76d5",
+    "runs/e6-iterative-low-viability-v2/operations/screen-150-valid-1-attempt-1.json": "19ea90703e0c9fa5bdaaa5062be7026f2fbd37c9ec6377c4822ba1b024c1f0c5",
+    "runs/e6-iterative-low-viability-v2/operations/screen-151-valid-1-attempt-1.json": "192629154917c39511174bf7216b06af9549619b12a8f13c1bc7a8e11014d649",
+    "runs/e6-iterative-low-viability-v2/operations/screen-152-valid-1-attempt-1.json": "3c05d5a75c470860c1107b0ee749468d2dce5d802e6ea2007a03768d26e177ca",
+    "runs/e6-iterative-low-viability-v2/operations/screen-153-valid-1-attempt-1.json": "57b565d5c15731f6ad0160d256c7fd077739f33c7ac774c842d4970bbd62f693",
+    "runs/e6-iterative-low-viability-v2/operations/screen-154-valid-1-attempt-1.json": "9f1dd63af1c4e691919914ed594133818ca0a57f5d3676b42e2112dbc5c93fa4",
+    "runs/e6-iterative-low-viability-v2/operations/screen-154-valid-10-attempt-1.json": "66f2cbebfebfb925e29d249dde323f54262592ab3dc627b1733e4e3b4cd25cfe",
+    "runs/e6-iterative-low-viability-v2/operations/screen-154-valid-11-attempt-1.json": "116ba66d772c82256ff2e5d78875a953d1a80053c88663fba3635a953605970e",
+    "runs/e6-iterative-low-viability-v2/operations/screen-154-valid-12-attempt-1.json": "4a1518106b16790676f770b5f6891d22d1fc6558d01fb1ced458555672c1d0b5",
+    "runs/e6-iterative-low-viability-v2/operations/screen-154-valid-13-attempt-1.json": "09852779beea5ee69a7de60237d3c36100c8e790f39d7a0e2cb4f4ed0c9a6180",
+    "runs/e6-iterative-low-viability-v2/operations/screen-154-valid-14-attempt-1.json": "be0cc5001c8e41ab3f0962e7a921c123b1e379adcfda6716220c275bf722b52d",
+    "runs/e6-iterative-low-viability-v2/operations/screen-154-valid-15-attempt-1.json": "5bf9394ccd3594478c742360887cc22c84b4002e76aef7a6a7b196fa1757be10",
+    "runs/e6-iterative-low-viability-v2/operations/screen-154-valid-16-attempt-1.json": "b2bbf731ffb3fba3c85c15c5cdf3aa01c055922dbb67eb4bd872d563f3572f92",
+    "runs/e6-iterative-low-viability-v2/operations/screen-154-valid-2-attempt-1.json": "d759fa486af5dd6eabb0cf39a66374a30e21602423ea82c076eb7b201d1ea3a8",
+    "runs/e6-iterative-low-viability-v2/operations/screen-154-valid-3-attempt-1.json": "98af5c87667f8f0c236dc9b072796601b94e0ebbb01e929d07c9411f78d88677",
+    "runs/e6-iterative-low-viability-v2/operations/screen-154-valid-4-attempt-1.json": "d993ceb05085fed1d9830e32f832d467ccd03be415b7ae95f1d18b60d82d9926",
+    "runs/e6-iterative-low-viability-v2/operations/screen-154-valid-5-attempt-1.json": "167f98fc97382ad82574d6568c6c36714efb273745a62a6016705b6a1d11ac22",
+    "runs/e6-iterative-low-viability-v2/operations/screen-154-valid-6-attempt-1.json": "448358f11083dfcbee88d9946f2b1afee90c9b4bf79eb85346c78c5adf71b558",
+    "runs/e6-iterative-low-viability-v2/operations/screen-154-valid-7-attempt-1.json": "511a39eed78f83f1beb439153b9e8bb4ddb1137b0834a6b5a7d7a40a2b63a225",
+    "runs/e6-iterative-low-viability-v2/operations/screen-154-valid-8-attempt-1.json": "dbb7aa01b0dab0b2379f8b9e6983597a18bd1436539d10e9eebc746fbb6182d5",
+    "runs/e6-iterative-low-viability-v2/operations/screen-154-valid-9-attempt-1.json": "d79ab14e8d250c30d546ee1fb2689cbcfde97c853ad97b86436f088e42474a98",
+    "runs/e6-iterative-low-viability-v2/operations/screen-155-valid-1-attempt-1.json": "f4617ea311af891da485dc5ac1e567fbe68288dc430faeb304a2e5ed3516e25a",
+    "runs/e6-iterative-low-viability-v2/operations/screen-155-valid-2-attempt-1.json": "bcda24d4de7708ed197a0d2318ea10bbedfe6dcee20f5b83bb4bbd2fe20bb51e",
+    "runs/e6-iterative-low-viability-v2/operations/screen-156-valid-1-attempt-1.json": "174271cfc580867dee5e9686187ddb320444f3e21c55fee56db847c3b2e304d7",
+    "runs/e6-iterative-low-viability-v2/operations/screen-157-valid-1-attempt-1.json": "8283523ffd06611dd0c073a022c7b54e69f166947cf3e113f45acf05a0bd210f",
+    "runs/e6-iterative-low-viability-v2/operations/screen-158-valid-1-attempt-1.json": "b24957a5883208c138e4ae21ddd3654664a819fb1525c34ba0de79480a983a31",
+    "runs/e6-iterative-low-viability-v2/operations/screen-158-valid-10-attempt-1.json": "52e07403a06e3087c11cff7f0533c448ad07553ff846199f919254de611c27ed",
+    "runs/e6-iterative-low-viability-v2/operations/screen-158-valid-11-attempt-1.json": "bdf7005bcc789173802bd5e919074603bc8e7f5c704118a3d85745926837d60b",
+    "runs/e6-iterative-low-viability-v2/operations/screen-158-valid-12-attempt-1.json": "a7e8975f3c8186039e4216495452bc524896000d9befb1a885578746e4de9591",
+    "runs/e6-iterative-low-viability-v2/operations/screen-158-valid-13-attempt-1.json": "9ccb5a8bc747f0ab674ebcc3a91a38eaa33e6ec01f3ab246ac1edbbc65fed103",
+    "runs/e6-iterative-low-viability-v2/operations/screen-158-valid-14-attempt-1.json": "bbc21fe11c6b549295da5f15ccb37016883379454fe76da996b4931cf76b8416",
+    "runs/e6-iterative-low-viability-v2/operations/screen-158-valid-15-attempt-1.json": "3e6d713edb3668f9651fcf55b8f710a389dd078210c6dcf1da3c1d08b285df37",
+    "runs/e6-iterative-low-viability-v2/operations/screen-158-valid-16-attempt-1.json": "75cc9c63747a026718f2e3a209793044ed0d6be033100454358105f538f5f78b",
+    "runs/e6-iterative-low-viability-v2/operations/screen-158-valid-2-attempt-1.json": "d6cf2bff956a9f0208b980fff3d64a21331ae54515dad456909e74cf554a2189",
+    "runs/e6-iterative-low-viability-v2/operations/screen-158-valid-3-attempt-1.json": "d255cf1a0179c5d57d8fa2cf5e5afd213daaadb000d1b104807e0c0e8d804040",
+    "runs/e6-iterative-low-viability-v2/operations/screen-158-valid-4-attempt-1.json": "e86cc32434d8438f15586d5f3180eef49aa71ef852da2cafa943ef53277f79d0",
+    "runs/e6-iterative-low-viability-v2/operations/screen-158-valid-5-attempt-1.json": "3048f06dfec5f7568be5939426d2d0e74c270fea11f3aaa5d80ac6a395be06ed",
+    "runs/e6-iterative-low-viability-v2/operations/screen-158-valid-6-attempt-1.json": "8012103ea3f9143dc0274a6f1b91cc93471f33dbbc1f89398488784cbd2e12c6",
+    "runs/e6-iterative-low-viability-v2/operations/screen-158-valid-7-attempt-1.json": "395a7f8adf41b45a654b5c55450d030eb69782eab85f27679c0db353498cc3a5",
+    "runs/e6-iterative-low-viability-v2/operations/screen-158-valid-8-attempt-1.json": "92fe046d80e2d1c3550f5ecf5e3e735b4cbc05d5743f1f22f06df2221c3d65df",
+    "runs/e6-iterative-low-viability-v2/operations/screen-158-valid-9-attempt-1.json": "b0b6dbe2c18ad6cc5884335c778de231cca2c62a1dd2054004b460ee0cc9b8d3",
+    "runs/e6-iterative-low-viability-v2/operations/screen-159-valid-1-attempt-1.json": "43318156fc9ef6983ab41c963bcd9a44258037856b87278226c95baaa4e7c738",
+    "runs/e6-iterative-low-viability-v2/operations/screen-159-valid-10-attempt-1.json": "c3dafcac692281596e408833ed147ab9c8b1d73f2fe71ad26acea2f961d3c38a",
+    "runs/e6-iterative-low-viability-v2/operations/screen-159-valid-11-attempt-1.json": "1ad92e35a4e4d5f04559409f6d825a0dba132afc8dcdbbccebebe9052aa7762c",
+    "runs/e6-iterative-low-viability-v2/operations/screen-159-valid-12-attempt-1.json": "fc59ce217352099acc4ec6ce538bb11706de5d1577a6b50269fe46beafc3002c",
+    "runs/e6-iterative-low-viability-v2/operations/screen-159-valid-13-attempt-1.json": "086efd0ee1b1cf3463cb29979824f745c4b32966b7eb4f9d2062f6563457df5b",
+    "runs/e6-iterative-low-viability-v2/operations/screen-159-valid-14-attempt-1.json": "28e171bf1b1985c9f22cbb376d13765378372d43dc8b1457d5b9291581d22847",
+    "runs/e6-iterative-low-viability-v2/operations/screen-159-valid-15-attempt-1.json": "20e6fd5125ba0fa8f55db065fe7416cf8312bf24ca9e754995c2d64281f833b1",
+    "runs/e6-iterative-low-viability-v2/operations/screen-159-valid-16-attempt-1.json": "4a9c3053f177b6d3ef4fed61fc2ae4cc56230eb9a1ef6955a37e143872ef7c05",
+    "runs/e6-iterative-low-viability-v2/operations/screen-159-valid-2-attempt-1.json": "7c072997cd84a15578799c3080bb6c580e0f1a7e63b21ba860f4cd49479a5824",
+    "runs/e6-iterative-low-viability-v2/operations/screen-159-valid-3-attempt-1.json": "3ee42d46c5eab88c3730f75766fa0d7c5e0c6cb2b29e4dd64e67ad11690571a8",
+    "runs/e6-iterative-low-viability-v2/operations/screen-159-valid-4-attempt-1.json": "a159d294a9ddeeea3c6db638168ac4283c74af268fa158b6d18ff4f3916a7a06",
+    "runs/e6-iterative-low-viability-v2/operations/screen-159-valid-5-attempt-1.json": "1584c71cb842e96323c93f11fb09fc30cd32c96840b4e9f863edda928d4e8179",
+    "runs/e6-iterative-low-viability-v2/operations/screen-159-valid-6-attempt-1.json": "8716a314c3607503d91dc9a255ffd952b4cf6f9059b9c201363005943606bb84",
+    "runs/e6-iterative-low-viability-v2/operations/screen-159-valid-7-attempt-1.json": "22375e0a487546b71e95c6bd4324c04110f8190d62a6bd2257111d6e824ef5f6",
+    "runs/e6-iterative-low-viability-v2/operations/screen-159-valid-8-attempt-1.json": "0ba65a305b409a5beb83e58942937962638c091b7e7f46453acff15e6579a37a",
+    "runs/e6-iterative-low-viability-v2/operations/screen-159-valid-9-attempt-1.json": "21a99428206fbdd2ccd520becb38634a8ca3a99a6043e278d3c1eace1f6db8a1",
+    "runs/e6-iterative-low-viability-v2/operations/screen-160-valid-1-attempt-1.json": "28a51c763ee7ba2b0f1430b97476072d40c399e3857b0401bd8ec4d75ebbecda",
+    "runs/e6-iterative-low-viability-v2/operations/screen-160-valid-2-attempt-1.json": "636e6a39151e1c877e89679396f9b75810ccb5ad5679926987fe7a9b75112fc7",
+    "runs/e6-iterative-low-viability-v2/operations/screen-161-valid-1-attempt-1.json": "9dd66f7dc1fcfccb3e7c1432b484a36d65066986a41b7beb7436f1c5e850a8ef",
+    "runs/e6-iterative-low-viability-v2/operations/screen-162-valid-1-attempt-1.json": "12727ec65ff9629bbbcd11deba808017c7d1d276e0be8bace0955adbe79ba1be",
+    "runs/e6-iterative-low-viability-v2/operations/screen-162-valid-10-attempt-1.json": "2e2c056cd42bccbb8dcbed1c1a260dde7ea397590cf11cda55986909291cde32",
+    "runs/e6-iterative-low-viability-v2/operations/screen-162-valid-11-attempt-1.json": "e572bb0fa2bc7d67ed5afac99bccb647e7f570e897d0caaab7de4373e0062806",
+    "runs/e6-iterative-low-viability-v2/operations/screen-162-valid-12-attempt-1.json": "2bd47d990b1c2e912c15f6fafe86111025f4567bfc22b5b274fb28587fbf7714",
+    "runs/e6-iterative-low-viability-v2/operations/screen-162-valid-2-attempt-1.json": "a31efe279d4b1e4722e653e31e866fd49abdf80d63143e1755da68f176df12af",
+    "runs/e6-iterative-low-viability-v2/operations/screen-162-valid-3-attempt-1.json": "55f5166772a9e3a6ac4bbd505d8a0487f6e6a63adfba059d4f3586d8e6d26b06",
+    "runs/e6-iterative-low-viability-v2/operations/screen-162-valid-4-attempt-1.json": "2faf26a9ff2570b2e4f6a0544472c8919d2abbbfb4f3467f3b16edab7f821ffc",
+    "runs/e6-iterative-low-viability-v2/operations/screen-162-valid-5-attempt-1.json": "c2cb200354b4565aeb96bb0493882ac0dcaeabe5875252d20e346be4cf0118bf",
+    "runs/e6-iterative-low-viability-v2/operations/screen-162-valid-6-attempt-1.json": "f185a1bfa24e91f561d019b3fcd066790cc3997567dfb51b7f9294c45eda8427",
+    "runs/e6-iterative-low-viability-v2/operations/screen-162-valid-7-attempt-1.json": "ad4338501104325f8254bcca8b784e75709e2a0f705a9718d1bbcb4e048313aa",
+    "runs/e6-iterative-low-viability-v2/operations/screen-162-valid-8-attempt-1.json": "71810ccd8ebb3107c1e9bb179b34b0e0dbae9fb4b3cb88a22798ebfbfb341333",
+    "runs/e6-iterative-low-viability-v2/operations/screen-162-valid-9-attempt-1.json": "798e8fbecdef052bc0cdc7af5817e7bccea8bdab67f1df1f28a14733b170e9d7",
+    "runs/e6-iterative-low-viability-v2/screening.json": "e6c2e260fc84cec80fb29502925e9f0a5ceb35d50a7ac27b487dbbf0905740ed",
+    "runs/e6-iterative-low-viability-v2/task-154/original-01.json": "c5a1e7271a8c4499bda547576566e696f88b94911552cc7d21907f075bbd69fd",
+    "runs/e6-iterative-low-viability-v2/task-154/original-02.json": "56ba9d151d3a5be61c25c3820093a9d4adb15e83410d107d72cf5e9cdfca6af1",
+    "runs/e6-iterative-low-viability-v2/task-154/original-03.json": "10215ecd0a45b5c0dc11d75e98a9ff6d18a2153d6be02cecf1bf018fe2bb0d7c",
+    "runs/e6-iterative-low-viability-v2/task-154/original-04.json": "53e5d3e5e604a789f2052f7b0f18cf728b0ee6cade0ab3ebb2a8ffe3d8da1378",
+    "runs/e6-iterative-low-viability-v2/task-154/original-05.json": "476efb348b9ce0270e6848d0734431d48a2e08cf8c7e0d8ca81ce9c4dc7343fa",
+    "runs/e6-iterative-low-viability-v2/task-154/original-06.json": "291afb1d3986111718d0d9834ab575e17dbb7d3d3029067bb13f8e6298468147",
+    "runs/e6-iterative-low-viability-v2/task-154/original-07.json": "f3bb3ff2ef4ec5b04042289ad521c8b47b6089ad25943be802fa5d5e2fcab7c4",
+    "runs/e6-iterative-low-viability-v2/task-154/original-08.json": "8318f9d15c182157865d2d30f84eca037e8d1430eb828a75d5802b7019373c3b",
+    "runs/e6-iterative-low-viability-v2/task-154/original-09.json": "5736248cb1445834de9a9511abc77b8958bae4b7444c691e0473de8fa3ce3245",
+    "runs/e6-iterative-low-viability-v2/task-154/original-10.json": "033400e895eab366e0941d253a00bd0905c78b923b18be4af9222b1f8d99237a",
+    "runs/e6-iterative-low-viability-v2/task-154/original-11.json": "52ff28722c8181a4f277437f5887bece24f8f6fa3deecf27e59f464b7c210ed5",
+    "runs/e6-iterative-low-viability-v2/task-154/original-12.json": "f60f789f38754d1ed0100c5acce6ccf8b63b853646fd7285963452905479389a",
+    "runs/e6-iterative-low-viability-v2/task-154/original-13.json": "bec3e543f9326f23093a1e282be2f12e5d9958161fab31b8136c6f3b03284314",
+    "runs/e6-iterative-low-viability-v2/task-154/original-14.json": "5997852f5f6b2f80230d3cf470bbd30dbae5f844324730719f529345d3e0ce66",
+    "runs/e6-iterative-low-viability-v2/task-154/original-15.json": "308efcdcccb972ddf6937a68d7fbe96281daa71307b1e30ce0407495411ec6e8",
+    "runs/e6-iterative-low-viability-v2/task-154/original-16.json": "1b99b17fdbd9633a6e72e6fa29c8efaae18c07aed1db9636716a415d25a90ade",
+    "runs/e6-iterative-low-viability-v2/task-154/original-execution-01.json": "c5a1e7271a8c4499bda547576566e696f88b94911552cc7d21907f075bbd69fd",
+    "runs/e6-iterative-low-viability-v2/task-154/original-execution-02.json": "56ba9d151d3a5be61c25c3820093a9d4adb15e83410d107d72cf5e9cdfca6af1",
+    "runs/e6-iterative-low-viability-v2/task-154/original-execution-03.json": "10215ecd0a45b5c0dc11d75e98a9ff6d18a2153d6be02cecf1bf018fe2bb0d7c",
+    "runs/e6-iterative-low-viability-v2/task-154/original-execution-04.json": "53e5d3e5e604a789f2052f7b0f18cf728b0ee6cade0ab3ebb2a8ffe3d8da1378",
+    "runs/e6-iterative-low-viability-v2/task-154/original-execution-05.json": "476efb348b9ce0270e6848d0734431d48a2e08cf8c7e0d8ca81ce9c4dc7343fa",
+    "runs/e6-iterative-low-viability-v2/task-154/original-execution-06.json": "291afb1d3986111718d0d9834ab575e17dbb7d3d3029067bb13f8e6298468147",
+    "runs/e6-iterative-low-viability-v2/task-154/original-execution-07.json": "f3bb3ff2ef4ec5b04042289ad521c8b47b6089ad25943be802fa5d5e2fcab7c4",
+    "runs/e6-iterative-low-viability-v2/task-154/original-execution-08.json": "8318f9d15c182157865d2d30f84eca037e8d1430eb828a75d5802b7019373c3b",
+    "runs/e6-iterative-low-viability-v2/task-154/original-execution-09.json": "5736248cb1445834de9a9511abc77b8958bae4b7444c691e0473de8fa3ce3245",
+    "runs/e6-iterative-low-viability-v2/task-154/original-execution-10.json": "033400e895eab366e0941d253a00bd0905c78b923b18be4af9222b1f8d99237a",
+    "runs/e6-iterative-low-viability-v2/task-154/original-execution-11.json": "52ff28722c8181a4f277437f5887bece24f8f6fa3deecf27e59f464b7c210ed5",
+    "runs/e6-iterative-low-viability-v2/task-154/original-execution-12.json": "f60f789f38754d1ed0100c5acce6ccf8b63b853646fd7285963452905479389a",
+    "runs/e6-iterative-low-viability-v2/task-154/original-execution-13.json": "bec3e543f9326f23093a1e282be2f12e5d9958161fab31b8136c6f3b03284314",
+    "runs/e6-iterative-low-viability-v2/task-154/original-execution-14.json": "5997852f5f6b2f80230d3cf470bbd30dbae5f844324730719f529345d3e0ce66",
+    "runs/e6-iterative-low-viability-v2/task-154/original-execution-15.json": "308efcdcccb972ddf6937a68d7fbe96281daa71307b1e30ce0407495411ec6e8",
+    "runs/e6-iterative-low-viability-v2/task-154/original-execution-16.json": "1b99b17fdbd9633a6e72e6fa29c8efaae18c07aed1db9636716a415d25a90ade",
+    "runs/e6-iterative-low-viability-v2/task-158/original-01.json": "99e2d4327b80d820429d1d66002c762994922ea3cff0c3d028b31bedfa73433d",
+    "runs/e6-iterative-low-viability-v2/task-158/original-02.json": "3950eaedced4b64ea74fca77fe3327ff97c2b3efc73bbb92fac4a70fd6ceeb11",
+    "runs/e6-iterative-low-viability-v2/task-158/original-03.json": "071f42db4953a93aa0c454b673fce779811e92c99aa720ad2d2d60f89c2819cc",
+    "runs/e6-iterative-low-viability-v2/task-158/original-04.json": "6bbc0732e74912400c60735ba9ec0aeeab9f0221c6754f4bae2ff4b1db395ecc",
+    "runs/e6-iterative-low-viability-v2/task-158/original-05.json": "89658bbceae387f5147b506df8906c705926a929ceb8e4ecb651e3aa24a5a8bc",
+    "runs/e6-iterative-low-viability-v2/task-158/original-06.json": "d2aba3a37976b1eac9c711c874e748283e49fb1cadc7a63f2a43d747b6045253",
+    "runs/e6-iterative-low-viability-v2/task-158/original-07.json": "e3c8da21ca078b67731bea8c5c579bd63ba29bfbca717450080315c063acf1d9",
+    "runs/e6-iterative-low-viability-v2/task-158/original-08.json": "021e48daa08a1581e023303422edc47d315dfad635b2c2b569c8ad490add21af",
+    "runs/e6-iterative-low-viability-v2/task-158/original-09.json": "c0623d992553a62340eb19abdf6556f3df529a5937714c9a0283e4cab6604a64",
+    "runs/e6-iterative-low-viability-v2/task-158/original-10.json": "041eb92a87dcb42c4fb5385aa6e9470a402200c6d011a51573046d339ab66374",
+    "runs/e6-iterative-low-viability-v2/task-158/original-11.json": "5176c8febe573e0c4f06bbcf42ab8370b93c5d9f40da8296d9cd25ae0be8b5e3",
+    "runs/e6-iterative-low-viability-v2/task-158/original-12.json": "49acc9978fae373b150937260ed4c3764b8b99700b7cf2932182768c8d16a9ef",
+    "runs/e6-iterative-low-viability-v2/task-158/original-13.json": "d0c53584eb28cb5ffe9be0bdb5c756f2c91dad5fa6553957cafe9894d96b1c7e",
+    "runs/e6-iterative-low-viability-v2/task-158/original-14.json": "6b2972f52bf42f0a720885a75c0cb5972f47135e43e118b99beeb535327a4c10",
+    "runs/e6-iterative-low-viability-v2/task-158/original-15.json": "ee162f4930ed3f4d4106b6cf9c39b678563d7af1f18965963e8bc520126b6e35",
+    "runs/e6-iterative-low-viability-v2/task-158/original-16.json": "f49637b05e120c182d1702c450a573e4c57ff8350610236a15b44a318a4d5285",
+    "runs/e6-iterative-low-viability-v2/task-158/original-execution-01.json": "99e2d4327b80d820429d1d66002c762994922ea3cff0c3d028b31bedfa73433d",
+    "runs/e6-iterative-low-viability-v2/task-158/original-execution-02.json": "3950eaedced4b64ea74fca77fe3327ff97c2b3efc73bbb92fac4a70fd6ceeb11",
+    "runs/e6-iterative-low-viability-v2/task-158/original-execution-03.json": "071f42db4953a93aa0c454b673fce779811e92c99aa720ad2d2d60f89c2819cc",
+    "runs/e6-iterative-low-viability-v2/task-158/original-execution-04.json": "6bbc0732e74912400c60735ba9ec0aeeab9f0221c6754f4bae2ff4b1db395ecc",
+    "runs/e6-iterative-low-viability-v2/task-158/original-execution-05.json": "89658bbceae387f5147b506df8906c705926a929ceb8e4ecb651e3aa24a5a8bc",
+    "runs/e6-iterative-low-viability-v2/task-158/original-execution-06.json": "d2aba3a37976b1eac9c711c874e748283e49fb1cadc7a63f2a43d747b6045253",
+    "runs/e6-iterative-low-viability-v2/task-158/original-execution-07.json": "e3c8da21ca078b67731bea8c5c579bd63ba29bfbca717450080315c063acf1d9",
+    "runs/e6-iterative-low-viability-v2/task-158/original-execution-08.json": "021e48daa08a1581e023303422edc47d315dfad635b2c2b569c8ad490add21af",
+    "runs/e6-iterative-low-viability-v2/task-158/original-execution-09.json": "c0623d992553a62340eb19abdf6556f3df529a5937714c9a0283e4cab6604a64",
+    "runs/e6-iterative-low-viability-v2/task-158/original-execution-10.json": "041eb92a87dcb42c4fb5385aa6e9470a402200c6d011a51573046d339ab66374",
+    "runs/e6-iterative-low-viability-v2/task-158/original-execution-11.json": "5176c8febe573e0c4f06bbcf42ab8370b93c5d9f40da8296d9cd25ae0be8b5e3",
+    "runs/e6-iterative-low-viability-v2/task-158/original-execution-12.json": "49acc9978fae373b150937260ed4c3764b8b99700b7cf2932182768c8d16a9ef",
+    "runs/e6-iterative-low-viability-v2/task-158/original-execution-13.json": "d0c53584eb28cb5ffe9be0bdb5c756f2c91dad5fa6553957cafe9894d96b1c7e",
+    "runs/e6-iterative-low-viability-v2/task-158/original-execution-14.json": "6b2972f52bf42f0a720885a75c0cb5972f47135e43e118b99beeb535327a4c10",
+    "runs/e6-iterative-low-viability-v2/task-158/original-execution-15.json": "ee162f4930ed3f4d4106b6cf9c39b678563d7af1f18965963e8bc520126b6e35",
+    "runs/e6-iterative-low-viability-v2/task-158/original-execution-16.json": "f49637b05e120c182d1702c450a573e4c57ff8350610236a15b44a318a4d5285",
+    "runs/e6-iterative-low-viability-v2/task-159/original-01.json": "61688460de2328582f876ddafc62fa8531a0bf65969df3fd410b1d1b9baae801",
+    "runs/e6-iterative-low-viability-v2/task-159/original-02.json": "b965e23b13730daf6c360604bbaf0496c37a08dc7c3bfc6d3f4532fa12240613",
+    "runs/e6-iterative-low-viability-v2/task-159/original-03.json": "d9013c3f78346cf3eaa18e0d636cf384b31dad264cecb88c464c5e5d2d2e93e9",
+    "runs/e6-iterative-low-viability-v2/task-159/original-04.json": "b7c23baf2dc81d940c30bf0dc89f33c396574adf2517f0a5a3e256de92b98ff8",
+    "runs/e6-iterative-low-viability-v2/task-159/original-05.json": "16d20e6f59dc2597ebb8be96cabc5175242964ca24bd993c0724bcfdb80292fb",
+    "runs/e6-iterative-low-viability-v2/task-159/original-06.json": "20ac003f08c80c5efe6147e3c1e50e84a752328c1a1f237b68a8b4060df71579",
+    "runs/e6-iterative-low-viability-v2/task-159/original-07.json": "f732e8f8e7420e93b50055baa717eb55d303ef075e4601e9fb6df18e5a5557bc",
+    "runs/e6-iterative-low-viability-v2/task-159/original-08.json": "dc66ece5b500f6ebf8677533305029987cf53f789d15c72731c12b92145254f4",
+    "runs/e6-iterative-low-viability-v2/task-159/original-09.json": "ab2dfb41086660326be2a06735507030f0b180c1c394825580731f45a35bcc6c",
+    "runs/e6-iterative-low-viability-v2/task-159/original-10.json": "70aaa2aa1ff6072acec28433528c11bd228000bcd5c008af105d3a92f3cc5830",
+    "runs/e6-iterative-low-viability-v2/task-159/original-11.json": "80ccc3b9a844b6f4ba767fbcf9ff0133e16c56a3d8e8e66d9604af906e53205e",
+    "runs/e6-iterative-low-viability-v2/task-159/original-12.json": "14a3e9b86f481758b75fee57f5e9745d225c25d348ecc29fcdbd40a18fa4a605",
+    "runs/e6-iterative-low-viability-v2/task-159/original-13.json": "d328f7f19c4423490b9d5a4c21029dbeec67c9f93db4cc9182c390d33b4cd0c4",
+    "runs/e6-iterative-low-viability-v2/task-159/original-14.json": "d182d5c333d40f461f06f639565c8662269469eae9963a270fa58405c5f0f418",
+    "runs/e6-iterative-low-viability-v2/task-159/original-15.json": "3c318cfba4b5f569c397476f49261d01839b6113a47f21918595bcecc35eb95d",
+    "runs/e6-iterative-low-viability-v2/task-159/original-16.json": "71362da8f85b40547148b053a43230e7ee2b0d16646e74f2e1888a56ef66eec1",
+    "runs/e6-iterative-low-viability-v2/task-159/original-execution-01.json": "61688460de2328582f876ddafc62fa8531a0bf65969df3fd410b1d1b9baae801",
+    "runs/e6-iterative-low-viability-v2/task-159/original-execution-02.json": "b965e23b13730daf6c360604bbaf0496c37a08dc7c3bfc6d3f4532fa12240613",
+    "runs/e6-iterative-low-viability-v2/task-159/original-execution-03.json": "d9013c3f78346cf3eaa18e0d636cf384b31dad264cecb88c464c5e5d2d2e93e9",
+    "runs/e6-iterative-low-viability-v2/task-159/original-execution-04.json": "b7c23baf2dc81d940c30bf0dc89f33c396574adf2517f0a5a3e256de92b98ff8",
+    "runs/e6-iterative-low-viability-v2/task-159/original-execution-05.json": "16d20e6f59dc2597ebb8be96cabc5175242964ca24bd993c0724bcfdb80292fb",
+    "runs/e6-iterative-low-viability-v2/task-159/original-execution-06.json": "20ac003f08c80c5efe6147e3c1e50e84a752328c1a1f237b68a8b4060df71579",
+    "runs/e6-iterative-low-viability-v2/task-159/original-execution-07.json": "f732e8f8e7420e93b50055baa717eb55d303ef075e4601e9fb6df18e5a5557bc",
+    "runs/e6-iterative-low-viability-v2/task-159/original-execution-08.json": "dc66ece5b500f6ebf8677533305029987cf53f789d15c72731c12b92145254f4",
+    "runs/e6-iterative-low-viability-v2/task-159/original-execution-09.json": "ab2dfb41086660326be2a06735507030f0b180c1c394825580731f45a35bcc6c",
+    "runs/e6-iterative-low-viability-v2/task-159/original-execution-10.json": "70aaa2aa1ff6072acec28433528c11bd228000bcd5c008af105d3a92f3cc5830",
+    "runs/e6-iterative-low-viability-v2/task-159/original-execution-11.json": "80ccc3b9a844b6f4ba767fbcf9ff0133e16c56a3d8e8e66d9604af906e53205e",
+    "runs/e6-iterative-low-viability-v2/task-159/original-execution-12.json": "14a3e9b86f481758b75fee57f5e9745d225c25d348ecc29fcdbd40a18fa4a605",
+    "runs/e6-iterative-low-viability-v2/task-159/original-execution-13.json": "d328f7f19c4423490b9d5a4c21029dbeec67c9f93db4cc9182c390d33b4cd0c4",
+    "runs/e6-iterative-low-viability-v2/task-159/original-execution-14.json": "d182d5c333d40f461f06f639565c8662269469eae9963a270fa58405c5f0f418",
+    "runs/e6-iterative-low-viability-v2/task-159/original-execution-15.json": "3c318cfba4b5f569c397476f49261d01839b6113a47f21918595bcecc35eb95d",
+    "runs/e6-iterative-low-viability-v2/task-159/original-execution-16.json": "71362da8f85b40547148b053a43230e7ee2b0d16646e74f2e1888a56ef66eec1",
+    "src/aea/stage.py": "317b16b7c6de36e41ecc4e07693191b28694ea11e402ff363c340596340b1a28"
+  },
+  "terminal_status": "SCREENING_COST_LIMIT"
+}

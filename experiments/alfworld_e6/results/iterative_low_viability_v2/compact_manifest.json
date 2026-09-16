@@ -1,0 +1,101 @@
+{
+  "base_prereg_commit": "b6cd05418f619ad23318e55916aaae2a96d07875",
+  "files": [
+    {
+      "bytes": 3,
+      "path": "adaptation_tasks.json",
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "bytes": 75461,
+      "path": "artifact_manifest.json",
+      "sha256": "38cc8ad3c74d79af3bdd46f4732f659a857f2186c53f9d79a359c4c169b50a15"
+    },
+    {
+      "bytes": 1247,
+      "path": "final_review.json",
+      "sha256": "bbbc399a2ae7bbdc80c8e264b3a68a83d989a7833528d24a657b927d54ddaf35"
+    },
+    {
+      "bytes": 12593,
+      "path": "finalize_report.py.txt",
+      "sha256": "d8a00b47e35c3fd3091f042da196d3a4098cfaaaaa2661a10af42c0b28b172b5"
+    },
+    {
+      "bytes": 2971,
+      "path": "physical_audit.json",
+      "sha256": "090cdcfa489b335213e5c20ae00659853a0571a10f828d0080f821be7b6c1079"
+    },
+    {
+      "bytes": 9316,
+      "path": "preservation_audit.json",
+      "sha256": "697665a89da85d46ecdf367215f0fc14f456f440d20fb04ffd03fd10f307d7ed"
+    },
+    {
+      "bytes": 19501,
+      "path": "preservation_check.py.txt",
+      "sha256": "4129c1ae10af78d4b5df8f5d8ac19bbac8b2ff068aaf0e310df203ef789c70eb"
+    },
+    {
+      "bytes": 10678,
+      "path": "qualified_zero_evidence.py.txt",
+      "sha256": "e9f2cf34dac145ae2f8613e73bd3b4f418d1bc46baef4807a3c292ac135fc403"
+    },
+    {
+      "bytes": 10763,
+      "path": "../../ITERATIVE_LOW_VIABILITY_V2_REPORT.md",
+      "sha256": "f3c132eb594646c7630cdfc3f7f806f9c7ed6a031bb659ed838d93cd169a72c7"
+    },
+    {
+      "bytes": 36079,
+      "path": "report_helper.py.txt",
+      "sha256": "0402a97b7cfbabd22a509ae1be34b581e6fb5ff2ef6369896ef1257ea5bdefc8"
+    },
+    {
+      "bytes": 90760,
+      "path": "result.json",
+      "sha256": "375f98a0469b3598134f269e12d661c8d260b7299b67188a4f80e1bedb5e4bdc"
+    },
+    {
+      "bytes": 927,
+      "path": "screening.tsv",
+      "sha256": "bb030b0943ea753c9e51886d773ed8827a51c8deccc164befd53b43b2d0493aa"
+    },
+    {
+      "bytes": 50513,
+      "path": "screening_audit.json",
+      "sha256": "16fb89d4e247e3ef186da918f032e88194022a56df5570b5c7ee0c983d922810"
+    },
+    {
+      "bytes": 33917,
+      "path": "screening_audit.py.txt",
+      "sha256": "fe2c545657fb43012fee5f6e82bde245c09fbdd6d4878f5c41c3e77af89c0c97"
+    },
+    {
+      "bytes": 33967,
+      "path": "screening_qualified_evidence.json",
+      "sha256": "521e099796a3d97594d54f5f66af68df0827f1fc19d2caa66da145d90f7cdc62"
+    },
+    {
+      "bytes": 54163,
+      "path": "superseded_terminal_audit.json",
+      "sha256": "867b1e427f100f4aca41fd33e7bce381b6ee95d5f93070dd7296db5b80e42be0"
+    },
+    {
+      "bytes": 9237,
+      "path": "superseded_terminal_audit.py.txt",
+      "sha256": "d3432dd8d564bf3d89f97cd5c9584e16db8086f2e15d05d3464eba10481ee489"
+    },
+    {
+      "bytes": 50687,
+      "path": "terminal_audit.json",
+      "sha256": "3ee6d8dc0467b6e46a84bc4f9b73c51bcd98d3320ece71c04f91d4a027ad5249"
+    },
+    {
+      "bytes": 14305,
+      "path": "terminal_audit.py.txt",
+      "sha256": "2cc68ac3289097406b123c408a26cde62208a5d5c4aec27c946aad0169da4309"
+    }
+  ],
+  "schema": "iterative-low-viability-v2-publication-v1"
+}

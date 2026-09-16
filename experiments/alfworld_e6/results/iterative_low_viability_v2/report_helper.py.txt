@@ -1,0 +1,785 @@
+#!/usr/bin/env python3
+"""Read-only V2 artifact summarizer. Writes compact drafts under /tmp only.
+
+No project imports, subprocesses, environment resets, provider calls, or reruns.
+The frozen driver remains authoritative for the preregistered decision. Root must
+supply final independent audit/recommendation review before publishing the draft.
+"""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import math
+from collections import Counter
+from pathlib import Path
+from typing import Any
+
+NAME = "e6-iterative-low-viability-v2"
+FINAL_DECISIONS = {
+    "LOW_VIABLE",
+    "LOW_PARTIAL_SIGNAL",
+    "LOW_NOT_WORKING",
+    "IMPLEMENTATION_FAILURE",
+    "INCONCLUSIVE",
+}
+TERMINAL_SCREEN = {
+    "INSUFFICIENT_FRESH_LOW",
+    "SCREENING_COST_LIMIT",
+    "INCONCLUSIVE",
+    "IMPLEMENTATION_FAILURE",
+}
+BASE = "bec74ed8a6ff40e119b2299c92b07b8602ff5fef"
+
+
+def sha(path: Path) -> str:
+    result = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            result.update(chunk)
+    return result.hexdigest()
+
+
+def digest(value: Any) -> str:
+    text = value if isinstance(value, str) else json.dumps(value, sort_keys=True)
+    return hashlib.sha256(text.encode()).hexdigest()
+
+
+def read(path: Path, default: Any = None) -> Any:
+    return json.loads(path.read_text()) if path.exists() else default
+
+
+def rows(path: Path) -> list[dict[str, Any]]:
+    return (
+        [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
+        if path.exists()
+        else []
+    )
+
+
+def close(left: float, right: float, label: str) -> None:
+    if not math.isclose(left, right, rel_tol=1e-9, abs_tol=1e-9):
+        raise ValueError(f"{label}: {left} != {right}")
+
+
+def physical_account(
+    cap: dict[str, Any], records: list[dict[str, Any]]
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    """Reconciliation resolves an existing attempt; it never adds a second request/cost."""
+    groups: dict[str, list[dict[str, Any]]] = {}
+    for record in records:
+        groups.setdefault(record["attempt"], []).append(record)
+    unique = []
+    for attempt, group in groups.items():
+        statuses = {r["status"] for r in group}
+        if not statuses <= {"returned", "ambiguous_failure", "orphan_reconciled"}:
+            raise ValueError(f"unsupported physical status for {attempt}: {statuses}")
+        if "returned" in statuses and len(statuses) > 1:
+            raise ValueError(f"request has contradictory returned/failed outcomes: {attempt}")
+        if len({float(r["reserved_usd"]) for r in group}) != 1:
+            raise ValueError(f"request reservation changed: {attempt}")
+        if len({float(r["conservative_usd"]) for r in group if r["status"] == "returned"}) > 1:
+            raise ValueError(f"returned request charge changed: {attempt}")
+        chosen = next((r for r in group if r["status"] == "orphan_reconciled"), group[-1])
+        unique.append(chosen)
+    inflight = cap.get("inflight", {})
+    if set(groups) & set(inflight):
+        raise ValueError("a terminal physical request remains in flight")
+    if len(groups) + len(inflight) != cap["attempts"]:
+        raise ValueError("physical attempt identities do not reconcile with the cap")
+    returned = sum(float(r["conservative_usd"]) for r in unique if r["status"] == "returned")
+    uncertain = sum(float(r["reserved_usd"]) for r in unique if r["status"] != "returned")
+    close(returned, float(cap["actual_usd"]), "returned conservative cost")
+    close(uncertain, float(cap["uncertain_usd"]), "retained failed reservations")
+    inflight_usd = sum(float(v) for v in inflight.values())
+    result = {
+        "returned_conservative_usd": returned,
+        "retained_failed_reservation_usd": uncertain,
+        "inflight_reservation_usd": inflight_usd,
+        "committed_upper_usd": returned + uncertain + inflight_usd,
+        "physical_attempts": cap["attempts"],
+        "terminal_attempts": len(unique),
+        "returned_requests": sum(r["status"] == "returned" for r in unique),
+        "ambiguous_failures": sum(r["status"] == "ambiguous_failure" for r in unique),
+        "orphan_reconciled_requests": sum(r["status"] == "orphan_reconciled" for r in unique),
+        "physical_record_rows": len(records),
+        "inflight_requests": len(inflight),
+        "screening_cap_usd": 8.0,
+        "whole_run_cap_usd": 20.0,
+        "accounting_note": "Orphan reconciliation retains the existing request reservation; it is neither a new attempt nor an additional cost. Returned ledger USD and conservative committed USD are alternative accounting views, not additive charges.",
+    }
+    return result, unique
+
+
+def screening_rows(
+    screening: dict[str, Any], ledger: list[dict[str, Any]], physical: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    result = []
+    for key, row in sorted(screening["tasks"].items(), key=lambda item: int(item[0])):
+        episodes = row["episodes"]
+        valid = [e for e in episodes if e["is_valid"]]
+        if (
+            len(valid) != row["valid_episodes"]
+            or sum(bool(e["behavioral_success"]) for e in valid) != row["valid_successes"]
+        ):
+            raise ValueError(f"screening counters disagree for {key}")
+        if [e["execution_index"] for e in valid] != row["valid_episode_indices"]:
+            raise ValueError(f"valid execution mapping differs for {key}")
+        if row["status"] == "CONFIRMED_ZERO" and (len(valid) != 16 or row["valid_successes"] != 0):
+            raise ValueError(f"invalid ZERO classification for {key}")
+        taskledger = [
+            r for r in ledger if str(r.get("task_id")) == key and r.get("arm") == "screen"
+        ]
+        taskphysical = [
+            r
+            for r in physical
+            if str(r.get("attribution", {}).get("task_id")) == key and r["phase"] == "screening"
+        ]
+        result.append(
+            {
+                "task_id": int(key),
+                "status": row["status"],
+                "valid_episodes": row["valid_episodes"],
+                "valid_successes": row["valid_successes"],
+                "requested_executions": row["executions"],
+                "returned_executions": len(episodes),
+                "invalid_returned_executions": len(episodes) - len(valid),
+                "executions_without_returned_trace": row["executions"] - len(episodes),
+                "recovered_provider_errors": row["recovered_provider_errors"],
+                "recovered_episode_executions": row["recovered_episode_executions"],
+                "recovered_behavioral_results": len(row["recoveries"]),
+                "provider_retry_events": sum(r.get("event") == "infra_retry" for r in taskledger),
+                "terminal_ledger_infra_failures": sum(
+                    r.get("event") == "infra_failure" for r in taskledger
+                ),
+                "physical_requests_with_terminal_record": len(taskphysical),
+                "ledger_usd": sum(
+                    float(r.get("usd") or 0) for r in taskledger if r.get("event") == "call"
+                ),
+                "retained_failed_reservation_usd": sum(
+                    float(r["reserved_usd"]) for r in taskphysical if r["status"] != "returned"
+                ),
+                "infrastructure_reason": row.get("infrastructure_reason"),
+                "valid_episode_execution_indices": row["valid_episode_indices"],
+                "execution_evidence": [
+                    {
+                        k: e.get(k)
+                        for k in (
+                            "execution_index",
+                            "target_valid_index",
+                            "slot_attempt",
+                            "is_valid",
+                            "behavioral_success",
+                            "episode_ids",
+                            "trace_file",
+                            "trace_sha256",
+                            "file_sha256",
+                        )
+                    }
+                    for e in episodes
+                ],
+            }
+        )
+    return result
+
+
+def semantic_result(raw: dict[str, Any]) -> dict[str, Any]:
+    result = raw["result"]
+    return {
+        "optimizer_call_index": raw["optimizer_call_index"],
+        "doses": raw["doses"],
+        "decision": result["decision"],
+        "version": result.get("version"),
+        "source_sha256": result["source_sha256"],
+        "input_sha256": result["input_sha256"],
+        "result_sha256": digest(result),
+        "finding_count": len(result.get("findings", [])),
+    }
+
+
+def candidate_result(raw: dict[str, Any], semantics: list[dict[str, Any]]) -> dict[str, Any]:
+    if digest(raw["source"]) != raw["source_sha256"]:
+        raise ValueError("candidate source hash differs")
+    structural = raw["structural"]
+    privilege = raw["privilege"]
+    identity = [x for x in privilege if x.startswith("DOSE = 0")]
+    lexical = [
+        x for x in privilege if not x.startswith("DOSE = 0") and "semantic_privilege_" not in x
+    ]
+    screened = [s for s in semantics if s["optimizer_call_index"] == raw["optimizer_call_index"]]
+    semantic = (
+        screened[-1]["decision"]
+        if screened
+        else "UNCERTAIN"
+        if any("semantic_privilege_uncertain" in x for x in privilege)
+        else "FAIL"
+        if any("semantic_privilege_fail" in x for x in privilege)
+        else "NOT_RUN"
+    )
+    return {
+        **{
+            k: raw.get(k)
+            for k in (
+                "candidate_id",
+                "parent_candidate_id",
+                "optimizer_call_index",
+                "requested_operation",
+                "source_sha256",
+                "mechanism",
+                "endpoint",
+                "remaining_calls",
+                "remaining_policy",
+            )
+        },
+        "gates": {
+            "structural": "FAIL" if structural else "PASS",
+            "d0_identity": "NOT_RUN" if structural else "FAIL" if identity else "PASS",
+            "lexical": "NOT_RUN" if structural or identity else "FAIL" if lexical else "PASS",
+            "semantic": semantic,
+            "solvability": {k: json.loads(raw["solvability"]).get(k) for k in ("ok", "source")}
+            if raw.get("solvability")
+            else "NOT_RUN",
+        },
+        "structural_reason_count": len(structural),
+        "identity_reason_count": len(identity),
+        "lexical_reason_count": len(lexical),
+        "rejection_reason_sha256": digest(raw["rejection_reason"])
+        if raw.get("rejection_reason")
+        else None,
+        "candidate_record_sha256": digest(raw),
+        "semantic_records": screened,
+    }
+
+
+def adaptation_task(run: Path, task: int, row: dict[str, Any]) -> dict[str, Any]:
+    original = row["original"]
+    own = row.get("summary") or read(run / f"task-{task}/adaptation/summary.json", {})
+    directory = run / f"task-{task}/adaptation"
+    semantics = [semantic_result(r) for r in rows(run / f"task-{task}/semantic_gates.jsonl")]
+    candidates = [candidate_result(c, semantics) for c in own.get("candidates", [])]
+    inputs = rows(directory / "designer_inputs.jsonl")
+    feedback = []
+    for record in rows(directory / "feedback.jsonl"):
+        raw = record["feedback"]
+        feedback.append(
+            {
+                "to_call_index": record["call_index"],
+                **{
+                    k: raw.get(k)
+                    for k in (
+                        "operation",
+                        "category",
+                        "candidate_id",
+                        "source_sha256",
+                        "remaining_calls",
+                        "remaining_policy",
+                        "endpoint",
+                        "failed_episode_id",
+                    )
+                },
+                "reason_sha256": digest(raw.get("reason", "")),
+                "feedback_sha256": digest(raw),
+            }
+        )
+    slots = []
+    for index in (1, 2, 3):
+        candidate = next((c for c in candidates if c["optimizer_call_index"] == index), None)
+        dispatched = next((r for r in inputs if r["call_index"] == index), None)
+        if candidate:
+            slots.append(
+                {
+                    "slot": f"C{index}",
+                    "status": "PRODUCED",
+                    "candidate_id": candidate["candidate_id"],
+                }
+            )
+        elif dispatched:
+            slots.append(
+                {
+                    "slot": f"C{index}",
+                    "status": "DISPATCHED_WITHOUT_CANDIDATE",
+                    "request_sha256": dispatched["request_sha256"],
+                }
+            )
+        else:
+            reason = (
+                "first viable family already frozen"
+                if own.get("first_viable_family_index")
+                else "reference unavailable"
+                if not original["reference_ok"]
+                else "semantic UNCERTAIN stopped DESIGN"
+                if any(s["decision"] == "UNCERTAIN" for s in semantics)
+                else "task/global termination or budget prevented call"
+            )
+            slots.append(
+                {
+                    "slot": f"C{index}",
+                    "status": "NOT_NEEDED" if own.get("first_viable_family_index") else "NOT_RUN",
+                    "reason": reason,
+                }
+            )
+    frozen = own.get("frozen_family")
+    freeze = (
+        None
+        if not frozen
+        else {
+            k: frozen[k]
+            for k in ("candidate_id", "source_sha256", "optimizer_call_index", "endpoint")
+        }
+    )
+    confirmation = own.get("confirmation") or read(run / f"task-{task}/confirmation.json")
+    if own.get("designer_calls", len(inputs)) > 3 or own.get("adaptation_rollouts", 0) > 30:
+        raise ValueError("reported task exceeded frozen designer/adaptation allocation")
+    return {
+        "task_id": task,
+        "task_status": row["status"],
+        "design_status": own.get("status", "NOT_RUN"),
+        "reference": {
+            k: original.get(k)
+            for k in (
+                "reference_status",
+                "reference_ok",
+                "reference_id",
+                "reference_sha256",
+                "reference_steps",
+            )
+        },
+        "evidence": {
+            k: original.get(k)
+            for k in (
+                "all_original_episode_ids",
+                "all_original_trace_sha256",
+                "original_zero_evidence_sha256",
+                "evidence_n",
+                "selection_seed",
+                "evidence_ids",
+                "selected_trace_sha256",
+                "evidence_sha256",
+                "designer_evidence_sha256",
+                "valid_episode_execution_indices",
+            )
+        },
+        "designer_slots": slots,
+        "candidates": candidates,
+        "typed_feedback": feedback,
+        "designer_inputs": inputs,
+        "semantic_gates": semantics,
+        "frozen_family": freeze,
+        "control": own.get("control")
+        or {
+            "status": "NOT_NEEDED"
+            if frozen and frozen["endpoint"]["verdict"] == "in_band"
+            else "NOT_RUN"
+        },
+        "search_accepted": bool(own.get("search_accepted")),
+        "accepted_dose": own.get("accepted_dose"),
+        "search_successes": own.get("search_successes"),
+        "search_n": own.get("search_n"),
+        "final_environment_hash": own.get("final_environment_hash"),
+        "confirmation": confirmation,
+        "designer_calls": own.get("designer_calls", len(inputs)),
+        "adaptation_rollouts": own.get("adaptation_rollouts", 0),
+        "adaptation_requested_batches": rows(directory / "physical_batches.jsonl"),
+        "confirmation_requested_batches": rows(run / f"task-{task}/confirmation_batches.jsonl"),
+        "adaptation_budget": read(directory / "rollout_budget.json", []),
+        "measurements": rows(directory / "measurements.jsonl"),
+        "interruption_kind": (own.get("interruption") or {}).get("kind"),
+        "completed_without_infrastructure_failure": own.get(
+            "completed_without_infrastructure_failure", False
+        ),
+    }
+
+
+def render(result: dict[str, Any]) -> str:
+    screen = result["screening"]
+    cost = result["cost"]
+    review = result["review"]
+    lines = [
+        "# Iterative LOW viability V2",
+        "",
+        f"**Final decision: {result['final_decision']}**",
+        "",
+        f"Screening outcome: `{screen['status']}`. {result['interpretation']}",
+        "",
+        "## Safety, scope and freeze",
+        "",
+        f"- Starting HEAD: `{result['safety']['starting_head']}`; research branch `aea-llm-vnext`.",
+        f"- Main unchanged: {result['safety'].get('main_unchanged')}; production modified: {result['safety'].get('production_modified')}.",
+        "- Scope: corrected screening/accounting and reporting; LOW, semantic gate, validator, CONTROL and prior results remain frozen.",
+        f"- Pool preregistration: `{result['pool_freeze']['prereg_commit']}`; viability preregistration: `{result['adaptation_freeze'].get('prereg_commit', 'NOT_RUN')}`.",
+        f"- Preflight: {result['preflight'].get('unit_passed', 'unknown')} unit tests, {result['preflight'].get('strict_mypy_files', 'unknown')} strict-mypy files; Ruff {result['preflight'].get('ruff')}; pre-commit {result['preflight'].get('precommit')}.",
+        f"- Independent final audit: **{review['status']}**.",
+        "",
+        "## Fresh screening",
+        "",
+        f"Starting ID {screen['starting_fresh_id']}; deterministic ascending order. Inspected {len(screen['inspected_ids'])} IDs: {', '.join(map(str, screen['inspected_ids']))}.",
+        f"Qualified tasks: {screen['qualified_tasks']}; infrastructure-inconclusive tasks: {screen['infra_inconclusive_tasks']}.",
+        "",
+        "| Task | Valid s/n | Outcome | Invalid returned / unreturned | Recovered physical / episode failures | Ledger USD | Retained failed USD |",
+        "| --- | ---: | --- | ---: | ---: | ---: | ---: |",
+    ]
+    for row in screen["tasks"]:
+        lines.append(
+            f"| {row['task_id']} | {row['valid_successes']}/{row['valid_episodes']} | {row['status']} | {row['invalid_returned_executions']} / {row['executions_without_returned_trace']} | {row['recovered_provider_errors']} / {row['recovered_episode_executions']} | {row['ledger_usd']:.9f} | {row['retained_failed_reservation_usd']:.9f} |"
+        )
+    lines += [
+        "",
+        "Provider failures are missing observations. Recovered errors preserve later valid outcomes. ZERO requires exactly 16 valid failures; the first valid success ends a task.",
+        "",
+        "## Costs and budgets",
+        "",
+        f"- Screening: {screen['requested_executions']} requested executions, {screen['valid_episodes']} valid outcomes, {screen['valid_successes']} successes.",
+        f"- Designer calls: {result['designer_calls']}; adaptation episodes charged: {result['adaptation_rollouts']}; K16 episodes requested: {result['confirmation_requested_episodes']}.",
+        f"- Physical requests: {cost['physical_attempts']} ({cost['returned_requests']} returned, {cost['ambiguous_failures']} ambiguous failures, {cost['orphan_reconciled_requests']} reconciled orphans, {cost['inflight_requests']} unresolved).",
+        f"- Ledger USD: ${cost['actual_ledger_usd']:.9f}; conservative returned USD: ${cost['returned_conservative_usd']:.9f}; retained failed USD: ${cost['retained_failed_reservation_usd']:.9f}; in-flight USD: ${cost['inflight_reservation_usd']:.9f}.",
+        f"- Committed cost: **${cost['committed_upper_usd']:.9f}**. Hard caps: screening $8; whole run $20. No double counting of orphan reconciliation.",
+        "- Per-task limits remain three designer calls and 30 adaptation episodes; K16 is evaluation-only. Historical B_L is 4–12/16; B_T is 7–9/16.",
+        "",
+        "## LOW, CONTROL and confirmation",
+        "",
+    ]
+    if result.get("screening_only_qualified_evidence"):
+        lines += [
+            "Confirmed-ZERO evidence is frozen in `screening_qualified_evidence.json`: all sixteen valid episode identities/hashes and the exact historical three-trace seeded selection for each qualified task. This remains screening provenance; no adaptation input pool formed.",
+            "",
+        ]
+        for evidence in result["screening_only_qualified_evidence"]["tasks"]:
+            lines += [
+                f"- Task {evidence['task_id']}: n=16, seed={evidence['selection_seed']}; selected episode IDs {evidence['evidence_ids']}; selected evidence SHA `{evidence['evidence_sha256']}`."
+            ]
+    if not result["adaptation_tasks"]:
+        lines += [
+            "References, C1/C2/C3, candidate gates, solvability, endpoint measurement, CONTROL, search acceptance and K16: **NOT_RUN / N/A**.",
+            "",
+            "Primary K16 B_L result: **N/A**. No four-task efficacy denominator applies.",
+        ]
+    else:
+        primary = result["primary"]
+        lines += [
+            f"Primary: **{primary['K16_B_L']}/4 K16-confirmed B_L**; B_T {primary['K16_B_T']}/4. Search accepted {primary['search_accepted']}/4."
+        ]
+        for task in result["adaptation_tasks"]:
+            lines += [
+                "",
+                f"### Task {task['task_id']}",
+                "",
+                f"Reference: {task['reference']['reference_status']}; task status {task['task_status']}; DESIGN {task['design_status']}.",
+                f"Evidence hash: `{task['evidence']['evidence_sha256']}`; reference hash: `{task['reference']['reference_sha256']}`.",
+            ]
+            for slot in task["designer_slots"]:
+                lines.append(
+                    f"- {slot['slot']}: {slot['status']} — {slot.get('candidate_id', slot.get('reason', 'interrupted request'))}."
+                )
+            for candidate in task["candidates"]:
+                lines += [
+                    f"- C{candidate['optimizer_call_index']} mechanism: {candidate['mechanism']}; parent {candidate['parent_candidate_id']}; operation {candidate['requested_operation']}.",
+                    f"  Source `{candidate['source_sha256']}`; gates `{json.dumps(candidate['gates'], sort_keys=True)}`; endpoint `{candidate['endpoint']}`.",
+                ]
+            for feedback in task["typed_feedback"]:
+                lines.append(
+                    f"- Feedback to C{feedback['to_call_index']}: {feedback['operation']} / {feedback['category']}; exact private packet SHA `{feedback['feedback_sha256']}`."
+                )
+            lines += [
+                f"- Freeze: `{json.dumps(task['frozen_family'], sort_keys=True)}`.",
+                f"- CONTROL: `{json.dumps(task['control'], sort_keys=True)}`.",
+                f"- Search: accepted={task['search_accepted']}, s/n={task['search_successes']}/{task['search_n']}, dose={task['accepted_dose']}.",
+                f"- K16: `{json.dumps(task['confirmation'], sort_keys=True)}`.",
+                f"- Budget: designer {task['designer_calls']}/3; adaptation {task['adaptation_rollouts']}/30.",
+            ]
+    lines += [
+        "",
+        "## Interpretation and next action",
+        "",
+        result["recommendation"],
+        "",
+        f"Single direct blocker: {review.get('single_blocker', 'Final review pending; no method recommendation inferred from screening alone.')}",
+        "",
+        "Raw trajectories, candidate source, prompts, privileged references, gate input bodies and feedback bodies remain local. Compact JSON records IDs, decisions, mechanisms, lineage, measurements and hashes; artifact_manifest.json binds local source files. Historical reports remain unchanged.",
+        "",
+    ]
+    return "\n".join(lines)
+
+
+def build(
+    repo: Path,
+    output: Path,
+    review_path: Path | None = None,
+    screening_evidence_path: Path | None = None,
+) -> dict[str, Any]:
+    if not output.resolve().is_relative_to(Path("/tmp")):
+        raise ValueError("this helper only writes drafts under /tmp")
+    run = repo / "runs" / NAME
+    frozen = repo / "experiments/alfworld_e6/frozen/iterative_low_viability_v2"
+    screening = read(run / "screening.json")
+    summary = read(run / "summary.json")
+    cap = read(run / "cap.json")
+    results = read(run / "results.json")
+    if not screening or not summary or not cap:
+        raise ValueError("terminal frozen-driver screening/summary/cap artifacts required")
+    if results is None:
+        if screening["status"] not in TERMINAL_SCREEN:
+            raise ValueError("screening or adaptation has not reached a terminal outcome")
+        decision = summary.get("final_viability_decision", summary.get("decision"))
+        expected = (
+            "IMPLEMENTATION_FAILURE"
+            if screening["status"] == "IMPLEMENTATION_FAILURE"
+            else "INCONCLUSIVE"
+        )
+        if decision != expected:
+            raise ValueError("screen-only final decision differs from the frozen protocol")
+        adaptation = []
+    else:
+        if screening["status"] != "qualified" or len(screening["qualified"]) != 4:
+            raise ValueError("adaptation lacks the frozen four-task ZERO pool")
+        pending = [
+            r
+            for r in results["tasks"].values()
+            if r["status"] not in ("completed", "reference_unavailable")
+        ]
+        if pending and not results.get("interruption"):
+            raise ValueError("adaptation is still running")
+        decision = summary["decision"]
+        adaptation = [
+            adaptation_task(run, int(task), row) for task, row in results["tasks"].items()
+        ]
+        if sorted(t["task_id"] for t in adaptation) != sorted(screening["qualified"]):
+            raise ValueError("adaptation task membership differs from the four-task pool")
+    if decision not in FINAL_DECISIONS:
+        raise ValueError("unknown final decision")
+    screening_evidence = None
+    screening_evidence_text = None
+    if not adaptation and screening["qualified"]:
+        if screening_evidence_path is None:
+            raise ValueError(
+                "partial pool has confirmed ZERO tasks; run qualified_zero_evidence.py and supply --screening-evidence"
+            )
+        screening_evidence_text = screening_evidence_path.read_text()
+        screening_evidence = json.loads(screening_evidence_text)
+        if (
+            screening_evidence["screening_sha256"] != digest((run / "screening.json").read_text())
+            or screening_evidence["qualified_task_ids"] != screening["qualified"]
+            or screening_evidence["adaptation_pool_formed"]
+            or screening_evidence["LOW_viability_evaluated"]
+        ):
+            raise ValueError("screening-only qualified evidence differs from final checkpoint")
+    cost, physical = physical_account(cap, rows(run / "cap.attempts.jsonl"))
+    ledger = [r for path in sorted(run.glob("ledger.*.jsonl")) for r in rows(path)]
+    calls = [r for r in ledger if r.get("event") == "call"]
+    cost.update(
+        actual_ledger_usd=sum(float(r.get("usd") or 0) for r in calls),
+        ledger_returned_calls=len(calls),
+        ledger_event_counts=dict(Counter(r.get("event", "unknown") for r in ledger)),
+        ledger_usd_by_budget={
+            budget: sum(float(r.get("usd") or 0) for r in calls if r.get("budget") == budget)
+            for budget in ("eval", "search", "designer")
+        },
+        screening_ledger_usd=sum(
+            float(r.get("usd") or 0) for r in calls if r.get("arm") == "screen"
+        ),
+        confirmation_ledger_usd=sum(
+            float(r.get("usd") or 0) for r in calls if r.get("phase") == "confirm"
+        ),
+        committed_terminal_usd_by_phase={
+            phase: sum(
+                float(r["conservative_usd"] if r["status"] == "returned" else r["reserved_usd"])
+                for r in physical
+                if r["phase"] == phase
+            )
+            for phase in ("screening", "adaptation")
+        },
+    )
+    tasks = screening_rows(screening, ledger, physical)
+    review = read(review_path, {}) if review_path else {}
+    review.setdefault("status", "FINAL_AUDIT_PENDING")
+    if review.get("decision") and review["decision"] != decision:
+        raise ValueError(
+            "final review decision differs from frozen driver report; finalize its audit first"
+        )
+    preflight = read(frozen / "preflight.json", {})
+    audit = read(frozen / "used_task_audit.json", {})
+    primary = (
+        None
+        if not adaptation
+        else {
+            "denominator": 4,
+            "K16_B_L": sum(bool((t["confirmation"] or {}).get("in_band_l")) for t in adaptation),
+            "K16_B_T": sum(bool((t["confirmation"] or {}).get("in_band_t")) for t in adaptation),
+            "search_accepted": sum(t["search_accepted"] for t in adaptation),
+            "references_available": sum(t["reference"]["reference_ok"] for t in adaptation),
+        }
+    )
+    if primary and any(primary[key] != summary[key] for key in ("K16_B_L", "K16_B_T")):
+        raise ValueError("confirmation counts differ from frozen driver's summary")
+    if not adaptation:
+        interpretation = "The four-task primary sample did not form. Iterative LOW was not evaluated, and screening alone provides no LOW efficacy result."
+        recommendation = "Stop. A new pool requires separate review/preregistration. No LOW method change is recommended from screening alone."
+    else:
+        interpretation = "The primary sample is the four frozen ZERO tasks, retaining reference-unavailable tasks. Semantic UNCERTAIN is reported separately; K16 results were not fed back into DESIGN."
+        recommendation = (
+            "FREEZE LOW. Stop LOW-only R&D and integrate complete AEA after review."
+            if decision == "LOW_VIABLE"
+            else review.get(
+                "recommendation",
+                "Stop. Root's final audit must identify the direct blocker and any user-authorized single next change; this helper does not invent a method recommendation.",
+            )
+        )
+    result = {
+        "schema": "iterative-low-viability-v2-compact-report-v1",
+        "final_decision": decision,
+        "safety": {
+            k: preflight.get(k)
+            for k in (
+                "starting_head",
+                "main_unchanged",
+                "production_modified",
+                "baseline_files_unchanged",
+                "historical_run_files_unchanged",
+                "paid_calls_before_freeze",
+            )
+        },
+        "method_validator_commit": BASE,
+        "pool_freeze": screening["freeze"],
+        "adaptation_freeze": results.get("freeze", {}) if results else {},
+        "preflight": preflight,
+        "screening": {
+            "status": screening["status"],
+            "stop_reason": screening.get("interruption")
+            or {
+                "kind": screening["status"],
+                "reason": "twenty inspected IDs did not form four ZERO tasks"
+                if screening["status"] == "INSUFFICIENT_FRESH_LOW"
+                else "four ZERO tasks formed; screening completed",
+            },
+            "starting_fresh_id": (audit.get("never_used_ids") or [150])[0],
+            "inspected_ids": [t["task_id"] for t in tasks],
+            "qualified_tasks": screening["qualified"],
+            "infra_inconclusive_tasks": [
+                t["task_id"] for t in tasks if t["status"] == "INFRA_INCONCLUSIVE"
+            ],
+            "requested_executions": sum(t["requested_executions"] for t in tasks),
+            "valid_episodes": sum(t["valid_episodes"] for t in tasks),
+            "valid_successes": sum(t["valid_successes"] for t in tasks),
+            "tasks": tasks,
+        },
+        "primary": primary,
+        "screening_only_qualified_evidence": screening_evidence,
+        "adaptation_tasks": adaptation,
+        "candidate_count": sum(len(t["candidates"]) for t in adaptation),
+        "designer_calls": sum(t["designer_calls"] for t in adaptation),
+        "adaptation_rollouts": sum(t["adaptation_rollouts"] for t in adaptation),
+        "confirmation_requested_episodes": sum(
+            sum(b["n"] for b in t["confirmation_requested_batches"]) for t in adaptation
+        ),
+        "cost": cost,
+        "review": review,
+        "interpretation": interpretation,
+        "recommendation": recommendation,
+        "report_helper_operations": {
+            "API_calls": 0,
+            "environment_resets": 0,
+            "reference_regeneration": 0,
+            "research_writes": 0,
+        },
+    }
+    inventory = [
+        p
+        for p in run.rglob("*")
+        if p.is_file() and p.suffix != ".lock" and not p.name.endswith(".tmp")
+    ]
+    inventory += [p for p in frozen.rglob("*") if p.is_file()]
+    inventory += [
+        p
+        for p in (
+            repo / "scripts/e6_iterative_low_viability_v2.py",
+            repo / "experiments/alfworld_e6/PREREG_ITERATIVE_LOW_VIABILITY_POOL_V2.md",
+            repo / "experiments/alfworld_e6/PREREG_ITERATIVE_LOW_VIABILITY_V2.md",
+        )
+        if p.exists()
+    ]
+    manifest = {
+        "helper_sha256": sha(Path(__file__)),
+        "files": [
+            {"path": str(p.relative_to(repo)), "bytes": p.stat().st_size, "sha256": sha(p)}
+            for p in sorted(set(inventory))
+        ],
+    }
+    if (
+        read(run / "screening.json") != screening
+        or read(run / "cap.json") != cap
+        or read(run / "results.json") != results
+    ):
+        raise ValueError("run artifacts changed while generating report; refuse a mixed snapshot")
+    output.mkdir(parents=True, exist_ok=True)
+    if screening_evidence_text is not None:
+        (output / "screening_qualified_evidence.json").write_text(screening_evidence_text)
+    for name, value in (
+        ("result.json", result),
+        ("adaptation_tasks.json", adaptation),
+        ("artifact_manifest.json", manifest),
+    ):
+        (output / name).write_text(json.dumps(value, indent=2, sort_keys=True) + "\n")
+    columns = (
+        "task_id",
+        "status",
+        "valid_successes",
+        "valid_episodes",
+        "requested_executions",
+        "invalid_returned_executions",
+        "recovered_provider_errors",
+        "recovered_episode_executions",
+        "ledger_usd",
+        "retained_failed_reservation_usd",
+    )
+    (output / "screening.tsv").write_text(
+        "\t".join(columns)
+        + "\n"
+        + "".join("\t".join(str(t[c]) for c in columns) + "\n" for t in tasks)
+    )
+    (output / "report.md").write_text(render(result))
+    output_manifest = {
+        "files": [
+            {"path": name, "bytes": (output / name).stat().st_size, "sha256": sha(output / name)}
+            for name in (
+                "result.json",
+                "adaptation_tasks.json",
+                "artifact_manifest.json",
+                "screening.tsv",
+                "report.md",
+                *(
+                    ["screening_qualified_evidence.json"]
+                    if screening_evidence_text is not None
+                    else []
+                ),
+            )
+        ]
+    }
+    (output / "compact_manifest.json").write_text(
+        json.dumps(output_manifest, indent=2, sort_keys=True) + "\n"
+    )
+    return result
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--repo", type=Path, default=Path("/home/kree/work/EnvJudge-aea-llm"))
+    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--review", type=Path)
+    parser.add_argument("--screening-evidence", type=Path)
+    args = parser.parse_args()
+    result = build(args.repo, args.output, args.review, args.screening_evidence)
+    print(
+        json.dumps(
+            {
+                "decision": result["final_decision"],
+                "screening": result["screening"]["status"],
+                "output": str(args.output),
+                "review": result["review"]["status"],
+            },
+            indent=2,
+        )
+    )
+
+
+if __name__ == "__main__":
+    main()

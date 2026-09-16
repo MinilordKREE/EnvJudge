@@ -1,0 +1,261 @@
+#!/usr/bin/env python3
+"""Freeze screening-only qualified evidence after a terminal partial-pool outcome.
+
+Reads existing original traces and the exact hash-pinned historical selection
+function. Writes identifiers/hashes under /tmp only. No project imports, model
+calls, environments, references, candidate admission, or adaptation are invoked.
+"""
+
+from __future__ import annotations
+
+import argparse
+import ast
+import hashlib
+import json
+import random
+from pathlib import Path
+from types import SimpleNamespace
+from typing import Any
+
+RUN_NAME = "e6-iterative-low-viability-v2"
+METHOD_COMMIT = "bec74ed8a6ff40e119b2299c92b07b8602ff5fef"
+SELECTOR_SHA = "23020ab07cfe46267fdef6aecb01210275a042f146a6447db9e8b3bef32e65f9"
+STAGE_SHA = "317b16b7c6de36e41ecc4e07693191b28694ea11e402ff363c340596340b1a28"
+TERMINAL = {
+    "INSUFFICIENT_FRESH_LOW",
+    "SCREENING_COST_LIMIT",
+    "INCONCLUSIVE",
+    "IMPLEMENTATION_FAILURE",
+}
+
+
+def digest(value: Any) -> str:
+    text = value if isinstance(value, str) else json.dumps(value, sort_keys=True)
+    return hashlib.sha256(text.encode()).hexdigest()
+
+
+def selection_function(repo: Path) -> Any:
+    """Execute only the exact pinned four-line pure selection function, not its module."""
+    path = repo / "src/aea/stage.py"
+    source = path.read_text()
+    if digest(source) != STAGE_SHA:
+        raise ValueError("historical stage source differs from the frozen production bytes")
+    node = next(
+        n
+        for n in ast.parse(source).body
+        if isinstance(n, ast.FunctionDef) and n.name == "seeded_failures"
+    )
+    function_source = ast.get_source_segment(source, node)
+    if not function_source or digest(function_source) != SELECTOR_SHA:
+        raise ValueError("historical seeded selection function differs")
+    namespace: dict[str, Any] = {"random": random}
+    exec(
+        compile(
+            "from __future__ import annotations\n" + function_source,
+            str(path) + ":seeded_failures",
+            "exec",
+        ),
+        namespace,
+    )
+    return namespace["seeded_failures"]
+
+
+def task_evidence(
+    run: Path, task: int, row: dict[str, Any], selector: Any, global_ids: set[str]
+) -> dict[str, Any]:
+    if (
+        row["status"] != "CONFIRMED_ZERO"
+        or row["valid_episodes"] != 16
+        or row["valid_successes"] != 0
+    ):
+        raise ValueError(f"task {task} does not have sixteen valid failures")
+    if (
+        len(row["valid_episode_indices"]) != 16
+        or row["executions"] != len(row["episodes"])
+        or row["executions"] > 48
+    ):
+        raise ValueError(f"task {task} counters/mapping are inconsistent")
+    valid: list[dict[str, Any]] = []
+    selected_execution_indices = []
+    local_ids: set[str] = set()
+    artifacts = []
+    valid_aliases = []
+    slot_attempt = 0
+    for index, record in enumerate(row["episodes"], 1):
+        path = run / f"task-{task}/original-execution-{index:02}.json"
+        text = path.read_text()
+        raw = json.loads(text)
+        if (
+            record["execution_index"] != index
+            or record["trace_file"] != str(path.relative_to(run))
+            or record["file_sha256"] != digest(text)
+            or record["trace_sha256"] != digest(raw)
+            or len(raw) != 1
+        ):
+            raise ValueError(f"task {task} execution {index} differs from its checkpoint")
+        trace = raw[0]
+        episode = trace["episode_id"]
+        if (
+            not episode
+            or episode in local_ids
+            or episode in global_ids
+            or trace["rollout_seed"] != task
+        ):
+            raise ValueError(f"task {task} episode provenance differs")
+        local_ids.add(episode)
+        if trace["candidate"].get("rules_code") or trace["candidate"].get("in_env_actions"):
+            raise ValueError("qualified screening includes a transformed candidate")
+        is_valid = not bool(trace.get("error"))
+        slot_attempt += 1
+        if (
+            record["episode_ids"] != [episode]
+            or record["terminal_errors"] != int(not is_valid)
+            or record["is_valid"] != is_valid
+            or record["target_valid_index"] != len(valid) + 1
+            or record["slot_attempt"] != slot_attempt
+            or slot_attempt > 3
+        ):
+            raise ValueError("execution identity, validity or retry index changed")
+        artifacts.append(
+            {
+                "path": str(path.relative_to(run)),
+                "file_sha256": digest(text),
+                "trace_sha256": digest(trace),
+                "episode_id": episode,
+                "is_valid": is_valid,
+            }
+        )
+        if not is_valid:
+            if record["behavioral_success"] is not None or record["successes"] != 0:
+                raise ValueError("errored execution was counted as a behavioral outcome")
+            continue
+        if (
+            trace["success"]
+            or record["behavioral_success"]
+            or record["successes"]
+            or not trace["steps"]
+            or trace["duration_steps"] != len(trace["steps"])
+            or len(trace["steps"]) > 50
+        ):
+            raise ValueError("qualified execution is not a valid completed failure")
+        valid.append(trace)
+        selected_execution_indices.append(index)
+        alias = run / f"task-{task}/original-{len(valid):02}.json"
+        if alias.read_bytes() != path.read_bytes():
+            raise ValueError("valid original alias differs from its actual execution")
+        valid_aliases.append({"path": str(alias.relative_to(run)), "file_sha256": digest(text)})
+        slot_attempt = 0
+    if len(valid) != 16 or selected_execution_indices != row["valid_episode_indices"]:
+        raise ValueError("qualified valid trace mapping differs")
+    global_ids.update(local_ids)
+    wrapped = [
+        SimpleNamespace(success=t["success"], error=t.get("error"), steps=t["steps"], record=t)
+        for t in valid
+    ]
+    chosen = [t.record for t in selector(wrapped, 3, seed=task)]
+    if len(chosen) != 3:
+        raise ValueError("historical selection did not produce three failures")
+    indices = [valid.index(trace) + 1 for trace in chosen]
+    return {
+        "task_id": task,
+        "screening_status": "CONFIRMED_ZERO",
+        "p_hat": 0.0,
+        "evidence_n": 16,
+        "selection_seed": task,
+        "selection_n": 3,
+        "all_original_episode_ids": [t["episode_id"] for t in valid],
+        "all_original_trace_sha256": [digest(t) for t in valid],
+        "original_zero_evidence_sha256": digest(valid),
+        "valid_episode_execution_indices": selected_execution_indices,
+        "selected_valid_indices": indices,
+        "selected_execution_indices": [selected_execution_indices[i - 1] for i in indices],
+        "evidence_ids": [t["episode_id"] for t in chosen],
+        "selected_trace_sha256": [digest(t) for t in chosen],
+        "evidence_sha256": digest(chosen),
+        "valid_original_artifacts": valid_aliases,
+        "all_execution_artifacts": artifacts,
+        "reference_status": "NOT_RUN",
+        "designer_evidence_status": "NOT_SERIALIZED_NO_ADAPTATION_POOL",
+    }
+
+
+def build(repo: Path, output: Path) -> dict[str, Any]:
+    if not output.resolve().is_relative_to(Path("/tmp")):
+        raise ValueError("screening evidence drafts must stay under /tmp")
+    run = repo / "runs" / RUN_NAME
+    checkpoint = (run / "screening.json").read_text()
+    screen = json.loads(checkpoint)
+    if screen["status"] not in TERMINAL or len(screen["qualified"]) >= 4:
+        raise ValueError("requires terminal screening with fewer than four qualified tasks")
+    if (run / "results.json").exists() or (run / "input_manifest.json").exists():
+        raise ValueError("partial-pool helper cannot replace an adaptation input manifest")
+    qualified = [
+        int(key)
+        for key, row in sorted(screen["tasks"].items(), key=lambda item: int(item[0]))
+        if row["status"] == "CONFIRMED_ZERO"
+    ]
+    if qualified != screen["qualified"]:
+        raise ValueError("qualified task membership differs from terminal checkpoint")
+    selector = selection_function(repo)
+    all_ids: set[str] = set()
+    tasks = [
+        task_evidence(run, task, screen["tasks"][str(task)], selector, all_ids)
+        for task in qualified
+    ]
+    manifest = {
+        "schema": "screening-only-qualified-evidence-v1",
+        "screening_status": screen["status"],
+        "screening_sha256": digest(checkpoint),
+        "pool_prereg_commit": screen["freeze"]["prereg_commit"],
+        "method_commit": METHOD_COMMIT,
+        "qualified_task_ids": qualified,
+        "adaptation_pool_formed": False,
+        "primary_efficacy_denominator": None,
+        "LOW_viability_evaluated": False,
+        "selection_function": "aea.stage.seeded_failures",
+        "selection_function_sha256": SELECTOR_SHA,
+        "stage_module_sha256": STAGE_SHA,
+        "input_order": "sixteen valid original traces in chronological execution order",
+        "selected_order": "exact random.Random(task_id).sample return order; not sorted",
+        "tasks": tasks,
+        "scope": {
+            "API_calls": 0,
+            "environment_resets": 0,
+            "references_generated": 0,
+            "designer_calls": 0,
+            "candidate_admission": 0,
+            "adaptation": 0,
+            "research_writes": 0,
+        },
+        "interpretation": "Preserves every confirmed ZERO task's sixteen valid failures and exact historical seeded three-trace selection, even though the required four-task adaptation pool did not form. This is screening provenance, not a new adaptation manifest or LOW efficacy result.",
+        "helper_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+    }
+    if (run / "screening.json").read_text() != checkpoint:
+        raise ValueError("screening checkpoint changed during evidence export")
+    output.mkdir(parents=True, exist_ok=True)
+    (output / "screening_qualified_evidence.json").write_text(
+        json.dumps(manifest, indent=2, sort_keys=True) + "\n"
+    )
+    return manifest
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--repo", type=Path, default=Path("/home/kree/work/EnvJudge-aea-llm"))
+    parser.add_argument("--output", type=Path, required=True)
+    args = parser.parse_args()
+    manifest = build(args.repo, args.output)
+    print(
+        json.dumps(
+            {
+                "qualified_task_ids": manifest["qualified_task_ids"],
+                "adaptation_pool_formed": False,
+                "output": str(args.output),
+            },
+            indent=2,
+        )
+    )
+
+
+if __name__ == "__main__":
+    main()
