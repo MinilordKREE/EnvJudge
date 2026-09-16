@@ -1,0 +1,72 @@
+{
+  "corrected_audit_sha256": "2a6c4fadddebb960cc58bcdd5e4965fb3548f4a53776254e84778d9f5b32069d",
+  "corrected_auditor_sha256": "03d6bd351967359af0dd4ceb0ded5f4709248b2c5e9a4d31f2e2041a93e13291",
+  "corrected_checks_failed": 0,
+  "corrected_checks_passed": 1869,
+  "corrected_status": "PASS",
+  "correction": "Allow absent direct designer response provider labels only alongside the exact deepseek-v4-pro model and independently validated frozen request/config/routing binding. Present designer labels must match DeepSeek. Qwen policy model and explicit Alibaba response provider pin remain required.",
+  "frozen_designer_config": {
+    "api_key_env": "DEEPSEEK_API_KEY",
+    "base_url": "https://api.deepseek.com",
+    "model": "deepseek-v4-pro",
+    "provider": "deepseek",
+    "provider_pin": null,
+    "thinking": false
+  },
+  "frozen_input_manifest_sha256": "ad6019cff5b1ee1712e892404cefd5eb2813f032341e322de782f277d8ada46d",
+  "frozen_response_extraction": {
+    "lines": "164-172",
+    "path": "src/aea/llm/client.py",
+    "semantics": "provider=getattr(completion,\"provider\",None); ChatResponse.provider is that string when present, otherwise None",
+    "source_sha256": "fd99cf8f476193dfb48807b6af911eb034f172dfafb90274711c899f197159c3"
+  },
+  "frozen_routing_guard": {
+    "lines": "45-59",
+    "path": "src/aea/llm/client.py",
+    "semantics": "DEEPSEEK_API_KEY is allowed only at https://api.deepseek.com with model prefix deepseek; check_routing rejects other endpoint/model pairs."
+  },
+  "initial_audit_path": "/tmp/viability_v3_terminal_audit_initial.json",
+  "initial_audit_sha256": "0a5b5844c7e78a6536e24f81f7df5f77da0d922502a10ced5db4288e4aeb9510",
+  "initial_auditor_sha256": "58d358cfdaeb03e269509b196c26edc0923be9a61b0f1b96a6bf6e1df3f01257",
+  "initial_auditor_source": "/tmp/viability_v3_adaptation_audit_initial.py.txt",
+  "initial_failed_check_name": "frozen_policy_designer_model_provider",
+  "initial_failed_checks": 4,
+  "initial_passed_checks": 1865,
+  "initial_status": "FAIL",
+  "label_limit": "The designer upstream provider label is unavailable; the audit verifies configuration/request routing and does not claim independent upstream-provider attestation.",
+  "observed_designer_response_labels": [
+    {
+      "model": "deepseek-v4-pro",
+      "phase": "design_low_C1",
+      "provider": null,
+      "request_sha256": "b7eafd45b665598655cb33fb4b1a1a1fb3c7ea37681f6578991ebdf062c93ff1",
+      "task_id": "154"
+    },
+    {
+      "model": "deepseek-v4-pro",
+      "phase": "design_low_C1",
+      "provider": null,
+      "request_sha256": "49adc8d46b55d9afaabeb1af68ec5e4f3b77842995b2d56d2dbae0c22c724f34",
+      "task_id": "159"
+    },
+    {
+      "model": "deepseek-v4-pro",
+      "phase": "design_low_C2",
+      "provider": null,
+      "request_sha256": "2b8480c234a7970df13adbfffe558beeefdcb5be9e2b0bd9bf7c697aafbd4f23",
+      "task_id": "159"
+    },
+    {
+      "model": "deepseek-v4-pro",
+      "phase": "design_low_C3",
+      "provider": null,
+      "request_sha256": "a5709c7666c6af2631382ba19619ae2a176bc8aac63703bd35c59c6ab3a59e67",
+      "task_id": "159"
+    }
+  ],
+  "offline_tests_passed": 29,
+  "regression_test": "test_direct_provider_absence_and_policy_provider_pin in /tmp/test_viability_v3_adaptation_audit.py covers eight cases: null/present correct designer label, wrong designer model/provider, correct policy pin, and missing/wrong policy labels/model.",
+  "root_cause": "Audit helper incorrectly required every direct DeepSeek completion to carry a response provider label. The frozen response schema permits provider=None and all four direct designer returns omitted this label.",
+  "schema": "v3-audit-helper-correction-v1",
+  "scope": "Reporting/auditor-only /tmp correction after terminal run; no production, driver, semantic gate, source, ledger, cap, or run artifact was changed."
+}

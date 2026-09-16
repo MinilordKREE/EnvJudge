@@ -1,0 +1,533 @@
+"""Adversarial tests of saved-artifact checks, not semantic classifications or LOW runs."""
+
+from __future__ import annotations
+import copy
+import gzip
+import importlib.util
+import json
+import sys
+from dataclasses import asdict
+from pathlib import Path
+from types import SimpleNamespace
+
+import pytest
+
+spec = importlib.util.spec_from_file_location(
+    "v3audit", "/tmp/viability_v3_adaptation_audit.py"
+)
+audit = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = audit
+spec.loader.exec_module(audit)
+
+
+def write(path, value, *, jsonl=False):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        "".join(json.dumps(r) + "\n" for r in value) if jsonl else json.dumps(value)
+    )
+
+
+def rewrite(path, fn, *, jsonl=False):
+    raw = (
+        [json.loads(r) for r in path.read_text().splitlines()]
+        if jsonl
+        else json.loads(path.read_text())
+    )
+    fn(raw)
+    write(path, raw, jsonl=jsonl)
+
+
+def physical(status="returned", attempt="a"):
+    row = {
+        "attempt": attempt,
+        "model": "qwen/qwen3-8b",
+        "phase": "screening",
+        "attribution": {"task_id": "163"},
+        "reserved_usd": 0.5,
+        "status": status,
+    }
+    if status == "returned":
+        row["conservative_usd"] = 0.1
+    return row
+
+
+def cap(actual=0.1, uncertain=0, attempts=1, inflight=None):
+    return {
+        "actual_usd": actual,
+        "uncertain_usd": uncertain,
+        "attempts": attempts,
+        "inflight": inflight or {},
+    }
+
+
+def test_orphan_reconciliation_keeps_one_attempt_and_full_failed_reserve():
+    unique, result = audit.physical_costs(
+        cap(0, 0.5), [physical("ambiguous_failure"), physical("orphan_reconciled")]
+    )
+    assert len(unique) == 1 and result["committed_usd"] == 0.5
+    assert result["physical_attempts"] == result["orphan_reconciled_attempts"] == 1
+
+
+@pytest.mark.parametrize(
+    "rows,state",
+    [
+        ([physical("ambiguous_failure")], cap(0, 0)),
+        ([physical(), physical("orphan_reconciled")], cap()),
+        ([physical()], cap(attempts=2)),
+        ([physical()], cap(inflight={"a": 0.5})),
+    ],
+)
+def test_refunded_ambiguous_or_double_counted_attempts_rejected(rows, state):
+    with pytest.raises(ValueError):
+        audit.physical_costs(state, rows)
+
+
+def test_unresolved_inflight_reservation_stays_in_committed_cost():
+    unique, result = audit.physical_costs(
+        cap(attempts=2, inflight={"b": 0.7}), [physical()]
+    )
+    assert len(unique) == 1 and result["committed_usd"] == pytest.approx(0.8)
+
+
+@pytest.fixture
+def fixture(tmp_path):
+    from aea.core.hashing import sha256_of
+    from aea.designer import AssistFamily, serialize_low, task_goal
+    from aea.families import FamilyContext
+    from aea.llm.types import Attribution, ChatRequest
+    from aea.low_optimizer import ITERATIVE_ASSIST_TOOL, iterative_messages
+    from tests.unit.test_iterative_low import REF
+    from tests.unit.test_llm_v1 import _trace
+
+    obj = audit.Audit(tmp_path)
+    obj.physical = []
+    task = "9"
+    td = obj.run / "task-9"
+    directory = td / "adaptation"
+    failures = [_trace(False) for _ in range(3)]
+    for i, t in enumerate(failures):
+        t.episode_id = f"original-{i}"
+        t.rollout_seed = 9
+    evidence = serialize_low(failures, 0.0, 16, REF, rich=True)
+    original = {
+        "task_id": 9,
+        "reference_ok": True,
+        "evidence_ids": [t.episode_id for t in failures],
+        "designer_evidence_sha256": evidence.sha256,
+    }
+    source = "DOSE = __DOSE__\nTASK = __TASK_ID__\n"
+    family = AssistFamily(
+        "fixture", "O", source, "generic support", "offline provenance fixture"
+    )
+    cid = f"9:C1:{audit.digest(source)}"
+    record = {
+        "candidate_id": cid,
+        "parent_candidate_id": None,
+        "optimizer_call_index": 1,
+        "requested_operation": "PROPOSE",
+        "source": source,
+        "source_sha256": audit.digest(source),
+        "mechanism": family.mechanism_summary,
+        "structural": [],
+        "privilege": [],
+        "solvability": json.dumps({"ok": True, "source": "oracle", "detail": {}}),
+        "endpoint": [4, 4, "too_easy"],
+        "rejection_reason": None,
+        "remaining_calls": 2,
+        "remaining_policy": 26,
+    }
+    request = ChatRequest(
+        model="deepseek-v4-pro",
+        messages=iterative_messages(evidence),
+        temperature=0.7,
+        seed=9,
+        max_tokens=6144,
+        attribution=Attribution(
+            phase="design_low_C1", budget="designer", arm="iterative_low", task_id="9"
+        ),
+        tools=(ITERATIVE_ASSIST_TOOL,),
+        tool_choice={
+            "type": "function",
+            "function": {"name": "diagnose_and_propose_assistance"},
+        },
+    )
+    reqrow = request.model_dump(mode="json")
+    write(directory / "privileged_designer_requests.jsonl", [reqrow], jsonl=True)
+    write(
+        directory / "designer_inputs.jsonl",
+        [
+            {
+                "call_index": 1,
+                "evidence_sha256": evidence.sha256,
+                "feedback_supplied": False,
+                "requested_operation": "PROPOSE",
+                "parent_candidate_id": None,
+                "previous_source_sha256": None,
+                "request_sha256": audit.digest(reqrow),
+            }
+        ],
+        jsonl=True,
+    )
+    write(
+        directory / "proposals.jsonl",
+        [{"call_index": 1, "arguments": {"families": [{"rules_code": source}]}}],
+        jsonl=True,
+    )
+    write(directory / "candidates.json", [record])
+    write(directory / "rejections.json", [])
+    write(
+        obj.run / "operations/designer-9-C1.json",
+        {"status": "completed", "finished": 1},
+    )
+    ledger = [
+        {
+            "task_id": "9",
+            "phase": "design_low_C1",
+            "event": "call",
+            "budget": "designer",
+            "request_sha256": sha256_of(
+                {"provider": "deepseek", "request": request.model_dump()}
+            ),
+            "ts": "2026-09-15T00:00:00+00:00",
+        }
+    ]
+    semantic = {
+        "source": source,
+        "reference": json.loads(json.dumps(asdict(REF))),
+        "designer_evidence": serialize_low(failures, 0.0, 16, None).text,
+        "task_id": "9",
+        "probes": [],
+    }
+    for dose in audit.DOSES:
+        for t in failures:
+            semantic["probes"].append(
+                {
+                    "dose": dose,
+                    "evidence": {
+                        "task_id": "9",
+                        "episode_id": t.episode_id,
+                        "step": 0,
+                        "goal": task_goal(failures),
+                        "observations": ["raw current state"],
+                        "actions": [],
+                    },
+                    "error": None,
+                    "coverage": ["same_original_state", "policy_formatter"],
+                }
+            )
+    payload = json.dumps(semantic, sort_keys=True, ensure_ascii=False)
+    semantic_sha = audit.digest(payload)
+    path = td / f"privileged_semantic_inputs/{semantic_sha}.json.gz"
+    path.parent.mkdir(parents=True)
+    path.write_bytes(gzip.compress(payload.encode()))
+    gate = {
+        "input_artifact": str(path),
+        "optimizer_call_index": 1,
+        "task_id": "9",
+        "doses": audit.DOSES[:],
+        "result": {
+            "source_sha256": audit.digest(source),
+            "input_sha256": semantic_sha,
+            "decision": "PASS",
+            "version": "alfworld-semantic-screen-v1",
+            "findings": [{"decision": "PASS"}],
+        },
+    }
+    write(td / "semantic_gates.jsonl", [gate], jsonl=True)
+    write(
+        directory / "solvability.jsonl",
+        [{"call_index": 1, "guard": {"ok": True}}],
+        jsonl=True,
+    )
+    batches = [
+        {"phase": "C1:dose:1.0", "n": 4, "batch_index": 1},
+        {"phase": "C1:dose:0.5", "n": 4, "batch_index": 1},
+        {"phase": "C1:dose:0.5", "n": 4, "batch_index": 2},
+    ]
+    write(directory / "physical_batches.jsonl", batches, jsonl=True)
+    trace_rows = []
+    successes = [True] * 4 + [True, False, True, False] * 2
+    for i, outcome in enumerate(successes):
+        dose = 1.0 if i < 4 else 0.5
+        t = _trace(outcome, candidate=family.make(dose, FamilyContext(task, ())))
+        t.episode_id = f"adapt-{i}"
+        t.rollout_seed = 9
+        trace_rows.append(t.model_dump(mode="json"))
+    write(directory / "traces.jsonl", trace_rows, jsonl=True)
+    for b in batches:
+        write(
+            obj.run
+            / f"operations/adapt-9-{b['phase'].replace(':', '-')}-{b['batch_index']}.json",
+            {"status": "completed", "metadata": {"n": b["n"], "phase": b["phase"]}},
+        )
+    write(
+        directory / "rollout_budget.json",
+        [
+            {
+                "task_id": "9",
+                "budget": "search",
+                "phase": "C1:dose:1.0",
+                "n": 4,
+                "refunded": 0,
+            },
+            {
+                "task_id": "9",
+                "budget": "search",
+                "phase": "C1:dose:0.5",
+                "n": 8,
+                "refunded": 0,
+            },
+        ],
+    )
+    measurements = [
+        {
+            "call_index": 1,
+            "d": 1.0,
+            "s": 4,
+            "n": 4,
+            "verdict": "too_easy",
+            "candidate_hash": audit.digest(audit.instantiate(source, task, 1.0)),
+        },
+        {
+            "call_index": 1,
+            "d": 0.5,
+            "s": 4,
+            "n": 8,
+            "verdict": "in_band",
+            "candidate_hash": audit.digest(audit.instantiate(source, task, 0.5)),
+        },
+    ]
+    write(directory / "measurements.jsonl", measurements, jsonl=True)
+    frozen = {
+        "candidate_id": cid,
+        "source_sha256": audit.digest(source),
+        "family": asdict(family),
+        "optimizer_call_index": 1,
+        "endpoint": {"s": 4, "n": 4, "verdict": "too_easy"},
+    }
+    write(directory / "frozen_family.json", frozen)
+    candidate = family.make(0.5, FamilyContext(task, ()))
+    summary = {
+        "task_id": 9,
+        "status": "viable",
+        "search_accepted": True,
+        "first_viable_family_index": 1,
+        "candidates": [record],
+        "adaptation_rollouts": 12,
+        "designer_calls": 1,
+        "frozen_family": frozen,
+        "control": {
+            "status": "accepted",
+            "history": [
+                {k: m[k] for k in ("d", "s", "n", "verdict")} for m in measurements
+            ],
+        },
+        "accepted_dose": 0.5,
+        "search_successes": 4,
+        "search_n": 8,
+        "final_family": asdict(family),
+        "final_candidate": candidate.model_dump(mode="json"),
+        "final_environment_hash": audit.digest(candidate.rules_code),
+    }
+    write(directory / "summary.json", summary)
+    confirm_rows = []
+    for i in range(16):
+        t = _trace(i < 3, candidate=candidate)
+        t.episode_id = f"confirm-{i}"
+        t.rollout_seed = 9
+        confirm_rows.append(t.model_dump(mode="json"))
+    write(
+        td / "confirmation_batches.jsonl",
+        [{"task": 9, "n": 16, "environment_sha256": summary["final_environment_hash"]}],
+        jsonl=True,
+    )
+    write(td / "confirmation_traces.json", confirm_rows)
+    confirmation = {
+        "successes": 3,
+        "n": 16,
+        "in_band_l": False,
+        "in_band_t": False,
+        "environment_sha256": summary["final_environment_hash"],
+        "dose": 0.5,
+        "episode_ids": [r["episode_id"] for r in confirm_rows],
+        "traces_sha256": audit.digest(confirm_rows),
+    }
+    write(td / "confirmation.json", confirmation)
+    summary["confirmation"] = confirmation
+    driver = SimpleNamespace(
+        failures_for=lambda task: failures, read_reference=lambda task: REF
+    )
+    outer = {"status": "completed", "summary": summary}
+    return obj, original, outer, driver, ledger, directory
+
+
+def evaluate_fixture(fixture):
+    obj, original, outer, driver, ledger, _ = fixture
+    obj.task(original, outer, driver, ledger, set(original["evidence_ids"]))
+    return [r["check"] for r in obj.checks if not r["passed"]]
+
+
+def test_complete_control_k16_provenance_fixture_passes(fixture):
+    assert evaluate_fixture(fixture) == []
+
+
+@pytest.mark.parametrize(
+    "mutation, expected",
+    [
+        ("gate_dose", "each_policy_batch_exact_admitted_source_dose"),
+        ("gate_uncertain", "each_policy_batch_exact_admitted_source_dose"),
+        ("runtime_source", "runtime_trace_exact_source_dose_seed"),
+        ("reused_episode", "fresh_global_episode_identity"),
+        ("k16_into_request", "exact_designer_messages_no_confirmation_input"),
+        ("refunded_episode", "requested_episode_budget_never_refunded"),
+        ("k16_changed_source", "confirmation_unchanged_runtime_environment"),
+        ("k16_into_control", "confirmation_never_mutates_design_control_summary"),
+    ],
+)
+def test_meaningful_provenance_tampering_is_detected(fixture, mutation, expected):
+    obj, _, outer, _, _, directory = fixture
+    if mutation == "gate_dose":
+        rewrite(
+            directory.parent / "semantic_gates.jsonl",
+            lambda rows: rows[0]["doses"].remove(0.5),
+            jsonl=True,
+        )
+    elif mutation == "gate_uncertain":
+        rewrite(
+            directory.parent / "semantic_gates.jsonl",
+            lambda rows: rows[0]["result"].update(
+                decision="UNCERTAIN", findings=[{"decision": "UNCERTAIN"}]
+            ),
+            jsonl=True,
+        )
+    elif mutation == "runtime_source":
+        rewrite(
+            directory / "traces.jsonl",
+            lambda rows: rows[0]["candidate"].update(rules_code="altered"),
+            jsonl=True,
+        )
+    elif mutation == "reused_episode":
+        rewrite(
+            directory / "traces.jsonl",
+            lambda rows: rows[0].update(episode_id="original-0"),
+            jsonl=True,
+        )
+    elif mutation == "k16_into_request":
+        rewrite(
+            directory / "privileged_designer_requests.jsonl",
+            lambda rows: rows[0]["messages"][1].update(
+                content=rows[0]["messages"][1]["content"] + " K16=3/16"
+            ),
+            jsonl=True,
+        )
+    elif mutation == "refunded_episode":
+        rewrite(
+            directory / "rollout_budget.json",
+            lambda rows: rows[0].update(n=3, refunded=1),
+        )
+    elif mutation == "k16_changed_source":
+        rewrite(
+            directory.parent / "confirmation_traces.json",
+            lambda rows: rows[0]["candidate"].update(
+                rules_code="changed in confirmation"
+            ),
+        )
+    elif mutation == "k16_into_control":
+        outer["summary"]["control"]["status"] = "changed by confirmation"
+    assert expected in evaluate_fixture(fixture)
+
+
+def test_missing_or_stale_source_and_unknown_dose_are_not_admitted():
+    source = "source"
+    gate = {
+        "result": {
+            "source_sha256": audit.digest(source),
+            "decision": "PASS",
+            "findings": [{"decision": "PASS"}],
+        },
+        "doses": audit.DOSES[:],
+    }
+    assert audit.check_admission([gate], source, 0.5)
+    assert not audit.check_admission([gate], "new source", 0.5)
+    assert not audit.check_admission([gate], source, 0.3)
+    assert not audit.check_admission([gate, copy.deepcopy(gate)], source, 0.5)
+
+
+def test_source_reconstruction_never_executes_code():
+    source = "raise Exception('must never execute')\nd = __DOSE__\nt = __TASK_ID__"
+    assert "d = 0.25" in audit.instantiate(source, "154", 0.25)
+    assert "t = '154'" in audit.instantiate(source, "154", 0.25)
+
+
+def test_active_run_is_refused_before_frozen_or_cost_checks(tmp_path, monkeypatch):
+    obj = audit.Audit(tmp_path)
+    write(obj.run / "screening.json", {"status": "running"})
+    monkeypatch.setattr(obj, "method", lambda: None)
+    with pytest.raises(ValueError, match="has not terminated"):
+        obj.run_audit()
+
+
+def test_frozen_execution_functions_still_equal_v2_read_only():
+    root = Path("/home/kree/work/EnvJudge-aea-llm")
+    newer = audit.source_functions(root / "scripts/e6_iterative_low_viability_v3.py")
+    older = audit.source_functions(root / "scripts/e6_iterative_low_viability_v2.py")
+    assert all(newer[name] == older[name] for name in audit.EXECUTION_FUNCTIONS)
+
+
+def test_prior_topup_eval_budget_is_not_confused_with_confirmation(fixture):
+    obj, _, _, _, _, _ = fixture
+    obj.physical = [
+        {
+            "phase": "screening",
+            "started": 0,
+            "attribution": {"task_id": "9", "budget": "eval", "phase": "screen_9_1"},
+        }
+    ]
+    assert evaluate_fixture(fixture) == []
+
+
+def test_physical_designer_retry_after_control_is_detected(fixture):
+    obj, _, _, _, _, _ = fixture
+    obj.physical = [
+        {
+            "phase": "adaptation",
+            "started": 2,
+            "attribution": {"task_id": "9", "budget": "search", "phase": "C1:dose:0.5"},
+        },
+        {
+            "phase": "adaptation",
+            "started": 3,
+            "attribution": {
+                "task_id": "9",
+                "budget": "designer",
+                "phase": "design_low_C1",
+            },
+        },
+    ]
+    assert (
+        "no_designer_attempt_after_control_or_confirmation_starts"
+        in evaluate_fixture(fixture)
+    )
+
+
+@pytest.mark.parametrize(
+    "row,expected",
+    [
+        ({"budget": "designer", "model": "deepseek-v4-pro", "provider": None}, True),
+        (
+            {"budget": "designer", "model": "deepseek-v4-pro", "provider": "DeepSeek"},
+            True,
+        ),
+        (
+            {"budget": "designer", "model": "deepseek-v4-pro", "provider": "other"},
+            False,
+        ),
+        ({"budget": "designer", "model": "wrong", "provider": None}, False),
+        ({"budget": "eval", "model": "qwen/qwen3-8b", "provider": "Alibaba"}, True),
+        ({"budget": "search", "model": "qwen/qwen3-8b", "provider": None}, False),
+        ({"budget": "search", "model": "qwen/qwen3-8b", "provider": "DeepSeek"}, False),
+        ({"budget": "eval", "model": "wrong", "provider": "Alibaba"}, False),
+    ],
+)
+def test_direct_provider_absence_and_policy_provider_pin(row, expected):
+    assert audit.returned_model_provider_matches(row) is expected

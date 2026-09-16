@@ -1,0 +1,830 @@
+[
+  {
+    "accepted_dose": null,
+    "adaptation_budget": [],
+    "adaptation_requested_batches": [],
+    "adaptation_rollouts": 0,
+    "candidates": [
+      {
+        "candidate_id": "154:C1:f8a28097e207d68774f41590fbc5f0255982e924bede2e1f399f0999230422c0",
+        "candidate_record_sha256": "0789075de99bb840ae899d659754c9454acfb9379360983e76650c137ccd306d",
+        "endpoint": null,
+        "gates": {
+          "d0_identity": "PASS",
+          "lexical": "PASS",
+          "semantic": "UNCERTAIN",
+          "solvability": "NOT_RUN",
+          "structural": "PASS"
+        },
+        "identity_reason_count": 0,
+        "lexical_reason_count": 0,
+        "mechanism": "Add an observation-side reminder of the task's required sub-goal sequence (take bread -> cool it with fridge -> place on countertop) and, with increasing DOSE, surface the cooling/placing affordance commands more prominently so the policy is steered toward the missing 'cool bread with fridge' step after it picks up the bread.",
+        "optimizer_call_index": 1,
+        "parent_candidate_id": null,
+        "rejection_reason_sha256": "af471e2a6b7e997f14afecfc333b305919a6d0998ce80970a7a5a8a694dfa1ce",
+        "remaining_calls": 2,
+        "remaining_policy": 30,
+        "requested_operation": "PROPOSE",
+        "semantic_records": [
+          {
+            "decision": "UNCERTAIN",
+            "doses": [
+              0.0,
+              0.0625,
+              0.125,
+              0.1875,
+              0.25,
+              0.3125,
+              0.375,
+              0.4375,
+              0.5,
+              0.5625,
+              0.625,
+              0.6875,
+              0.75,
+              0.8125,
+              0.875,
+              0.9375,
+              1.0
+            ],
+            "finding_count": 6237,
+            "input_sha256": "5dc7e638b903bdceca016f836a93137af3bbefdaef80e35fc9f2474fd5411c85",
+            "optimizer_call_index": 1,
+            "result_sha256": "e4c038df02793beffcf33f45af62264e3ef4f526550f2a8a9dd5afeb19f06d4a",
+            "source_sha256": "f8a28097e207d68774f41590fbc5f0255982e924bede2e1f399f0999230422c0",
+            "version": "alfworld-semantic-screen-v1"
+          }
+        ],
+        "source_sha256": "f8a28097e207d68774f41590fbc5f0255982e924bede2e1f399f0999230422c0",
+        "structural_reason_count": 0
+      }
+    ],
+    "completed_without_infrastructure_failure": true,
+    "confirmation": null,
+    "confirmation_requested_batches": [],
+    "control": {
+      "status": "NOT_RUN"
+    },
+    "design_status": "inconclusive",
+    "designer_calls": 1,
+    "designer_inputs": [
+      {
+        "call_index": 1,
+        "evidence_sha256": "47b10bfe1e4cee40d3d60e154cf60254e4a65a8014d62a5b91e6ab979c3a447c",
+        "feedback_supplied": false,
+        "independently_constructed_match": true,
+        "parent_candidate_id": null,
+        "previous_source_sha256": null,
+        "request_sha256": "6bac0423d75e8ffe33618338f243114ff9464aa2d7c6cd0529e05917cf9c7b22",
+        "requested_operation": "PROPOSE"
+      }
+    ],
+    "designer_slots": [
+      {
+        "candidate_id": "154:C1:f8a28097e207d68774f41590fbc5f0255982e924bede2e1f399f0999230422c0",
+        "slot": "C1",
+        "status": "PRODUCED"
+      },
+      {
+        "reason": "semantic UNCERTAIN stopped DESIGN",
+        "slot": "C2",
+        "status": "NOT_RUN"
+      },
+      {
+        "reason": "semantic UNCERTAIN stopped DESIGN",
+        "slot": "C3",
+        "status": "NOT_RUN"
+      }
+    ],
+    "evidence": {
+      "all_original_episode_ids": [
+        "40ebdf19ee",
+        "05169ff974",
+        "2b9ff50ee9",
+        "786aa2a2eb",
+        "32345e4509",
+        "0ce66c4d40",
+        "01485264d7",
+        "9c5a9463fc",
+        "f350a0387e",
+        "f0a0254593",
+        "80088b0d7f",
+        "7564bebd16",
+        "5cabc8ef59",
+        "cae8a438ba",
+        "5a3fedcae4",
+        "3f1fd7d315"
+      ],
+      "all_original_trace_sha256": [
+        "4e5ac0be509343fee7cdc47e9d0bcd6ec77c8a0f514d291e9744eb7fd97669db",
+        "87b50bc6e5b306e7c819b962200a26dc613b6cd34909f2487db8d8c46860a87c",
+        "3c4995046f45e3afe0ef6eb83c26fff37af1e6890cfb1ceffaed000f84603604",
+        "d4ce3579783cc1c20e33ce67a319eb79be89ea46ca5a2cc347f18dcf28d33e6c",
+        "1aa65829c1f000ae6a7faf7236bb7ebc2dba25ff8a83019da43e4734155061fe",
+        "37ab47028cdd51ee1bec498656d1e9ba192582e0ddfc79ef0ec8ab0bdc3f6a67",
+        "9214ae893825bd5a2884180daca59903a5a94a12294b3718469313813b540010",
+        "96f5a9b0d9118f775cab343db434e0ce5e62539206ce601779aa28663bac9639",
+        "05d4a084730037e332f5535aa964209b6b58632cdacf4191c97e10d39d1639da",
+        "0910abc70d5a8e4cb7b2ad1df0342cc94d0697ed587120e782f1e4c49cd3b102",
+        "2cbb14752201fb00050ee0d7c159f12684c2a78ff35bcc6cb780050323269b23",
+        "60365236fcd8d025c8a0349270d324444f773ca963d4fc4a8bd102949e8fea02",
+        "8ddd41d3c34ff1d44d0e3fd434e1db210719cb3e43e910e7beb40395daf9f3b4",
+        "6a62d0bd76c4707853891fa622aa67c5717f751d2c0bd0f9b7d77b651258d10b",
+        "98bec504b60be8dd8c40f5989c20df79a7c2c5622e9abfa9f9e1b2dee89d16a9",
+        "f6dfb538921ce28b0e61302284399048cf9aa1b5cce8698b83ff6f3c76558e26"
+      ],
+      "designer_evidence_sha256": "47b10bfe1e4cee40d3d60e154cf60254e4a65a8014d62a5b91e6ab979c3a447c",
+      "evidence_ids": [
+        "01485264d7",
+        "cae8a438ba",
+        "5cabc8ef59"
+      ],
+      "evidence_n": 16,
+      "evidence_sha256": "d4b442dff2c824f6d42a22114448f92ca178ddba2b5d0a5ee7f14c2a2b8e735f",
+      "original_zero_evidence_sha256": "0c8c2a77903761785db4820dab64499147099638dde761b156beced5e8c58f27",
+      "selected_trace_sha256": [
+        "9214ae893825bd5a2884180daca59903a5a94a12294b3718469313813b540010",
+        "6a62d0bd76c4707853891fa622aa67c5717f751d2c0bd0f9b7d77b651258d10b",
+        "8ddd41d3c34ff1d44d0e3fd434e1db210719cb3e43e910e7beb40395daf9f3b4"
+      ],
+      "selection_seed": 154,
+      "valid_episode_execution_indices": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16
+      ]
+    },
+    "final_environment_hash": null,
+    "frozen_family": null,
+    "interruption_kind": null,
+    "measurements": [],
+    "reference": {
+      "reference_id": "f0a58f89e43dcbbb",
+      "reference_ok": true,
+      "reference_sha256": "f8f5e026b4cc01e84ae1475241bda4207f765fc089b02d2f02f3d2d27dfa0549",
+      "reference_status": "REFERENCE_AVAILABLE",
+      "reference_steps": 16
+    },
+    "search_accepted": false,
+    "search_n": null,
+    "search_successes": null,
+    "semantic_gates": [
+      {
+        "decision": "UNCERTAIN",
+        "doses": [
+          0.0,
+          0.0625,
+          0.125,
+          0.1875,
+          0.25,
+          0.3125,
+          0.375,
+          0.4375,
+          0.5,
+          0.5625,
+          0.625,
+          0.6875,
+          0.75,
+          0.8125,
+          0.875,
+          0.9375,
+          1.0
+        ],
+        "finding_count": 6237,
+        "input_sha256": "5dc7e638b903bdceca016f836a93137af3bbefdaef80e35fc9f2474fd5411c85",
+        "optimizer_call_index": 1,
+        "result_sha256": "e4c038df02793beffcf33f45af62264e3ef4f526550f2a8a9dd5afeb19f06d4a",
+        "source_sha256": "f8a28097e207d68774f41590fbc5f0255982e924bede2e1f399f0999230422c0",
+        "version": "alfworld-semantic-screen-v1"
+      }
+    ],
+    "task_id": 154,
+    "task_status": "completed",
+    "typed_feedback": []
+  },
+  {
+    "accepted_dose": null,
+    "adaptation_budget": [],
+    "adaptation_requested_batches": [],
+    "adaptation_rollouts": 0,
+    "candidates": [],
+    "completed_without_infrastructure_failure": false,
+    "confirmation": null,
+    "confirmation_requested_batches": [],
+    "control": {
+      "status": "NOT_RUN"
+    },
+    "design_status": "reference_unavailable",
+    "designer_calls": 0,
+    "designer_inputs": [],
+    "designer_slots": [
+      {
+        "reason": "reference unavailable",
+        "slot": "C1",
+        "status": "NOT_RUN"
+      },
+      {
+        "reason": "reference unavailable",
+        "slot": "C2",
+        "status": "NOT_RUN"
+      },
+      {
+        "reason": "reference unavailable",
+        "slot": "C3",
+        "status": "NOT_RUN"
+      }
+    ],
+    "evidence": {
+      "all_original_episode_ids": [
+        "e9f40a461f",
+        "75358f0045",
+        "ddb6731652",
+        "2d6637e6c6",
+        "a0b978c74e",
+        "25b057e6f9",
+        "ac39742da2",
+        "7f461cecb1",
+        "93b2ceb16e",
+        "e30d962087",
+        "2d4ba8de76",
+        "4950d0f1e2",
+        "2484859d1d",
+        "50434a07d4",
+        "7729b3343a",
+        "d7edd539a1"
+      ],
+      "all_original_trace_sha256": [
+        "9facceb53e976a78b5bdbf2ac87165fca2b8220acbcca9d6e326a1901e7472bb",
+        "cc58fc5c2262ea398ec503fdf995fa0fee3ce6c1aa0aef705b1d0ff883b42722",
+        "1dc67c455019bce460f1b8c4d20d48599f95ed3b87e6ddf4f1fffea455773152",
+        "d7e74207ab96849cd5d1974209b48404c3b88d4b23fa1185ebe6a81e7cc49dbf",
+        "83e2ff0a23c47be006f10c6ba2ebd2cbadc8af6b7047c593e96d97a71cabe18c",
+        "9b457ac74e93822dd15b080de79699967ba79d3da809064f741cf5b1bb962efe",
+        "0595848cc3eee6cff1693b59d718babe99db47e9a99c0d0a6db44c8afc36fccb",
+        "5ed485f45379b7e6d5055f32ff6288853b41ec3e6c18ea508d853524f585f426",
+        "c1818dc8dedc481425113bfc57d31c818f8163741ea2f7c73b13955de1d2b6b5",
+        "89b81e72ce0b444ab5c930f8504ac9d714093a9b8ad4920b88c7b792559672c1",
+        "8e36fafbda74d202ba614fe9d2919f5d82e23f4190599f3f2549fc81ecd6343b",
+        "692a724f7b57c13ae2e704db9540a3ac68eaa6f168209c43fe8ba84de4974a4d",
+        "4b11e8d9ef579956ee4981a4ca5fe6e470897bf7004257036779cebe020d748b",
+        "ddb181625fb115c98906e6d4bb1d80a41d0903cd90c7e4a79ec81f4a0a5f35f3",
+        "af3f2c49645a18ce99e7b0b1ff949d7836416bf20efdeaf04fa7551c5bb6a167",
+        "831309c589c650f9c8b50138afd1af949bae284b9f1c9dbf1579a096b179d46b"
+      ],
+      "designer_evidence_sha256": "9da71055b0462da64b5e08ba383e9214e4f730dea41740db5e51cdd58dd46712",
+      "evidence_ids": [
+        "7f461cecb1",
+        "7729b3343a",
+        "50434a07d4"
+      ],
+      "evidence_n": 16,
+      "evidence_sha256": "46b84d32279a0843d6a64bd73ae49d005f776f8f913fc9f76ab5c5254deb7445",
+      "original_zero_evidence_sha256": "20c0b77d08fb88efbe47ba5e96c7450f6c709355ac8ccf6a9cbdd6fe5813907d",
+      "selected_trace_sha256": [
+        "5ed485f45379b7e6d5055f32ff6288853b41ec3e6c18ea508d853524f585f426",
+        "af3f2c49645a18ce99e7b0b1ff949d7836416bf20efdeaf04fa7551c5bb6a167",
+        "ddb181625fb115c98906e6d4bb1d80a41d0903cd90c7e4a79ec81f4a0a5f35f3"
+      ],
+      "selection_seed": 158,
+      "valid_episode_execution_indices": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16
+      ]
+    },
+    "final_environment_hash": null,
+    "frozen_family": null,
+    "interruption_kind": null,
+    "measurements": [],
+    "reference": {
+      "reference_id": null,
+      "reference_ok": false,
+      "reference_sha256": "729c583918ceb1ac4081152d8748572f316b7168fe262edcdb0201616edee0b1",
+      "reference_status": "REFERENCE_UNAVAILABLE",
+      "reference_steps": 0
+    },
+    "search_accepted": false,
+    "search_n": null,
+    "search_successes": null,
+    "semantic_gates": [],
+    "task_id": 158,
+    "task_status": "reference_unavailable",
+    "typed_feedback": []
+  },
+  {
+    "accepted_dose": null,
+    "adaptation_budget": [],
+    "adaptation_requested_batches": [],
+    "adaptation_rollouts": 0,
+    "candidates": [
+      {
+        "candidate_id": "159:C1:239255f9f19fda067c1b193d502f36ae6ca31c4474c82e9c02ecb3bcbc376272",
+        "candidate_record_sha256": "f61014c34aa46c3f7f875b01be9dd6441b92391b29c783fcc9f10bd25e02b115",
+        "endpoint": null,
+        "gates": {
+          "d0_identity": "PASS",
+          "lexical": "PASS",
+          "semantic": "FAIL",
+          "solvability": "NOT_RUN",
+          "structural": "PASS"
+        },
+        "identity_reason_count": 0,
+        "lexical_reason_count": 0,
+        "mechanism": "Observation-side support that surfaces the correct task sub-steps and the correct receptacles: it highlights the microwave as the heating device and the fridge as the cooling device, and reorders/reinforces the admissible commands toward the heat-then-cool sequence. Larger DOSE gives progressively stronger, more explicit reminders (from subtle highlighting of 'heat ... with microwave 1' and 'cool ... with fridge 1' commands up to a leading step-by-step hint line), without ever telling the policy which specific object instance to pick or replaying reference actions.",
+        "optimizer_call_index": 1,
+        "parent_candidate_id": null,
+        "rejection_reason_sha256": "783d9d5b99502a975fbf6822173e4391aa36474577ed1d72bc97f2fcdf93967f",
+        "remaining_calls": 2,
+        "remaining_policy": 30,
+        "requested_operation": "PROPOSE",
+        "semantic_records": [
+          {
+            "decision": "FAIL",
+            "doses": [
+              0.0,
+              0.0625,
+              0.125,
+              0.1875,
+              0.25,
+              0.3125,
+              0.375,
+              0.4375,
+              0.5,
+              0.5625,
+              0.625,
+              0.6875,
+              0.75,
+              0.8125,
+              0.875,
+              0.9375,
+              1.0
+            ],
+            "finding_count": 9836,
+            "input_sha256": "83f7e6393afe9d7072fb0b28411c078b0952102e97258b70c4ff86a7615a3750",
+            "optimizer_call_index": 1,
+            "result_sha256": "dc3115fef5e6c1bdf7f8078c20505d54b1931cbe21eec48b815e1951a1784cd9",
+            "source_sha256": "239255f9f19fda067c1b193d502f36ae6ca31c4474c82e9c02ecb3bcbc376272",
+            "version": "alfworld-semantic-screen-v1"
+          }
+        ],
+        "source_sha256": "239255f9f19fda067c1b193d502f36ae6ca31c4474c82e9c02ecb3bcbc376272",
+        "structural_reason_count": 0
+      },
+      {
+        "candidate_id": "159:C2:7e68a0d417eb01bd31095bc39cc332ecbb6c1f9b247d33ed7334dad4184daa67",
+        "candidate_record_sha256": "0142e4ec7c74dd4524b42eb6acc76f3f3e2d1fbaed5fc0fcd8df4da48254bcf5",
+        "endpoint": null,
+        "gates": {
+          "d0_identity": "PASS",
+          "lexical": "FAIL",
+          "semantic": "NOT_RUN",
+          "solvability": "NOT_RUN",
+          "structural": "PASS"
+        },
+        "identity_reason_count": 0,
+        "lexical_reason_count": 1,
+        "mechanism": "After each world step, if the policy's action was ineffective (no world change) AND the action text names a heating/cooling verb or a stove/microwave/fridge receptacle that is not the correct appliance for the in-hand object, append a short corrective feedback line to the observation explaining what went wrong and naming the correct appliance/verb (e.g. 'That did nothing: to heat an object you must put it in the microwave and use the microwave, not a stoveburner.'). DOSE controls how many distinct error categories get feedback and how explicit the corrective text becomes, from a single generic 'That action had no effect.' at low dose up to category-specific redirects naming microwave/fridge at high dose. DOSE=0 returns the observation unchanged.",
+        "optimizer_call_index": 2,
+        "parent_candidate_id": "159:C1:239255f9f19fda067c1b193d502f36ae6ca31c4474c82e9c02ecb3bcbc376272",
+        "rejection_reason_sha256": "b523134d153a82c795f7c1d98d9c2920a6cc1e311045a513717052cacfd9e73c",
+        "remaining_calls": 1,
+        "remaining_policy": 30,
+        "requested_operation": "REPLACE_MECHANISM",
+        "semantic_records": [],
+        "source_sha256": "7e68a0d417eb01bd31095bc39cc332ecbb6c1f9b247d33ed7334dad4184daa67",
+        "structural_reason_count": 0
+      },
+      {
+        "candidate_id": "159:C3:15c4a05e9a9a36edc0c54ac855eb2ebf20b01572aabc70263ebc9b0aa33ef8fd",
+        "candidate_record_sha256": "bb3cc666bd7f9a722a300d5bffbc7ead943bc1686b23c85d311919af06f94ec2",
+        "endpoint": null,
+        "gates": {
+          "d0_identity": "PASS",
+          "lexical": "PASS",
+          "semantic": "FAIL",
+          "solvability": "NOT_RUN",
+          "structural": "PASS"
+        },
+        "identity_reason_count": 0,
+        "lexical_reason_count": 0,
+        "mechanism": "When the policy is holding a potato (or any heatable object) and is at or near the microwave, reorder/re-surface the admissible command list so the correct 'heat <obj> with microwave 1' action is moved to the front and highlighted; DOSE scales how aggressively relevant appliance-verb commands are promoted (from a single reorder at low dose to also injecting a short goal-reminder line naming the microwave at high dose). DOSE=0 returns the observation and admissible list unchanged.",
+        "optimizer_call_index": 3,
+        "parent_candidate_id": "159:C2:7e68a0d417eb01bd31095bc39cc332ecbb6c1f9b247d33ed7334dad4184daa67",
+        "rejection_reason_sha256": "2a5a7f884e6271b2743d6194a5ff4b260f445fb4cafc216fac6031e342719a4e",
+        "remaining_calls": 0,
+        "remaining_policy": 30,
+        "requested_operation": "REPLACE_MECHANISM",
+        "semantic_records": [
+          {
+            "decision": "FAIL",
+            "doses": [
+              0.0,
+              0.0625,
+              0.125,
+              0.1875,
+              0.25,
+              0.3125,
+              0.375,
+              0.4375,
+              0.5,
+              0.5625,
+              0.625,
+              0.6875,
+              0.75,
+              0.8125,
+              0.875,
+              0.9375,
+              1.0
+            ],
+            "finding_count": 2917,
+            "input_sha256": "5c1e985caa7ff449305913e91e23518380522bfc1382dbee994af8fa8be471ec",
+            "optimizer_call_index": 3,
+            "result_sha256": "c927b4b83325a783c8f029b4d0075dedb194fba76c2941e9d0988baf109ac82b",
+            "source_sha256": "15c4a05e9a9a36edc0c54ac855eb2ebf20b01572aabc70263ebc9b0aa33ef8fd",
+            "version": "alfworld-semantic-screen-v1"
+          }
+        ],
+        "source_sha256": "15c4a05e9a9a36edc0c54ac855eb2ebf20b01572aabc70263ebc9b0aa33ef8fd",
+        "structural_reason_count": 0
+      }
+    ],
+    "completed_without_infrastructure_failure": true,
+    "confirmation": null,
+    "confirmation_requested_batches": [],
+    "control": {
+      "status": "NOT_RUN"
+    },
+    "design_status": "unresolved",
+    "designer_calls": 3,
+    "designer_inputs": [
+      {
+        "call_index": 1,
+        "evidence_sha256": "45c5f02e204d6ef8753f993f323e928b86aef1a5a39bd2bbb020dcd50503cf8b",
+        "feedback_supplied": false,
+        "independently_constructed_match": true,
+        "parent_candidate_id": null,
+        "previous_source_sha256": null,
+        "request_sha256": "0a2e6cc1cf4023bcca8b0beef58d8b4ad0733a893f7774bd479ad74ee17b3e0a",
+        "requested_operation": "PROPOSE"
+      },
+      {
+        "call_index": 2,
+        "evidence_sha256": "45c5f02e204d6ef8753f993f323e928b86aef1a5a39bd2bbb020dcd50503cf8b",
+        "feedback_supplied": true,
+        "independently_constructed_match": true,
+        "parent_candidate_id": "159:C1:239255f9f19fda067c1b193d502f36ae6ca31c4474c82e9c02ecb3bcbc376272",
+        "previous_source_sha256": "239255f9f19fda067c1b193d502f36ae6ca31c4474c82e9c02ecb3bcbc376272",
+        "request_sha256": "a7df92d288d181071d29e52414ad825e6cbcb7fe6619b9e7f2afaaca504c5c18",
+        "requested_operation": "REPLACE_MECHANISM"
+      },
+      {
+        "call_index": 3,
+        "evidence_sha256": "45c5f02e204d6ef8753f993f323e928b86aef1a5a39bd2bbb020dcd50503cf8b",
+        "feedback_supplied": true,
+        "independently_constructed_match": true,
+        "parent_candidate_id": "159:C2:7e68a0d417eb01bd31095bc39cc332ecbb6c1f9b247d33ed7334dad4184daa67",
+        "previous_source_sha256": "7e68a0d417eb01bd31095bc39cc332ecbb6c1f9b247d33ed7334dad4184daa67",
+        "request_sha256": "a8c450844b9753dbfcaaa312f6d656c18f71944636e7d27168a0ff2ec63c4122",
+        "requested_operation": "REPLACE_MECHANISM"
+      }
+    ],
+    "designer_slots": [
+      {
+        "candidate_id": "159:C1:239255f9f19fda067c1b193d502f36ae6ca31c4474c82e9c02ecb3bcbc376272",
+        "slot": "C1",
+        "status": "PRODUCED"
+      },
+      {
+        "candidate_id": "159:C2:7e68a0d417eb01bd31095bc39cc332ecbb6c1f9b247d33ed7334dad4184daa67",
+        "slot": "C2",
+        "status": "PRODUCED"
+      },
+      {
+        "candidate_id": "159:C3:15c4a05e9a9a36edc0c54ac855eb2ebf20b01572aabc70263ebc9b0aa33ef8fd",
+        "slot": "C3",
+        "status": "PRODUCED"
+      }
+    ],
+    "evidence": {
+      "all_original_episode_ids": [
+        "49bd6ad258",
+        "70bc6bb99a",
+        "f3583ad1e1",
+        "8fc43183bc",
+        "84adb0c864",
+        "ad4d822e71",
+        "bce953fc60",
+        "13c8e98707",
+        "bb714ad561",
+        "4f5db14177",
+        "45c3700f83",
+        "67cb7a7275",
+        "e0fc323400",
+        "ca5e8badd0",
+        "a590e7c873",
+        "9f3e4b74ed"
+      ],
+      "all_original_trace_sha256": [
+        "2815809027a61fd5edae79f47d849dfa7de2f37d95f007b812e56dd9ce9a1f37",
+        "6433c34f2062a4824b9e009c1a8373f0a415c5f95c51ca921de5e4f5627f92eb",
+        "4357b16044db08c3bff9774598bd71c8a102f3c1c8099ca729e8882fa38c6395",
+        "ca30fcc45ebde587ee5659434a6d8204377989ecfab928f450f52eb378ba2ca1",
+        "fa52de56c6f0e130e49538130b3632a18818cd4473a9110c05ed4706387b616b",
+        "86f522069f4b8915d33ba2e40a8f155eb51864cb1693d2380ad136bea59a3b21",
+        "60eb9d17e81574fbda4365d7a3e7c062e5921d02965f2a665e2d19937524657c",
+        "6c71847d0add3897ad0cd50b208b54664e87a7ba154b52c6179e63db49c1b844",
+        "965ebcd410fb1511ac20f4bdda00baf249beff442200048dc0f0cb376662ac7e",
+        "f1a3e3c55982863857bec46594f6257ac5b57200f7e041b90e299a49f9b93f22",
+        "16f67a583ddac93689dd937b2d7b989be3de368c544c1361421c0cf1708877d5",
+        "847a52d632fa191624feda51f7ba6cadf5035980febfe6996bee357b1357c8a2",
+        "83031b3e2be7ac92e635f82028166c8177be0631e3a3bba544050132279ad4f7",
+        "eba254cf9b78eddbd689f9859328fddcb48e70cc3bc3575afd26b782e69b69b9",
+        "941b3d30025ec2c727e0137f4a00a6bdbaefaf72b7d622da813de1cfb8f5a055",
+        "3463ec60fc21e52eefefb4824ef6bf389dc1537324d09941d42405eadda501ca"
+      ],
+      "designer_evidence_sha256": "45c5f02e204d6ef8753f993f323e928b86aef1a5a39bd2bbb020dcd50503cf8b",
+      "evidence_ids": [
+        "e0fc323400",
+        "f3583ad1e1",
+        "45c3700f83"
+      ],
+      "evidence_n": 16,
+      "evidence_sha256": "55a935664362fa036ea6ab84853661a3437cb8e9571626706bb97c44e9517b0a",
+      "original_zero_evidence_sha256": "fcddeb379d70e01d61b5a028ed8073a48abfbb04a7c1fc5282da01465e920253",
+      "selected_trace_sha256": [
+        "83031b3e2be7ac92e635f82028166c8177be0631e3a3bba544050132279ad4f7",
+        "4357b16044db08c3bff9774598bd71c8a102f3c1c8099ca729e8882fa38c6395",
+        "16f67a583ddac93689dd937b2d7b989be3de368c544c1361421c0cf1708877d5"
+      ],
+      "selection_seed": 159,
+      "valid_episode_execution_indices": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16
+      ]
+    },
+    "final_environment_hash": null,
+    "frozen_family": null,
+    "interruption_kind": null,
+    "measurements": [],
+    "reference": {
+      "reference_id": "b68a542228b51665",
+      "reference_ok": true,
+      "reference_sha256": "80a8fc5d7507a4491a97275e295aed0071340e2b47f0c4250c376bc67653749e",
+      "reference_status": "REFERENCE_AVAILABLE",
+      "reference_steps": 12
+    },
+    "search_accepted": false,
+    "search_n": null,
+    "search_successes": null,
+    "semantic_gates": [
+      {
+        "decision": "FAIL",
+        "doses": [
+          0.0,
+          0.0625,
+          0.125,
+          0.1875,
+          0.25,
+          0.3125,
+          0.375,
+          0.4375,
+          0.5,
+          0.5625,
+          0.625,
+          0.6875,
+          0.75,
+          0.8125,
+          0.875,
+          0.9375,
+          1.0
+        ],
+        "finding_count": 9836,
+        "input_sha256": "83f7e6393afe9d7072fb0b28411c078b0952102e97258b70c4ff86a7615a3750",
+        "optimizer_call_index": 1,
+        "result_sha256": "dc3115fef5e6c1bdf7f8078c20505d54b1931cbe21eec48b815e1951a1784cd9",
+        "source_sha256": "239255f9f19fda067c1b193d502f36ae6ca31c4474c82e9c02ecb3bcbc376272",
+        "version": "alfworld-semantic-screen-v1"
+      },
+      {
+        "decision": "FAIL",
+        "doses": [
+          0.0,
+          0.0625,
+          0.125,
+          0.1875,
+          0.25,
+          0.3125,
+          0.375,
+          0.4375,
+          0.5,
+          0.5625,
+          0.625,
+          0.6875,
+          0.75,
+          0.8125,
+          0.875,
+          0.9375,
+          1.0
+        ],
+        "finding_count": 2917,
+        "input_sha256": "5c1e985caa7ff449305913e91e23518380522bfc1382dbee994af8fa8be471ec",
+        "optimizer_call_index": 3,
+        "result_sha256": "c927b4b83325a783c8f029b4d0075dedb194fba76c2941e9d0988baf109ac82b",
+        "source_sha256": "15c4a05e9a9a36edc0c54ac855eb2ebf20b01572aabc70263ebc9b0aa33ef8fd",
+        "version": "alfworld-semantic-screen-v1"
+      }
+    ],
+    "task_id": 159,
+    "task_status": "completed",
+    "typed_feedback": [
+      {
+        "candidate_id": "159:C1:239255f9f19fda067c1b193d502f36ae6ca31c4474c82e9c02ecb3bcbc376272",
+        "category": "privilege",
+        "endpoint": null,
+        "failed_episode_id": null,
+        "feedback_sha256": "d626d6d1d4224227dc10191c3c2d6761295f2f0e322cbef89b4e958e8fc65d46",
+        "operation": "REPLACE_MECHANISM",
+        "reason_sha256": "783d9d5b99502a975fbf6822173e4391aa36474577ed1d72bc97f2fcdf93967f",
+        "remaining_calls": 2,
+        "remaining_policy": 30,
+        "source_sha256": "239255f9f19fda067c1b193d502f36ae6ca31c4474c82e9c02ecb3bcbc376272",
+        "to_call_index": 2
+      },
+      {
+        "candidate_id": "159:C2:7e68a0d417eb01bd31095bc39cc332ecbb6c1f9b247d33ed7334dad4184daa67",
+        "category": "privilege",
+        "endpoint": null,
+        "failed_episode_id": null,
+        "feedback_sha256": "f34d32d01bd4173497e715b6e5c77c8b2149294eafb378dc31a9be9dcbe90296",
+        "operation": "REPLACE_MECHANISM",
+        "reason_sha256": "b523134d153a82c795f7c1d98d9c2920a6cc1e311045a513717052cacfd9e73c",
+        "remaining_calls": 1,
+        "remaining_policy": 30,
+        "source_sha256": "7e68a0d417eb01bd31095bc39cc332ecbb6c1f9b247d33ed7334dad4184daa67",
+        "to_call_index": 3
+      }
+    ]
+  },
+  {
+    "accepted_dose": null,
+    "adaptation_budget": [],
+    "adaptation_requested_batches": [],
+    "adaptation_rollouts": 0,
+    "candidates": [],
+    "completed_without_infrastructure_failure": false,
+    "confirmation": null,
+    "confirmation_requested_batches": [],
+    "control": {
+      "status": "NOT_RUN"
+    },
+    "design_status": "reference_unavailable",
+    "designer_calls": 0,
+    "designer_inputs": [],
+    "designer_slots": [
+      {
+        "reason": "reference unavailable",
+        "slot": "C1",
+        "status": "NOT_RUN"
+      },
+      {
+        "reason": "reference unavailable",
+        "slot": "C2",
+        "status": "NOT_RUN"
+      },
+      {
+        "reason": "reference unavailable",
+        "slot": "C3",
+        "status": "NOT_RUN"
+      }
+    ],
+    "evidence": {
+      "all_original_episode_ids": [
+        "2e6df0cdfa",
+        "882a024490",
+        "396c12c204",
+        "409f96c372",
+        "4340eec052",
+        "3026616a6e",
+        "947144a8ef",
+        "a1926d84dc",
+        "9400ccab6a",
+        "43dc594d33",
+        "f6bdd5049d",
+        "53e5f3a572",
+        "a7656bec34",
+        "59fe601744",
+        "8a5e9de87d",
+        "feda2bac18"
+      ],
+      "all_original_trace_sha256": [
+        "b3700bebd167eac9e3db5e48eb925e11adca6a754347b29119b133eca00a6d90",
+        "e78cbc7eafcd8b6d6004351ce5f115821a96a1828d8c00831c038a9282de42e2",
+        "1fc42344707bf1de1588bcee235ed54ce3ee3a7d972ef0a7f404513dbded8487",
+        "0d56836ac8d162f5a2987252d8dea61bdcaeb051ac51a94604fcd61e1f00880e",
+        "91fc1779595359993b74387618e8f7b84a5b5bd2a32bc37229f14e4d17f136a3",
+        "7b262a228fbce0e9918cb049a018a0352a73e140b858c6f581d10694fdfb8e5b",
+        "9a6b4a4525c4531b7a229363c1820d8d4563a9778393c986e02bb4ccbda62f9a",
+        "c0dd142d3bec4cf8119c956ae8ed7db18987db849ee135ea7ea2dc21413a54a7",
+        "841cb4fa4c8034556cd1b6b666e4238fa46f9be9b474b86b3134dfc721347168",
+        "c41f9b54b1eb6216136cebd5797b65926a3b249bc8e1899780cdad7fa9dcd86f",
+        "2cc8896e83dd6d3febc50775c4ed1d495cf8d26aea82b8391f630daf4ef2e8e1",
+        "d347b8c857683070abc581bf6e29e51eeca506d1ebe5d8286bff092a0475e300",
+        "5193449d83e42a366608724ead6e274d1a2147cb04dc70e36d7678eb17167e25",
+        "4c905c7402a6ae0c0dacdea3cda6370725fe46b87491eb48da5d7826e9b35a15",
+        "8952574152b8f25302fad201af59e31ddf6d468c0886853b539a3d4a24f805f7",
+        "2bdb58add952c9a18d6d27f1f58f0ef7e6d6dbf4d705eb8b50fcdd949b20b6d8"
+      ],
+      "designer_evidence_sha256": "c69684e5d72032b30fa6cd0cb756c394596b6fdf848d4199531292ee64f7db4b",
+      "evidence_ids": [
+        "2e6df0cdfa",
+        "feda2bac18",
+        "53e5f3a572"
+      ],
+      "evidence_n": 16,
+      "evidence_sha256": "321baa81a6b995ca98964173789d47b7abd14d6d96827e410bfe656aadb35a2b",
+      "original_zero_evidence_sha256": "321cf4f4bbd856c92dd9204201d78bdc180aec7dad8bfbebcb5a1937c670d610",
+      "selected_trace_sha256": [
+        "b3700bebd167eac9e3db5e48eb925e11adca6a754347b29119b133eca00a6d90",
+        "2bdb58add952c9a18d6d27f1f58f0ef7e6d6dbf4d705eb8b50fcdd949b20b6d8",
+        "d347b8c857683070abc581bf6e29e51eeca506d1ebe5d8286bff092a0475e300"
+      ],
+      "selection_seed": 165,
+      "valid_episode_execution_indices": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16
+      ]
+    },
+    "final_environment_hash": null,
+    "frozen_family": null,
+    "interruption_kind": null,
+    "measurements": [],
+    "reference": {
+      "reference_id": null,
+      "reference_ok": false,
+      "reference_sha256": "729c583918ceb1ac4081152d8748572f316b7168fe262edcdb0201616edee0b1",
+      "reference_status": "REFERENCE_UNAVAILABLE",
+      "reference_steps": 0
+    },
+    "search_accepted": false,
+    "search_n": null,
+    "search_successes": null,
+    "semantic_gates": [],
+    "task_id": 165,
+    "task_status": "reference_unavailable",
+    "typed_feedback": []
+  }
+]

@@ -1,0 +1,241 @@
+{
+  "task154_candidate_review.json": {
+    "actions_taken": "Only read and hash saved files and analyze static source; no semantic rejudgment, Rules execution, environment, or model call.",
+    "all_checks_pass": true,
+    "call_index": 1,
+    "candidate_source_sha256": "f8a28097e207d68774f41590fbc5f0255982e924bede2e1f399f0999230422c0",
+    "checks": {
+      "all_original_action_prefixes": true,
+      "all_post_reset_observation_prefixes": true,
+      "all_prefix_shapes": true,
+      "baseline_matches_original_poststep": true,
+      "candidate_preserves_raw_observation_as_prefix": true,
+      "decision_is_uncertain_without_fail": true,
+      "fixed_17_doses": true,
+      "no_adaptation_policy_dispatch": true,
+      "no_command_additions_or_deletions": true,
+      "no_confirmation_dispatch": true,
+      "no_hook_errors": true,
+      "no_solvability_dispatch": true,
+      "no_wrapper_reminder_in_authorized_evidence": true,
+      "original_failure_hash": true,
+      "payload_sha256": true,
+      "raw_admissibles_match_baseline": true,
+      "reference_actions_match": true,
+      "reference_file_hash": true,
+      "reference_steps_match": true,
+      "same_baseline_across_doses": true,
+      "source_hash_binding": true
+    },
+    "finding_counts": {
+      "PASS": 765,
+      "UNCERTAIN": 5472
+    },
+    "finding_kind_information_counts": [
+      {
+        "count": 765,
+        "decision": "PASS",
+        "information": "No learner-facing change in this probe",
+        "kind": "IDENTITY"
+      },
+      {
+        "count": 5472,
+        "decision": "UNCERTAIN",
+        "information": "Changed text has unsupported or ungrounded semantics",
+        "kind": "UNSUPPORTED"
+      }
+    ],
+    "full_local_review_sha256": "372b2931898acbaabd4466813de929141d7a958bf4760190c481f7477093d7ec",
+    "gate_decision": "UNCERTAIN",
+    "interpretation": [
+      "The frozen screener produced unsupported/ungrounded UNCERTAIN, not a reference-relation FAIL. Its uncertainty witnesses cite no reference evidence and report public evidence check Not established.",
+      "The public goal already requires cooled bread at the target receptacle. The first raw reset lists a fridge navigation destination, but not a cooling command. The candidate supplies the generic cool-with-fridge prerequisite; at this prefix the generic grammar rejects words cooled, fridge, and placing rather than establishing a task-specific hidden-location disclosure.",
+      "The code uses no hidden source receptacle or full reference action sequence. Promotion is confined to commands already admissible at each raw state; actual hidden-relation safety remains a separate semantic question, not a PASS claim from this read-only review.",
+      "The raw evidence excludes all wrapper reminders, matches the selected original action and post-step observation prefixes, and is unchanged across doses. Reset observations are bound to the frozen trusted original-session producer; this review does not independently rerun/reset an environment.",
+      "Admission stopped task154 before solvability, d=1 policy, redesign, CONTROL, or K16. This censored candidate gives no learner-response or optimizer-feedback signal."
+    ],
+    "probe_count": 2601,
+    "schema": "v3-task154-C1-compact-saved-input-review-v1",
+    "semantic_gzip_sha256": "95ce90de552e3e6917643ccc0a7966f2dadaa7d745836f747ccac2e820f32461",
+    "semantic_input_sha256": "5dc7e638b903bdceca016f836a93137af3bbefdaef80e35fc9f2474fd5411c85",
+    "task_id": 154
+  },
+  "task159_C1_C2_candidate_review.json": {
+    "C1": {
+      "finding_counts": {
+        "FAIL": 4014,
+        "PASS": 283,
+        "UNCERTAIN": 5539
+      },
+      "finding_kind_information_counts": [
+        {
+          "count": 153,
+          "decision": "PASS",
+          "information": "No learner-facing change in this probe"
+        },
+        {
+          "count": 2752,
+          "decision": "UNCERTAIN",
+          "information": "Command preference lacks goal or current-episode relation grounding"
+        },
+        {
+          "count": 3264,
+          "decision": "FAIL",
+          "information": "potato 3 located_at it"
+        },
+        {
+          "count": 750,
+          "decision": "FAIL",
+          "information": "potato 2 located_at garbagecan 1"
+        },
+        {
+          "count": 2787,
+          "decision": "UNCERTAIN",
+          "information": "Changed text has unsupported or ungrounded semantics"
+        },
+        {
+          "count": 130,
+          "decision": "PASS",
+          "information": "Changes follow the goal, prerequisites or current-episode observations"
+        }
+      ],
+      "garbagecan_command_promotions": 0,
+      "input_sha256": "83f7e6393afe9d7072fb0b28411c078b0952102e97258b70c4ff86a7615a3750",
+      "interpretation": [
+        "The recorded screening verdict remains FAIL and correctly prevented admission under the frozen protocol. Independent saved-surface review does not substantiate the two recorded hidden-location disclosures.",
+        "The relation potato 3 located_at it treats an unresolved pronoun from the rich reference as a receptacle. The delta contains ordinary pronominal it in a generic heating/cooling reminder, not a disclosure of potato 3 location.",
+        "The garbagecan target exists in unchanged raw room/navigation text. Excluding separately audited admissible-command lines, removing only the three literal inserted hint variants makes every saved final prompt and formatted-history prose exactly equal to baseline. No hint names garbagecan and no garbagecan command is promoted; unchanged text therefore does not establish a transmitted hidden potato-garbagecan relation.",
+        "All command changes preserve the currently admissible command set and promote microwave/fridge commands. Unsupported appliance/precondition grounding remains conservative admission uncertainty; this review does not grant semantic PASS.",
+        "The medium-dose heat-then-cool instruction may conflict with a hot-object goal; without policy probes this is a source-level design concern, not an observed behavioral failure."
+      ],
+      "probe_count": 2601,
+      "recorded_decision": "FAIL",
+      "semantic_gzip_sha256": "089bcf6cda245150b35a39cbbe5928910204845969e9aba5b32d2e2e686b11d9",
+      "source_sha256": "239255f9f19fda067c1b193d502f36ae6ca31c4474c82e9c02ecb3bcbc376272"
+    },
+    "C2": {
+      "EnvResponse_keyword_expressions": [
+        {
+          "info": "raw_response.info",
+          "observation": "Observation(text=text, data=new_data)",
+          "reward": "raw_response.reward",
+          "terminated": "raw_response.terminated",
+          "truncated": "raw_response.truncated"
+        }
+      ],
+      "interpretation": "The only EnvResponse constructor passes reward=raw_response.reward, terminated=raw_response.terminated, truncated=raw_response.truncated, and info=raw_response.info. The frozen lexical regex matches the reward keyword regardless of pass-through expression. Record this conservative lexical rejection; source review alone does not establish a reward change or a framework correctness failure. No hook execution or safety PASS was performed.",
+      "recorded_feedback_category": "privilege",
+      "recorded_feedback_operation": "REPLACE_MECHANISM",
+      "recorded_reason": "changes the reward",
+      "reward_lexical_guard": "src/aea/designer.py:1079: regex \\breward\\s*= rejects any reward assignment spelling",
+      "source_sha256": "7e68a0d417eb01bd31095bc39cc332ecbb6c1f9b247d33ed7334dad4184daa67"
+    },
+    "actions_taken": "Saved-file reads, hashes, AST inspection, exact hint-removal comparisons only; no semantic evaluator, hooks, environment, model, or run mutation.",
+    "all_checks_pass": true,
+    "checks": {
+      "C2_feedback_source_binding": true,
+      "C2_recorded_reward_reason": true,
+      "authorized_evidence_has_no_inserted_hints": true,
+      "baseline_matches_original_poststep": true,
+      "baseline_same_across_doses": true,
+      "command_set_unchanged": true,
+      "failure_hash": true,
+      "final_prompt_prose_changes_are_only_literal_hint_insertion": true,
+      "formatted_history_prose_changes_are_only_literal_hint_insertion": true,
+      "no_confirmation_dispatch_so_far": true,
+      "no_hook_errors": true,
+      "no_policy_dispatch_so_far": true,
+      "no_solvability_dispatch_so_far": true,
+      "non_observation_hook_surfaces_unchanged": true,
+      "observation_changes_are_only_literal_hint_insertion": true,
+      "prefix_shapes": true,
+      "raw_action_prefixes": true,
+      "raw_admissibles_match_baseline": true,
+      "raw_poststep_observation_prefixes": true,
+      "reference_actions_steps_match": true,
+      "reference_hash": true,
+      "semantic_payload_hash": true,
+      "source_hash_binding": true
+    },
+    "full_local_review_sha256": "0dc90e3ec8e05b933e79796f3abc18ace3213765fd89c12002542166566dfc86",
+    "schema": "v3-task159-C1-C2-compact-saved-artifact-review-v1",
+    "task_id": 159
+  },
+  "task159_C3_candidate_review.json": {
+    "actions_taken": "Read/hash saved artifacts, compare exact raw prefixes and hint removal, inspect current command strings only. No semantic evaluator, hooks, environment, model, or run mutation.",
+    "all_checks_pass": true,
+    "call_index": 3,
+    "checks": {
+      "baseline_matches_original_poststep": true,
+      "baseline_same_across_doses": true,
+      "command_sets_preserved": true,
+      "failure_hash": true,
+      "fixed_17_doses": true,
+      "hint_held_object_in_raw_current_appliance_command": true,
+      "history_prose_is_baseline_plus_hint_only": true,
+      "no_confirmation": true,
+      "no_hint_in_authorized_observations": true,
+      "no_hook_errors": true,
+      "no_policy": true,
+      "no_solvability": true,
+      "non_observation_hook_surfaces_unchanged": true,
+      "observation_text_is_baseline_plus_hint_only": true,
+      "payload_hash": true,
+      "prefix_shapes": true,
+      "prompt_prose_is_baseline_plus_hint_only": true,
+      "raw_action_prefixes": true,
+      "raw_admissibles_match_baseline": true,
+      "raw_poststep_observation_prefixes": true,
+      "reference_actions_steps_match": true,
+      "reference_hash": true,
+      "source_hash": true
+    },
+    "finding_counts": {
+      "FAIL": 245,
+      "PASS": 2159,
+      "UNCERTAIN": 513
+    },
+    "finding_information_counts": [
+      {
+        "count": 946,
+        "decision": "PASS",
+        "information": "No learner-facing change in this probe"
+      },
+      {
+        "count": 128,
+        "decision": "UNCERTAIN",
+        "information": "Command preference lacks goal or current-episode relation grounding"
+      },
+      {
+        "count": 1213,
+        "decision": "PASS",
+        "information": "Changes follow the goal, prerequisites or current-episode observations"
+      },
+      {
+        "count": 245,
+        "decision": "FAIL",
+        "information": "potato 3 located_at it"
+      },
+      {
+        "count": 385,
+        "decision": "UNCERTAIN",
+        "information": "Changed text has unsupported or ungrounded semantics"
+      }
+    ],
+    "full_local_review_sha256": "6cf1783040008e1afbb352ab61b10380571cbb171367d01fb869077eb4a30d2e",
+    "input_sha256": "5c1e985caa7ff449305913e91e23518380522bfc1382dbee994af8fa8be471ec",
+    "interpretation": [
+      "Recorded C3 FAIL remains the frozen admission outcome. All245 FAIL witnesses cite potato3 located_at it, the same unresolved-reference-pronoun relation as C1.",
+      "The first recorded FAIL reminder names potato1 inferred from a currently admissible heat action; its ordinary pronoun it refers to that held object. Other saved hints name apple1 when it is exposed in current appliance commands. Neither independently substantiates disclosure of potato3 location.",
+      "All saved observation changes are the appended current-object hint; all prompt/history prose returns exactly to baseline after removal of those hints, with admissible command ordering audited separately. Command sets, actions, transition feedback, and rewards remain unchanged in these saved probes.",
+      "385 changed-text and128 command-grounding UNCERTAIN findings remain evidence of the frozen screener declining unsupported semantics. This review grants no PASS and does not override any screening outcome.",
+      "The candidate is rejected before solvability or policy; no endpoint, CONTROL, search acceptance, or K16 behavior exists. C1/C2/C3 exhaustion is an admission outcome, not evidence that maximum-dose support was too hard or that confirmation missed."
+    ],
+    "probe_count": 2601,
+    "recorded_gate_decision": "FAIL",
+    "schema": "v3-task159-C3-compact-saved-artifact-review-v1",
+    "semantic_gzip_sha256": "dfa5618848d1657ca0fa8d53f2bba76a1fc0d23557b1791fe34a3d3129c1e8a1",
+    "source_sha256": "15c4a05e9a9a36edc0c54ac855eb2ebf20b01572aabc70263ebc9b0aa33ef8fd",
+    "task_id": 159
+  }
+}

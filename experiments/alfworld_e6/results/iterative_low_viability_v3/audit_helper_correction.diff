@@ -1,0 +1,38 @@
+--- initial_terminal_audit.py
++++ corrected_terminal_audit.py
+@@ -87,0 +88,13 @@
++
++
++def returned_model_provider_matches(row: dict[str, Any]) -> bool:
++    """Direct DeepSeek may omit a response provider; its route is config-bound.
++
++    OpenRouter's policy response must still carry the frozen Alibaba provider pin.
++    See frozen client.py response extraction: absent completion.provider becomes None.
++    """
++    if row["budget"] == "designer":
++        return row["model"] == "deepseek-v4-pro" and (
++            row["provider"] is None or str(row["provider"]).lower() == "deepseek"
++        )
++    return row["model"] == "qwen/qwen3-8b" and str(row["provider"]).lower() == "alibaba"
+@@ -1099,7 +1112,2 @@
+-            expected_model = (
+-                "deepseek-v4-pro" if row["budget"] == "designer" else "qwen/qwen3-8b"
+-            )
+-            expected_provider = "deepseek" if row["budget"] == "designer" else "alibaba"
+-            self.check(
+-                row["model"] == expected_model
+-                and str(row["provider"]).lower() == expected_provider,
++            self.check(
++                returned_model_provider_matches(row),
+@@ -1144,0 +1153,11 @@
++                }
++            )
++        unlabeled_designer = sum(
++            r["budget"] == "designer" and r["provider"] is None for r in calls
++        )
++        cost["designer_response_provider_label_unavailable"] = unlabeled_designer
++        if unlabeled_designer:
++            self.notes.append(
++                {
++                    "note": "Direct designer responses omit the provider label. The DeepSeek route is bound by frozen configuration, routing guards, model, and request hashes; an independent upstream provider label is unavailable.",
++                    "logical_calls": unlabeled_designer,

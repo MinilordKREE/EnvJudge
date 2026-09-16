@@ -1,0 +1,169 @@
+#!/usr/bin/env python3
+"""Offline final V3 physical cost, lineage and 21-field consistency audit.
+
+Stdlib only. Reads records and uses local Git; no application imports, environment,
+model, network, raw-run edits or report edits. Writes one new /tmp JSON artifact.
+"""
+import collections
+from datetime import datetime
+from decimal import Decimal
+import hashlib
+import json
+from pathlib import Path
+import subprocess
+
+ROOT=Path('/home/kree/work/EnvJudge-aea-llm')
+RUN=ROOT/'runs/e6-iterative-low-viability-v3'
+OUT=Path('/tmp/viability_v3_final_phase_audit.json')
+D=Decimal
+EPS=D('0.0000000001')
+sources={};failures=[];checks=0
+
+def read(path):
+    raw=path.read_bytes();sources[str(path.relative_to(ROOT)) if path.is_relative_to(ROOT) else str(path)]=hashlib.sha256(raw).hexdigest();return raw
+
+def load(path):return json.loads(read(path))
+def rows(path):return [json.loads(line,parse_float=D) for line in read(path).splitlines() if line]
+def canonical(obj):return hashlib.sha256(json.dumps(obj,sort_keys=True).encode()).hexdigest()
+def close(x,y):return abs(D(str(x))-D(str(y)))<EPS
+
+def check(ok,label,detail=None):
+    global checks
+    checks+=1
+    if not ok:failures.append({'check':label,'detail':detail})
+
+screen=load(RUN/'screening.json');result=load(RUN/'results.json');summary=load(RUN/'summary.json');cap=load(RUN/'cap.json');baseline=load(RUN/'topup_cost_baseline.json');manifest=load(RUN/'input_manifest.json');core=load(ROOT/'experiments/alfworld_e6/frozen/iterative_low_viability_v3/core_manifest.json')
+attempts=rows(RUN/'cap.attempts.jsonl');ledger=[row for p in sorted(RUN.glob('ledger.*.jsonl')) for row in rows(p)]
+operations={p.name:load(p) for p in sorted((RUN/'operations').glob('*.json'))}
+check(len(attempts)==cap['attempts']==862 and len({a['attempt'] for a in attempts})==862,'all862_physical_attempts_unique_and_accounted')
+check(not cap['inflight'] and not cap.get('stopped') and not cap.get('bound_violation'),'no_inflight_or_budget_stop')
+check(cap['screening_limit_usd']==4 and cap['adaptation_confirmation_limit_usd']==25 and cap['total_limit_usd']==29,'frozen_4_25_29_caps')
+check(cap['screening_baseline_sha256']==hashlib.sha256(read(RUN/'topup_cost_baseline.json')).hexdigest()==manifest['topup_cost_baseline_sha256'],'immutable_screening_baseline_hash')
+check(baseline['physical_attempts']==858 and close(baseline['screening_committed_usd'],1.364482886),'topup_baseline_exact')
+check(cap['phase']=='adaptation' and cap['actual_usd']>=baseline['actual_usd'] and cap['uncertain_usd']>=baseline['uncertain_usd'],'monotonic_cap_no_screening_refund')
+check(all(op['status']=='completed' for op in operations.values()) and len(operations)==28,'all28_operations_closed')
+phase_totals=collections.defaultdict(lambda:{'attempts':0,'returned':0,'failed':0,'returned_usd':D(0),'failed_reservations_usd':D(0),'reserved_usd_total':D(0)})
+actual=uncertain=committed=D(0);signatures=collections.Counter();maximum_exposure=D(0)
+for i,a in enumerate(attempts):
+    attr=a['attribution'];phase=a['phase'];r=phase_totals[phase];r['attempts']+=1;r['reserved_usd_total']+=a['reserved_usd']
+    check(phase in ('screening','adaptation'),'known_paid_phase')
+    check((phase=='screening')==(i<858),'monotonic_screening_then_adaptation_order',i)
+    limit=D(4) if phase=='screening' else min(D(29),D(str(baseline['screening_committed_usd']))+D(25))
+    check(committed+a['reserved_usd']<limit+EPS,'pre_dispatch_reservation_below_phase_limit',a['attempt'])
+    maximum_exposure=max(maximum_exposure,committed+a['reserved_usd'])
+    if phase=='screening':check(a['model']=='qwen/qwen3-8b' and attr['arm']=='screen' and attr['budget']=='eval','screening_model_and_budget')
+    else:check(a['model']=='deepseek-v4-pro' and attr['arm']=='iterative_low' and attr['budget']=='designer' and attr['task_id'] in ('154','159'),'only_four_designer_adaptation_requests')
+    if a['status']=='returned':
+        inp,out=(D('.117'),D('.455')) if a['model']=='qwen/qwen3-8b' else (D('1.32'),D('3.96'))
+        expected=max(D(str(a.get('upstream_usd') or 0)),(D(a['input_tokens'])*inp+D(a['output_tokens'])*out)/D(1000000))
+        check(close(a['conservative_usd'],expected) and expected<=a['reserved_usd']+EPS,'physical_return_peak_cache_miss_conservative_arithmetic',a['attempt'])
+        r['returned']+=1;r['returned_usd']+=a['conservative_usd'];actual+=a['conservative_usd'];committed+=a['conservative_usd']
+        signatures[(attr['task_id'],attr['phase'],a['model'],a['input_tokens'],a['output_tokens'])]+=1
+    else:
+        check(a['status']=='ambiguous_failure' and phase=='screening','only_prior_topup_failed_requests')
+        r['failed']+=1;r['failed_reservations_usd']+=a['reserved_usd'];uncertain+=a['reserved_usd'];committed+=a['reserved_usd']
+check(close(actual,cap['actual_usd']) and close(uncertain,cap['uncertain_usd']),'physical_attempt_sums_equal_cap')
+check(phase_totals['screening']['attempts']==858 and phase_totals['adaptation']['attempts']==4,'phase_attempt_counts858_plus4')
+check(close(phase_totals['screening']['returned_usd'],baseline['actual_usd']) and close(phase_totals['screening']['failed_reservations_usd'],baseline['uncertain_usd']),'immutable_screening_cost_components')
+check(close(committed-D(str(baseline['screening_committed_usd'])),phase_totals['adaptation']['returned_usd']) and phase_totals['adaptation']['failed']==0,'adaptation_incremental_cost_separate_from_topup')
+priced=collections.defaultdict(lambda:D(0));call_signatures=collections.Counter();designer_rows=[]
+for row in ledger:
+    if row['event']!='call':continue
+    if row['model']=='qwen/qwen3-8b':
+        expected=(D(row['prompt_tokens'])*D('.117')+D(row['completion_tokens'])*D('.455'))/D(1000000);view='topup_policy'
+        check(row['provider']=='Alibaba' and row['pricing_version']=='openrouter-qwen3-8b-2026-09-07','screening_pricing_provenance')
+    else:
+        check(row['model']=='deepseek-v4-pro' and row['pricing_version']=='deepseek-pricing-2026-09-03','designer_pricing_provenance')
+        when=datetime.fromisoformat(row['ts'].replace('Z','+00:00'));hour=when.hour+when.minute/60+when.second/3600
+        peak=when.weekday()<5 and (1<=hour<4 or 6<=hour<10)
+        check(row['pricing_tier']==('peak' if peak else 'off_peak'),'designer_utc_time_tier')
+        hit,miss,out=(D('.044'),D('1.32'),D('3.96')) if peak else (D('.022'),D('.66'),D('1.98'))
+        expected=(D(row['cached_tokens'])*hit+D(row['prompt_tokens']-row['cached_tokens'])*miss+D(row['completion_tokens'])*out)/D(1000000);view='designer';designer_rows.append(row)
+    check(close(row['usd'],expected),'priced_ledger_cache_and_time_arithmetic',row['request_sha256'])
+    priced[view]+=row['usd'];call_signatures[(row['task_id'],row['phase'],row['model'],row['prompt_tokens'],row['completion_tokens'])]+=1
+check(call_signatures==signatures,'every_returned_physical_request_matches_one_priced_call')
+check(len(designer_rows)==4 and len(signatures)==853,'four_designer_calls_853_total_priced_calls')
+check(not any(row.get('budget')=='search' or row.get('phase')=='confirm' for row in ledger),'zero_adaptation_policy_and_confirmation_ledger_activity')
+check(close(summary['screening_usd'],priced['topup_policy']) and close(summary['designer_usd'],priced['designer']) and close(summary['actual_ledger_usd'],sum(priced.values())),'summary_priced_views_reconcile')
+check(summary['adaptation_usd']==summary['confirmation_usd']==0 and summary['physical_attempts']==862 and summary['conservative_cap_account']==cap,'summary_zero_policy_and_cap_views_reconcile')
+
+# Four-task input and unmodified prior selection; no environment replay.
+task_ids=[row['task_id'] for row in manifest['tasks']]
+check(task_ids==[154,158,159,165] and list(map(int,result['tasks']))==task_ids,'four_task_denominator_and_order')
+check(screen['qualified']==[165] and list(map(int,screen['tasks']))==[163,164,165],'first_new_ZERO_stopped_topup')
+check(screen['tasks']['165']['valid_episodes']==16 and screen['tasks']['165']['valid_successes']==0,'Z4_exact_0_of16')
+ids=set();references={};lineages={};feedback_summary={};gate_counts=collections.Counter()
+core_rows={r['task_id']:r for r in core['tasks']}
+for row in manifest['tasks']:
+    task=row['task_id'];actual_row=result['tasks'][str(task)]
+    check(actual_row['original']==row,'results_original_matches_frozen_input',task)
+    originals=[json.loads(read(RUN/f'task-{task}/original-{i:02d}.json'))[0] for i in range(1,17)]
+    check([t['episode_id'] for t in originals]==row['all_original_episode_ids'] and [canonical(t) for t in originals]==row['all_original_trace_sha256'] and canonical(originals)==row['original_zero_evidence_sha256'],'all16_original_identity_hashes',task)
+    check(all(not t['success'] and not t['error'] and t['rollout_seed']==task for t in originals),'all16_valid_original_failures',task)
+    for t in originals:check(t['episode_id'] not in ids,'four_task_unique_original_ids',task);ids.add(t['episode_id'])
+    selected=load(RUN/f'task-{task}/original_failures.json')
+    check(canonical(selected)==row['evidence_sha256'] and [t['episode_id'] for t in selected]==row['evidence_ids'] and [canonical(t) for t in selected]==row['selected_trace_sha256'],'selected_three_exact_input_hashes',task)
+    if task in core_rows:check(all(row[k]==core_rows[task][k] for k in ['evidence_ids','selected_trace_sha256','evidence_sha256','original_zero_evidence_sha256']),'prior_core_selection_never_changed',task)
+    reference=load(RUN/f'task-{task}/privileged_reference.json');check(canonical(reference)==row['reference_sha256'],'frozen_reference_hash',task)
+    references[str(task)]={'status':row['reference_status'],'reason':row['reference_reason'],'steps':row['reference_steps']}
+    own=actual_row['summary'];cand=own['candidates'];lineages[str(task)]=[]
+    check(own['designer_calls']==len(cand)<=3 and own['adaptation_rollouts']==0 and own['search_accepted'] is False,'max_three_calls_zero_adaptation_policy',task)
+    check(own.get('control') is None and own.get('confirmation') is None,'no_CONTROL_or_K16_entered',task)
+    if not row['reference_ok']:check(actual_row['status']=='reference_unavailable' and not cand,'unavailable_reference_no_replacement_or_designer',task)
+    last_id=None
+    for index,candidate in enumerate(cand,1):
+        checksum=hashlib.sha256(candidate['source'].encode()).hexdigest()
+        check(candidate['optimizer_call_index']==index and candidate['source_sha256']==checksum and candidate['candidate_id']==f'{task}:C{index}:{checksum}' and candidate['parent_candidate_id']==last_id,'candidate_lineage_and_source_binding',[task,index])
+        check(candidate['remaining_policy']==30 and candidate['remaining_calls']==3-index and candidate['requested_operation']==('PROPOSE' if index==1 else 'REPLACE_MECHANISM'),'candidate_scoped_budget_and_typed_operation',[task,index])
+        reason=candidate['rejection_reason'];gate='semantic_UNCERTAIN' if reason.startswith('semantic_privilege_uncertain:') else 'semantic_FAIL' if reason.startswith('semantic_privilege_fail:') else 'lexical_privilege'
+        gate_counts[gate]+=1
+        check(candidate['endpoint'] is None and candidate['solvability'] is None and candidate['structural']==[],'rejection_before_solvability_and_any_policy',[task,index])
+        lineages[str(task)].append({'call':index,'candidate_id':candidate['candidate_id'],'parent_candidate_id':last_id,'requested_operation':candidate['requested_operation'],'gate':gate,'rejection_prefix':reason.split(':',1)[0]})
+        last_id=candidate['candidate_id']
+    feedback_path=RUN/f'task-{task}/adaptation/feedback.jsonl'
+    feedback=rows(feedback_path) if feedback_path.exists() else []
+    feedback_summary[str(task)]=[{'call_index':r['call_index'],'operation':r['feedback']['operation'],'category':r['feedback']['category'],'candidate_id':r['feedback']['candidate_id']} for r in feedback]
+    check(len(feedback)==max(0,len(cand)-1),'one_feedback_per_redesign',task)
+    for entry in feedback:
+        c=cand[entry['call_index']-2];f=entry['feedback'];check(f['candidate_id']==c['candidate_id'] and f['operation']=='REPLACE_MECHANISM' and f['category']=='privilege' and f['endpoint'] is None and f['failed_rollout'] is None,'typed_feedback_before_policy_only',task)
+    if cand:
+        inputs=rows(RUN/f'task-{task}/adaptation/designer_inputs.jsonl');check(len(inputs)==len(cand),'designer_input_count',task)
+        for entry,c in zip(inputs,cand):check(entry['call_index']==c['optimizer_call_index'] and entry['independently_constructed_match'] and entry['evidence_sha256']==row['designer_evidence_sha256'] and entry['requested_operation']==c['requested_operation'] and entry['parent_candidate_id']==c['parent_candidate_id'],'independently_constructed_designer_input_lineage',task)
+    check(summary['tasks'][str(task)]['original']==actual_row['original'] and summary['tasks'][str(task)]['status']==actual_row['status'] and summary['tasks'][str(task)]['summary']==own,'root_summary_task_consistency',task)
+check(len(ids)==64,'64_unique_original_ZERO_episodes')
+check({k:v['status'] for k,v in references.items()}=={'154':'REFERENCE_AVAILABLE','158':'REFERENCE_UNAVAILABLE','159':'REFERENCE_AVAILABLE','165':'REFERENCE_UNAVAILABLE'},'exact_reference_coverage_two_of_four')
+check(gate_counts=={'semantic_UNCERTAIN':1,'semantic_FAIL':2,'lexical_privilege':1},'gate_funnel_four_prepolicy_rejections')
+check(summary['failure_funnel']['semantic_UNCERTAIN']==1 and summary['failure_funnel']['semantic_FAIL']==2 and summary['failure_funnel']['lexical_privilege_rejects']==1 and summary['failure_funnel']['reference_unavailable']==2,'summary_gate_funnel_consistency')
+check(summary['primary_denominator']==4 and summary['referenced_tasks']==summary['completed_referenced_tasks']==2 and summary['K16_B_L']==summary['K16_B_T']==summary['endpoint_viable_tasks']==summary['failed_K16_confirmations']==0,'primary_denominator_and_nonevaluated_endpoint_counts')
+check(result['interruption'] is None and summary['interruption'] is None and summary['decision']==summary['final_viability_decision']=='INCONCLUSIVE','inconclusive_with_two_references_no_low_efficacy_claim')
+check(not any('confirm-' in name or 'endpoint' in name or 'control' in name for name in operations),'no_hidden_endpoint_CONTROL_K16_operations')
+preservation=load(Path('/tmp/viability_v3_preservation_final.json'));check(preservation['audit_status']=='PASS' and not preservation['failures'],'independent_final_preservation_PASS')
+prereg=ROOT/'experiments/alfworld_e6/PREREG_ITERATIVE_LOW_VIABILITY_V3.md';read(prereg)
+check(result['freeze']['prereg_commit']==preservation['adaptation']['commit'] and result['freeze']['prereg_sha256']==preservation['adaptation']['prereg_sha256'],'adaptation_prereg_matches_independent_preservation')
+report_fields={
+ '01_prior_three_ZERO_tasks_verified':[154,158,159],
+ '02_topup_prereg_SHA':screen['freeze']['prereg_commit'],
+ '03_starting_unused_ID':163,
+ '04_newly_inspected_task_IDs':[163,164,165],
+ '05_topup_screening_committed_cost_usd':phase_totals['screening']['returned_usd']+phase_totals['screening']['failed_reservations_usd'],
+ '06_Z4_and_evidence':{'task_id':165,'successes':0,'valid_episodes':16},
+ '07_final_four_task_set':task_ids,
+ '08_reference_availability':references,
+ '09_viability_prereg_SHA':result['freeze']['prereg_commit'],
+ '10_per_task_C1_C2_C3_lineage':lineages,
+ '11_typed_feedback':feedback_summary,
+ '12_candidate_gate_outcomes':dict(gate_counts),
+ '13_endpoint_outcomes':'NOT_RUN: all four proposed candidates rejected before policy',
+ '14_CONTROL_histories':'NOT_RUN',
+ '15_search_accepts':0,
+ '16_K16_B_L':{'count':0,'confirmation_episodes':0,'status':'NOT_EVALUATED'},
+ '17_K16_B_T':{'count':0,'confirmation_episodes':0,'status':'NOT_EVALUATED'},
+ '18_spend_views':{'topup_policy_ledger_usd':priced['topup_policy'],'designer_ledger_usd':priced['designer'],'designer_conservative_return_usd':phase_totals['adaptation']['returned_usd'],'adaptation_policy_usd':0,'confirmation_usd':0,'total_ledger_usd':sum(priced.values()),'continuation_conservative_return_usd':actual,'continuation_uncertain_reservations_usd':uncertain,'continuation_committed_usd':committed,'historical_V2_separate_sunk_usd':D('7.994786072')},
+ '19_exact_final_decision':'INCONCLUSIVE',
+ '20_full_AEA_integration_recommendation':'NOT_TRIGGERED: LOW_VIABLE not established',
+ '21_direct_observed_blocker':'No referenced candidate passed lexical/semantic admission; only two of four references were available. The gate bottleneck and limited reference coverage prevent a LOW viability conclusion.'
+}
+output={'schema':'viability-v3-final-phase-and-report-consistency-v1','audit_status':'FAIL' if failures else 'PASS','checks':checks,'failures':failures,'phase_totals':dict(phase_totals),'priced_ledger_views':dict(priced),'cap_decimal_reconciliation':{'returned_usd':actual,'uncertain_usd':uncertain,'committed_usd':committed,'maximum_historical_reservation_exposure_usd':maximum_exposure,'incremental_adaptation_usd':phase_totals['adaptation']['returned_usd'],'adaptation_cumulative_ceiling_usd':min(D(29),D(str(baseline['screening_committed_usd']))+D(25))},'required_21_report_fields':report_fields,'source_sha256':sources,'audit_script_sha256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),'limits':['Ledger pricing applies actual cache-hit and peak/off-peak tiers; conservative physical cap accounting uses peak cache-miss input rates and retains failed reservations. Neither view is an externally verified billing invoice.','This audit validates records, costs and report consistency. It does not re-execute the environment, reference provider, candidate code, semantic screening, solvability, policy or designer.','Semantic screening outcomes are preserved as observed; semantic correctness/false-positive analysis is a separate review.']}
+with OUT.open('x') as stream:json.dump(output,stream,indent=2,sort_keys=True,default=str);stream.write('\n')
+print(json.dumps({'audit_status':output['audit_status'],'checks':checks,'failures':failures,'designer_ledger_usd':priced['designer'],'designer_conservative_usd':phase_totals['adaptation']['returned_usd'],'continuation_committed_usd':committed},default=str,indent=2))
+raise SystemExit(2 if failures else 0)

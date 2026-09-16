@@ -1,0 +1,38 @@
+{
+  "audit_checks": {
+    "historical_preservation": 597,
+    "terminal_provenance": 1869,
+    "topup": 19299
+  },
+  "audit_only_correction": {
+    "experiment_or_method_modified": false,
+    "initial_result": "Four audit failures from an overly strict designer response-provider label assumption; initial helper and result retained.",
+    "resolution": "Corrected only the offline audit helper to accept an absent label for frozen direct-DeepSeek routing, retaining strict policy provider pin and adding regression coverage."
+  },
+  "candidate_findings": {
+    "154:C1": "UNCERTAIN: added generic cooling reminder lies outside the bounded accepted wording; saved raw-prefix provenance passed and no FAIL witness was recorded.",
+    "159:C1": "Recorded FAIL retained. Independent saved-surface review finds a pronoun parsed as a location, and unchanged baseline location text counted as disclosure; this does not substantiate the logged hidden-location claim.",
+    "159:C2": "Lexical FAIL retained. The blanket reward-assignment pattern rejects a constructor that passes through raw_response.reward; no reward modification was observed or executed in policy.",
+    "159:C3": "Recorded semantic FAIL retained. Saved-surface review confirms that the hint names the held object from raw current admissible commands; the logged hidden-location relation comes from treating the ordinary pronoun it as a reference location."
+  },
+  "correctness_assessment": "No observed gate bypass, privileged admission reaching policy, validator/runtime reconstruction mismatch, lineage corruption, accounting defect affecting execution, or K16 feedback. Recorded safe rejections remain the frozen method outcomes; precision limitations do not justify retrospective PASS or a behavioral efficacy claim.",
+  "decision": "INCONCLUSIVE",
+  "execution_status": "All 28 operation records completed; no outstanding physical requests; no resumption, reference regeneration or further experiment.",
+  "formal_decision_reason": "Only two of the four frozen tasks had usable references; both completed without infrastructure interruption, no candidate reached a policy probe, and there were no search accepts or K16 confirmations. The frozen rule for LOW_NOT_WORKING requires at least three referenced/evaluable completed tasks.",
+  "limits": [
+    "No policy episodes were run after screening; no candidate efficacy, solvability, endpoint, CONTROL, or K16 success/failure was measured.",
+    "A provenance PASS does not prove semantic isolation or candidate usefulness.",
+    "Two reference-unavailable tasks remain in denominator four.",
+    "Direct designer responses omit an upstream provider label; frozen direct-DeepSeek config/model/request hashes bind routing, not independent provider attestation."
+  ],
+  "offline_validation": {
+    "new_V3_tests_passed": 34,
+    "preflight_tests_passed": 403,
+    "terminal_auditor_regression_tests_passed": 29
+  },
+  "previous_results_preserved": "V2 INCONCLUSIVE / SCREENING_COST_LIMIT and all prior results remain unchanged.",
+  "recommendation": "Stop this continuation. The single next functionality scope is semantic privilege-screen precision for public prerequisites and actual learner-facing deltas, evaluated offline against these saved cases and the frozen leak benchmarks before any further paid experiment. No fix or further experiment is implemented here.",
+  "schema": "iterative-low-viability-v3-final-review-v1",
+  "single_blocker": "Admission precision prevents the referenced tasks from reaching policy evaluation: generic prerequisite/current-command support is rejected as unsupported or as unsubstantiated hidden-location relations.",
+  "status": "PASS"
+}

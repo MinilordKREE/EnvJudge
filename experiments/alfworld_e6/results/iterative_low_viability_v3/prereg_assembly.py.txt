@@ -1,0 +1,69 @@
+"""Assemble new preregistration from already frozen successful top-up inputs only."""
+import hashlib
+import json
+import shutil
+import subprocess
+from pathlib import Path
+
+ROOT = Path('/home/kree/work/EnvJudge-aea-llm')
+RUN = ROOT / 'runs/e6-iterative-low-viability-v3'
+EXP = ROOT / 'experiments/alfworld_e6'
+FROZEN = EXP / 'frozen/iterative_low_viability_v3'
+DEST = EXP / 'PREREG_ITERATIVE_LOW_VIABILITY_V3.md'
+manifest_bytes = (RUN / 'input_manifest.json').read_bytes()
+manifest = json.loads(manifest_bytes)
+prepared = json.loads((RUN / 'prepared.json').read_text())
+screen = json.loads((RUN / 'screening.json').read_text())
+baseline = json.loads((RUN / 'topup_cost_baseline.json').read_text())
+cap = json.loads((RUN / 'cap.json').read_text())
+assert manifest['tasks'] == prepared
+assert screen['status'] == 'qualified' and len(screen['qualified']) == 1
+assert [r['task_id'] for r in prepared] == [154, 158, 159, screen['qualified'][0]]
+assert cap['phase'] == 'screening_complete' and not cap['inflight'] and not cap.get('stopped')
+assert not DEST.exists() and not (FROZEN / 'input_manifest.json').exists()
+assert not (RUN / 'results.json').exists() and not (RUN / 'stage_interruption.json').exists()
+assert not (RUN / 'STOP.json').exists()
+baseline_sha = hashlib.sha256((RUN / 'topup_cost_baseline.json').read_bytes()).hexdigest()
+assert baseline_sha == manifest['topup_cost_baseline_sha256'] == cap['screening_baseline_sha256']
+assert baseline['screening_status'] == 'qualified'
+for key in ['actual_usd', 'uncertain_usd']:
+    assert abs(cap[key] - baseline[key]) < 1e-9
+assert cap['attempts'] == baseline['physical_attempts']
+assert abs(baseline['screening_committed_usd'] - cap['screening_committed_usd']) < 1e-9
+assert abs(baseline['screening_committed_usd'] - cap['actual_usd'] - cap['uncertain_usd']) < 1e-9
+for name, key in [('screening.json', 'screening_sha256'), ('combined_screening.json', 'combined_screening_sha256')]:
+    assert hashlib.sha256((RUN / name).read_bytes()).hexdigest() == manifest[key]
+for operation in ['freeze-inputs', *[f"reference-{r['task_id']}" for r in prepared]]:
+    assert json.loads((RUN / 'operations' / (operation + '.json')).read_text())['status'] == 'completed'
+commit = subprocess.check_output(['git', 'log', '-1', '--format=%H', '--', 'experiments/alfworld_e6/PREREG_ITERATIVE_LOW_TOPUP.md'], cwd=ROOT, text=True).strip()
+assert commit == '4d8419e584d695591e55d1bbf85981b37cfa3764'
+sha = hashlib.sha256(manifest_bytes).hexdigest()
+lines = ['| Task | Original outcome | Reference | Steps |', '|---|---|---|---|']
+for row in prepared:
+    lines.append(f"| {row['task_id']} | 0/16 | {row['reference_status']} | {row['reference_steps']} |")
+lines += ['', 'Exact all-16 episode IDs and per-trace hashes are in the immutable manifest.', 'The following bindings retain each task’s exact selected evidence and reference:', '']
+for row in prepared:
+    lines += [f"### Task {row['task_id']}", '', f"- Original all-16 aggregate SHA256: `{row['original_zero_evidence_sha256']}`.", f"- Selected three episode IDs (ordered): `{', '.join(row['evidence_ids'])}`.", f"- Selected evidence SHA256: `{row['evidence_sha256']}`.", f"- Serialized designer evidence SHA256: `{row['designer_evidence_sha256']}`.", f"- Reference ID: `{row['reference_id']}`.", f"- Reference SHA256: `{row['reference_sha256']}`.", f"- Evidence n: `{row['evidence_n']}`; selection seed: `{row['selection_seed']}`.", '']
+text = Path('/tmp/PREREG_ITERATIVE_LOW_VIABILITY_V3.md').read_text()
+replacements = {
+    'Status: DRAFT — populate exact frozen inputs and commit/push before adaptation.': 'Status: frozen before the first adaptation designer request; commit and push this preregistration and its exact input manifest before execution.',
+    'INPUT_MANIFEST_SHA_PLACEHOLDER': sha,
+    'TOPUP_COMMIT_PLACEHOLDER': commit,
+    'FOUR_TASKS_PLACEHOLDER': str([r['task_id'] for r in prepared]),
+    '`INPUT_TABLE_PLACEHOLDER`': '\n'.join(lines),
+    'SCREENING_SPEND_PLACEHOLDER': f"USD {baseline['screening_committed_usd']:.9f}",
+}
+for before, after in replacements.items():
+    assert before in text, before
+    text = text.replace(before, after)
+assert 'PLACEHOLDER' not in text and 'Status: DRAFT' not in text
+text += '\n## Successful top-up phase binding\n\n'
+text += f"- Top-up baseline SHA256: `{hashlib.sha256((RUN / 'topup_cost_baseline.json').read_bytes()).hexdigest()}`.\n"
+text += f"- Returned cost: ${baseline['actual_usd']:.9f}; retained failed-request reservations: ${baseline['uncertain_usd']:.9f}; in-flight: $0.\n"
+text += f"- Physical top-up attempts: {baseline['physical_attempts']}.\n"
+text += f"- Top-up screening SHA256: `{manifest['screening_sha256']}`.\n"
+text += f"- Combined screening SHA256: `{manifest['combined_screening_sha256']}`.\n"
+shutil.copyfile(RUN / 'input_manifest.json', FROZEN / 'input_manifest.json')
+DEST.write_text(text)
+assert (FROZEN / 'input_manifest.json').read_bytes() == manifest_bytes
+print(json.dumps({'manifest_sha256':sha,'tasks':[r['task_id'] for r in prepared], 'prereg_sha256':hashlib.sha256(DEST.read_bytes()).hexdigest()}))

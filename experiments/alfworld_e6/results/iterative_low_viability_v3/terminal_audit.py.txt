@@ -1,0 +1,1394 @@
+#!/usr/bin/env python3
+"""Terminal, offline V3 provenance audit; only output under /tmp is writable.
+
+Reuses frozen read-only freeze/input validators and existing runtime-provenance
+checks. Never builds a substrate, runs hooks, resets an environment, rejudges a
+semantic input, generates a reference, calls a model, or changes run artifacts.
+"""
+
+from __future__ import annotations
+
+import argparse
+import ast
+import gzip
+import hashlib
+import importlib
+import json
+import math
+import os
+import re
+import sys
+from collections import Counter
+from dataclasses import asdict
+from datetime import datetime
+from pathlib import Path
+from typing import Any
+
+DRIVER_SHA = "980528539037365cb321c9a7678918dbb9302ecacd265cc10be2617e5d124e33"
+BASE_DRIVER_SHA = "c230bcfaea60b3c1b346018a5a7380c96d67c25e4f8fbe75702aef517d6129f4"
+GATE_SHA = "ab0ba2aceffd53f408191105a4cfedb2dacc6136bd16defd03d553fad5b5dccd"
+DOSES = [i / 16 for i in range(17)]
+EXECUTION_FUNCTIONS = (
+    "config",
+    "scoped_three_call_budget",
+    "require_pass",
+    "make_screen",
+    "run_task",
+    "assert_fresh_episode_ids",
+    "confirm",
+    "adapt",
+)
+
+
+def digest(value: Any) -> str:
+    raw = value if isinstance(value, str) else json.dumps(value, sort_keys=True)
+    return hashlib.sha256(raw.encode()).hexdigest()
+
+
+def file_sha(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def source_functions(path: Path) -> dict[str, str]:
+    text = path.read_text()
+    lines = text.splitlines(keepends=True)
+    return {
+        node.name: "".join(
+            lines[
+                min([node.lineno, *(x.lineno for x in node.decorator_list)])
+                - 1 : node.end_lineno
+            ]
+        )
+        for node in ast.parse(text).body
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+    }
+
+
+def instantiate(source: str, task: str, dose: float) -> str:
+    """The frozen AssistFamily string substitution; does not execute Python source."""
+    return source.replace("__DOSE__", repr(float(dose))).replace(
+        "__TASK_ID__", repr(str(task))
+    )
+
+
+def check_admission(gates: list[dict[str, Any]], source: str, dose: float) -> bool:
+    sha = digest(source)
+    matching = [g for g in gates if g["result"]["source_sha256"] == sha]
+    if len(matching) != 1:
+        return False
+    gate = matching[0]
+    findings = gate["result"].get("findings", [])
+    return (
+        gate["result"]["decision"] == "PASS"
+        and bool(findings)
+        and all(f["decision"] == "PASS" for f in findings)
+        and gate["doses"] == DOSES
+        and dose in gate["doses"]
+    )
+
+
+def returned_model_provider_matches(row: dict[str, Any]) -> bool:
+    """Direct DeepSeek may omit a response provider; its route is config-bound.
+
+    OpenRouter's policy response must still carry the frozen Alibaba provider pin.
+    See frozen client.py response extraction: absent completion.provider becomes None.
+    """
+    if row["budget"] == "designer":
+        return row["model"] == "deepseek-v4-pro" and (
+            row["provider"] is None or str(row["provider"]).lower() == "deepseek"
+        )
+    return row["model"] == "qwen/qwen3-8b" and str(row["provider"]).lower() == "alibaba"
+
+
+def physical_costs(
+    cap: dict[str, Any], rows: list[dict[str, Any]]
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Deduplicate orphan reconciliation, but preserve every physical failed reserve."""
+    grouped: dict[str, list[dict[str, Any]]] = {}
+    for row in rows:
+        grouped.setdefault(row["attempt"], []).append(row)
+    unique = []
+    for attempt, group in grouped.items():
+        statuses = {r["status"] for r in group}
+        if not statuses <= {"returned", "ambiguous_failure", "orphan_reconciled"}:
+            raise ValueError("unknown physical outcome")
+        if "returned" in statuses and statuses != {"returned"}:
+            raise ValueError("contradictory physical outcome")
+        for key in ("model", "phase", "reserved_usd"):
+            if len({json.dumps(r.get(key), sort_keys=True) for r in group}) != 1:
+                raise ValueError("physical attribution/reservation changed")
+        if len({json.dumps(r.get("attribution"), sort_keys=True) for r in group}) != 1:
+            raise ValueError("physical attribution changed")
+        if (
+            statuses == {"returned"}
+            and len({r["conservative_usd"] for r in group}) != 1
+        ):
+            raise ValueError("physical charge changed")
+        unique.append(
+            next((r for r in group if r["status"] == "orphan_reconciled"), group[-1])
+        )
+    inflight = cap.get("inflight", {})
+    if set(grouped) & set(inflight) or len(grouped) + len(inflight) != cap["attempts"]:
+        raise ValueError("physical identities do not reconcile")
+    actual = sum(
+        float(r["conservative_usd"]) for r in unique if r["status"] == "returned"
+    )
+    uncertain = sum(
+        float(r["reserved_usd"]) for r in unique if r["status"] != "returned"
+    )
+    for left, right in ((actual, cap["actual_usd"]), (uncertain, cap["uncertain_usd"])):
+        if not math.isclose(left, right, abs_tol=1e-9, rel_tol=1e-9):
+            raise ValueError("physical cost does not reconcile")
+    return unique, {
+        "physical_attempts": cap["attempts"],
+        "returned_conservative_usd": actual,
+        "retained_failed_reservation_usd": uncertain,
+        "inflight_reservation_usd": sum(inflight.values()),
+        "committed_usd": actual + uncertain + sum(inflight.values()),
+        "orphan_reconciled_attempts": sum(
+            r["status"] == "orphan_reconciled" for r in unique
+        ),
+    }
+
+
+class Audit:
+    def __init__(self, root: Path):
+        self.root = root
+        self.run = root / "runs/e6-iterative-low-viability-v3"
+        self.checks: list[dict[str, Any]] = []
+        self.artifacts: dict[str, str] = {}
+        self.notes: list[dict[str, Any]] = []
+
+    def check(self, condition: Any, name: str, **detail: Any) -> None:
+        self.checks.append({"check": name, "passed": bool(condition), **detail})
+
+    def path(self, path: Path) -> str:
+        return (
+            str(path.relative_to(self.root))
+            if path.is_relative_to(self.root)
+            else str(path)
+        )
+
+    def text(self, path: Path) -> str:
+        raw = path.read_bytes()
+        self.artifacts[self.path(path)] = hashlib.sha256(raw).hexdigest()
+        return raw.decode()
+
+    def read(self, path: Path, default: Any = None) -> Any:
+        return json.loads(self.text(path)) if path.exists() else default
+
+    def rows(self, path: Path) -> list[dict[str, Any]]:
+        return (
+            [json.loads(line) for line in self.text(path).splitlines() if line.strip()]
+            if path.exists()
+            else []
+        )
+
+    def inventory(self) -> dict[str, tuple[int, int, int]]:
+        paths = [
+            p
+            for p in self.run.rglob("*")
+            if p.is_file() and p.suffix in (".json", ".jsonl", ".gz")
+        ]
+        return {
+            str(p): (p.stat().st_ino, p.stat().st_size, p.stat().st_mtime_ns)
+            for p in paths
+        }
+
+    def method(self) -> Any:
+        sys.dont_write_bytecode = True
+        os.environ["LITELLM_LOCAL_MODEL_COST_MAP"] = "True"
+        sys.path[:0] = [
+            str(self.root),
+            str(self.root / "src"),
+            str(self.root / "third_party/envharness"),
+        ]
+        current = self.root / "scripts/e6_iterative_low_viability_v3.py"
+        base = self.root / "scripts/e6_iterative_low_viability_v2.py"
+        self.check(digest(self.text(current)) == DRIVER_SHA, "exact_v3_driver")
+        self.check(digest(self.text(base)) == BASE_DRIVER_SHA, "exact_frozen_v2_base")
+        self.check(
+            digest(self.text(self.root / "src/aea/semantic_privilege.py")) == GATE_SHA,
+            "exact_semantic_gate",
+        )
+        if not all(c["passed"] for c in self.checks):
+            raise ValueError("refusing to import changed driver or method")
+        v3, v2 = source_functions(current), source_functions(base)
+        for name in EXECUTION_FUNCTIONS:
+            self.check(
+                v3[name] == v2[name], "unchanged_execution_function", function=name
+            )
+        driver = importlib.import_module("scripts.e6_iterative_low_viability_v3")
+        if Path(driver.__file__).resolve() != current.resolve():
+            raise ValueError("wrong imported driver location")
+        return driver
+
+    def gate_inputs(
+        self,
+        task: str,
+        original: dict[str, Any],
+        failures: list[Any],
+        reference: Any,
+        gates: list[dict[str, Any]],
+    ) -> None:
+        from aea.designer import serialize_low, task_goal
+        from aea.stage import trace_actions
+
+        actions = {t.episode_id: trace_actions(t) for t in failures}
+        evidence = serialize_low(failures, 0.0, 16, None).text
+        seen_sources = set()
+        for gate in gates:
+            result = gate["result"]
+            source_sha = result["source_sha256"]
+            label = {"task": task, "source_sha256": source_sha}
+            self.check(
+                source_sha not in seen_sources,
+                "single_semantic_result_per_source",
+                **label,
+            )
+            seen_sources.add(source_sha)
+            path = (
+                self.run
+                / f"task-{task}/privileged_semantic_inputs/{result['input_sha256']}.json.gz"
+            )
+            compressed = path.read_bytes()
+            self.artifacts[self.path(path)] = hashlib.sha256(compressed).hexdigest()
+            raw = gzip.decompress(compressed).decode()
+            data = json.loads(raw)
+            self.check(
+                digest(raw) == result["input_sha256"], "semantic_payload_hash", **label
+            )
+            self.check(
+                gate.get("input_artifact") == str(path),
+                "semantic_index_canonical_artifact_path",
+                **label,
+            )
+            self.check(
+                digest(data["source"]) == source_sha
+                and data["task_id"] == task
+                and gate["task_id"] == task,
+                "semantic_source_task_binding",
+                **label,
+            )
+            self.check(
+                data["reference"] == json.loads(json.dumps(asdict(reference))),
+                "exact_reference_in_semantic_input",
+                **label,
+            )
+            self.check(
+                data["designer_evidence"] == evidence,
+                "semantic_designer_evidence_excludes_reference",
+                **label,
+            )
+            self.check(gate["doses"] == DOSES, "all_reachable_doses_screened", **label)
+            findings = result.get("findings", [])
+            verdict = (
+                "FAIL"
+                if any(f["decision"] == "FAIL" for f in findings)
+                else "UNCERTAIN"
+                if any(f["decision"] == "UNCERTAIN" for f in findings)
+                else "PASS"
+            )
+            self.check(
+                bool(findings)
+                and result["decision"] == verdict
+                and result["version"] == "alfworld-semantic-screen-v1",
+                "gate_result_consistency",
+                **label,
+            )
+            observed_doses = {p["dose"] for p in data["probes"]}
+            self.check(
+                observed_doses <= set(DOSES)
+                and (verdict != "PASS" or observed_doses == set(DOSES)),
+                "executed_probe_doses",
+                **label,
+            )
+            valid_prefixes = valid_goals = valid_coverage = True
+            prefixes: dict[tuple[str, int], dict[str, Any]] = {}
+            for probe in data["probes"]:
+                ev = probe["evidence"]
+                error = probe.get("error")
+                if error and ev["episode_id"] == "unavailable":
+                    valid_prefixes &= verdict != "PASS"
+                    continue
+                valid_prefixes &= (
+                    ev["task_id"] == task
+                    and ev["episode_id"] in original["evidence_ids"]
+                )
+                valid_prefixes &= (
+                    len(ev["observations"]) == ev["step"] + 1
+                    and len(ev["actions"]) == ev["step"]
+                )
+                valid_prefixes &= (
+                    ev["episode_id"] in actions
+                    and ev["actions"] == actions.get(ev["episode_id"], [])[: ev["step"]]
+                )
+                valid_goals &= ev["goal"] == task_goal(failures)
+                key = (ev["episode_id"], ev["step"])
+                valid_prefixes &= key not in prefixes or prefixes[key] == ev
+                prefixes[key] = ev
+                if verdict == "PASS":
+                    valid_coverage &= not error and {
+                        "same_original_state",
+                        "policy_formatter",
+                    } <= set(probe["coverage"])
+            self.check(
+                valid_prefixes,
+                "authorized_evidence_task_episode_step_raw_action_prefix",
+                **label,
+            )
+            self.check(valid_goals, "authorized_public_goal", **label)
+            self.check(valid_coverage, "admitted_probe_execution_coverage", **label)
+
+    def task(
+        self,
+        original: dict[str, Any],
+        outer: dict[str, Any],
+        driver: Any,
+        ledger: list[dict[str, Any]],
+        seen_ids: set[str],
+    ) -> dict[str, Any]:
+        from aea.core.hashing import sha256_of
+        from aea.designer import (
+            AssistFamily,
+            EvidenceBounds,
+            serialize_low,
+            trajectory_text,
+        )
+        from aea.families import FamilyContext
+        from aea.llm.types import ChatRequest
+        from aea.low_optimizer import (
+            Feedback,
+            ITERATIVE_ASSIST_TOOL,
+            iterative_messages,
+        )
+        from envharness.core.types import Trace
+
+        task = str(original["task_id"])
+        td = self.run / f"task-{task}"
+        directory = td / "adaptation"
+        summary = outer.get("summary") or self.read(directory / "summary.json", {})
+        logs = self.rows(directory / "designer_inputs.jsonl")
+        requests = self.rows(directory / "privileged_designer_requests.jsonl")
+        packets = self.rows(directory / "feedback.jsonl")
+        proposals = self.rows(directory / "proposals.jsonl")
+        records = self.read(directory / "candidates.json", [])
+        rejections = self.read(directory / "rejections.json", [])
+        gates = self.rows(td / "semantic_gates.jsonl")
+        batches = self.rows(directory / "physical_batches.jsonl")
+        measurements = self.rows(directory / "measurements.jsonl")
+        guards = self.rows(directory / "solvability.jsonl")
+        traces = [
+            Trace.model_validate(r) for r in self.rows(directory / "traces.jsonl")
+        ]
+        self.check(
+            len(logs) == len(requests) <= 3
+            and len(records) <= len(proposals) <= len(logs),
+            "designer_call_cap_and_artifact_counts",
+            task=task,
+        )
+        self.check(
+            [r["call_index"] for r in logs] == list(range(1, len(logs) + 1)),
+            "sequential_designer_calls",
+            task=task,
+        )
+        self.check(
+            not records or summary.get("candidates") == records,
+            "summary_candidate_history",
+            task=task,
+        )
+        if not original["reference_ok"] or outer["status"] == "pending":
+            self.check(
+                not any(
+                    (
+                        logs,
+                        requests,
+                        records,
+                        gates,
+                        batches,
+                        traces,
+                        measurements,
+                        guards,
+                    )
+                ),
+                "unavailable_or_unreached_task_has_no_adaptation",
+                task=task,
+            )
+            return {
+                "task": task,
+                "outer_status": outer["status"],
+                "designer_calls": 0,
+                "adaptation_rollouts": 0,
+            }
+        failures = driver.failures_for(int(task))
+        reference = driver.read_reference(int(task))
+        evidence = serialize_low(failures, 0.0, 16, reference, rich=True)
+        self.check(
+            evidence.sha256 == original["designer_evidence_sha256"],
+            "exact_n16_designer_evidence",
+            task=task,
+        )
+        self.gate_inputs(task, original, failures, reference, gates)
+        by_index: dict[int, str] = {}
+        for proposal in proposals:
+            fs = proposal["arguments"].get("families")
+            family = (
+                fs[0] if isinstance(fs, list) and fs and isinstance(fs[0], dict) else {}
+            )
+            by_index[proposal["call_index"]] = str(family.get("rules_code") or "")
+        feedback_by_call = {p["call_index"]: p["feedback"] for p in packets}
+        self.check(
+            len(feedback_by_call) == len(packets)
+            and set(feedback_by_call) == set(range(2, len(logs) + 1)),
+            "one_actual_feedback_per_redesign",
+            task=task,
+        )
+        for log, raw_request in zip(logs, requests):
+            index = log["call_index"]
+            packet = feedback_by_call.get(index)
+            feedback = Feedback(**packet) if packet else None
+            request = ChatRequest.model_validate(raw_request)
+            label = {"task": task, "call": index}
+            prior_charge = sum(
+                b["n"] for b in batches if int(b["phase"].split(":")[0][1:]) < index
+            )
+            self.check(
+                30 - prior_charge >= 16,
+                "unchanged_endpoint_and_calibration_reserve_before_designer",
+                **label,
+            )
+            self.check(
+                request.messages == iterative_messages(evidence, feedback),
+                "exact_designer_messages_no_confirmation_input",
+                **label,
+            )
+            self.check(
+                digest(raw_request) == log["request_sha256"]
+                and log["evidence_sha256"] == evidence.sha256,
+                "designer_request_hash_binding",
+                **label,
+            )
+            self.check(
+                request.model == "deepseek-v4-pro"
+                and request.seed == int(task) + index - 1
+                and request.temperature == 0.7
+                and request.max_tokens == 6144
+                and request.tools == (ITERATIVE_ASSIST_TOOL,)
+                and request.tool_choice
+                == {
+                    "type": "function",
+                    "function": {"name": "diagnose_and_propose_assistance"},
+                },
+                "frozen_designer_generation",
+                **label,
+            )
+            self.check(
+                request.attribution.task_id == task
+                and request.attribution.arm == "iterative_low"
+                and request.attribution.budget == "designer"
+                and request.attribution.phase == f"design_low_C{index}",
+                "designer_attribution",
+                **label,
+            )
+            self.check(
+                log["feedback_supplied"] == (index > 1)
+                and log["requested_operation"]
+                == (feedback.operation if feedback else "PROPOSE")
+                and log["parent_candidate_id"]
+                == (feedback.candidate_id if feedback else None)
+                and log["previous_source_sha256"]
+                == (feedback.source_sha256 if feedback else None),
+                "logged_feedback_lineage",
+                **label,
+            )
+            billed = [
+                r
+                for r in ledger
+                if str(r.get("task_id")) == task
+                and r.get("phase") == request.attribution.phase
+                and r.get("event") == "call"
+            ]
+            upstream_hash = sha256_of(
+                {"provider": "deepseek", "request": request.model_dump()}
+            )
+            self.check(
+                all(r["request_sha256"] == upstream_hash for r in billed),
+                "designer_ledger_request_binding",
+                **label,
+            )
+            operation = self.read(
+                self.run / f"operations/designer-{task}-C{index}.json", {}
+            )
+            self.check(
+                operation.get("status") in ("completed", "interrupted", "dispatched"),
+                "designer_single_dispatch_marker",
+                **label,
+            )
+            if operation.get("status") == "completed":
+                self.check(
+                    len(billed) == 1,
+                    "completed_designer_has_one_logical_return",
+                    **label,
+                )
+            if packet:
+                parent = records[index - 2] if len(records) >= index - 1 else {}
+                self.check(
+                    packet in rejections
+                    and all(
+                        packet.get(k) == parent.get(k)
+                        for k in (
+                            "candidate_id",
+                            "source",
+                            "source_sha256",
+                            "mechanism",
+                            "remaining_calls",
+                            "remaining_policy",
+                            "endpoint",
+                        )
+                    )
+                    and packet["reason"] == parent.get("rejection_reason"),
+                    "feedback_exact_prior_rejection",
+                    **label,
+                )
+                if packet.get("failed_episode_id"):
+                    failed = next(
+                        (
+                            t
+                            for t in traces
+                            if t.episode_id == packet["failed_episode_id"]
+                        ),
+                        None,
+                    )
+                    self.check(
+                        failed is not None
+                        and not failed.success
+                        and packet["failed_rollout"]
+                        == trajectory_text(
+                            "candidate_failure",
+                            failed,
+                            EvidenceBounds(steps_head=6, steps_tail=3),
+                        ),
+                        "feedback_failure_is_actual_adaptation_trace",
+                        **label,
+                    )
+        for index, record in enumerate(records, 1):
+            sha = digest(record["source"])
+            label = {"task": task, "call": index}
+            self.check(
+                record["source"] == by_index.get(index)
+                and record["source_sha256"] == sha
+                and record["candidate_id"] == f"{task}:C{index}:{sha}",
+                "unmodified_proposal_source_identity",
+                **label,
+            )
+            self.check(
+                record["optimizer_call_index"] == index
+                and record["remaining_calls"] == 3 - index
+                and record["parent_candidate_id"]
+                == (records[index - 2]["candidate_id"] if index > 1 else None),
+                "candidate_linear_lineage",
+                **label,
+            )
+            endpoint_charge = sum(
+                b["n"]
+                for b in batches
+                if int(b["phase"].split(":")[0][1:]) <= index
+                and float(b["phase"].split(":")[-1]) == 1.0
+            )
+            self.check(
+                record["remaining_policy"] == 30 - endpoint_charge,
+                "record_remaining_policy_after_design_endpoint",
+                **label,
+            )
+            self.check(
+                record["requested_operation"]
+                == (
+                    feedback_by_call[index]["operation"]
+                    if index > 1 and index in feedback_by_call
+                    else "PROPOSE"
+                ),
+                "candidate_typed_operation",
+                **label,
+            )
+            if record["solvability"] is not None or record["endpoint"] is not None:
+                self.check(
+                    not record["structural"]
+                    and not record["privilege"]
+                    and check_admission(gates, record["source"], 1.0),
+                    "certification_and_endpoint_have_full_admission",
+                    **label,
+                )
+            if "semantic_privilege_uncertain" in str(record.get("rejection_reason")):
+                self.check(
+                    index == len(logs)
+                    and not record["solvability"]
+                    and not record["endpoint"]
+                    and summary.get("status") == "inconclusive",
+                    "uncertain_stops_task_before_probe",
+                    **label,
+                )
+        for guard in guards:
+            index = guard["call_index"]
+            self.check(
+                index in by_index and check_admission(gates, by_index[index], 1.0),
+                "solvability_after_semantic_pass",
+                task=task,
+                call=index,
+            )
+        guard_ok = {g["call_index"] for g in guards if g["guard"]["ok"]}
+        phases: dict[str, list[Any]] = {}
+        charged = sum(b["n"] for b in batches)
+        cursor = 0
+        all_runtime_hashes = set()
+        for b in batches:
+            matched = re.fullmatch(r"C(\d+):dose:(.+)", b["phase"])
+            if matched is None:
+                self.check(False, "well_formed_policy_phase", task=task)
+                continue
+            index, dose = int(matched[1]), float(matched[2])
+            source = by_index.get(index, "")
+            label = {"task": task, "call": index, "dose": dose}
+            self.check(
+                index in by_index
+                and index in guard_ok
+                and check_admission(gates, source, dose),
+                "each_policy_batch_exact_admitted_source_dose",
+                **label,
+            )
+            code = instantiate(source, task, dose)
+            all_runtime_hashes.add(digest(code))
+            batch_traces = traces[cursor : cursor + b["n"]]
+            cursor += len(batch_traces)
+            phases.setdefault(b["phase"], []).extend(batch_traces)
+            marker = self.read(
+                self.run
+                / f"operations/adapt-{task}-{b['phase'].replace(':', '-')}-{b['batch_index']}.json",
+                {},
+            )
+            self.check(
+                b["n"] == 4 and b["batch_index"] in (1, 2),
+                "frozen_four_then_eight_batch_schedule",
+                **label,
+            )
+            self.check(
+                marker.get("metadata", {}).get("n") == b["n"]
+                and marker.get("metadata", {}).get("phase") == b["phase"],
+                "batch_single_dispatch_marker",
+                **label,
+            )
+            if marker.get("status") == "completed":
+                self.check(
+                    len(batch_traces) == b["n"]
+                    and not any(t.error for t in batch_traces),
+                    "completed_batch_full_valid_traces",
+                    **label,
+                )
+            else:
+                self.notes.append(
+                    {
+                        "task": task,
+                        "phase": b["phase"],
+                        "requested_episodes": b["n"],
+                        "returned_episodes": len(batch_traces),
+                        "note": "Interrupted/dispatched batch retains full episode charge; returned errors have no behavioral result.",
+                    }
+                )
+            self.check(
+                all(
+                    t.candidate.rules_code == code
+                    and not t.candidate.in_env_actions
+                    and t.rollout_seed == int(task)
+                    for t in batch_traces
+                ),
+                "runtime_trace_exact_source_dose_seed",
+                **label,
+            )
+        self.check(
+            cursor == len(traces), "all_adaptation_traces_have_paid_batch", task=task
+        )
+        self.check(
+            charged <= 30
+            and summary.get("adaptation_rollouts", 0) == charged
+            and summary.get("designer_calls", 0) == len(logs),
+            "per_task_three_calls_thirty_requested_episodes",
+            task=task,
+        )
+        budget = self.read(directory / "rollout_budget.json", [])
+        self.check(
+            sum(r["n"] for r in budget) == charged
+            and all(
+                r["task_id"] == task and r["budget"] == "search" and r["refunded"] == 0
+                for r in budget
+            ),
+            "requested_episode_budget_never_refunded",
+            task=task,
+        )
+        self.check(
+            Counter({r["phase"]: r["n"] for r in budget})
+            == Counter(
+                {
+                    p: sum(b["n"] for b in batches if b["phase"] == p)
+                    for p in {b["phase"] for b in batches}
+                }
+            ),
+            "phase_episode_accounting",
+            task=task,
+        )
+        for phase in phases:
+            phase_batches = [b for b in batches if b["phase"] == phase]
+            self.check(
+                [b["batch_index"] for b in phase_batches] in ([1], [1, 2]),
+                "no_repeated_or_extra_measurement_batch",
+                task=task,
+                phase=phase,
+            )
+            if len(phase_batches) == 2:
+                self.check(
+                    0 < sum(bool(t.success) for t in phases[phase][:4]) < 4,
+                    "only_mixed_first_batch_tops_up_to_eight",
+                    task=task,
+                    phase=phase,
+                )
+        for m in measurements:
+            phase = f"C{m['call_index']}:dose:{m['d']}"
+            mts = phases.get(phase, [])
+            expected = instantiate(by_index.get(m["call_index"], ""), task, m["d"])
+            success = sum(bool(t.success) for t in mts)
+            verdict = (
+                "in_band"
+                if len(mts) == 8 and 3 <= success <= 5
+                else "too_hard"
+                if success < (3 if len(mts) == 8 else 1)
+                else "too_easy"
+            )
+            self.check(
+                m["n"] == len(mts)
+                and m["s"] == success
+                and m["candidate_hash"] == digest(expected)
+                and not any(t.error for t in mts)
+                and m["verdict"] == verdict
+                and (len(mts) == 8 or len(mts) == 4 and success in (0, 4)),
+                "measurement_matches_valid_behavior_and_runtime_source",
+                task=task,
+                call=m["call_index"],
+                dose=m["d"],
+            )
+        frozen = summary.get("frozen_family")
+        if frozen:
+            index = frozen["optimizer_call_index"]
+            family = AssistFamily(**frozen["family"])
+            self.check(
+                self.read(directory / "frozen_family.json") == frozen
+                and frozen["source_sha256"] == digest(family.template)
+                and family.template == by_index.get(index),
+                "immutable_frozen_family_artifact",
+                task=task,
+            )
+            self.check(
+                index
+                == summary["first_viable_family_index"]
+                == len(records)
+                == len(logs)
+                and records[index - 1]["endpoint"] is not None
+                and records[index - 1]["endpoint"][2] in ("in_band", "too_easy")
+                and all(
+                    not r["endpoint"] or r["endpoint"][2] == "too_hard"
+                    for r in records[: index - 1]
+                ),
+                "first_viable_freezes_design_no_later_call",
+                task=task,
+            )
+            control = summary.get("control", {})
+            actual_control = [
+                m for m in measurements if m["call_index"] == index and m["d"] != 1.0
+            ]
+            if control:
+                expected_control = [
+                    {"d": m["d"], "s": m["s"], "n": m["n"], "verdict": m["verdict"]}
+                    for m in measurements
+                    if m["call_index"] == index
+                ]
+                self.check(
+                    control["history"] == expected_control,
+                    "control_history_from_frozen_family_measurements",
+                    task=task,
+                )
+            self.check(
+                all(m["call_index"] == index for m in measurements if m["d"] != 1.0),
+                "interior_doses_only_after_family_freeze",
+                task=task,
+            )
+            if summary.get("search_accepted"):
+                dose = float(summary["accepted_dose"])
+                candidate = family.make(dose, FamilyContext(task, ()))
+                assert candidate is not None
+                self.check(
+                    summary["final_family"] == frozen["family"]
+                    and candidate.model_dump(mode="json") == summary["final_candidate"]
+                    and digest(candidate.rules_code)
+                    == summary["final_environment_hash"]
+                    and check_admission(gates, family.template, dose),
+                    "accepted_environment_reconstructs_frozen_admission",
+                    task=task,
+                )
+                self.check(
+                    summary["search_n"] == 8
+                    and 3 <= summary["search_successes"] <= 5
+                    and any(
+                        m["call_index"] == index
+                        and m["d"] == dose
+                        and m["n"] == 8
+                        and m["s"] == summary["search_successes"]
+                        for m in measurements
+                    ),
+                    "exact_search_acceptance",
+                    task=task,
+                )
+            self.check(
+                not actual_control
+                or bool(control)
+                or bool(summary.get("interruption")),
+                "control_artifact_or_interruption",
+                task=task,
+            )
+        else:
+            self.check(
+                not summary.get("search_accepted") and not summary.get("control"),
+                "no_acceptance_without_frozen_family",
+                task=task,
+            )
+        confirmation_batches = self.rows(td / "confirmation_batches.jsonl")
+        confirmation_raw = self.read(td / "confirmation_traces.json", [])
+        confirmation_traces = [Trace.model_validate(r) for r in confirmation_raw]
+        confirmation = self.read(td / "confirmation.json")
+        self.check(
+            len(confirmation_batches) <= 1
+            and (not confirmation_batches or summary.get("search_accepted")),
+            "confirmation_once_only_after_search_acceptance",
+            task=task,
+        )
+        if confirmation_batches:
+            self.check(
+                confirmation_batches
+                == [
+                    {
+                        "task": int(task),
+                        "n": 16,
+                        "environment_sha256": summary["final_environment_hash"],
+                    }
+                ],
+                "confirmation_sixteen_eval_episodes",
+                task=task,
+            )
+            self.check(
+                all(
+                    t.candidate.rules_code == summary["final_candidate"]["rules_code"]
+                    and t.candidate.in_env_actions == []
+                    and t.rollout_seed == int(task)
+                    for t in confirmation_traces
+                ),
+                "confirmation_unchanged_runtime_environment",
+                task=task,
+            )
+        if confirmation:
+            successes = sum(bool(t.success) for t in confirmation_traces)
+            self.check(
+                len(confirmation_traces) == 16
+                and not any(t.error for t in confirmation_traces)
+                and confirmation == summary.get("confirmation")
+                and confirmation["successes"] == successes
+                and confirmation["n"] == 16
+                and confirmation["in_band_l"] == (4 <= successes <= 12)
+                and confirmation["in_band_t"] == (7 <= successes <= 9)
+                and confirmation["traces_sha256"] == digest(confirmation_raw)
+                and confirmation["episode_ids"]
+                == [t.episode_id for t in confirmation_traces]
+                and confirmation["environment_sha256"]
+                == summary["final_environment_hash"]
+                and confirmation["dose"] == summary["accepted_dose"],
+                "actual_k16_counts_bands_trace_hashes",
+                task=task,
+            )
+        local_summary = self.read(directory / "summary.json", {})
+        final_without_k16 = {k: v for k, v in summary.items() if k != "confirmation"}
+        self.check(
+            local_summary == final_without_k16,
+            "confirmation_never_mutates_design_control_summary",
+            task=task,
+        )
+        for trace in traces + confirmation_traces:
+            self.check(
+                bool(trace.episode_id) and trace.episode_id not in seen_ids,
+                "fresh_global_episode_identity",
+                task=task,
+                episode_id=trace.episode_id,
+            )
+            seen_ids.add(trace.episode_id)
+        policy_calls = [
+            r
+            for r in ledger
+            if str(r.get("task_id")) == task
+            and r.get("event") == "call"
+            and r.get("budget") in ("search", "eval")
+        ]
+        self.check(
+            all(
+                (r["budget"] == "search" and r["phase"] in phases)
+                or (
+                    r["budget"] == "eval"
+                    and r["phase"] == "confirm"
+                    and bool(confirmation_batches)
+                )
+                for r in policy_calls
+            ),
+            "every_billed_policy_call_has_admitted_dispatch",
+            task=task,
+        )
+        policy_physical = [
+            r
+            for r in self.physical
+            if str(r.get("attribution", {}).get("task_id")) == task
+            and r["phase"] == "adaptation"
+            and r.get("attribution", {}).get("budget") in ("search", "eval")
+        ]
+        self.check(
+            all(
+                (
+                    r["attribution"]["budget"] == "search"
+                    and r["attribution"]["phase"] in phases
+                )
+                or (
+                    r["attribution"]["budget"] == "eval"
+                    and r["attribution"]["phase"] == "confirm"
+                    and bool(confirmation_batches)
+                )
+                for r in policy_physical
+            ),
+            "every_physical_policy_attempt_has_admitted_dispatch",
+            task=task,
+        )
+        confirmation_physical = [
+            r
+            for r in self.physical
+            if str(r.get("attribution", {}).get("task_id")) == task
+            and r["phase"] == "adaptation"
+            and r.get("attribution", {}).get("budget") == "eval"
+        ]
+        designer_physical = [
+            r
+            for r in self.physical
+            if r["phase"] == "adaptation"
+            and str(r["attribution"]["task_id"]) == task
+            and r["attribution"]["budget"] == "designer"
+        ]
+        self.check(
+            all(
+                r["attribution"]["phase"]
+                in {f"design_low_C{i}" for i in range(1, len(logs) + 1)}
+                for r in designer_physical
+            ),
+            "every_physical_designer_attempt_has_one_logged_call",
+            task=task,
+        )
+        frozen_control_physical = [
+            r
+            for r in policy_physical
+            if r["attribution"]["budget"] == "search"
+            and float(r["attribution"]["phase"].split(":")[-1]) != 1.0
+        ]
+        after_freeze = frozen_control_physical + confirmation_physical
+        if designer_physical and after_freeze:
+            self.check(
+                max(r["started"] for r in designer_physical)
+                <= min(r["started"] for r in after_freeze),
+                "no_designer_attempt_after_control_or_confirmation_starts",
+                task=task,
+            )
+        designer_return_times = [
+            datetime.fromisoformat(r["ts"]).timestamp()
+            for r in ledger
+            if str(r.get("task_id")) == task
+            and r.get("event") == "call"
+            and r.get("budget") == "designer"
+        ]
+        if confirmation_physical and designer_return_times:
+            self.check(
+                max(designer_return_times)
+                <= min(r["started"] for r in confirmation_physical),
+                "all_designer_returns_precede_confirmation_dispatch",
+                task=task,
+            )
+        return {
+            "task": task,
+            "outer_status": outer["status"],
+            "designer_calls": len(logs),
+            "candidate_records": len(records),
+            "semantic_decisions": [g["result"]["decision"] for g in gates],
+            "adaptation_rollouts": charged,
+            "returned_adaptation_traces": len(traces),
+            "runtime_source_hashes": sorted(all_runtime_hashes),
+            "confirmation_requested": bool(confirmation_batches),
+            "confirmation_completed": confirmation is not None,
+        }
+
+    def costs(
+        self, cap: dict[str, Any], driver: Any, ledger: list[dict[str, Any]]
+    ) -> dict[str, Any]:
+        from aea.llm.pricing import load_pricing
+        from aea.llm.types import Usage
+
+        self.physical, cost = physical_costs(
+            cap, self.rows(self.run / "cap.attempts.jsonl")
+        )
+        self.check(True, "physical_attempts_cost_and_reservations_reconcile")
+        self.check(
+            not cap.get("bound_violation"), "no_physical_request_bound_violation"
+        )
+        self.check(
+            cap.get("total_limit_usd") == 29
+            and cap.get("screening_limit_usd") == 4
+            and cap.get("adaptation_confirmation_limit_usd") == 25,
+            "frozen_separate_dollar_caps",
+        )
+        self.check(
+            all(
+                r["phase"] in ("screening", "adaptation")
+                and (
+                    r["phase"] == "screening"
+                    or r["attribution"]["budget"] in ("designer", "search", "eval")
+                )
+                for r in self.physical
+            ),
+            "physical_phase_and_budget_domains",
+        )
+        baseline = self.read(self.run / "topup_cost_baseline.json", {})
+        topup = [r for r in self.physical if r["phase"] == "screening"]
+        topup_actual = sum(
+            r["conservative_usd"] for r in topup if r["status"] == "returned"
+        )
+        topup_uncertain = sum(
+            r["reserved_usd"] for r in topup if r["status"] != "returned"
+        )
+        if baseline:
+            self.check(
+                math.isclose(topup_actual, baseline["actual_usd"], abs_tol=1e-9)
+                and math.isclose(
+                    topup_uncertain, baseline["uncertain_usd"], abs_tol=1e-9
+                )
+                and len(topup) == baseline["physical_attempts"],
+                "topup_baseline_preserves_all_historical_topup_requests",
+            )
+            ceiling = (
+                driver.phase_limit(cap, self.run / "cap.json")
+                if cap["phase"] == "adaptation"
+                else baseline["screening_committed_usd"] + 25
+            )
+            self.check(
+                cost["committed_usd"] <= ceiling + 1e-9
+                and cost["committed_usd"] - baseline["screening_committed_usd"]
+                <= 25 + 1e-9,
+                "separate_25usd_adaptation_cap_no_unused_topup_transfer",
+            )
+            cost.update(
+                topup_committed_usd=baseline["screening_committed_usd"],
+                adaptation_committed_usd=cost["committed_usd"]
+                - baseline["screening_committed_usd"],
+                adaptation_limit_usd=25,
+                effective_cumulative_ceiling_usd=ceiling,
+                historical_v2_sunk_usd_excluded=7.994786072,
+            )
+        calls = [r for r in ledger if r.get("event") == "call"]
+        pricing = load_pricing(self.root / "configs/pricing.yaml")
+        for row in calls:
+            usage = Usage(
+                prompt_tokens=row["prompt_tokens"],
+                completion_tokens=row["completion_tokens"],
+                cached_tokens=row["cached_tokens"],
+                reasoning_tokens=row["reasoning_tokens"],
+            )
+            charge = pricing.cost(
+                row["model"], usage, datetime.fromisoformat(row["ts"])
+            )
+            self.check(
+                returned_model_provider_matches(row),
+                "frozen_policy_designer_model_provider",
+                request_sha256=row["request_sha256"],
+            )
+            self.check(
+                math.isclose(charge.usd, row["usd"], abs_tol=1e-12)
+                and charge.tier == row["pricing_tier"]
+                and charge.pricing_version == row["pricing_version"],
+                "ledger_frozen_pricing",
+                request_sha256=row["request_sha256"],
+            )
+        returned = Counter(
+            (
+                r["model"],
+                str(r["attribution"]["task_id"]),
+                r["attribution"]["phase"],
+                r["input_tokens"],
+                r["output_tokens"],
+            )
+            for r in self.physical
+            if r["status"] == "returned"
+        )
+        logged = Counter(
+            (
+                r["model"],
+                str(r["task_id"]),
+                r["phase"],
+                r["prompt_tokens"],
+                r["completion_tokens"],
+            )
+            for r in calls
+        )
+        self.check(
+            not (logged - returned), "no_ledger_call_without_returned_physical_request"
+        )
+        if returned != logged:
+            self.notes.append(
+                {
+                    "note": "Some returned physical requests have no complete logical ledger return; conservative cost remains charged.",
+                    "physical_only_returns": sum((returned - logged).values()),
+                }
+            )
+        unlabeled_designer = sum(
+            r["budget"] == "designer" and r["provider"] is None for r in calls
+        )
+        cost["designer_response_provider_label_unavailable"] = unlabeled_designer
+        if unlabeled_designer:
+            self.notes.append(
+                {
+                    "note": "Direct designer responses omit the provider label. The DeepSeek route is bound by frozen configuration, routing guards, model, and request hashes; an independent upstream provider label is unavailable.",
+                    "logical_calls": unlabeled_designer,
+                }
+            )
+        cost["ledger_priced_usd"] = sum(r["usd"] for r in calls)
+        cost["phase_costs"] = {}
+        for key, phase, budget in (
+            ("topup", "screening", None),
+            ("designer", "adaptation", "designer"),
+            ("adaptation_policy", "adaptation", "search"),
+            ("confirmation", "adaptation", "eval"),
+        ):
+            rows = [
+                r
+                for r in self.physical
+                if r["phase"] == phase
+                and (budget is None or r["attribution"]["budget"] == budget)
+            ]
+            cost["phase_costs"][key] = {
+                "physical_attempts": len(rows),
+                "conservative_returned_usd": sum(
+                    r["conservative_usd"] for r in rows if r["status"] == "returned"
+                ),
+                "retained_failed_reservations_usd": sum(
+                    r["reserved_usd"] for r in rows if r["status"] != "returned"
+                ),
+            }
+        return cost
+
+    def run_audit(self) -> dict[str, Any]:
+        before = self.inventory()
+        driver = self.method()
+        results = self.read(self.run / "results.json")
+        screening = self.read(self.run / "screening.json", {})
+        stage_error = self.read(self.run / "stage_interruption.json")
+        if results is None:
+            if not stage_error and screening.get("status") not in (
+                "TOPUP_INCONCLUSIVE",
+                "SCREENING_COST_LIMIT",
+                "INSUFFICIENT_FRESH_LOW",
+                "INCONCLUSIVE",
+                "IMPLEMENTATION_FAILURE",
+            ):
+                raise ValueError(
+                    "adaptation has not terminated; refusing active/pre-adaptation audit"
+                )
+            freeze = driver.ensure_frozen(adaptation=False)
+            self.check(
+                not any(self.run.glob("task-*/adaptation/designer_inputs.jsonl")),
+                "terminal_without_adaptation_has_no_designer_requests",
+            )
+            self.check(before == self.inventory(), "stable_terminal_artifact_snapshot")
+            return self.result("NOT_RUN", freeze, [], {}, stage_error is not None)
+        interruption = results.get("interruption") or stage_error
+        if not interruption and any(
+            r["status"] not in ("completed", "reference_unavailable")
+            for r in results["tasks"].values()
+        ):
+            raise ValueError("adaptation is still active; terminal audit refused")
+        freeze = driver.ensure_frozen(adaptation=True)
+        prepared = driver.verify_input_set()
+        self.check(freeze == results["freeze"], "exact_runtime_and_prereg_bindings")
+        self.check(
+            set(results["tasks"]) == {str(r["task_id"]) for r in prepared},
+            "four_task_denominator_preserved",
+        )
+        reference_finishes = []
+        for original in prepared:
+            marker = self.read(
+                self.run / f"operations/reference-{original['task_id']}.json", {}
+            )
+            self.check(
+                marker.get("status") == "completed"
+                and marker.get("metadata")
+                == {"task": original["task_id"], "provider_calls": 1},
+                "one_completed_frozen_reference_invocation",
+                task=str(original["task_id"]),
+            )
+            if marker.get("finished") is not None:
+                reference_finishes.append(marker["finished"])
+            self.check(
+                results["tasks"][str(original["task_id"])]["original"] == original,
+                "frozen_original_row",
+                task=str(original["task_id"]),
+            )
+        for name in (
+            "input_manifest.json",
+            "runtime_hashes.json",
+            "core_manifest.json",
+            "method_binding_audit.json",
+        ):
+            self.text(driver.FROZEN / name)
+        self.text(driver.PREREG)
+        cap = self.read(self.run / "cap.json")
+        self.check(
+            not cap["inflight"] or bool(interruption),
+            "open_reservations_only_on_terminal_interruption",
+        )
+        input_manifest = self.read(self.run / "input_manifest.json")
+        self.check(
+            input_manifest["policy_config"]
+            == driver.e3.policy_qwen().model_dump(mode="json")
+            and input_manifest["designer_config"]
+            == driver.e3.designer_deepseek().model_dump(mode="json")
+            and input_manifest["effective_designer_max_tokens"] == 6144,
+            "input_manifest_exact_frozen_llm_configs",
+        )
+        ledger = [
+            r
+            for path in sorted(self.run.glob("ledger.*.jsonl"))
+            for r in self.rows(path)
+        ]
+        costs = self.costs(cap, driver, ledger)
+        adaptation_attempts = [r for r in self.physical if r["phase"] == "adaptation"]
+        if adaptation_attempts:
+            self.check(
+                len(reference_finishes) == 4
+                and max(reference_finishes)
+                <= min(r["started"] for r in adaptation_attempts),
+                "all_references_frozen_before_first_adaptation_request",
+            )
+        original_ids = [
+            episode for r in prepared for episode in r["all_original_episode_ids"]
+        ]
+        self.check(
+            len(original_ids) == len(set(original_ids)) == 64,
+            "sixty_four_distinct_frozen_original_episodes",
+        )
+        seen_ids = set(original_ids)
+        task_audits = [
+            self.task(
+                original,
+                results["tasks"][str(original["task_id"])],
+                driver,
+                ledger,
+                seen_ids,
+            )
+            for original in prepared
+        ]
+        recorded_ids = self.read(
+            self.run / "adaptation_and_confirmation_episode_ids.json"
+        )
+        if recorded_ids is not None:
+            self.check(
+                set(recorded_ids) <= seen_ids
+                and set(original_ids) <= set(recorded_ids),
+                "persisted_episode_identity_set_is_bound",
+            )
+        adapted_tasks = {str(r["task_id"]) for r in prepared if r["reference_ok"]}
+        self.check(
+            all(
+                r["phase"] == "screening"
+                or str(r["attribution"].get("task_id")) in adapted_tasks
+                for r in self.physical
+            ),
+            "every_adaptation_physical_request_belongs_to_available_reference_task",
+        )
+        self.check(before == self.inventory(), "stable_terminal_artifact_snapshot")
+        return self.result("PASS", freeze, task_audits, costs, bool(interruption))
+
+    def result(
+        self,
+        status: str,
+        freeze: dict[str, Any],
+        tasks: list[dict[str, Any]],
+        costs: dict[str, Any],
+        interrupted: bool,
+    ) -> dict[str, Any]:
+        failures = [c for c in self.checks if not c["passed"]]
+        return {
+            "schema": "v3-terminal-adaptation-provenance-audit-v1",
+            "auditor_sha256": file_sha(Path(__file__)),
+            "audit_status": "FAIL" if failures else status,
+            "research_decision": "not determined by this audit",
+            "terminal_interruption": interrupted,
+            "freeze": freeze,
+            "checks_passed": len(self.checks) - len(failures),
+            "checks_failed": len(failures),
+            "failures": failures,
+            "tasks": tasks,
+            "costs": costs,
+            "checks": self.checks,
+            "notes": self.notes,
+            "artifact_sha256": self.artifacts,
+            "limitations": [
+                "Semantic gate events do not carry timestamps. Gate-before-policy is supported by the hash-pinned frozen call flow and exact source/dose admission artifacts, not independent timestamped gate telemetry.",
+                "Raw replay prefixes are bound to task, episode, goal, dose, and original actions. This audit does not rerun hooks or independently certify semantic correctness; actual surface review remains separate.",
+                "Provider completion and ledger records account for observable calls and retained reservations; ambiguous requests are not assumed unbilled.",
+                "A passing provenance audit is not a LOW efficacy result. Missing/errored episodes remain missing, and incomplete K16 is not a confirmation miss.",
+            ],
+        }
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--root", type=Path, default=Path("/home/kree/work/EnvJudge-aea-llm")
+    )
+    parser.add_argument("--output", type=Path, required=True)
+    args = parser.parse_args()
+    output = args.output.resolve()
+    if not output.is_relative_to(Path("/tmp")):
+        parser.error(
+            "audit output must be under /tmp; repository and run are read-only"
+        )
+    audit = Audit(args.root.resolve())
+    try:
+        result = audit.run_audit()
+    except Exception as exc:
+        result = {
+            "schema": "v3-terminal-adaptation-provenance-audit-v1",
+            "audit_status": "REFUSED",
+            "reason_type": type(exc).__name__,
+            "reason": str(exc),
+            "checks": audit.checks,
+            "artifact_sha256": audit.artifacts,
+        }
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
+    print(
+        json.dumps(
+            {
+                "audit_status": result["audit_status"],
+                "output": str(output),
+                "sha256": file_sha(output),
+            }
+        )
+    )
+    return 0 if result["audit_status"] in ("PASS", "NOT_RUN") else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

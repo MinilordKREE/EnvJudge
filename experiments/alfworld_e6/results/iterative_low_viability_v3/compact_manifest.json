@@ -1,0 +1,145 @@
+{
+  "files": [
+    {
+      "bytes": 13046,
+      "path": "experiments/alfworld_e6/ITERATIVE_LOW_VIABILITY_V3_REPORT.md",
+      "sha256": "6d33bdd705ea032fba71108c268232d79b55a63a0707d078a6cdc3424119849f"
+    },
+    {
+      "bytes": 30594,
+      "path": "experiments/alfworld_e6/results/iterative_low_viability_v3/adaptation_tasks.json",
+      "sha256": "de7ddbd963bd0f42f962c5f4975f95ca938bc894e69f824a69710d54b078ac00"
+    },
+    {
+      "bytes": 52147,
+      "path": "experiments/alfworld_e6/results/iterative_low_viability_v3/artifact_manifest.json",
+      "sha256": "c54bb0f5d063f3f5494abd5bb32929c99e2629b565756fb3de2fdc2171d98e7a"
+    },
+    {
+      "bytes": 1805,
+      "path": "experiments/alfworld_e6/results/iterative_low_viability_v3/audit_helper_correction.diff",
+      "sha256": "771f099675d230c279b6378823fd4cdbcff0387626b77c0b4cec5ae2c630f17f"
+    },
+    {
+      "bytes": 3846,
+      "path": "experiments/alfworld_e6/results/iterative_low_viability_v3/audit_helper_correction.json",
+      "sha256": "791eaa5b58e2b56a837f90d1cd5b89ec76af6d9ad3cb12bafbec265a095dbf1c"
+    },
+    {
+      "bytes": 12906,
+      "path": "experiments/alfworld_e6/results/iterative_low_viability_v3/candidate_surface_review.json",
+      "sha256": "5d1e34ac3eee49cb1bcc9efa68d687e9000797cf7ad93fbbdc16a88572e76223"
+    },
+    {
+      "bytes": 5071,
+      "path": "experiments/alfworld_e6/results/iterative_low_viability_v3/decision_review.md",
+      "sha256": "7db9e1166db210cdf02ee3ee67080b60b8f577769c0f3316bdcc105c39add2ef"
+    },
+    {
+      "bytes": 3694,
+      "path": "experiments/alfworld_e6/results/iterative_low_viability_v3/final_review.json",
+      "sha256": "448843c062204b20695241f4bcfd1a4216ef6ec38ecc3ce7ca83868b7cbd01d2"
+    },
+    {
+      "bytes": 8905,
+      "path": "experiments/alfworld_e6/results/iterative_low_viability_v3/finalize_report.py.txt",
+      "sha256": "e23b43cd437d3ef60ec5a68b4c39c72e591d0983251d6fbe7d98986a2195c754"
+    },
+    {
+      "bytes": 24889,
+      "path": "experiments/alfworld_e6/results/iterative_low_viability_v3/physical_phase_audit.json",
+      "sha256": "d94bb500d13a46e3f66f4a85ee7c26923612760850c0463daa6b23a07c148960"
+    },
+    {
+      "bytes": 18237,
+      "path": "experiments/alfworld_e6/results/iterative_low_viability_v3/physical_phase_audit.py.txt",
+      "sha256": "9fc6ffdf8a2be2539d15dd30570364653c5a3662ba88eb7d156cbd8f4e573347"
+    },
+    {
+      "bytes": 5087,
+      "path": "experiments/alfworld_e6/results/iterative_low_viability_v3/prereg_assembly.py.txt",
+      "sha256": "89e57f3a9485b9fd25dffebec5a3e5bb0b586807f6a4481bb32ac06eacfb2e0a"
+    },
+    {
+      "bytes": 11183,
+      "path": "experiments/alfworld_e6/results/iterative_low_viability_v3/preservation_audit.json",
+      "sha256": "bbdb2e9f36c990965805b833d96d260c4428b3eed62b59ffc02a2b8ffe0638c9"
+    },
+    {
+      "bytes": 23388,
+      "path": "experiments/alfworld_e6/results/iterative_low_viability_v3/preservation_check.py.txt",
+      "sha256": "743442f23ee7ea591b39b39a68df2dde585529a2e80afff2cd0fb3ee8da8d38d"
+    },
+    {
+      "bytes": 41777,
+      "path": "experiments/alfworld_e6/results/iterative_low_viability_v3/report_helper.py.txt",
+      "sha256": "c0cf55659fbcd85c8ae399d889c4b4c1c26a15bd85af7c716d1cbb367749533f"
+    },
+    {
+      "bytes": 109233,
+      "path": "experiments/alfworld_e6/results/iterative_low_viability_v3/result.json",
+      "sha256": "d957a9924e87183e0d326aa2808cbc983d0907f59c25eaaa01215932ac7b71b6"
+    },
+    {
+      "bytes": 8857,
+      "path": "experiments/alfworld_e6/results/iterative_low_viability_v3/review_task154.py.txt",
+      "sha256": "554b5d42f2fc51e024f44599034e061f3cc28cbdf86315838ea55099501e610c"
+    },
+    {
+      "bytes": 11904,
+      "path": "experiments/alfworld_e6/results/iterative_low_viability_v3/review_task159_C1_C2.py.txt",
+      "sha256": "20704d3d10fee3a0baa226734e9eef4aba6aac9a8570d989dc4ddfb423c47392"
+    },
+    {
+      "bytes": 8728,
+      "path": "experiments/alfworld_e6/results/iterative_low_viability_v3/review_task159_C3.py.txt",
+      "sha256": "59c9a739929e2c2dc53b3926632bb24d2c1ecb021dc3638b144f9334fab97d12"
+    },
+    {
+      "bytes": 46182,
+      "path": "experiments/alfworld_e6/results/iterative_low_viability_v3/screening_audit.json",
+      "sha256": "7eff28df049965a4fc2227836f17a1389b3c3517ae80e39abe2f9b9f00d8b463"
+    },
+    {
+      "bytes": 53423,
+      "path": "experiments/alfworld_e6/results/iterative_low_viability_v3/screening_audit.py.txt",
+      "sha256": "f1c6b8785d420849ea8c2bdc06acf13da6a23c8b9623b9c622e7796e1ad0b3d6"
+    },
+    {
+      "bytes": 48417,
+      "path": "experiments/alfworld_e6/results/iterative_low_viability_v3/screening_reference_audit.json",
+      "sha256": "44987b9ff70bc46ec1902d8ec74df8808c6de85483958d26bb6f92934db6f006"
+    },
+    {
+      "bytes": 332724,
+      "path": "experiments/alfworld_e6/results/iterative_low_viability_v3/superseded_terminal_audit.json",
+      "sha256": "0a5b5844c7e78a6536e24f81f7df5f77da0d922502a10ced5db4288e4aeb9510"
+    },
+    {
+      "bytes": 55775,
+      "path": "experiments/alfworld_e6/results/iterative_low_viability_v3/superseded_terminal_audit.py.txt",
+      "sha256": "58d358cfdaeb03e269509b196c26edc0923be9a61b0f1b96a6bf6e1df3f01257"
+    },
+    {
+      "bytes": 332300,
+      "path": "experiments/alfworld_e6/results/iterative_low_viability_v3/terminal_audit.json",
+      "sha256": "2a6c4fadddebb960cc58bcdd5e4965fb3548f4a53776254e84778d9f5b32069d"
+    },
+    {
+      "bytes": 56697,
+      "path": "experiments/alfworld_e6/results/iterative_low_viability_v3/terminal_audit.py.txt",
+      "sha256": "03d6bd351967359af0dd4ceb0ded5f4709248b2c5e9a4d31f2e2041a93e13291"
+    },
+    {
+      "bytes": 4817,
+      "path": "experiments/alfworld_e6/results/iterative_low_viability_v3/terminal_audit_README.md",
+      "sha256": "9dd2e5b93c560b8004db50c43b3e0951049c2a4988b6732aeee7026e68dde58f"
+    },
+    {
+      "bytes": 18285,
+      "path": "experiments/alfworld_e6/results/iterative_low_viability_v3/terminal_audit_tests.py.txt",
+      "sha256": "6fa770f55bb4a8a609c48268919a1d4ed2a65929313f1216f5fb8cc1717b439b"
+    }
+  ],
+  "schema": "iterative-low-viability-v3-published-files-v1"
+}

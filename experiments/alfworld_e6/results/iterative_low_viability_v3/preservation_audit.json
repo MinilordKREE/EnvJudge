@@ -1,0 +1,168 @@
+{
+  "adaptation": {
+    "commit": "80005ab90fae93525af669a82a09910cc562590a",
+    "input_manifest_sha256": "ad6019cff5b1ee1712e892404cefd5eb2813f032341e322de782f277d8ada46d",
+    "prereg_sha256": "76ac222a626a6b2dad803ad728f586eba6c1f9394b52d0dca3e973a316bf417c",
+    "present": true
+  },
+  "audit_script_sha256": "743442f23ee7ea591b39b39a68df2dde585529a2e80afff2cd0fb3ee8da8d38d",
+  "audit_status": "PASS",
+  "checks": 597,
+  "current_V3_core_copy_files_preserved": 96,
+  "elapsed_seconds": 0.967,
+  "ending_safety": {
+    "main": {
+      "HEAD": "f97260589475bf4412f2310b1dfbcc1c34816547",
+      "branch": "main",
+      "status_short_raw": " ? third_party/envharness\n"
+    },
+    "research": {
+      "HEAD": "80005ab90fae93525af669a82a09910cc562590a",
+      "branch": "aea-llm-vnext",
+      "status_short_raw": ""
+    },
+    "worktrees": "/home/kree/work/EnvJudge          f972605 [main]\n/home/kree/work/EnvJudge-aea-llm  80005ab [aea-llm-vnext]\n"
+  },
+  "failures": [],
+  "limits": [
+    "No full dataset or 12 GB historical scanner inventory rescan; checks the 2,552 starting research hashes, supplemental original Git blobs, and 576 historical run hashes/file sets.",
+    "Main preservation is HEAD/branch/raw-status equality; selected active bridge/runtime files are independently hashed in the research worktree.",
+    "Local origin/aea-llm-vnext ancestry is checked without network access; no new remote verification is claimed.",
+    "V3 execution validity/costs are assessed by the separate screening auditor; this report checks preservation and frozen bindings.",
+    "Fresh V3 report/artifact additions are allowed; every original tracked path and every pool-preregistered file remains exact."
+  ],
+  "notes": [],
+  "preservation": {
+    "additional_hash_read_bytes": 1602760,
+    "fixed_bindings": {
+      "experiments/alfworld_e6/PREREG_ITERATIVE_LOW_TOPUP.md": "b3920d3ab997f14e7ccf786f1f1deb58417cb8ff04a57d9662ca4a57866d2b1a",
+      "experiments/alfworld_e6/frozen/iterative_low_viability_v3/core_manifest.json": "c25cab9b7cab7777310b7b8f4947ef3a423f0a51d6ce7701f3e58549c684c42a",
+      "experiments/alfworld_e6/frozen/iterative_low_viability_v3/cost_basis.json": "1b7b8969021090d2b7b0e0a02abca8e599945107499f8fef702f5ac205eefcac",
+      "experiments/alfworld_e6/frozen/iterative_low_viability_v3/runtime_hashes.json": "490a40c0d9eb2bba5257ae9101af9eaea7ed67019e8d1c9b193e25eceb2de2e4",
+      "experiments/alfworld_e6/frozen/iterative_low_viability_v3/starting_baseline.json": "77d3a690c10f2454b2d505d67fc3875fba83afa3aa63f47240fa1277cc67182c",
+      "experiments/alfworld_e6/frozen/iterative_low_viability_v3/used_task_audit.json": "1d8e571d57a5c67d2b82e4d200022908fb1d76c5423fc817ee4fcfc30de181df",
+      "scripts/e6_iterative_low_viability.py": "21e3a91c2a598385e2ed8c27fdeab0584015874d3c5411260a00f6bc042f839c",
+      "scripts/e6_iterative_low_viability_v2.py": "c230bcfaea60b3c1b346018a5a7380c96d67c25e4f8fbe75702aef517d6129f4",
+      "scripts/e6_iterative_low_viability_v3.py": "980528539037365cb321c9a7678918dbb9302ecacd265cc10be2617e5d124e33",
+      "src/aea/semantic_privilege.py": "ab0ba2aceffd53f408191105a4cfedb2dacc6136bd16defd03d553fad5b5dccd"
+    },
+    "historical_file_sets": [
+      {
+        "actual_count": 52,
+        "expected_count": 52,
+        "missing": [],
+        "root": "runs/e6-iterative-low-smoke",
+        "unexpected": []
+      },
+      {
+        "actual_count": 53,
+        "expected_count": 53,
+        "missing": [],
+        "root": "runs/e6-iterative-low-semantic-smoke",
+        "unexpected": []
+      },
+      {
+        "actual_count": 110,
+        "expected_count": 110,
+        "missing": [],
+        "root": "runs/e6-iterative-low-viability",
+        "unexpected": []
+      },
+      {
+        "actual_count": 361,
+        "expected_count": 361,
+        "missing": [],
+        "root": "runs/e6-iterative-low-viability-v2",
+        "unexpected": []
+      }
+    ],
+    "historical_run_files": 576,
+    "new_tracked_paths_after_pool_prereg": [
+      "experiments/alfworld_e6/PREREG_ITERATIVE_LOW_VIABILITY_V3.md",
+      "experiments/alfworld_e6/frozen/iterative_low_viability_v3/input_manifest.json"
+    ],
+    "original_bytes_hashed": 830562678,
+    "original_git_tracked_paths_including_gitlink": 2553,
+    "pool_preregistered_new_files": {
+      "experiments/alfworld_e6/PREREG_ITERATIVE_LOW_TOPUP.md": "b3920d3ab997f14e7ccf786f1f1deb58417cb8ff04a57d9662ca4a57866d2b1a",
+      "experiments/alfworld_e6/frozen/iterative_low_viability_v3/DRIVER_CHANGES.md": "3c52a49745105077a931b9a3ba5d05495e0e7731c587b6a61b0b7e25e26d30f6",
+      "experiments/alfworld_e6/frozen/iterative_low_viability_v3/USED_TASKS_AUDIT.md": "4233180ab97c3f83d41be4cfb941537e548b1f0e532f1d0a42c5774789cc5005",
+      "experiments/alfworld_e6/frozen/iterative_low_viability_v3/build_viability_topup_audit.py.txt": "6c804fa43f5f7089a8ac6b46203984ab8ca9f534a22d31ff811b7c8ce5096520",
+      "experiments/alfworld_e6/frozen/iterative_low_viability_v3/core_manifest.json": "c25cab9b7cab7777310b7b8f4947ef3a423f0a51d6ce7701f3e58549c684c42a",
+      "experiments/alfworld_e6/frozen/iterative_low_viability_v3/cost_basis.json": "1b7b8969021090d2b7b0e0a02abca8e599945107499f8fef702f5ac205eefcac",
+      "experiments/alfworld_e6/frozen/iterative_low_viability_v3/driver_mypy_preflight.txt": "5d4b6d285b77932e3d08212c3b4974d0a803f98ec60408ac6ccf6a063fa6c19e",
+      "experiments/alfworld_e6/frozen/iterative_low_viability_v3/finalize_viability_topup_audit.py.txt": "6864d940c4443884be8a4cfa95fb5f76f58cb969e56bde8a3a96e432a9370655",
+      "experiments/alfworld_e6/frozen/iterative_low_viability_v3/format_preflight.txt": "a8974443d12f9736423157c869f658ab1b4fc18c2ff99f12bf2cb579052f9e5b",
+      "experiments/alfworld_e6/frozen/iterative_low_viability_v3/method_binding_audit.json": "1588c726c25aa2753dfab0eb993bc9bb69ead7e4fa4643fa4f193415e297dc55",
+      "experiments/alfworld_e6/frozen/iterative_low_viability_v3/mypy_preflight.txt": "092e5eb1e45e241cfabcc8c61bcc544108ae075fc01d13940b2b24013bbd1e3a",
+      "experiments/alfworld_e6/frozen/iterative_low_viability_v3/precommit_preflight.txt": "942760896d97dc0fb37822af66b9af50173e00e0c0a27e600036b165e43aef9f",
+      "experiments/alfworld_e6/frozen/iterative_low_viability_v3/preflight.json": "1e0c363e33e5ec4597bae108ce5e7aaa7fffc3dac2883ba9a217f823749b357b",
+      "experiments/alfworld_e6/frozen/iterative_low_viability_v3/ruff_preflight.txt": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "experiments/alfworld_e6/frozen/iterative_low_viability_v3/runtime_hashes.json": "490a40c0d9eb2bba5257ae9101af9eaea7ed67019e8d1c9b193e25eceb2de2e4",
+      "experiments/alfworld_e6/frozen/iterative_low_viability_v3/starting_baseline.json": "77d3a690c10f2454b2d505d67fc3875fba83afa3aa63f47240fa1277cc67182c",
+      "experiments/alfworld_e6/frozen/iterative_low_viability_v3/unit_preflight.txt": "e0c6057ac666f1add467e1db45085056f86d61fb4e07ffd5c1fa92d7509c87a4",
+      "experiments/alfworld_e6/frozen/iterative_low_viability_v3/used_task_audit.json": "1d8e571d57a5c67d2b82e4d200022908fb1d76c5423fc817ee4fcfc30de181df",
+      "experiments/alfworld_e6/frozen/iterative_low_viability_v3/validation.json": "6a200e59e8c93482ae5bb0676589afc277428ff929a11147fc91ddaffcdd0061",
+      "scripts/e6_iterative_low_viability_v3.py": "980528539037365cb321c9a7678918dbb9302ecacd265cc10be2617e5d124e33",
+      "tests/unit/test_iterative_low_viability_v3.py": "9eb28535db6a165a08ce16f2d7d760b2e1a53e45aba7e25c944953d776cb6cea"
+    },
+    "runtime_sources": {
+      "third_party/envharness/envharness/agents/policy.py": "8e06bf1d83bb65a235551dc2a982bf150a7d3c3dade33d9fa9d0b104c161c978",
+      "third_party/envharness/envharness/bridges/alfworld/bridge.py": "2e66a32d939c0f1ed20ff186dd51deb3496cb2edff4ed56050fc8daa1003d170",
+      "third_party/envharness/envharness/core/code_loader.py": "182a1807639630ea313d7521a04e1736ce2f03502bec5eafafc79a1d907253e7",
+      "third_party/envharness/envharness/core/types.py": "34e5280efb41d951d46515b157887ffb5615d1ecfb5f6ef28f0fd0ea3135a9a9",
+      "third_party/envharness/envharness/harnesses/rules.py": "ee7a7df6659ceb9d648cf933e451ccee4fb3ba172c2dc5d74d234d4a03649f6f",
+      "third_party/envharness/envharness/orchestration/episode_worker.py": "3a75e12389d622742b50901264eba091029e56d6988216758edf274e754ccca1",
+      "third_party/envharness/envharness/orchestration/runner.py": "b8742c2721cdc1b01d97724b77399bf0f284943d08de858c0e7fb50804dc02a1"
+    },
+    "starting_manifest_files": 2552,
+    "supplemental_original_tracked_files": [],
+    "unique_original_files_hashed": 3128
+  },
+  "prior_V2_final_decision": "INCONCLUSIVE",
+  "prior_V2_published_artifacts_verified": 373,
+  "prior_core_episodes_preserved": 48,
+  "production_tree": "6cc4166ced6c9a4564438750153c33d64e5967de",
+  "schema": "iterative-low-viability-v3-preservation-v1",
+  "screening_freeze": {
+    "base_driver_commit": "b6cd05418f619ad23318e55916aaae2a96d07875",
+    "base_driver_sha256": "c230bcfaea60b3c1b346018a5a7380c96d67c25e4f8fbe75702aef517d6129f4",
+    "driver_sha256": "980528539037365cb321c9a7678918dbb9302ecacd265cc10be2617e5d124e33",
+    "frozen_config_hashes": {
+      "configs/alfworld_config_100.yaml": "ef6a64096b198d7105bb3d3083f922ac0c0ee60bd2186c67ab4bd99863089e30",
+      "configs/corpus_aea.yaml": "a5f4b3c7ec0ace3ffebef184481585402dbf9a2d594d4fcde4dfc355a97eab10",
+      "configs/pricing.yaml": "22ec07333b638ad6b5679bc58ce1f7fd0a1c8b526bed5420c378a03147805f7e",
+      "scripts/e3.py": "4152356515fee743170205780be85ac45436073294b7bd9981dc1df221635363",
+      "scripts/e6_iterative_low_smoke.py": "86aa45af30cfafefd251b8da5f1fc45399404956eac18f5f94c0027899acd459"
+    },
+    "implementation_sha": "bec74ed8a6ff40e119b2299c92b07b8602ff5fef",
+    "input_hashes": {
+      "core_manifest.json": "c25cab9b7cab7777310b7b8f4947ef3a423f0a51d6ce7701f3e58549c684c42a",
+      "runtime_hashes.json": "490a40c0d9eb2bba5257ae9101af9eaea7ed67019e8d1c9b193e25eceb2de2e4",
+      "used_task_audit.json": "1d8e571d57a5c67d2b82e4d200022908fb1d76c5423fc817ee4fcfc30de181df"
+    },
+    "prereg_commit": "4d8419e584d695591e55d1bbf85981b37cfa3764",
+    "prereg_sha256": "b3920d3ab997f14e7ccf786f1f1deb58417cb8ff04a57d9662ca4a57866d2b1a",
+    "semantic_gate_sha256": "ab0ba2aceffd53f408191105a4cfedb2dacc6136bd16defd03d553fad5b5dccd",
+    "semantic_gate_version": "alfworld-semantic-screen-v1",
+    "source_tree": "6cc4166ced6c9a4564438750153c33d64e5967de",
+    "validator_fidelity_sha": "bec74ed8a6ff40e119b2299c92b07b8602ff5fef"
+  },
+  "screening_status_observed": "qualified",
+  "starting_safety": {
+    "baseline_file_count": 2552,
+    "baseline_sha256": "77d3a690c10f2454b2d505d67fc3875fba83afa3aa63f47240fa1277cc67182c",
+    "historical_run_file_count": 576,
+    "main": {
+      "HEAD": "f97260589475bf4412f2310b1dfbcc1c34816547",
+      "branch": "main",
+      "status_short_raw": " ? third_party/envharness\n"
+    },
+    "research": {
+      "HEAD": "6fbf237f749e48e099bd75ea5a9c79b8d2cdc94e",
+      "branch": "aea-llm-vnext",
+      "status_short_raw": ""
+    },
+    "worktrees": "/home/kree/work/EnvJudge          f972605 [main]\n/home/kree/work/EnvJudge-aea-llm  6fbf237 [aea-llm-vnext]\n"
+  }
+}

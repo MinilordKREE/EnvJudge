@@ -1,0 +1,72 @@
+"""Saved-artifact read-only review; no gate/helper execution or env/model calls."""
+import ast,gzip,hashlib,json,re
+from collections import Counter
+from pathlib import Path
+root=Path('/home/kree/work/EnvJudge-aea-llm');run=root/'runs/e6-iterative-low-viability-v3';td=run/'task-159'
+def digest(v):return hashlib.sha256((v if isinstance(v,str) else json.dumps(v,sort_keys=True)).encode()).hexdigest()
+def read(p):return json.loads(p.read_text())
+proposals=[json.loads(x) for x in (td/'adaptation/proposals.jsonl').read_text().splitlines()]
+p1=next(x for x in proposals if x['call_index']==1);p2=next(x for x in proposals if x['call_index']==2)
+source=p1['arguments']['families'][0]['rules_code'];source2=p2['arguments']['families'][0]['rules_code']
+gate=next(json.loads(x) for x in (td/'semantic_gates.jsonl').read_text().splitlines() if json.loads(x)['optimizer_call_index']==1)
+b=gzip.decompress(Path(gate['input_artifact']).read_bytes());data=json.loads(b)
+prepared=next(r for r in read(run/'prepared.json') if r['task_id']==159)
+originals=read(td/'original_failures.json');by_id={t['episode_id']:t for t in originals};reference=read(td/'privileged_reference.json')
+fn=next(n for n in ast.walk(ast.parse(source)) if isinstance(n,ast.FunctionDef) and n.name=='_hint')
+hints=[n.value.value for n in ast.walk(fn) if isinstance(n,ast.Return) and isinstance(n.value,ast.Constant) and isinstance(n.value.value,str)]
+def prose_only(text):
+    return "\n".join(line for line in text.split("\n") if not line.startswith(("Admissible actions:","Admissible commands:")))
+def strip_hints(text):
+    for hint in hints:text=text.replace(hint+'\n','')
+    return text
+checks={'source_hash_binding':digest(source)==digest(data['source'])==gate['result']['source_sha256'],'semantic_payload_hash':hashlib.sha256(b).hexdigest()==gate['result']['input_sha256'],'reference_hash':digest(reference)==prepared['reference_sha256'],'reference_actions_steps_match':data['reference']['actions']==reference['actions'] and data['reference']['steps']==reference['steps'],'failure_hash':digest(originals)==prepared['evidence_sha256'],'prefix_shapes':True,'raw_action_prefixes':True,'raw_poststep_observation_prefixes':True,'raw_admissibles_match_baseline':True,'baseline_matches_original_poststep':True,'baseline_same_across_doses':True,'authorized_evidence_has_no_inserted_hints':True,'observation_changes_are_only_literal_hint_insertion':True,'final_prompt_prose_changes_are_only_literal_hint_insertion':True,'formatted_history_prose_changes_are_only_literal_hint_insertion':True,'command_set_unchanged':True,'non_observation_hook_surfaces_unchanged':True,'no_hook_errors':True}
+base={};probes={};changes=Counter();promoted=Counter();demoted=Counter();dosecounts={}
+for p in data['probes']:
+    ev=p['evidence'];eid=ev['episode_id'];step=ev['step'];dose=p['dose'];t=by_id[eid];bef=p['baseline'];aft=p['transformed'];key=(eid,step)
+    checks['prefix_shapes'] &= ev['task_id']=='159' and len(ev['observations'])==step+1 and len(ev['actions'])==step
+    checks['raw_action_prefixes'] &= ev['actions']==[s['raw_action']['kwargs'].get('text','') for s in t['steps'][:step]]
+    checks['raw_poststep_observation_prefixes'] &= ev['observations'][1:]==[s['raw_observation']['text'] for s in t['steps'][:step]]
+    checks['raw_admissibles_match_baseline'] &= ev['admissible_commands']==bef['admissible_commands']
+    checks['authorized_evidence_has_no_inserted_hints'] &= not any(h in o for h in hints for o in ev['observations'])
+    if step:checks['baseline_matches_original_poststep'] &= bef['observation']==t['steps'][step-1]['raw_observation']
+    if key in base:checks['baseline_same_across_doses'] &= base[key]==bef
+    else:base[key]=bef
+    checks['observation_changes_are_only_literal_hint_insertion'] &= strip_hints(aft['observation']['text'])==bef['observation']['text']
+    checks['final_prompt_prose_changes_are_only_literal_hint_insertion'] &= strip_hints(prose_only(aft['final_prompt']))==prose_only(bef['final_prompt'])
+    checks['formatted_history_prose_changes_are_only_literal_hint_insertion'] &= [strip_hints(prose_only(s)) for s in aft['formatted_observation_history']]==[prose_only(s) for s in bef['formatted_observation_history']]
+    checks['command_set_unchanged'] &= sorted(bef['admissible_commands'])==sorted(aft['admissible_commands'])
+    checks['non_observation_hook_surfaces_unchanged'] &= all(bef[k]==aft[k] for k in ('action','feedback','transition'))
+    checks['no_hook_errors'] &= p['error'] is None
+    changed=[k for k in bef if bef[k]!=aft[k]];changes.update(changed)
+    dc=dosecounts.setdefault(str(dose),Counter());dc['probes']+=1;dc['identity']+=not changed;dc.update(changed)
+    for c in bef['admissible_commands']:
+        delta=bef['admissible_commands'].index(c)-aft['admissible_commands'].index(c)
+        if delta>0:promoted[c]+=1
+        elif delta<0:demoted[c]+=1
+    probes[(eid,step,dose)]=p
+findings=gate['result']['findings'];failures=[f for f in findings if f['decision']=='FAIL'];relations=Counter(f['information'] for f in failures)
+witnesses=[]
+for relation in relations:
+    f=next(f for f in failures if f['information']==relation)
+    act=dict(re.findall(r'(task|episode|step|dose)=([^;]+)',f['activation']));p=probes[(act['episode'],int(act['step']),float(act['dose']))]
+    path=f['candidate_evidence'][0].split(': ',1)[0]
+    added=[h for h in hints if h in p['transformed']['observation']['text'] and h not in p['baseline']['observation']['text']]
+    target=relation.split(' located_at ')[1]
+    before=p['baseline'][path] if path in p['baseline'] else None
+    after=p['transformed'][path] if path in p['transformed'] else None
+    if isinstance(before,list):before='\n'.join(before);after='\n'.join(after)
+    witnesses.append({'recorded_relation':relation,'recorded_count':relations[relation],'kind':f['kind'],'activation':f['activation'],'surface_path':path,'candidate_evidence_sha256':digest(f['candidate_evidence']),'reference_evidence':f['reference_evidence'],'public_evidence_check':f['public_evidence_check'],'actual_inserted_hint_lines':added,'target_in_actual_hint':any(re.search(r'\b'+re.escape(target)+r'\b',s) for s in added),'target_occurrences_before':before.count(target) if isinstance(before,str) else None,'target_occurrences_after':after.count(target) if isinstance(after,str) else None,'non_command_target_occurrences_before':prose_only(before).count(target) if isinstance(before,str) else None,'non_command_target_occurrences_after':prose_only(after).count(target) if isinstance(after,str) else None,'prose_after_without_literal_hints_equals_before':strip_hints(prose_only(after))==prose_only(before) if isinstance(after,str) else None})
+reward_calls=[]
+for n in ast.walk(ast.parse(source2)):
+    if isinstance(n,ast.Call) and isinstance(n.func,ast.Name) and n.func.id=='EnvResponse':
+        reward_calls.append({k.arg:ast.unparse(k.value) for k in n.keywords})
+feedbacks=[json.loads(x) for x in (td/'adaptation/feedback.jsonl').read_text().splitlines()]
+f3=next((x['feedback'] for x in feedbacks if x['call_index']==3),{})
+checks['C2_feedback_source_binding']=f3.get('source')==source2 and f3.get('source_sha256')==digest(source2)
+checks['C2_recorded_reward_reason']=f3.get('reason')=='changes the reward'
+checks['no_policy_dispatch_so_far']=not (td/'adaptation/physical_batches.jsonl').exists()
+checks['no_solvability_dispatch_so_far']=not (td/'adaptation/solvability.jsonl').exists()
+checks['no_confirmation_dispatch_so_far']=not (td/'confirmation_batches.jsonl').exists()
+output={'schema':'v3-task159-C1-C2-compact-saved-artifact-review-v1','scope':'C1 completed screening and C2 lexical rejection only; C3 still pending at review time.','task_id':159,'checks':checks,'all_checks_pass':all(checks.values()),'C1':{'source_sha256':digest(source),'input_sha256':gate['result']['input_sha256'],'semantic_gzip_sha256':hashlib.sha256(Path(gate['input_artifact']).read_bytes()).hexdigest(),'uncompressed_bytes':len(b),'recorded_decision':'FAIL','probe_count':len(data['probes']),'episode_ids':list(by_id),'finding_counts':dict(Counter(f['decision'] for f in findings)),'fail_relations':dict(relations),'finding_kind_information_counts':[{'decision':k[0],'information':k[1],'count':v} for k,v in Counter((f['decision'],f['information']) for f in findings).items()],'changed_surface_counts':dict(changes),'changes_by_dose':{k:dict(v) for k,v in dosecounts.items()},'literal_hint_variants':hints,'compact_witnesses':witnesses,'garbagecan_command_promotions':sum(v for k,v in promoted.items() if 'garbagecan' in k),'all_promoted_command_categories':{'microwave':sum(v for k,v in promoted.items() if 'microwave' in k),'fridge':sum(v for k,v in promoted.items() if 'fridge' in k),'other':sum(v for k,v in promoted.items() if 'microwave' not in k and 'fridge' not in k)},'interpretation':['The recorded screening verdict remains FAIL and correctly prevented admission under the frozen protocol. Independent saved-surface review does not substantiate the two recorded hidden-location disclosures.','The relation potato 3 located_at it treats an unresolved pronoun from the rich reference as a receptacle. The delta contains ordinary pronominal it in a generic heating/cooling reminder, not a disclosure of potato 3 location.','The garbagecan target exists in unchanged raw room/navigation text. Excluding separately audited admissible-command lines, removing only the three literal inserted hint variants makes every saved final prompt and formatted-history prose exactly equal to baseline. No hint names garbagecan and no garbagecan command is promoted; unchanged text therefore does not establish a transmitted hidden potato-garbagecan relation.','All command changes preserve the currently admissible command set and promote microwave/fridge commands. Unsupported appliance/precondition grounding remains conservative admission uncertainty; this review does not grant semantic PASS.','The medium-dose heat-then-cool instruction may conflict with a hot-object goal; without policy probes this is a source-level design concern, not an observed behavioral failure.']},'C2':{'source_sha256':digest(source2),'recorded_reason':f3.get('reason'),'recorded_feedback_operation':f3.get('operation'),'recorded_feedback_category':f3.get('category'),'EnvResponse_keyword_expressions':reward_calls,'reward_lexical_guard':'src/aea/designer.py:1079: regex \\breward\\s*= rejects any reward assignment spelling','interpretation':'The only EnvResponse constructor passes reward=raw_response.reward, terminated=raw_response.terminated, truncated=raw_response.truncated, and info=raw_response.info. The frozen lexical regex matches the reward keyword regardless of pass-through expression. Record this conservative lexical rejection; source review alone does not establish a reward change or a framework correctness failure. No hook execution or safety PASS was performed.'},'actions_taken':'Saved-file reads, hashes, AST inspection, exact hint-removal comparisons only; no semantic evaluator, hooks, environment, model, or run mutation.'}
+path=Path('/tmp/task159_C1_C2_candidate_review.json');path.write_text(json.dumps(output,indent=2,sort_keys=True)+'\n')
+print(json.dumps({'output':str(path),'all_checks_pass':output['all_checks_pass'],'failed_checks':[k for k,v in checks.items() if not v],'probe_count':len(data['probes']),'finding_counts':output['C1']['finding_counts'],'recorded_relations':dict(relations),'garbagecan_promotions':output['C1']['garbagecan_command_promotions'],'C2_reward_expressions':[x.get('reward') for x in reward_calls],'compact_witnesses':[{k:w[k] for k in ('recorded_relation','activation','surface_path','target_in_actual_hint','target_occurrences_before','target_occurrences_after','non_command_target_occurrences_before','non_command_target_occurrences_after','prose_after_without_literal_hints_equals_before')} for w in witnesses]},indent=2))

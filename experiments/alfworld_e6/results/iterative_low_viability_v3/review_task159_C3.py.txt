@@ -1,0 +1,50 @@
+"""Read-only saved C3 witness/prefix review; no hook or semantic rejudgment."""
+import gzip,hashlib,json,re
+from collections import Counter
+from pathlib import Path
+root=Path('/home/kree/work/EnvJudge-aea-llm');run=root/'runs/e6-iterative-low-viability-v3';td=run/'task-159'
+def read(p):return json.loads(p.read_text())
+def digest(v):return hashlib.sha256((v if isinstance(v,str) else json.dumps(v,sort_keys=True)).encode()).hexdigest()
+def prose(s):return '\n'.join(x for x in s.split('\n') if not x.startswith(('Admissible commands:','Admissible actions:')))
+gate=next(json.loads(s) for s in (td/'semantic_gates.jsonl').read_text().splitlines() if json.loads(s)['optimizer_call_index']==3)
+path=Path(gate['input_artifact']);compressed=path.read_bytes();payload=gzip.decompress(compressed);data=json.loads(payload)
+record=read(td/'adaptation/candidates.json')[2];originals=read(td/'original_failures.json');by_id={t['episode_id']:t for t in originals};reference=read(td/'privileged_reference.json');prepared=next(t for t in read(run/'prepared.json') if t['task_id']==159)
+checks={'source_hash':digest(data['source'])==record['source_sha256']==gate['result']['source_sha256'],'payload_hash':hashlib.sha256(payload).hexdigest()==gate['result']['input_sha256'],'failure_hash':digest(originals)==prepared['evidence_sha256'],'reference_hash':digest(reference)==prepared['reference_sha256'],'reference_actions_steps_match':data['reference']['actions']==reference['actions'] and data['reference']['steps']==reference['steps'],'fixed_17_doses':gate['doses']==[x/16 for x in range(17)],'prefix_shapes':True,'raw_action_prefixes':True,'raw_poststep_observation_prefixes':True,'raw_admissibles_match_baseline':True,'baseline_matches_original_poststep':True,'baseline_same_across_doses':True,'command_sets_preserved':True,'observation_text_is_baseline_plus_hint_only':True,'hint_held_object_in_raw_current_appliance_command':True,'no_hint_in_authorized_observations':True,'non_observation_hook_surfaces_unchanged':True,'no_hook_errors':True,'prompt_prose_is_baseline_plus_hint_only':True,'history_prose_is_baseline_plus_hint_only':True}
+baselines={};probes={};hints=set();held_objects=set();changes=Counter();promotion=Counter();dosecounts={}
+pattern=re.compile(r'\nHint: you are holding (.+?); heat it with the microwave\.$')
+for p in data['probes']:
+    ev=p['evidence'];eid=ev['episode_id'];step=ev['step'];dose=p['dose'];t=by_id[eid];bef=p['baseline'];aft=p['transformed'];key=(eid,step)
+    checks['prefix_shapes'] &= ev['task_id']=='159' and len(ev['observations'])==step+1 and len(ev['actions'])==step
+    checks['raw_action_prefixes'] &= ev['actions']==[s['raw_action']['kwargs'].get('text','') for s in t['steps'][:step]]
+    checks['raw_poststep_observation_prefixes'] &= ev['observations'][1:]==[s['raw_observation']['text'] for s in t['steps'][:step]]
+    checks['raw_admissibles_match_baseline'] &= ev['admissible_commands']==bef['admissible_commands']
+    checks['no_hint_in_authorized_observations'] &= not any('Hint: you are holding' in s for s in ev['observations'])
+    if step:checks['baseline_matches_original_poststep'] &= bef['observation']==t['steps'][step-1]['raw_observation']
+    if key in baselines:checks['baseline_same_across_doses'] &= baselines[key]==bef
+    else:baselines[key]=bef
+    checks['command_sets_preserved'] &= sorted(bef['admissible_commands'])==sorted(aft['admissible_commands'])
+    before=bef['observation']['text'];after=aft['observation']['text'];checks['observation_text_is_baseline_plus_hint_only'] &= after.startswith(before)
+    extra=after[len(before):] if after.startswith(before) else after
+    if extra:
+        match=pattern.fullmatch(extra);checks['observation_text_is_baseline_plus_hint_only'] &= match is not None
+        if match:
+            held=match[1];hints.add(extra);held_objects.add(held)
+            checks['hint_held_object_in_raw_current_appliance_command'] &= any(re.search(r'(heat|cool)\s+'+re.escape(held)+r'\s+with\s+',c) for c in ev['admissible_commands'])
+    checks['non_observation_hook_surfaces_unchanged'] &= all(bef[k]==aft[k] for k in ('action','feedback','transition'))
+    checks['no_hook_errors'] &= p['error'] is None
+    changed=[k for k in bef if bef[k]!=aft[k]];changes.update(changed);dc=dosecounts.setdefault(str(dose),Counter());dc['probes']+=1;dc['identity']+=not changed;dc.update(changed)
+    for c in aft['admissible_commands']:
+        if aft['admissible_commands'].index(c)<bef['admissible_commands'].index(c):promotion[c]+=1
+    probes[(eid,step,dose)]=p
+
+def strip_hints(s):
+    for h in hints:s=s.replace(h,'')
+    return s
+for p in data['probes']:
+    bef=p['baseline'];aft=p['transformed']
+    checks['prompt_prose_is_baseline_plus_hint_only'] &= strip_hints(prose(aft['final_prompt']))==prose(bef['final_prompt'])
+    checks['history_prose_is_baseline_plus_hint_only'] &= [strip_hints(prose(s)) for s in aft['formatted_observation_history']]==[prose(s) for s in bef['formatted_observation_history']]
+findings=gate['result']['findings'];fails=[f for f in findings if f['decision']=='FAIL'];f=fails[0];a=dict(re.findall(r'(task|episode|step|dose)=([^;]+)',f['activation']));p=probes[(a['episode'],int(a['step']),float(a['dose']))];ev=p['evidence'];raw_cool=[c for c in ev['admissible_commands'] if re.match(r'(heat|cool)\s+',c)]
+checks['no_solvability']=not (td/'adaptation/solvability.jsonl').exists();checks['no_policy']=not (td/'adaptation/physical_batches.jsonl').exists();checks['no_confirmation']=not (td/'confirmation_batches.jsonl').exists()
+output={'schema':'v3-task159-C3-compact-saved-artifact-review-v1','task_id':159,'call_index':3,'source_sha256':record['source_sha256'],'input_sha256':gate['result']['input_sha256'],'semantic_gzip_sha256':hashlib.sha256(compressed).hexdigest(),'uncompressed_bytes':len(payload),'recorded_gate_decision':gate['result']['decision'],'probe_count':len(data['probes']),'episode_ids':list(by_id),'finding_counts':dict(Counter(f['decision'] for f in findings)),'finding_information_counts':[{'decision':k[0],'information':k[1],'count':v} for k,v in Counter((f['decision'],f['information']) for f in findings).items()],'checks':checks,'all_checks_pass':all(checks.values()),'hint_variants':sorted(hints),'held_objects_in_hints':sorted(held_objects),'promoted_commands':dict(promotion),'changed_surface_counts':dict(changes),'changes_by_dose':{k:dict(v) for k,v in dosecounts.items()},'first_recorded_fail_witness':{'information':f['information'],'kind':f['kind'],'activation':f['activation'],'reference_evidence':f['reference_evidence'],'public_evidence_check':f['public_evidence_check'],'candidate_evidence_sha256':digest(f['candidate_evidence']),'actual_added_observation_text':p['transformed']['observation']['text'][len(p['baseline']['observation']['text']):],'current_raw_appliance_commands':raw_cool,'public_goal':ev['goal']},'interpretation':['Recorded C3 FAIL remains the frozen admission outcome. All245 FAIL witnesses cite potato3 located_at it, the same unresolved-reference-pronoun relation as C1.','The first recorded FAIL reminder names potato1 inferred from a currently admissible heat action; its ordinary pronoun it refers to that held object. Other saved hints name apple1 when it is exposed in current appliance commands. Neither independently substantiates disclosure of potato3 location.','All saved observation changes are the appended current-object hint; all prompt/history prose returns exactly to baseline after removal of those hints, with admissible command ordering audited separately. Command sets, actions, transition feedback, and rewards remain unchanged in these saved probes.','385 changed-text and128 command-grounding UNCERTAIN findings remain evidence of the frozen screener declining unsupported semantics. This review grants no PASS and does not override any screening outcome.','The candidate is rejected before solvability or policy; no endpoint, CONTROL, search acceptance, or K16 behavior exists. C1/C2/C3 exhaustion is an admission outcome, not evidence that maximum-dose support was too hard or that confirmation missed.'],'actions_taken':'Read/hash saved artifacts, compare exact raw prefixes and hint removal, inspect current command strings only. No semantic evaluator, hooks, environment, model, or run mutation.'}
+p=Path('/tmp/task159_C3_candidate_review.json');p.write_text(json.dumps(output,indent=2,sort_keys=True)+'\n');print(json.dumps({'output':str(p),'all_checks_pass':output['all_checks_pass'],'failed_checks':[k for k,v in checks.items() if not v],'counts':output['finding_counts'],'first_fail':output['first_recorded_fail_witness'],'hint_variants':output['hint_variants'],'promoted_commands':output['promoted_commands']},indent=2))

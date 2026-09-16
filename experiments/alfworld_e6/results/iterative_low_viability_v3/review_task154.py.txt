@@ -1,0 +1,101 @@
+"""Read-only task154 C1 saved-artifact review. No semantic evaluator or hooks invoked."""
+import ast
+import gzip
+import hashlib
+import json
+import re
+from collections import Counter
+from pathlib import Path
+root=Path('/home/kree/work/EnvJudge-aea-llm')
+run=root/'runs/e6-iterative-low-viability-v3'
+taskdir=run/'task-154'
+def digest(value):
+    text=value if isinstance(value,str) else json.dumps(value,sort_keys=True)
+    return hashlib.sha256(text.encode()).hexdigest()
+def read(path): return json.loads(path.read_text())
+gate=read(taskdir/'semantic_gates.jsonl')
+payload_path=Path(gate['input_artifact'])
+payload_bytes=gzip.decompress(payload_path.read_bytes())
+data=json.loads(payload_bytes)
+record=read(taskdir/'adaptation/candidates.json')[0]
+prepared=next(x for x in read(run/'prepared.json') if x['task_id']==154)
+originals=read(taskdir/'original_failures.json')
+by_id={t['episode_id']:t for t in originals}
+reference=read(taskdir/'privileged_reference.json')
+checks={
+'payload_sha256':hashlib.sha256(payload_bytes).hexdigest()==gate['result']['input_sha256'],
+'source_hash_binding':digest(data['source'])==record['source_sha256']==gate['result']['source_sha256'],
+'original_failure_hash':digest(originals)==prepared['evidence_sha256'],
+'reference_file_hash':digest(reference)==prepared['reference_sha256'],
+'reference_steps_match':data['reference']['steps']==reference['steps'],
+'reference_actions_match':data['reference']['actions']==reference['actions'],
+'fixed_17_doses':gate['doses']==[x/16 for x in range(17)],
+'all_prefix_shapes':True,'all_original_action_prefixes':True,'all_post_reset_observation_prefixes':True,
+'raw_admissibles_match_baseline':True,'no_wrapper_reminder_in_authorized_evidence':True,
+'baseline_matches_original_poststep':True,'same_baseline_across_doses':True,
+'candidate_preserves_raw_observation_as_prefix':True,'no_command_additions_or_deletions':True,
+'no_hook_errors':True,
+}
+probe_counts=Counter(); changes=Counter(); changes_by_dose={}; baselines={}; focus_examples=[]; initial=None
+for p in data['probes']:
+    ev=p['evidence']; eid=ev['episode_id']; step=ev['step']; dose=p['dose']; trace=by_id[eid]
+    checks['all_prefix_shapes'] &= ev['task_id']=='154' and len(ev['observations'])==step+1 and len(ev['actions'])==step
+    expected_actions=[s['raw_action']['kwargs'].get('text','') for s in trace['steps'][:step]]
+    checks['all_original_action_prefixes'] &= ev['actions']==expected_actions
+    checks['all_post_reset_observation_prefixes'] &= ev['observations'][1:]==[s['raw_observation']['text'] for s in trace['steps'][:step]]
+    checks['raw_admissibles_match_baseline'] &= ev['admissible_commands']==p['baseline']['admissible_commands']
+    checks['no_wrapper_reminder_in_authorized_evidence'] &= not any('[Reminder:' in s for s in ev['observations'])
+    checks['candidate_preserves_raw_observation_as_prefix'] &= p['transformed']['observation']['text'].startswith(p['baseline']['observation']['text'])
+    checks['no_command_additions_or_deletions'] &= sorted(p['baseline']['admissible_commands'])==sorted(p['transformed']['admissible_commands'])
+    if step:
+        checks['baseline_matches_original_poststep'] &= p['baseline']['observation']==trace['steps'][step-1]['raw_observation']
+    key=(eid,step)
+    if key in baselines: checks['same_baseline_across_doses'] &= baselines[key]==p['baseline']
+    else: baselines[key]=p['baseline']
+    checks['no_hook_errors'] &= p['error'] is None
+    probe_counts[dose]+=1
+    changed=[k for k in p['baseline'] if p['baseline'][k]!=p['transformed'][k]]
+    changes.update(changed)
+    counts=changes_by_dose.setdefault(dose,Counter()); counts.update(changed); counts['probes']+=1;counts['identity']+=not changed
+    if p['baseline']['admissible_commands']!=p['transformed']['admissible_commands'] and len(focus_examples)<2:
+        focus_examples.append({'episode_id':eid,'step':step,'dose':dose,'promoted_commands':[c for c in p['transformed']['admissible_commands'] if p['transformed']['admissible_commands'].index(c)<p['baseline']['admissible_commands'].index(c)]})
+    if initial is None and step==0 and dose==0.3125: initial=p
+findings=gate['result']['findings']; first=next(f for f in findings if f['decision']=='UNCERTAIN')
+kindcounts=Counter((f['decision'],f['kind'],f['information']) for f in findings)
+nonempty_reference_count=sum(bool(f['reference_evidence']) for f in findings if f['decision']=='UNCERTAIN')
+tree=ast.parse((root/'src/aea/semantic_privilege.py').read_text()); generic=''
+for n in tree.body:
+    if isinstance(n,ast.Assign) and any(isinstance(t,ast.Name) and t.id=='_GENERIC_WORDS_TEXT' for t in n.targets):generic=ast.literal_eval(n.value)
+added=initial['transformed']['observation']['text'][len(initial['baseline']['observation']['text']):].strip()
+unknown=sorted(set(re.findall(r'[a-z][a-z_-]*',added.lower()))-set(generic.split())-set(initial['evidence']['goal'].lower().split()))
+checks['decision_is_uncertain_without_fail']=gate['result']['decision']=='UNCERTAIN' and not any(f['decision']=='FAIL' for f in findings)
+checks['no_adaptation_policy_dispatch'] = not (taskdir/'adaptation/physical_batches.jsonl').exists()
+checks['no_confirmation_dispatch'] = not (taskdir/'confirmation_batches.jsonl').exists()
+checks['no_solvability_dispatch'] = not (taskdir/'adaptation/solvability.jsonl').exists()
+out={
+'schema':'v3-task154-C1-compact-saved-input-review-v1','task_id':154,'call_index':1,
+'candidate_source_sha256':record['source_sha256'],'semantic_input_sha256':gate['result']['input_sha256'],
+'semantic_gzip_sha256':hashlib.sha256(payload_path.read_bytes()).hexdigest(),
+'semantic_uncompressed_bytes':len(payload_bytes),'candidate_mechanism':'Observation reminder to cool the goal object before placing it; dose-dependent promotion of already admissible cooling/placing commands.',
+'gate_decision':gate['result']['decision'],'probe_count':len(data['probes']),
+'episode_ids':list(by_id),'steps_per_episode':{'first':0,'last':50,'count':51},
+'finding_counts':dict(Counter(f['decision'] for f in findings)),
+'finding_kind_information_counts':[{'decision':k[0],'kind':k[1],'information':k[2],'count':v} for k,v in kindcounts.items()],
+'changed_surface_counts':dict(changes),'changes_by_dose':{str(k):dict(v) for k,v in changes_by_dose.items()},
+'first_uncertain_witness':first,'first_active_added_text':added,
+'first_active_public_goal':initial['evidence']['goal'],
+'initial_raw_has_fridge_navigation_command':'go to fridge 1' in initial['evidence']['admissible_commands'],
+'initial_raw_has_cooling_command':any(c.startswith('cool ') for c in initial['evidence']['admissible_commands']),
+'generic_grammar_unrecognized_words_in_first_added_text':unknown,
+'uncertain_findings_with_reference_evidence':nonempty_reference_count,
+'command_promotion_examples':focus_examples,'checks':checks,'all_checks_pass':all(checks.values()),
+'interpretation':[
+'The frozen screener produced unsupported/ungrounded UNCERTAIN, not a reference-relation FAIL. Its uncertainty witnesses cite no reference evidence and report public evidence check Not established.',
+'The public goal already requires cooled bread at the target receptacle. The first raw reset lists a fridge navigation destination, but not a cooling command. The candidate supplies the generic cool-with-fridge prerequisite; at this prefix the generic grammar rejects words cooled, fridge, and placing rather than establishing a task-specific hidden-location disclosure.',
+'The code uses no hidden source receptacle or full reference action sequence. Promotion is confined to commands already admissible at each raw state; actual hidden-relation safety remains a separate semantic question, not a PASS claim from this read-only review.',
+'The raw evidence excludes all wrapper reminders, matches the selected original action and post-step observation prefixes, and is unchanged across doses. Reset observations are bound to the frozen trusted original-session producer; this review does not independently rerun/reset an environment.',
+'Admission stopped task154 before solvability, d=1 policy, redesign, CONTROL, or K16. This censored candidate gives no learner-response or optimizer-feedback signal.',
+],
+'actions_taken':'Only read and hash saved files and analyze static source; no semantic rejudgment, Rules execution, environment, or model call.'}
+path=Path('/tmp/task154_candidate_review.json');path.write_text(json.dumps(out,indent=2,sort_keys=True)+'\n')
+print(json.dumps({'output':str(path),'all_checks_pass':out['all_checks_pass'],'failed_checks':[k for k,v in checks.items() if not v],'probe_count':out['probe_count'],'finding_counts':out['finding_counts'],'changed_surface_counts':out['changed_surface_counts'],'generic_grammar_unrecognized_words':unknown,'uncertain_with_reference_evidence':nonempty_reference_count,'command_promotion_examples':focus_examples},indent=2))
