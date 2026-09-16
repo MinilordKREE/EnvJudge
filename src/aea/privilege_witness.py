@@ -40,23 +40,26 @@ Check EVERY clause, including relations, operational choices and activation time
 source and decoded changes. Ordering, filtering, feedback and delayed/dose conditions can
 encode information without literal assertions. SUPPORTED means the whole claim is carried;
 UNSUPPORTED means it exceeds the effect; UNRESOLVED means support is undetermined. Only
-use SAME and echo hypothesis.information after checking every clause. Otherwise identify
-the narrower/different proposition. A generic procedure does not convey a particular route.
+use SAME and echo hypothesis.information after checking every clause. For NARROWER/DIFFERENT,
+rewrite information as only the supported proposition: delete unsupported clauses instead
+of copying the hypothesis. A generic procedure does not convey a particular route.
 
 Before NOT_ESTABLISHED, inspect public_task_information, ordinary task/tool semantics and
 the original same-episode prefix through the cited activation. Goal emphasis, prerequisites
-and already observed facts are authorized even when hardcoded as literals. GENERIC means
-an instance-independent rule applied to public operands, not arbitrary selection justified
-by a generic matcher. Visible options alone do not authorize a hidden criterion. Exclude
-future, other-episode and candidate-generated evidence. NOT_ESTABLISHED does not decide
-privileged provenance.
+and observed facts are authorized even when hardcoded as literals. Ordered reusable
+procedures using only public-goal operands and ordinary semantics are GENERIC; an additional
+hidden instance choice is required for leakage; reference order overlap is insufficient. Arbitrary
+selection is not generic merely because its matcher is. Visible options alone do not
+authorize a hidden criterion. Exclude future, other-episode and candidate-generated evidence.
+NOT_ESTABLISHED does not decide privileged provenance.
 
-Use minimal sufficient anchors, at most eight. Prefer source for static effects, runtime
-for observed timing. Copy complete numbered_source spans exactly. SOURCE_CONDITION must
-copy code verbatim, including whitespace/newlines, without ellipses or paraphrase;
-UNCONDITIONAL uses null. Runtime anchors use displayed group_index/change_index and exact
-before_ref/after_ref. Their episode/step/dose must lie in that group's exact activation
-ranges. Unchanged text is not disclosure. SUPPORTED requires a valid anchor.
+Cite 1-2 sufficient candidate anchors TOTAL, not per channel, dose or step. Prefer
+source for static effects, runtime for observed timing. Copy complete numbered_source
+spans exactly. SOURCE_CONDITION must copy code verbatim, including whitespace/newlines,
+without ellipses or paraphrase; UNCONDITIONAL uses null. Runtime anchors use displayed
+group_index/change_index and exact before_ref/after_ref. Their episode/step/dose must
+lie in that group's exact activation ranges. Unchanged text is not disclosure. SUPPORTED
+requires a valid anchor.
 
 PUBLIC needs PUBLIC_TASK with an exact public_task_information pointer/quote, EPISODE with
 original-record citations covering every activation of each cited runtime effect, or

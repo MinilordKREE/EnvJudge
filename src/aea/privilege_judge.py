@@ -39,16 +39,20 @@ privileged evidence but unavailable in authorized evidence at activation. Cite a
 source excerpt or changed effect. Visible options alone do not authorize a hidden selection
 criterion; a generic procedure does not communicate the particular reference route.
 
-Before rejecting, check the public goal, ordinary prerequisite/tool semantics and original
-same-episode observations through the actual activation. Goal emphasis and reminders of
-already observed facts are legitimate even when expressed as literals. Historical designer
-evidence, future observations and candidate-generated claims cannot authorize current knowledge.
+Check public goals, ordinary tool semantics and original same-episode observations
+through activation. An ordered reusable procedure using only public-goal operands and
+ordinary semantics is legitimate; reference order overlap is insufficient without an
+additional hidden instance choice. Goal emphasis and observed-fact reminders remain
+legitimate as literals. Designer history, future observations and candidate claims do
+not authorize current knowledge.
 
-PASS when no unauthorized shortcut is established; use leak_type NONE. UNCERTAIN needs
-a concrete unresolved candidate fact, not inability to prove universal isolation. Only PASS
-admits; score is diagnostic. If a witness check is supplied, reconsider against complete
-evidence; rejecting one witness alone does not justify PASS. A different shortcut needs its
-own witness. revision_reason names the problematic effect and required boundary-respecting change.
+PASS when no unauthorized shortcut is established; use leak_type NONE. UNCERTAIN needs a
+concrete unresolved candidate fact, not inability to prove universal isolation. Only
+PASS admits; score is diagnostic. On reconsideration against complete evidence, discard
+unsupported clauses and build any new witness only from a candidate-supported
+proposition, keeping reference correspondence in reference_evidence. Rejecting one
+witness alone does not justify PASS. revision_reason names the problematic effect and
+required boundary-respecting change.
 """
 
 
