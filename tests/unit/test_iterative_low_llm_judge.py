@@ -409,7 +409,7 @@ def test_tampered_k16_environment_is_rejected_before_any_confirmation_episode(
     assert not (viability.RUN / "task-9/confirmation_traces.json").exists()
 
 
-@pytest.mark.parametrize("stage,limit", [("validation", 3.0), ("engineering", 8.0)])
+@pytest.mark.parametrize("stage,limit", [("validation", 3.0), ("engineering", 17.0)])
 def test_physical_stage_caps_are_independent_and_sticky(
     viability: Any, stage: str, limit: float
 ) -> None:
@@ -508,13 +508,13 @@ def test_unknown_inflight_and_operation_crashes_never_dispatch_again(viability: 
     assert json.loads(path.read_text())["inflight"] == {"unknown-worker": 0.3}
 
 
-def test_child_policy_factory_binds_eight_cap_without_v3_globals(
+def test_child_policy_factory_binds_engineering_cap_without_v3_globals(
     viability: Any, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     path = viability.RUN / "cap.json"
     viability.initialize_cap(path, "engineering")
     with viability.cap_lock(path) as state:
-        state["actual_usd"] = 7.999999
+        state["actual_usd"] = state["limit_usd"] - 0.000001
     monkeypatch.setattr(
         viability.AeaLLMClient,
         "__init__",

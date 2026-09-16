@@ -1,0 +1,28 @@
+{
+  "before_first_paid_request": true,
+  "combined_authorized_limit_usd": 20.0,
+  "driver_tests_passed": 99,
+  "fixed_input_audit_checks_passed": 914755,
+  "format": "PASS",
+  "independent_budget_audit_checks_passed": 48,
+  "logs_sha256": {
+    "budget20_driver.txt": "0649b73191dacf20e57241bf3f23703f3af5255194109bad34e185191e0f1760",
+    "budget20_precommit.txt": "942760896d97dc0fb37822af66b9af50173e00e0c0a27e600036b165e43aef9f",
+    "budget20_static.txt": "9fb1ad4a21d0ff6f10f5878ffb89067cadd7eddd8446dd5527065205cce86cb1",
+    "budget20_unit.txt": "3d8e38d57069b226d0500b79ab187713c4e7c9ab2400a84bfb3a19b33ba68a17"
+  },
+  "mypy": "PASS",
+  "physical_stage_limits_usd": {
+    "engineering": 17.0,
+    "validation": 3.0
+  },
+  "precommit": "PASS",
+  "prepaid_test_fixture_correction": "The first budget recheck found one test using the old absolute cap; its setup now derives the boundary from the configured limit. Final tests pass. Runtime changes are limited to the two budget literals.",
+  "ruff": "PASS",
+  "source_manifest_sha256": "530cf264faf7920b910bb149beae47e024cdf058e7734a8587e8216c7c9984fe",
+  "status": "PASS",
+  "unit_tests": {
+    "deselected": 11,
+    "passed": 607
+  }
+}

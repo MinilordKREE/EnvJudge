@@ -9,7 +9,7 @@ Hard physical cap: USD 3. No increase or reset.
 
 ## Immutable input bindings
 
-- source_manifest.json: 518f992089a6c4fc9ef72748ea25f5dc0700be06952a05d6e3b6c3857c10ecf1
+- source_manifest.json: 530cf264faf7920b910bb149beae47e024cdf058e7734a8587e8216c7c9984fe
 - input_manifest.json: d41c397eeea1afc435e7050ee73171f84f4296ebe622e8843bb112102f3e7b2c
 - validation_manifest.json: 04e9e309810e4ac881c0b8c4f1e3234101d3fbcc474021a1ae14fee12a2d5e32
 
@@ -28,3 +28,10 @@ Reporting precedence and limitations are exactly those in the frozen design docu
 Full input and reference bytes remain in the gitignored private store. Public manifests
 contain only identifiers, counts, hashes, labels, and configuration. This publication-only
 checkpoint starts no paid validation; the sanitized commit and audit must be reported first.
+
+## User-authorized pre-call budget amendment
+
+The user now authorizes the specified DeepSeek/OpenRouter API processing and a combined
+USD20 ceiling. Phase A remains USD3; Phase B is USD17. No paid call, cap or operation
+journal existed before this amendment. All frozen inputs, labels and method rules remain
+unchanged. The earlier publication-only pause is superseded by this explicit continuation.

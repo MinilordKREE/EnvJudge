@@ -75,7 +75,7 @@ ARM = "iterative_low_llm_judge"
 TASKS = (154, 159)
 DESIGNER_CALL_CAP = 3
 ADAPTATION_CAP = 30
-STAGE_LIMITS = {"validation": 3.0, "engineering": 8.0}
+STAGE_LIMITS = {"validation": 3.0, "engineering": 17.0}
 RATES = {**historical.RATES, "deepseek-v4-flash": (0.44, 1.32)}
 REPEAT_CASES = (
     "archived_task110",
@@ -1570,7 +1570,7 @@ def write_prereg_template(adaptation: bool) -> None:
         "",
         "This stage uses the exact frozen design in docs/design/AEA_LLM_PRIVILEGE_JUDGE.md.",
         "No policy during validation or saved replay. No task/baseline/reference generation.",
-        "Hard physical cap: USD " + str(8 if adaptation else 3) + ". No increase or reset.",
+        "Hard physical cap: USD " + str(17 if adaptation else 3) + ". No increase or reset.",
         "",
         "## Immutable input bindings",
         "",

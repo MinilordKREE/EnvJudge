@@ -141,7 +141,7 @@ No prompt, threshold or label changes after freeze.
 
 ## Physical accounting and engineering acceptance
 
-Validation has a separate hard physical USD3 cap and no policy. Engineering has a hard USD8 cap
+Validation has a separate hard physical USD3 cap and no policy. Engineering has a hard USD17 cap
 covering judge, designer, adaptation policy, K16 and failed-request reservations. Before each
 physical request, reserve full serialized wire bytes plus framing allowance at conservative
 peak input prices and maximum output tokens. Failed/ambiguous requests retain their entire
@@ -198,3 +198,19 @@ so its raw input blobs are absent from the outgoing commit ancestry.
 
 This publication-only checkpoint authorizes no paid validation. Phase A requires a separate
 continuation after the sanitized implementation SHA and material audit have been reported.
+
+## Pre-call budget authorization amendment
+
+After publication sanitization and before any API call, the user explicitly authorized the
+specified external API processing and raised the experiment ceiling to USD20. This is a
+combined ceiling: retain Phase A at USD3 and allocate USD17 to Phase B. Separate immutable
+stage caps therefore bound all experiment API usage and failed-request reservations to
+USD20 in total. The prior USD8 engineering allocation remains part of the earlier published
+record; no existing cap or ledger was reset or increased after execution began.
+
+The authorized destinations are DeepSeek (`https://api.deepseek.com`) for reference-aware
+Flash judge and Pro designer calls, and OpenRouter (`https://openrouter.ai/api/v1`) with
+Alibaba pinned for Qwen learner calls. Raw privileged materials remain gitignored and are
+not published to GitHub. Judge inputs, labels, settings, admission rules, three DESIGN calls,
+30 adaptation rollouts per task, CONTROL, acceptance, and K16 remain unchanged. Phase B still
+requires Phase A acceptance and a pushed validation freeze/preregistration first.

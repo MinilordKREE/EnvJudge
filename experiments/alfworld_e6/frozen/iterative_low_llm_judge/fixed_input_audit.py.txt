@@ -66,7 +66,7 @@ check({r['case_id']:r['expected_verdict'] for r in rows if r['role']=='regressio
 check([r['repeat_of'] for r in rows if r['role']=='repeat']==REPEATS,'four_repeat_members')
 check([(r['task_id'],r['call_index']) for r in rows if r['role']=='inspection']==SAVED,'saved_inspection_order')
 check(vm['judge_config']==JudgeConfig().model_dump(mode='json'),'frozen_judge_config')
-check(vm['physical_cap_usd']==3.0 and sm['caps_usd']=={'validation':3.0,'engineering':8.0},'separate_caps')
+check(vm['physical_cap_usd']==3.0 and sm['caps_usd']=={'validation':3.0,'engineering':17.0},'separate_caps')
 source_hashes = {name:sha((ROOT/name).read_text()) for name in sm['source_hashes']}
 check(source_hashes==sm['source_hashes'],'frozen_source_runtime_files')
 check(not (BASE/'validation/cap.json').exists() and not (BASE/'engineering/cap.json').exists(),'no_paid_caps_yet')

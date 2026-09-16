@@ -2,7 +2,7 @@
   "adaptation_rollouts_per_task": 30,
   "base_driver_sha256": "980528539037365cb321c9a7678918dbb9302ecacd265cc10be2617e5d124e33",
   "caps_usd": {
-    "engineering": 8.0,
+    "engineering": 17.0,
     "validation": 3.0
   },
   "confirmation_k": 16,
@@ -13,9 +13,9 @@
     "configs/corpus_aea.yaml": "a5f4b3c7ec0ace3ffebef184481585402dbf9a2d594d4fcde4dfc355a97eab10",
     "configs/pricing.yaml": "22ec07333b638ad6b5679bc58ce1f7fd0a1c8b526bed5420c378a03147805f7e",
     "configs/privilege_judge_pricing.yaml": "f54f67cb3a6af8565a801fdc47204d5a605f343bf785203fd25fba4900037c21",
-    "docs/design/AEA_LLM_PRIVILEGE_JUDGE.md": "984b5e5a75bb4fa78ee8df4c09477ee0bb63d070e6f4e867822bd412f8fb44c9",
+    "docs/design/AEA_LLM_PRIVILEGE_JUDGE.md": "d85af6378bd8c0be77644e303e140dc62a9589cb8fdcc3423eb3e81d1beaf63a",
     "scripts/e3.py": "4152356515fee743170205780be85ac45436073294b7bd9981dc1df221635363",
-    "scripts/e6_iterative_low_llm_judge.py": "129344ad6f30e2838f726f435cd3090aa95f2e034d93e7f6c03ff90cc8240c12",
+    "scripts/e6_iterative_low_llm_judge.py": "945c5b4ca969b0f8440a9a11aec7ea0e16b542d781f8076562595eb0d560d3ba",
     "scripts/e6_iterative_low_smoke.py": "86aa45af30cfafefd251b8da5f1fc45399404956eac18f5f94c0027899acd459",
     "scripts/e6_iterative_low_viability_v3.py": "980528539037365cb321c9a7678918dbb9302ecacd265cc10be2617e5d124e33",
     "scripts/semantic_privilege_benchmark.py": "2539faaf05ef2192809b96cf96f95460be08584f6d40c483a1f8f9285f112a94",

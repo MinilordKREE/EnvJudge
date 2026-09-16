@@ -1,0 +1,131 @@
+#!/usr/bin/env python3
+"""Read-only pre-paid amendment audit; writes only a metadata result under /tmp."""
+from __future__ import annotations
+
+import ast
+import hashlib
+import json
+import os
+from pathlib import Path
+import subprocess
+import time
+
+ROOT = Path('/home/kree/work/EnvJudge-aea-llm')
+BEFORE = 'e8ee338435ea35583da3b44eb6eb512ebe667ade'
+FROZEN = 'experiments/alfworld_e6/frozen/iterative_low_llm_judge/'
+OUT = Path('/tmp/llm_judge_budget_amendment_audit.json')
+
+
+def sha(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def git(*args):
+    return subprocess.check_output(['git', '-C', str(ROOT), *args],
+                                   env={**os.environ, 'GIT_OPTIONAL_LOCKS': '0'})
+
+
+def old(path):
+    return git('show', BEFORE + ':' + path)
+
+
+def read(path):
+    return (ROOT / path).read_bytes()
+
+
+def functions(tree):
+    return [(n.name, ast.dump(n, include_attributes=False))
+            for n in ast.walk(tree) if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))]
+
+
+checks = {}
+
+
+def check(name, condition):
+    checks[name] = bool(condition)
+
+
+driver = 'scripts/e6_iterative_low_llm_judge.py'
+old_tree = ast.parse(old(driver)); new_tree = ast.parse(read(driver))
+old_functions = functions(old_tree); new_functions = functions(new_tree)
+check('all_execution_and_decision_function_asts_unchanged',
+      [x for x in old_functions if x[0] != 'write_prereg_template'] ==
+      [x for x in new_functions if x[0] != 'write_prereg_template'])
+changed_assignment = 0
+changed_report_literal = 0
+for node in old_tree.body:
+    if isinstance(node, ast.Assign) and any(isinstance(t, ast.Name) and t.id == 'STAGE_LIMITS' for t in node.targets):
+        check('baseline_limits_exact', ast.literal_eval(node.value) == {'validation': 3.0, 'engineering': 8.0})
+        node.value = ast.parse("{'validation': 3.0, 'engineering': 17.0}", mode='eval').body
+        changed_assignment += 1
+    if isinstance(node, ast.FunctionDef) and node.name == 'write_prereg_template':
+        for expr in ast.walk(node):
+            if (isinstance(expr, ast.IfExp) and isinstance(expr.test, ast.Name)
+                    and expr.test.id == 'adaptation' and isinstance(expr.body, ast.Constant)
+                    and expr.body.value == 8 and isinstance(expr.orelse, ast.Constant)
+                    and expr.orelse.value == 3):
+                expr.body.value = 17
+                changed_report_literal += 1
+check('exactly_one_budget_assignment', changed_assignment == 1)
+check('exactly_one_matching_prereg_budget_print_literal', changed_report_literal == 1)
+check('whole_driver_ast_only_engineering_limit_and_matching_prereg_budget_literal_changed', ast.dump(old_tree, include_attributes=False) == ast.dump(new_tree, include_attributes=False))
+for node in new_tree.body:
+    if isinstance(node, ast.Assign):
+        for target in node.targets:
+            if isinstance(target, ast.Name) and target.id in ('STAGE_LIMITS', 'TASKS', 'DESIGNER_CALL_CAP', 'ADAPTATION_CAP'):
+                checks['constant_' + target.id] = ast.literal_eval(node.value) == {
+                    'STAGE_LIMITS': {'validation': 3.0, 'engineering': 17.0},
+                    'TASKS': (154, 159), 'DESIGNER_CALL_CAP': 3, 'ADAPTATION_CAP': 30,
+                }[target.id]
+
+source_manifest = json.loads(read(FROZEN + 'source_manifest.json'))
+previous_source = json.loads(old(FROZEN + 'source_manifest.json'))
+check('manifest_caps_3_plus17', source_manifest['caps_usd'] == {'validation': 3.0, 'engineering': 17.0})
+check('combined_new_experiment_cap20', sum(source_manifest['caps_usd'].values()) == 20.0)
+check('unchanged_budget_dimensions', all(source_manifest[k] == previous_source[k] for k in source_manifest if k not in ('source_hashes', 'caps_usd')))
+source_changes = sorted(k for k in source_manifest['source_hashes'] if source_manifest['source_hashes'][k] != previous_source['source_hashes'][k])
+check('source_inventory_membership_unchanged', set(source_manifest['source_hashes']) == set(previous_source['source_hashes']))
+check('source_changes_only_driver_and_design_doc', set(source_changes) <= {driver, 'docs/design/AEA_LLM_PRIVILEGE_JUDGE.md'})
+check('all_frozen_current_source_hashes_match', all(sha(read(k)) == v for k, v in source_manifest['source_hashes'].items()))
+check('production_src_byte_unchanged', not git('diff', '--name-only', BEFORE, '--', 'src').strip())
+
+fixed = ('input_manifest.json', 'validation_manifest.json', 'saved_candidates.json', 'fixed_input_audit.json')
+for name in fixed:
+    check('unchanged_' + name, read(FROZEN + name) == old(FROZEN + name))
+vm = json.loads(read(FROZEN + 'validation_manifest.json'))
+private = ROOT / 'runs/e6-iterative-low-llm-judge/private'
+input_hashes = {}
+for row in vm['cases']:
+    path = private / row['input_file']
+    actual = sha(path.read_bytes())
+    input_hashes[row['input_file']] = actual
+    check('private_input_' + row['case_id'], actual == row['input_file_sha256'])
+check('exact21_calls_17_unique_inputs', len(vm['cases']) == 21 and len(input_hashes) == 17)
+check('validation_manifest_cap3', vm['physical_cap_usd'] == 3.0)
+im = json.loads(read(FROZEN + 'input_manifest.json'))
+check('private_saved_candidates_unchanged', sha((private / 'saved_candidates.json').read_bytes()) == im['saved_candidates_sha256'])
+check('all_archive_import_hashes_unchanged', all(sha(read(k)) == v for field in ('archived_file_hashes', 'imported_file_hashes') for k, v in im[field].items()))
+check('no_tracked_private_files', not git('ls-files', 'runs/e6-iterative-low-llm-judge/private').strip())
+paid_files = [str(p.relative_to(ROOT)) for stage in ('validation', 'engineering')
+              for pattern in ('cap.json', 'cap.attempts.jsonl', 'cap.denials.jsonl', 'ledger*.jsonl',
+                              'operations/*.json', 'judge_requests/*.jsonl', 'result.json',
+                              'results.json', 'saved_replay.json') for p in (private / stage).glob(pattern)]
+check('no_prior_paid_artifacts', not paid_files)
+prereg = read('experiments/alfworld_e6/PREREG_ITERATIVE_LOW_LLM_JUDGE_VALIDATION.md').decode()
+check('prereg_binds_all_manifest_hashes', all(sha(read(FROZEN + name)) in prereg for name in ('source_manifest.json', 'input_manifest.json', 'validation_manifest.json')))
+failures = [name for name, ok in checks.items() if not ok]
+result = {'schema': 'llm_judge_budget_amendment_audit_v1', 'status': 'PASS' if not failures else 'FAIL',
+          'checked_at_unix': time.time(), 'baseline_commit': BEFORE,
+          'current_head': git('rev-parse', 'HEAD').decode().strip(),
+          'current_status_sha256': sha(git('status', '--porcelain=v1')),
+          'checks': checks, 'failures': failures, 'source_changes': source_changes,
+          'driver_function_count': len(old_functions), 'driver_sha256': sha(read(driver)),
+          'stage_limits_usd': source_manifest['caps_usd'], 'total_cap_usd': sum(source_manifest['caps_usd'].values()),
+          'private_input_hashes': input_hashes, 'paid_artifact_paths': paid_files,
+          'source_manifest_sha256': sha(read(FROZEN + 'source_manifest.json')),
+          'prereg_sha256': sha(prereg.encode()), 'script_sha256': sha(Path(__file__).read_bytes()),
+          'no_api_policy_environment_calls': True,
+          'phase_a_acceptance_barrier': 'All21 valid response schemas with no generated_uncertainty; exact13 labels and4 repeat agreements; inspections remain unlabeled.'}
+OUT.write_text(json.dumps(result, indent=2, sort_keys=True) + '\n')
+print(json.dumps({'status': result['status'], 'checks': len(checks), 'failures': failures,
+                  'output': str(OUT), 'sha256': sha(OUT.read_bytes())}))
