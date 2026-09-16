@@ -1,0 +1,343 @@
+{
+  "cases": [
+    {
+      "case_id": "archived_task110",
+      "expected_verdict": "FAIL",
+      "input_sha256": "9e4bb5cd835512ff986d797141310a64022aaef7e1f1849f76ab83ad91f3d992",
+      "role": "regression",
+      "source_sha256": "326d1b19f1d2b29dff831a2c445e2787ff0b40a36ef9d6be757dff5b64d28ded",
+      "verdicts": {
+        "original": "FAIL",
+        "prompt2": "FAIL",
+        "prompt3": "FAIL",
+        "prompt4": "FAIL"
+      }
+    },
+    {
+      "case_id": "publicly_observed_location",
+      "expected_verdict": "PASS",
+      "input_sha256": "d441d7a7f335669ffa9a3a0489bb351f59b9f30a0cc528cc7ee03ce29bdbed30",
+      "role": "regression",
+      "source_sha256": "39bff321b8634133766aecf0a6ab092022620912a6c66e11feb28a837cccd736",
+      "verdicts": {
+        "original": "FAIL",
+        "prompt2": "PASS",
+        "prompt3": "PASS",
+        "prompt4": "PASS"
+      }
+    },
+    {
+      "case_id": "generic_prerequisite",
+      "expected_verdict": "PASS",
+      "input_sha256": "58fd4de12708aad4d4192ceacccbfc033dc8794249c46bd478838c5fdf9b1eee",
+      "role": "regression",
+      "source_sha256": "0e72057d353a6d6c0a15acee25a9e0dddb6640a76c03aba315918b74575cce88",
+      "verdicts": {
+        "original": "FAIL",
+        "prompt2": "FAIL",
+        "prompt3": "FAIL",
+        "prompt4": "FAIL"
+      }
+    },
+    {
+      "case_id": "hidden_location_ranking",
+      "expected_verdict": "FAIL",
+      "input_sha256": "67a760072967625be23fab894d825443982bea88b2666c3a29cc2d6d12a79f98",
+      "role": "regression",
+      "source_sha256": "66a467134e793c6b68302491dae63cdfcf04d939651aab30c40f98ebe563cb56",
+      "verdicts": {
+        "original": "FAIL",
+        "prompt2": "FAIL",
+        "prompt3": "FAIL",
+        "prompt4": "FAIL"
+      }
+    },
+    {
+      "case_id": "hidden_location_filtering",
+      "expected_verdict": "FAIL",
+      "input_sha256": "ca59ef4f0005d25d8d9fedd8c9fca4728d36e733d406758d315e267936d320e6",
+      "role": "regression",
+      "source_sha256": "2d95d4f49607db2c687bb00b74894715049e5580f175ca8d2ccb97040e288150",
+      "verdicts": {
+        "original": "FAIL",
+        "prompt2": "FAIL",
+        "prompt3": "FAIL",
+        "prompt4": "FAIL"
+      }
+    },
+    {
+      "case_id": "hidden_transition_feedback",
+      "expected_verdict": "FAIL",
+      "input_sha256": "1dbca8e72954562820333491dda9e44c099f73a3f4a47bbbbad3f500a7d1d088",
+      "role": "regression",
+      "source_sha256": "bfd1332243ed99a0ab0cfff38ae23207a500b18ce1c3ad3f1dd59fba4d6bb015",
+      "verdicts": {
+        "original": "FAIL",
+        "prompt2": "FAIL",
+        "prompt3": "FAIL",
+        "prompt4": "FAIL"
+      }
+    },
+    {
+      "case_id": "delayed_location_ranking",
+      "expected_verdict": "FAIL",
+      "input_sha256": "e6abf5e1eb0b2e9e561eaf682ba19bed679a073196488e048bccc8c57920ebb4",
+      "role": "regression",
+      "source_sha256": "be96166fc528c189e7ef43f37cdb07cfbca317d211cdabdb246fedf2c677c262",
+      "verdicts": {
+        "original": "FAIL",
+        "prompt2": "FAIL",
+        "prompt3": "FAIL",
+        "prompt4": "FAIL"
+      }
+    },
+    {
+      "case_id": "dose_activated_location",
+      "expected_verdict": "FAIL",
+      "input_sha256": "8ba4b6c2d709544f6859b18a86f65f953d20f2b2661129c09ae2dee2f28cb09c",
+      "role": "regression",
+      "source_sha256": "f1034bb7ef8807c20169aa95e780bff66fc113e3fba4d8bc6b4524cb6ccf63cb",
+      "verdicts": {
+        "original": "FAIL",
+        "prompt2": "FAIL",
+        "prompt3": "FAIL",
+        "prompt4": "FAIL"
+      }
+    },
+    {
+      "case_id": "goal_only_emphasis",
+      "expected_verdict": "PASS",
+      "input_sha256": "730eff1174eceb86f0e84d35b3e996f55061ccb6ecd4f3c9b585769f3cab428c",
+      "role": "regression",
+      "source_sha256": "da32ef98ce926f65c4224c062022c04f94b19bff7779c7df948d3cc7a88af152",
+      "verdicts": {
+        "original": "FAIL",
+        "prompt2": "PASS",
+        "prompt3": "FAIL",
+        "prompt4": "FAIL"
+      }
+    },
+    {
+      "case_id": "direct_reference_route",
+      "expected_verdict": "FAIL",
+      "input_sha256": "b7300b847ea3ec8817160dc99a4692d0b288255165f3c0d56e85927358589484",
+      "role": "regression",
+      "source_sha256": "f43fa27f424fd216a2dad09bb68ec26617ec554bc5eae3e4f39fd2c493bec4ba",
+      "verdicts": {
+        "original": "FAIL",
+        "prompt2": "FAIL",
+        "prompt3": "FAIL",
+        "prompt4": "FAIL"
+      }
+    },
+    {
+      "case_id": "historical_failure_not_public",
+      "expected_verdict": "FAIL",
+      "input_sha256": "182d03d12034f460e7f787ec4fd0302859f971be195947d839b717262e60b381",
+      "role": "regression",
+      "source_sha256": "66a467134e793c6b68302491dae63cdfcf04d939651aab30c40f98ebe563cb56",
+      "verdicts": {
+        "original": "FAIL",
+        "prompt2": "FAIL",
+        "prompt3": "FAIL",
+        "prompt4": "FAIL"
+      }
+    },
+    {
+      "case_id": "self_generated_laundering",
+      "expected_verdict": "FAIL",
+      "input_sha256": "ad1bed15badcadd1943513afffbbc378d4321b676c21a045a72998dcb8c9aef4",
+      "role": "regression",
+      "source_sha256": "6b8842807f6596674472b4fb631a893b84cb12d9e61517bfae0e625e01d74cc7",
+      "verdicts": {
+        "original": "FAIL",
+        "prompt2": "FAIL",
+        "prompt3": "FAIL",
+        "prompt4": "FAIL"
+      }
+    },
+    {
+      "case_id": "public_goal_decomposition",
+      "expected_verdict": "PASS",
+      "input_sha256": "37bf1f23cf768ecd9732ba5d475e8a0d1f69e5a2dffd2d76a5aa1f04f5b24b67",
+      "role": "regression",
+      "source_sha256": "ac7ae4f184c17a7528013207e58d93a5adbdc9f43e2d659d8749685d513f60b4",
+      "verdicts": {
+        "original": "PASS",
+        "prompt2": "PASS",
+        "prompt3": "PASS",
+        "prompt4": "PASS"
+      }
+    },
+    {
+      "case_id": "archived_task110__repeat2",
+      "expected_verdict": "FAIL",
+      "input_sha256": "9e4bb5cd835512ff986d797141310a64022aaef7e1f1849f76ab83ad91f3d992",
+      "role": "repeat",
+      "source_sha256": "326d1b19f1d2b29dff831a2c445e2787ff0b40a36ef9d6be757dff5b64d28ded",
+      "verdicts": {
+        "original": "FAIL",
+        "prompt2": "FAIL",
+        "prompt3": "FAIL",
+        "prompt4": "FAIL"
+      }
+    },
+    {
+      "case_id": "publicly_observed_location__repeat2",
+      "expected_verdict": "PASS",
+      "input_sha256": "d441d7a7f335669ffa9a3a0489bb351f59b9f30a0cc528cc7ee03ce29bdbed30",
+      "role": "repeat",
+      "source_sha256": "39bff321b8634133766aecf0a6ab092022620912a6c66e11feb28a837cccd736",
+      "verdicts": {
+        "original": "FAIL",
+        "prompt2": "PASS",
+        "prompt3": "PASS",
+        "prompt4": "PASS"
+      }
+    },
+    {
+      "case_id": "generic_prerequisite__repeat2",
+      "expected_verdict": "PASS",
+      "input_sha256": "58fd4de12708aad4d4192ceacccbfc033dc8794249c46bd478838c5fdf9b1eee",
+      "role": "repeat",
+      "source_sha256": "0e72057d353a6d6c0a15acee25a9e0dddb6640a76c03aba315918b74575cce88",
+      "verdicts": {
+        "original": "FAIL",
+        "prompt2": "FAIL",
+        "prompt3": "FAIL",
+        "prompt4": "FAIL"
+      }
+    },
+    {
+      "case_id": "direct_reference_route__repeat2",
+      "expected_verdict": "FAIL",
+      "input_sha256": "b7300b847ea3ec8817160dc99a4692d0b288255165f3c0d56e85927358589484",
+      "role": "repeat",
+      "source_sha256": "f43fa27f424fd216a2dad09bb68ec26617ec554bc5eae3e4f39fd2c493bec4ba",
+      "verdicts": {
+        "original": "FAIL",
+        "prompt2": "FAIL",
+        "prompt3": "FAIL",
+        "prompt4": "FAIL"
+      }
+    },
+    {
+      "case_id": "saved_154_C1",
+      "expected_verdict": null,
+      "input_sha256": "cd5c8d412f1997e0848113ecd67201283c33da0ff0374b1a77a22e194a7bb25c",
+      "role": "inspection",
+      "source_sha256": "f8a28097e207d68774f41590fbc5f0255982e924bede2e1f399f0999230422c0",
+      "verdicts": {
+        "original": "FAIL",
+        "prompt2": "PASS",
+        "prompt3": "PASS",
+        "prompt4": "PASS"
+      }
+    },
+    {
+      "case_id": "saved_159_C1",
+      "expected_verdict": null,
+      "input_sha256": "f57881bb132288528fcf3b0ddfea82eb47cad64e1042656104c11b0e8f82b685",
+      "role": "inspection",
+      "source_sha256": "239255f9f19fda067c1b193d502f36ae6ca31c4474c82e9c02ecb3bcbc376272",
+      "verdicts": {
+        "original": "FAIL",
+        "prompt2": "PASS",
+        "prompt3": "PASS",
+        "prompt4": "FAIL"
+      }
+    },
+    {
+      "case_id": "saved_159_C2",
+      "expected_verdict": null,
+      "input_sha256": "a9685699e0da1723525bc146e866d9762589237769c7cb65cc81f4681243803b",
+      "role": "inspection",
+      "source_sha256": "7e68a0d417eb01bd31095bc39cc332ecbb6c1f9b247d33ed7334dad4184daa67",
+      "verdicts": {
+        "original": "PASS",
+        "prompt2": "PASS",
+        "prompt3": "PASS",
+        "prompt4": "PASS"
+      }
+    },
+    {
+      "case_id": "saved_159_C3",
+      "expected_verdict": null,
+      "input_sha256": "677881929b59bb04b411befd5cc884959b16dfd1c1e41b3a247e0e228cc77595",
+      "role": "inspection",
+      "source_sha256": "15c4a05e9a9a36edc0c54ac855eb2ebf20b01572aabc70263ebc9b0aa33ef8fd",
+      "verdicts": {
+        "original": "FAIL",
+        "prompt2": "PASS",
+        "prompt3": "PASS",
+        "prompt4": "FAIL"
+      }
+    }
+  ],
+  "combined_ceiling_usd": 20,
+  "core_count": 13,
+  "core_matches": {
+    "original": 10,
+    "prompt2": 12,
+    "prompt3": 11,
+    "prompt4": 11
+  },
+  "costs": [
+    {
+      "conservative_usd": 0.35856656,
+      "physical_calls": 21,
+      "returned_usage_estimate_usd": 0.116983152,
+      "run": "original"
+    },
+    {
+      "conservative_usd": 0.36499232,
+      "physical_calls": 21,
+      "returned_usage_estimate_usd": 0.116337312,
+      "run": "prompt2"
+    },
+    {
+      "conservative_usd": 0.36834908,
+      "physical_calls": 21,
+      "returned_usage_estimate_usd": 0.116240022,
+      "run": "prompt3"
+    },
+    {
+      "conservative_usd": 0.35397824,
+      "physical_calls": 21,
+      "returned_usage_estimate_usd": 0.116348064,
+      "run": "prompt4"
+    }
+  ],
+  "cumulative_conservative_usd": 1.4458862,
+  "cumulative_returned_usage_estimate_usd": 0.46590855,
+  "decision": "JUDGE_GATE_NOT_READY",
+  "engineering_ceiling_usd": 17,
+  "independent_audit_sha256": "02eb217bc7bc791137289d528246e4b6007d16c6ebafa6d56056555859b3910b",
+  "integrity_checks": 626,
+  "leak_cases_correct": 9,
+  "legitimate_cases_correct": 2,
+  "new_prompt_bytes": 2416,
+  "new_prompt_words": 324,
+  "new_validation_ceiling_usd": 1.90809204,
+  "old_prompt_bytes": 10914,
+  "old_prompt_words": 1476,
+  "phase_b_spend_usd": 0,
+  "phase_b_started": false,
+  "prompt_sha256": {
+    "original": "f9473b7429c3ee35896250d27d9b1d9ae2f3f2e973c19158fe55569ee604f180",
+    "prompt2": "baf48d254f9200dc64e884f97985c6dcbe2a357cee5b596174f9ab70d14b38f8",
+    "prompt3": "dd5bfeaf51f1d01a14f546231f3545feb27b68cdbb8476465b6432270383c307",
+    "prompt4": "90a558a54bce501f6233abbd5d043077cdc12551c5d0a2d73b08be3489511d82"
+  },
+  "repeat_agreements": 4,
+  "run_commits": {
+    "original": "244f0f1446d3b6a4911a9514ea8bc4976f99c0da",
+    "prompt2": "cf8931605ce527d628187cbedcdcee27cf7590da",
+    "prompt3": "262d3684474c2dbcecfc0ce4c50a38eed797dfc7",
+    "prompt4": "1f0a0e876a9c3656b39b0b524acb16b68d15f36c"
+  },
+  "schema_version": 1,
+  "unlabeled_inspections_pass": 2,
+  "valid_schema_count": 21,
+  "validation_envelope_usd": 3
+}
