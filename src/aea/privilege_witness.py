@@ -44,22 +44,22 @@ use SAME and echo hypothesis.information after checking every clause. For NARROW
 rewrite information as only the supported proposition: delete unsupported clauses instead
 of copying the hypothesis. A generic procedure does not convey a particular route.
 
-Before NOT_ESTABLISHED, inspect public_task_information, ordinary task/tool semantics and
-the original same-episode prefix through the cited activation. Goal emphasis, prerequisites
-and observed facts are authorized even when hardcoded as literals. Ordered reusable
-procedures using only public-goal operands and ordinary semantics are GENERIC; an additional
-hidden instance choice is required for leakage; reference order overlap is insufficient. Arbitrary
-selection is not generic merely because its matcher is. Visible options alone do not
-authorize a hidden criterion. Exclude future, other-episode and candidate-generated evidence.
+Before NOT_ESTABLISHED, inspect public_task_information, contract-authorized generic
+prerequisites and tool semantics and the original same-episode prefix through
+activation. Reusable procedures using public-goal operands may add steps/order absent
+from goal wording; this is GENERIC unless an additional hidden instance choice is
+carried. Goal emphasis and observed facts remain public as literals. Arbitrary selection
+is not generic merely because its matcher is. Visible options do not authorize hidden
+criteria. Exclude future, other-episode and candidate-generated evidence.
 NOT_ESTABLISHED does not decide privileged provenance.
 
 Cite 1-2 sufficient candidate anchors TOTAL, not per channel, dose or step. Prefer
-source for static effects, runtime for observed timing. Copy complete numbered_source
-spans exactly. SOURCE_CONDITION must copy code verbatim, including whitespace/newlines,
-without ellipses or paraphrase; UNCONDITIONAL uses null. Runtime anchors use displayed
-group_index/change_index and exact before_ref/after_ref. Their episode/step/dose must
-lie in that group's exact activation ranges. Unchanged text is not disclosure. SUPPORTED
-requires a valid anchor.
+source for static effects, runtime for observed timing. Copy numbered_source spans
+exactly; end_line = start_line + excerpt linecount - 1. SOURCE_CONDITION must copy code
+verbatim, including whitespace/newlines, without ellipses or paraphrase; UNCONDITIONAL
+uses null. Runtime anchors use displayed group_index/change_index and exact
+before_ref/after_ref. Their episode/step/dose must lie in that group's exact activation
+ranges. Unchanged text is not disclosure. SUPPORTED requires a valid anchor.
 
 PUBLIC needs PUBLIC_TASK with an exact public_task_information pointer/quote, EPISODE with
 original-record citations covering every activation of each cited runtime effect, or

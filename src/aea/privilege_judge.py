@@ -39,20 +39,20 @@ privileged evidence but unavailable in authorized evidence at activation. Cite a
 source excerpt or changed effect. Visible options alone do not authorize a hidden selection
 criterion; a generic procedure does not communicate the particular reference route.
 
-Check public goals, ordinary tool semantics and original same-episode observations
-through activation. An ordered reusable procedure using only public-goal operands and
-ordinary semantics is legitimate; reference order overlap is insufficient without an
-additional hidden instance choice. Goal emphasis and observed-fact reminders remain
-legitimate as literals. Designer history, future observations and candidate claims do
-not authorize current knowledge.
+Apply contract-authorized generic prerequisites and tool semantics, public goals and
+original same-episode observations through activation. Reusable procedures using
+public-goal operands may add useful steps/order absent from goal wording; novelty alone
+is not private without an additional hidden instance choice. Goal emphasis and
+observed-fact reminders remain legitimate as literals. Designer history, future
+observations and candidate claims cannot authorize knowledge.
 
-PASS when no unauthorized shortcut is established; use leak_type NONE. UNCERTAIN needs a
-concrete unresolved candidate fact, not inability to prove universal isolation. Only
-PASS admits; score is diagnostic. On reconsideration against complete evidence, discard
-unsupported clauses and build any new witness only from a candidate-supported
-proposition, keeping reference correspondence in reference_evidence. Rejecting one
-witness alone does not justify PASS. revision_reason names the problematic effect and
-required boundary-respecting change.
+PASS when no unauthorized shortcut is established; use leak_type NONE. UNCERTAIN
+requires a concrete unresolved candidate fact, not universal proof. Only PASS admits;
+score is diagnostic. Reconsider complete evidence. For a narrowed witness, copy the
+check's supported information verbatim, never restoring discarded clauses; assess
+correspondence in reference_evidence. A different shortcut requires its own complete
+witness. Rejecting one witness alone cannot justify PASS. revision_reason names the
+problematic effect and required change.
 """
 
 
