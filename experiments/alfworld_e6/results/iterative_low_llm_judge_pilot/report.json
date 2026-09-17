@@ -1,0 +1,38 @@
+{
+  "K16_B_L": 1,
+  "K16_B_T": 0,
+  "completed_K16": 1,
+  "completed_tasks": 2,
+  "decision": "LOW_IMPLEMENTATION_WORKS",
+  "end_to_end_functional_viability": true,
+  "endpoint_tasks": 2,
+  "engineering_cost": {
+    "call_rows": 1848,
+    "conservative_committed_usd": 3.751151961000016,
+    "policy_rollout_rows": 40,
+    "returned_ledger_usd": 3.367354798
+  },
+  "engineering_only": true,
+  "fresh_scientific_efficacy": false,
+  "interruption_sha256": null,
+  "pilot": {
+    "combined_cap_usd": 20.0,
+    "cumulative_committed_usd": 8.684193041000016,
+    "engineering_cap_usd": 15.06695892,
+    "prior_committed_usd": 4.93304108,
+    "protocol": "iterative-low-r5-judge-pilot-v1",
+    "r5_judge_ready": false,
+    "validation_cost_is_included_in_prior_committed_usd": true
+  },
+  "record_sha256": "1e0471e1de99f969098cb547cf7f24c66e00b9e91d2a249d1ce9794d942b7f30",
+  "repeated_judge_rejection_tasks": 0,
+  "schema_version": 1,
+  "search_accepts": 1,
+  "validation_cost": {
+    "call_rows": 51,
+    "conservative_committed_usd": 0.63351508,
+    "policy_rollout_rows": 0,
+    "returned_ledger_usd": 0.204638304
+  },
+  "validation_decision": "JUDGE_GATE_NOT_READY"
+}
