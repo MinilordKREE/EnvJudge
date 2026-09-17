@@ -1,0 +1,43 @@
+{
+  "accounting": {
+    "adaptation_rollouts": 392,
+    "baseline_rollouts": 318,
+    "confirmation_rollouts": 128,
+    "designer_calls": 39,
+    "judge_FAIL": 5,
+    "judge_PASS": 12,
+    "judge_UNCERTAIN": 1,
+    "judge_decisions": 18,
+    "logical_calls": 28496,
+    "physical_policy_episodes": 838
+  },
+  "checks": 117528,
+  "freeze_sha256": "92c08cfcce3d1ab501bec0198e40556683fe192b1cb89a89e6be0380da51cc3b",
+  "limitations": [
+    "Stored evidence and execution integrity; no proof of judge semantic accuracy",
+    "Physical attempts identify process/task/phase; provider receipt does not expose episode UUID",
+    "Ambiguous transport failures retain estimates, not asserted provider charges"
+  ],
+  "logical_usd": 41.228121967,
+  "physical_accounting": {
+    "ambiguous_failures": 21.0,
+    "attempts": 28517.0,
+    "conservative_total_usd": 42.552569996999985,
+    "estimate_exceeded_count": 0.0,
+    "incomplete_journal_lines": 0.0,
+    "inflight": 0.0,
+    "inflight_estimate_usd": 0.0,
+    "invalid_usage": 0.0,
+    "invalid_usage_estimate_usd": 0.0,
+    "retained_ambiguous_estimate_usd": 0.07277766600000002,
+    "returned": 28496.0,
+    "returned_conservative_usd": 42.47979233099998,
+    "returned_upper_rate_usd": 42.47979233099998,
+    "upstream_reported_count": 28421.0,
+    "upstream_reported_usd": 40.24072373099998
+  },
+  "protocol": "e3-integrated-aea-v1",
+  "status": "PASS",
+  "task_metadata_sha256": "0292836da9d3e8f7d426d2cc5340a1327ca7662fa6c7114973e5ab57c88f2fd8",
+  "tasks": 30
+}
