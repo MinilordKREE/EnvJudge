@@ -1,0 +1,797 @@
+{
+  "characterizer_source_sha256": {
+    "src/aea/actuator.py": "b35c677a87b36484b721528236919a8f525f0deec54536d9ce26bdd8cfd2a621",
+    "src/aea/intervention.py": "c4fa060c9c5bb3cc00706de84df76518ba0b4730128297923903fb4036c57e58"
+  },
+  "helper_sha256": "28131ef68e0322dd65928cb088d8005b753aa20d115dbf931bed0d6d15262a96",
+  "historical_implementation_commit": "969e339281e71190d1df6aed579b2402513bcd45",
+  "historical_inputs_unchanged": true,
+  "historical_result_commit": "247ab479ff9f703db0acbb7beff11b8d73893798",
+  "limitations": [
+    "Equivalence applies only to the captured replay suite.",
+    "Old outcome counts do not determine outcomes at unmeasured new representatives.",
+    "Reported typed feedback is conditional diagnostic evidence, not a new accepted environment."
+  ],
+  "model_calls": 0,
+  "new_policy_episodes": 0,
+  "private_summary_sha256": "f7c1adc11e17522157f7c1e4ec4eedb0b2795e835c63382f82fd4aa00f1a200f",
+  "schema_version": 1,
+  "scope": "offline characterization, no historical rescoring",
+  "status": "PASS",
+  "tasks": [
+    {
+      "characterization_sha256": "8fd5fa3ca41577eda22286e9224d9414741b766658d98184cec6d7a4b3d5e063",
+      "classes": [
+        {
+          "is_off": true,
+          "level_id": "surface-36b82a6a99e15d1629b1159ded3ae3c6cf21b778870006007326cf3cca9f537b",
+          "members": [
+            0.0
+          ],
+          "rendered_source_sha256": "80fa0f5b45c38bf9cf49e4db481b07da2be752a539d5bb3c14b0076518b67f9d",
+          "representative": 0.0
+        },
+        {
+          "is_off": false,
+          "level_id": "surface-fa3789a5f36e5a9b9a81d7abb58b2c10a04d60493c6e038668b031fd9ac2ed7f",
+          "members": [
+            0.0625,
+            0.125,
+            0.1875,
+            0.25,
+            0.3125
+          ],
+          "rendered_source_sha256": "04379a1de0fc0605960b4f12e8633ac9249eb3a33e6a3d69d440adee45744100",
+          "representative": 0.3125
+        },
+        {
+          "is_off": false,
+          "level_id": "surface-aa9db6f80cd1716a17a2fe8f6b94656f2c59e40061135932bb1ca12cde1167ab",
+          "members": [
+            0.375,
+            0.4375,
+            0.5,
+            0.5625,
+            0.625
+          ],
+          "rendered_source_sha256": "27e116f4db8378ffa97e2da69dd0a3f25a0323964a924d753020322d5476e2ee",
+          "representative": 0.625
+        },
+        {
+          "is_off": false,
+          "level_id": "surface-41601470357ce4e6c248d3096b18c1afb3b57afbf72fddc2f12ec5d09dddcf31",
+          "members": [
+            0.6875,
+            0.75,
+            0.8125,
+            0.875,
+            0.9375,
+            1.0
+          ],
+          "rendered_source_sha256": "8db745b8aec4d6a07e361b8fee334e86f92c8e06c1e603a2684efbc3af7c2ba0",
+          "representative": 1.0
+        }
+      ],
+      "conflicting_saved_verdicts_within_effective_class": [],
+      "coverage": {
+        "complete": true,
+        "episode_step_count": 153,
+        "probe_count": 2601
+      },
+      "diagnostics": [],
+      "effective_level_count": 4,
+      "historical_source_sha256": "42f53d2c3eeda9d8213f711727f83aa836359bcfbec0fecee453bacafc95d4e4",
+      "nominal_settings": [
+        0.0,
+        0.0625,
+        0.125,
+        0.1875,
+        0.25,
+        0.3125,
+        0.375,
+        0.4375,
+        0.5,
+        0.5625,
+        0.625,
+        0.6875,
+        0.75,
+        0.8125,
+        0.875,
+        0.9375,
+        1.0
+      ],
+      "old_policy_probes": [
+        {
+          "level_id": "surface-41601470357ce4e6c248d3096b18c1afb3b57afbf72fddc2f12ec5d09dddcf31",
+          "n": 4,
+          "nominal": 1.0,
+          "probe_index": 0,
+          "redundant_nominal_probe": false,
+          "successes": 4,
+          "verdict": "too_easy"
+        },
+        {
+          "level_id": "surface-aa9db6f80cd1716a17a2fe8f6b94656f2c59e40061135932bb1ca12cde1167ab",
+          "n": 8,
+          "nominal": 0.5,
+          "probe_index": 1,
+          "redundant_nominal_probe": false,
+          "successes": 6,
+          "verdict": "too_easy"
+        },
+        {
+          "level_id": "surface-fa3789a5f36e5a9b9a81d7abb58b2c10a04d60493c6e038668b031fd9ac2ed7f",
+          "n": 4,
+          "nominal": 0.25,
+          "probe_index": 2,
+          "redundant_nominal_probe": false,
+          "successes": 4,
+          "verdict": "too_easy"
+        },
+        {
+          "level_id": "surface-fa3789a5f36e5a9b9a81d7abb58b2c10a04d60493c6e038668b031fd9ac2ed7f",
+          "n": 4,
+          "nominal": 0.125,
+          "probe_index": 3,
+          "redundant_nominal_probe": true,
+          "successes": 4,
+          "verdict": "too_easy"
+        },
+        {
+          "level_id": "surface-fa3789a5f36e5a9b9a81d7abb58b2c10a04d60493c6e038668b031fd9ac2ed7f",
+          "n": 4,
+          "nominal": 0.0625,
+          "probe_index": 4,
+          "redundant_nominal_probe": true,
+          "successes": 4,
+          "verdict": "too_easy"
+        }
+      ],
+      "positive_effective_level_count": 3,
+      "provenance": {
+        "judge_input_sha256": "2bf44c579e1eba9486408da783fee95aafc13ccd32f1a7bb359b234f3f50da84",
+        "mode": "saved_full_runtime_probes",
+        "saved_raw_probe_sha256": "32bcfc090ca706441666c17843d00a49819941f356280113d10ec6a66bb98947"
+      },
+      "raw_probe_sha256": "b632747bc6a7c46a25963427c02ab7019145af693f8d43919914a88e7eaab102",
+      "redundant_old_probe_count": 2,
+      "regime": "LOW",
+      "task_id": 8,
+      "typed_feedback_assessment": {
+        "condition": "Conditional reuse of the exact historical strongest observation, not a new learner measurement.",
+        "operation": null,
+        "reason": null,
+        "status": "NOT_IDENTIFIABLE_FROM_SAVED_PROBES"
+      }
+    },
+    {
+      "characterization_sha256": "5f8fdfa9dd200ffb0a420f6d3896942387fdefe9474fcf5b31bf7656c3a60df2",
+      "classes": [
+        {
+          "is_off": true,
+          "level_id": "surface-c1d50af947351830732d1bd8a614d7be2cce86756617caac661d7a92c2ac6db5",
+          "members": [
+            0.0,
+            0.0625,
+            0.125,
+            0.1875,
+            0.25
+          ],
+          "rendered_source_sha256": "ee7a35ccb0bcd4479b9bfbc5c9fc18d78fbed4f9ba251535c73d8fa14604e081",
+          "representative": 0.25
+        },
+        {
+          "is_off": false,
+          "level_id": "surface-37275ee3ea394ba4e14a76717917b302d741c881d717a7bf0212740758f4c3a4",
+          "members": [
+            0.3125,
+            0.375,
+            0.4375
+          ],
+          "rendered_source_sha256": "e3a97b3472b1178b47037f41acbd9b899f6db7a102f23c5428b5f9b1555c5105",
+          "representative": 0.4375
+        },
+        {
+          "is_off": false,
+          "level_id": "surface-0adb3b46432958f244eee9f6d5eab8b4bd8d40337e777bbbbd3446a9529f42cd",
+          "members": [
+            0.5,
+            0.5625,
+            0.625,
+            0.6875
+          ],
+          "rendered_source_sha256": "15f7c72eccd5a82b957629eb23173f46a038281967bb4dfd6f992da5b5ebe34d",
+          "representative": 0.6875
+        },
+        {
+          "is_off": false,
+          "level_id": "surface-3f64f55b29596f07f24ea900b1020ced3b51c4ab79e1d5ed0a3d0e67a078eef1",
+          "members": [
+            0.75,
+            0.8125,
+            0.875,
+            0.9375,
+            1.0
+          ],
+          "rendered_source_sha256": "af03bf43bc66b6633d1f429ab531b5372230a4edb84caa8bf0b5a6669e98a6ce",
+          "representative": 1.0
+        }
+      ],
+      "conflicting_saved_verdicts_within_effective_class": [],
+      "coverage": {
+        "complete": true,
+        "episode_step_count": 153,
+        "probe_count": 2601
+      },
+      "diagnostics": [],
+      "effective_level_count": 4,
+      "historical_source_sha256": "66bbc7ff29e0addbf4fce2b4940d5b14c28d0f8f4e95df723fc093fcf98fd417",
+      "nominal_settings": [
+        0.0,
+        0.0625,
+        0.125,
+        0.1875,
+        0.25,
+        0.3125,
+        0.375,
+        0.4375,
+        0.5,
+        0.5625,
+        0.625,
+        0.6875,
+        0.75,
+        0.8125,
+        0.875,
+        0.9375,
+        1.0
+      ],
+      "old_policy_probes": [
+        {
+          "level_id": "surface-3f64f55b29596f07f24ea900b1020ced3b51c4ab79e1d5ed0a3d0e67a078eef1",
+          "n": 4,
+          "nominal": 1.0,
+          "probe_index": 0,
+          "redundant_nominal_probe": false,
+          "successes": 4,
+          "verdict": "too_easy"
+        },
+        {
+          "level_id": "surface-0adb3b46432958f244eee9f6d5eab8b4bd8d40337e777bbbbd3446a9529f42cd",
+          "n": 4,
+          "nominal": 0.5,
+          "probe_index": 1,
+          "redundant_nominal_probe": false,
+          "successes": 4,
+          "verdict": "too_easy"
+        },
+        {
+          "level_id": "surface-c1d50af947351830732d1bd8a614d7be2cce86756617caac661d7a92c2ac6db5",
+          "n": 4,
+          "nominal": 0.25,
+          "probe_index": 2,
+          "redundant_nominal_probe": false,
+          "successes": 0,
+          "verdict": "too_hard"
+        },
+        {
+          "level_id": "surface-37275ee3ea394ba4e14a76717917b302d741c881d717a7bf0212740758f4c3a4",
+          "n": 4,
+          "nominal": 0.375,
+          "probe_index": 3,
+          "redundant_nominal_probe": false,
+          "successes": 4,
+          "verdict": "too_easy"
+        },
+        {
+          "level_id": "surface-37275ee3ea394ba4e14a76717917b302d741c881d717a7bf0212740758f4c3a4",
+          "n": 4,
+          "nominal": 0.3125,
+          "probe_index": 4,
+          "redundant_nominal_probe": true,
+          "successes": 4,
+          "verdict": "too_easy"
+        }
+      ],
+      "positive_effective_level_count": 3,
+      "provenance": {
+        "judge_input_sha256": "3d5defbd0add516406f25805703811207a473732f9319a5a9a1f68609614356b",
+        "mode": "saved_full_runtime_probes",
+        "saved_raw_probe_sha256": "445bffb28e941f51ba3d47ea239a3df496cc340ec32824e161540589cc68e989"
+      },
+      "raw_probe_sha256": "783d852d0d9f005940414b3528692b0519718d0676162eaa0dec93f9a47ad7cb",
+      "redundant_old_probe_count": 1,
+      "regime": "LOW",
+      "task_id": 9,
+      "typed_feedback_assessment": {
+        "condition": "Conditional reuse of the exact historical strongest observation, not a new learner measurement.",
+        "operation": null,
+        "reason": null,
+        "status": "NOT_IDENTIFIABLE_FROM_SAVED_PROBES"
+      }
+    },
+    {
+      "characterization_sha256": "a2f6c121dc2dc85900d3dae1fcd351ff64c5ba4c00f8c5996bd545fa179c7cd3",
+      "classes": [
+        {
+          "is_off": true,
+          "level_id": "surface-b4e09c823431ba1d48d6c4bdb36f87fdf77d37c8e6de82adf56899fd5bd10515",
+          "members": [
+            0.0
+          ],
+          "rendered_source_sha256": "6e4f0dd593cdb972ddc24d94dbe9f346c47ed1475706cf996414f4a18b7da444",
+          "representative": 0.0
+        },
+        {
+          "is_off": false,
+          "level_id": "surface-46f08c6fbb94f0c66a6873f890bbf743bfb2471e1d374f1d850495d6880be6dd",
+          "members": [
+            0.0625,
+            0.125,
+            0.1875,
+            0.25,
+            0.3125,
+            0.375,
+            0.4375
+          ],
+          "rendered_source_sha256": "4e7015536ea49063ca61accbf9b81655fd6e9bc58e0e3bc761e17592f32a0a6a",
+          "representative": 0.4375
+        },
+        {
+          "is_off": false,
+          "level_id": "surface-910bd9c518ea61b8686152b8681cfb1ed8f9dfa602a5bcb5c1f3fc3c6918a859",
+          "members": [
+            0.5,
+            0.5625,
+            0.625,
+            0.6875,
+            0.75,
+            0.8125,
+            0.875,
+            0.9375,
+            1.0
+          ],
+          "rendered_source_sha256": "e16e650e4c96192c6c2a6fe95a3290726b199568a7847395b809705c23a046a2",
+          "representative": 1.0
+        }
+      ],
+      "conflicting_saved_verdicts_within_effective_class": [],
+      "coverage": {
+        "complete": true,
+        "episode_step_count": 153,
+        "probe_count": 2601
+      },
+      "diagnostics": [],
+      "effective_level_count": 3,
+      "historical_source_sha256": "f9ce78527e86f22a09e688b5126bedcab6dd32aa55e427b97329c2fcc05a34cb",
+      "nominal_settings": [
+        0.0,
+        0.0625,
+        0.125,
+        0.1875,
+        0.25,
+        0.3125,
+        0.375,
+        0.4375,
+        0.5,
+        0.5625,
+        0.625,
+        0.6875,
+        0.75,
+        0.8125,
+        0.875,
+        0.9375,
+        1.0
+      ],
+      "old_policy_probes": [
+        {
+          "level_id": "surface-910bd9c518ea61b8686152b8681cfb1ed8f9dfa602a5bcb5c1f3fc3c6918a859",
+          "n": 4,
+          "nominal": 1.0,
+          "probe_index": 0,
+          "redundant_nominal_probe": false,
+          "successes": 4,
+          "verdict": "too_easy"
+        },
+        {
+          "level_id": "surface-910bd9c518ea61b8686152b8681cfb1ed8f9dfa602a5bcb5c1f3fc3c6918a859",
+          "n": 4,
+          "nominal": 0.5,
+          "probe_index": 1,
+          "redundant_nominal_probe": true,
+          "successes": 4,
+          "verdict": "too_easy"
+        },
+        {
+          "level_id": "surface-46f08c6fbb94f0c66a6873f890bbf743bfb2471e1d374f1d850495d6880be6dd",
+          "n": 4,
+          "nominal": 0.25,
+          "probe_index": 2,
+          "redundant_nominal_probe": false,
+          "successes": 4,
+          "verdict": "too_easy"
+        },
+        {
+          "level_id": "surface-46f08c6fbb94f0c66a6873f890bbf743bfb2471e1d374f1d850495d6880be6dd",
+          "n": 8,
+          "nominal": 0.125,
+          "probe_index": 3,
+          "redundant_nominal_probe": true,
+          "successes": 6,
+          "verdict": "too_easy"
+        },
+        {
+          "level_id": "surface-46f08c6fbb94f0c66a6873f890bbf743bfb2471e1d374f1d850495d6880be6dd",
+          "n": 4,
+          "nominal": 0.0625,
+          "probe_index": 4,
+          "redundant_nominal_probe": true,
+          "successes": 4,
+          "verdict": "too_easy"
+        }
+      ],
+      "positive_effective_level_count": 2,
+      "provenance": {
+        "judge_input_sha256": "202f00a111b49fe5f9ceee533e7dd116fa4f9be9121efd97a9d65d7ba923f0ef",
+        "mode": "saved_full_runtime_probes",
+        "saved_raw_probe_sha256": "cb689456ba6a7ee3ff9add03e0c003bdde5846e898f5868a808dc688ba78a754"
+      },
+      "raw_probe_sha256": "da9073593a6572649ae1da4bf2ed36ef59e77ef93677b1e020bfdbb01963d0e9",
+      "redundant_old_probe_count": 3,
+      "regime": "LOW",
+      "task_id": 10,
+      "typed_feedback_assessment": {
+        "condition": "Conditional reuse of the exact historical strongest observation, not a new learner measurement.",
+        "operation": null,
+        "reason": null,
+        "status": "NOT_IDENTIFIABLE_FROM_SAVED_PROBES"
+      }
+    },
+    {
+      "characterization_sha256": "cd3472049d2f40b4f6320d3f957e2bf0963513b6775554f40fcc777091593094",
+      "classes": [
+        {
+          "is_off": true,
+          "level_id": "surface-f8b50592bf2f23826ba4e069c758484df871a19adc8fd180a930bdc4afa6648d",
+          "members": [
+            0.0
+          ],
+          "rendered_source_sha256": "43d331caa6657eb2c1fee90fc31fc854a814ec76e5ba90c8938f77268259b5f1",
+          "representative": 0.0
+        },
+        {
+          "is_off": false,
+          "level_id": "surface-89f6223c5fe56ba758d7e8f85fa5a20400d11845f33a13058656986eaee02d7c",
+          "members": [
+            0.0625,
+            0.125,
+            0.1875,
+            0.25,
+            0.3125,
+            0.375,
+            0.4375
+          ],
+          "rendered_source_sha256": "04a546605dc8e80e3e2b29552f218efd66976e4c8f19481f6e42a43a93de8259",
+          "representative": 0.4375
+        },
+        {
+          "is_off": false,
+          "level_id": "surface-7d6a87bcab53a1b33026c142a3eefe870bcb8deea672763484b94255582e2c92",
+          "members": [
+            0.5,
+            0.5625,
+            0.625,
+            0.6875,
+            0.75,
+            0.8125,
+            0.875,
+            0.9375,
+            1.0
+          ],
+          "rendered_source_sha256": "2320b94394f8db5a90f6c5818132ecd2ffe74edb6dd1dfbbe5171df5190d7a5b",
+          "representative": 1.0
+        }
+      ],
+      "conflicting_saved_verdicts_within_effective_class": [],
+      "coverage": {
+        "complete": true,
+        "episode_step_count": 153,
+        "probe_count": 2601
+      },
+      "diagnostics": [],
+      "effective_level_count": 3,
+      "historical_source_sha256": "ad2bc9df2a46477e76fdf1ad570e8eb4f0752a1ebd0056083c97e9aac10fe9b3",
+      "nominal_settings": [
+        0.0,
+        0.0625,
+        0.125,
+        0.1875,
+        0.25,
+        0.3125,
+        0.375,
+        0.4375,
+        0.5,
+        0.5625,
+        0.625,
+        0.6875,
+        0.75,
+        0.8125,
+        0.875,
+        0.9375,
+        1.0
+      ],
+      "old_policy_probes": [
+        {
+          "level_id": "surface-7d6a87bcab53a1b33026c142a3eefe870bcb8deea672763484b94255582e2c92",
+          "n": 4,
+          "nominal": 1.0,
+          "probe_index": 0,
+          "redundant_nominal_probe": false,
+          "successes": 4,
+          "verdict": "too_easy"
+        },
+        {
+          "level_id": "surface-7d6a87bcab53a1b33026c142a3eefe870bcb8deea672763484b94255582e2c92",
+          "n": 4,
+          "nominal": 0.5,
+          "probe_index": 1,
+          "redundant_nominal_probe": true,
+          "successes": 4,
+          "verdict": "too_easy"
+        },
+        {
+          "level_id": "surface-89f6223c5fe56ba758d7e8f85fa5a20400d11845f33a13058656986eaee02d7c",
+          "n": 4,
+          "nominal": 0.25,
+          "probe_index": 2,
+          "redundant_nominal_probe": false,
+          "successes": 4,
+          "verdict": "too_easy"
+        },
+        {
+          "level_id": "surface-89f6223c5fe56ba758d7e8f85fa5a20400d11845f33a13058656986eaee02d7c",
+          "n": 4,
+          "nominal": 0.125,
+          "probe_index": 3,
+          "redundant_nominal_probe": true,
+          "successes": 4,
+          "verdict": "too_easy"
+        },
+        {
+          "level_id": "surface-89f6223c5fe56ba758d7e8f85fa5a20400d11845f33a13058656986eaee02d7c",
+          "n": 4,
+          "nominal": 0.0625,
+          "probe_index": 4,
+          "redundant_nominal_probe": true,
+          "successes": 4,
+          "verdict": "too_easy"
+        }
+      ],
+      "positive_effective_level_count": 2,
+      "provenance": {
+        "judge_input_sha256": "0f0f42beaeb56845552b73d184a4441f388c8b59db4051f9af5681154c3c92da",
+        "mode": "saved_full_runtime_probes",
+        "saved_raw_probe_sha256": "ca573916b8d00f2549a195302ddf07d0f12d5f4a60afc9f89917c209a5d4dcab"
+      },
+      "raw_probe_sha256": "51e0a39e414df351084e9e1992eea6fd3d2cefb66d303adabbd78b3417aa2286",
+      "redundant_old_probe_count": 3,
+      "regime": "LOW",
+      "task_id": 17,
+      "typed_feedback_assessment": {
+        "condition": "Conditional reuse of the exact historical strongest observation, not a new learner measurement.",
+        "operation": null,
+        "reason": null,
+        "status": "NOT_IDENTIFIABLE_FROM_SAVED_PROBES"
+      }
+    },
+    {
+      "characterization_sha256": "30e87c4a611b9a38d717040ba6fb9a3a59ad475492ffe03e3616c88ca54b298c",
+      "classes": [
+        {
+          "is_off": true,
+          "level_id": "surface-5c7be2156d42124695891c553d2b8f355d13ba5dd1be06f6992236b7eb7dc3e8",
+          "members": [
+            0.0,
+            0.0625
+          ],
+          "rendered_source_sha256": "72f0f157bf8c7ae562d0aea9d7d76bffac8741446b2503aa131343d772671971",
+          "representative": 0.0625
+        },
+        {
+          "is_off": false,
+          "level_id": "surface-6e92268a0b9f66c06b03a0ad5b4cabac4bff0767fc89b311612ab2ee60353b03",
+          "members": [
+            0.125,
+            0.1875
+          ],
+          "rendered_source_sha256": "71617f79c9a908702ee7e4be00db579862284666f567f6f34cb8cab67bff6c39",
+          "representative": 0.1875
+        },
+        {
+          "is_off": false,
+          "level_id": "surface-f4bcea7c26a2535363480e0431379cd5ddf2a9b95a9f086a36290b560f5bade3",
+          "members": [
+            0.25
+          ],
+          "rendered_source_sha256": "9572054aeba261c515cd37f10e2bb84e19ae89cd19cf65ca40e2a35309a87bda",
+          "representative": 0.25
+        },
+        {
+          "is_off": false,
+          "level_id": "surface-d58688be33c7b52fd40604fc8d209a9f6d74e87e6f7aebaf59a4689511751d17",
+          "members": [
+            0.3125,
+            0.375
+          ],
+          "rendered_source_sha256": "61b1249d0a10c13d22e3369b6073e2df3ebb5b1e5a0caed9d3244e43f1fa0f27",
+          "representative": 0.375
+        },
+        {
+          "is_off": false,
+          "level_id": "surface-a7a8a72ffe61fee1fd475cb5c50f43326eaa4342277c4637362d0c6823938c2c",
+          "members": [
+            0.4375
+          ],
+          "rendered_source_sha256": "0b8691eea0b2dfbefedca4923c8221271164ead3c3ac93eb2f7a0c47de92112d",
+          "representative": 0.4375
+        },
+        {
+          "is_off": false,
+          "level_id": "surface-669b87d81df463d343e6108b2c95a1bb0763050eda4aeff6d669bd74db34c3b1",
+          "members": [
+            0.5,
+            0.5625
+          ],
+          "rendered_source_sha256": "a7e6361537de543f5bc296e097d516558ec1cb2302dba6251ad456e839ed1b3d",
+          "representative": 0.5625
+        },
+        {
+          "is_off": false,
+          "level_id": "surface-f94d670aeddb143c69d844be8060e67215546aaba6831ca37fe86aa243b02358",
+          "members": [
+            0.625,
+            0.6875
+          ],
+          "rendered_source_sha256": "4e2dcf422689b1887d2197b174805fcbda9fa7aada59d637665a25c3f7bb5b90",
+          "representative": 0.6875
+        },
+        {
+          "is_off": false,
+          "level_id": "surface-d45644977e517f2134d711b8d84d18dfc2109c89382ceda831f054e9e78de629",
+          "members": [
+            0.75
+          ],
+          "rendered_source_sha256": "0d88a6cffda6ed29c6acd6665c0c4fdc384db8ba021f0b538513cd53f49b8615",
+          "representative": 0.75
+        },
+        {
+          "is_off": false,
+          "level_id": "surface-606b87793c14dff5621184e55bd10bc52d9b222802db58770d2396c10bca5d06",
+          "members": [
+            0.8125,
+            0.875
+          ],
+          "rendered_source_sha256": "1d63e33369119476c50459d0c359f157d4d3d6e67a3b898472417749a93f19d4",
+          "representative": 0.875
+        },
+        {
+          "is_off": false,
+          "level_id": "surface-663f7e2335010730f1bed72d9af4c71b39e4d50ee7be0905790f648a5e046370",
+          "members": [
+            0.9375
+          ],
+          "rendered_source_sha256": "65c582cfa56fbf164ea16514a5638495db68f1df99078d58627f55513ba12104",
+          "representative": 0.9375
+        },
+        {
+          "is_off": false,
+          "level_id": "surface-8e21b2e93387794546320f73221094202061ce9befd8c95dca11082a615099a3",
+          "members": [
+            1.0
+          ],
+          "rendered_source_sha256": "e5db1b9467becbc90d299dbdb2964c9fb2fe3577fd3d41aaaa4b63bd2454c50d",
+          "representative": 1.0
+        }
+      ],
+      "conflicting_saved_verdicts_within_effective_class": [
+        {
+          "level_id": "surface-669b87d81df463d343e6108b2c95a1bb0763050eda4aeff6d669bd74db34c3b1",
+          "probe_indices": [
+            1,
+            4
+          ]
+        }
+      ],
+      "coverage": {
+        "complete": true,
+        "episode_step_count": 41,
+        "probe_count": 697
+      },
+      "diagnostics": [],
+      "effective_level_count": 11,
+      "historical_source_sha256": "edaacb7a7a45abc068179262d8c38c0eb537dea518c7e9f63c2b5519656a27e6",
+      "nominal_settings": [
+        0.0,
+        0.0625,
+        0.125,
+        0.1875,
+        0.25,
+        0.3125,
+        0.375,
+        0.4375,
+        0.5,
+        0.5625,
+        0.625,
+        0.6875,
+        0.75,
+        0.8125,
+        0.875,
+        0.9375,
+        1.0
+      ],
+      "old_policy_probes": [
+        {
+          "level_id": "surface-8e21b2e93387794546320f73221094202061ce9befd8c95dca11082a615099a3",
+          "n": 4,
+          "nominal": 1.0,
+          "probe_index": 0,
+          "redundant_nominal_probe": false,
+          "successes": 0,
+          "verdict": "too_hard"
+        },
+        {
+          "level_id": "surface-669b87d81df463d343e6108b2c95a1bb0763050eda4aeff6d669bd74db34c3b1",
+          "n": 4,
+          "nominal": 0.5,
+          "probe_index": 1,
+          "redundant_nominal_probe": false,
+          "successes": 4,
+          "verdict": "too_easy"
+        },
+        {
+          "level_id": "surface-d45644977e517f2134d711b8d84d18dfc2109c89382ceda831f054e9e78de629",
+          "n": 4,
+          "nominal": 0.75,
+          "probe_index": 2,
+          "redundant_nominal_probe": false,
+          "successes": 0,
+          "verdict": "too_hard"
+        },
+        {
+          "level_id": "surface-f94d670aeddb143c69d844be8060e67215546aaba6831ca37fe86aa243b02358",
+          "n": 4,
+          "nominal": 0.625,
+          "probe_index": 3,
+          "redundant_nominal_probe": false,
+          "successes": 0,
+          "verdict": "too_hard"
+        },
+        {
+          "level_id": "surface-669b87d81df463d343e6108b2c95a1bb0763050eda4aeff6d669bd74db34c3b1",
+          "n": 4,
+          "nominal": 0.5625,
+          "probe_index": 4,
+          "redundant_nominal_probe": true,
+          "successes": 0,
+          "verdict": "too_hard"
+        }
+      ],
+      "positive_effective_level_count": 10,
+      "provenance": {
+        "mode": "local_original_baseline_action_replay",
+        "new_policy_episodes": 0,
+        "runtime_fingerprint_matches_historical": true,
+        "selected_baseline_episodes": 2
+      },
+      "raw_probe_sha256": "c00a25e9b28acd6ec0977f302fb7f15d3e30bb9b68644ef855737e69313929a8",
+      "redundant_old_probe_count": 1,
+      "regime": "HIGH",
+      "task_id": 23,
+      "typed_feedback_assessment": {
+        "condition": "Conditional reuse of the exact historical strongest observation, not a new learner measurement.",
+        "operation": null,
+        "reason": null,
+        "status": "NOT_IDENTIFIABLE_FROM_SAVED_PROBES"
+      }
+    }
+  ]
+}

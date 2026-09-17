@@ -69,6 +69,7 @@ from aea.errors import BudgetExhausted, ConfigError, InfraError
 from aea.estimate import EstimateResult, estimate
 from aea.evaluate import Eval, evaluate
 from aea.families import LIBRARY, Family, FamilyContext, LeverageTable, propose_families
+from aea.intervention import V3Config, canonical_hash
 from aea.io import (
     AeaMeta,
     TraceWriter,
@@ -175,9 +176,16 @@ class Controller:
         reference: ReferenceProvider | None = None,
         assist_provider: AssistProvider | None = None,
         privilege_judge: PrivilegeJudge | None = None,
+        designer_controller_config: V3Config | None = None,
     ) -> None:
         self.config = config
         self.integrated = config.method_version == "llm_v2_integrated"
+        self.designer_controller = config.method_version == "llm_v3_designer_controller"
+        self.task_local = self.integrated or self.designer_controller
+        self.designer_controller_config = designer_controller_config or V3Config()
+        self.design_sessions: dict[str, Any] = {}
+        self._v3_episode_ids: set[str] = set()
+        self._v3_started: set[str] = set()
         self._privilege_judge = privilege_judge
         self.reference = reference
         """``llm_v1`` LOW only: the privileged reference provider (None = failure-only mode)."""
@@ -202,7 +210,7 @@ class Controller:
         self._io_lock = threading.Lock()
         self._order: dict[str, int] = {}
         self._finished: dict[str, threading.Event] = {}
-        if not self.integrated:
+        if not self.task_local:
             self._restore_leverage()
 
     # ------------------------------------------------------------------ plumbing
@@ -222,11 +230,36 @@ class Controller:
         reset_options: dict[str, Any] | None = None,
     ) -> list[Trace]:
         """Charge ``n`` BEFORE running (the cap is a hard stop), then run and record."""
-        account = self.baseline_budget if self.integrated and phase == "estimate" else self.budget
+        account = self.baseline_budget if self.task_local and phase == "estimate" else self.budget
         account.charge(task.task_id, n, phase=phase)
+        expected_candidate = (
+            candidate.model_copy(deep=True) if self.designer_controller else candidate
+        )
         traces = self.substrate.rollouts(
             task, candidate, n, attribution=self._attr(task, phase), reset_options=reset_options
         )
+        if self.designer_controller:
+            from aea.designer_controller_confirmation import candidate_hash, validate_traces
+
+            with self._io_lock:
+                evidence_path = (
+                    self.run_dir
+                    / "designer_controller"
+                    / canonical_hash(task.task_id)[:16]
+                    / "search_traces.jsonl"
+                )
+                for trace in traces:
+                    append_jsonl(
+                        evidence_path,
+                        {
+                            "phase": phase,
+                            "candidate_sha256": candidate_hash(expected_candidate),
+                            "trace": trace.model_dump(mode="json"),
+                        },
+                    )
+                if candidate_hash(candidate) != candidate_hash(expected_candidate):
+                    raise ConfigError("Dispatched v3 candidate was mutated during execution")
+                validate_traces(traces, n, task, expected_candidate, self._v3_episode_ids)
         errored = sum(1 for t in traces if t.error)
         if errored:  # environment / infrastructure errors are refunded and never counted
             account.refund(task.task_id, errored, phase=phase)
@@ -240,14 +273,14 @@ class Controller:
             n=len(traces),
             successes=sum(int(bool(t.success)) for t in traces),
         )
-        if self.integrated and (
+        if self.task_local and (
             len(traces) != n or (phase != "estimate" and any(trace.error for trace in traces))
         ):
             raise InfraError("incomplete integrated AEA policy batch", kind="rollout")
         return traces
 
     def _write_corpus(self, task: TaskRef, candidate: Candidate, meta: AeaMeta) -> None:
-        if self.integrated:
+        if self.task_local:
             meta = meta.model_copy(
                 update={
                     "n_search": self.baseline_budget.account(task.task_id).spent
@@ -271,7 +304,7 @@ class Controller:
         return {t for t, o in done.items() if o != "infra_error"}
 
     def _record_leverage(self, task: TaskRef, family: str, has_leverage: bool) -> None:
-        if not self.integrated:
+        if not self.task_local:
             self.leverage.record_leverage(family, has_leverage)
         self._ev("leverage", task, family=family, tested=True, has_leverage=has_leverage)
 
@@ -279,7 +312,7 @@ class Controller:
         self, task: TaskRef, family: str, lo: float, hi: float, accepted: float | None
     ) -> None:
         frontier = accepted if accepted is not None else (lo + hi) / 2
-        if self.integrated:
+        if self.task_local:
             return
         self.leverage.record_frontier(family, frontier)
         self._ev("leverage", task, family=family, frontier=frontier, lo=lo, hi=hi)
@@ -316,6 +349,20 @@ class Controller:
         files in task order. Tasks already done in ``run_dir`` are skipped."""
         done = self.completed_tasks()
         todo = [t for t in tasks if t.task_id not in done]
+        if self.designer_controller:
+            if len({task.task_id for task in tasks}) != len(tasks):
+                raise ConfigError("V3 task identities must be unique")
+            if not todo:
+                return []  # preserve completed evidence; do not rewrite its accounting
+            path = self.run_dir / "events.jsonl"
+            previous = read_trace(path) if path.exists() else []
+            started = {
+                str(event.payload["task_id"]) for event in previous if event.kind == "task_start"
+            }
+            if any(task.task_id in started for task in todo):
+                raise ConfigError("V3 task already started; implicit restart is forbidden")
+            if any(event.run_id != self.run_id for event in previous):
+                raise ConfigError("V3 run identity differs from stored history")
         order = [t.task_id for t in tasks]
         self._order = {t: i for i, t in enumerate(order)}
         for t in tasks:
@@ -333,7 +380,7 @@ class Controller:
                 outcomes = list(pool.map(self.run_task, todo))
         canonicalize_corpus(self.corpus_path, order)
         rows = self.budget.accounting_rows(order)
-        if self.integrated:
+        if self.task_local:
             rows = self.baseline_budget.accounting_rows(order) + rows
         write_accounting(self.run_dir / "accounting.csv", rows)
         return outcomes
@@ -349,7 +396,28 @@ class Controller:
                 self._finished[t].wait()
 
     def run_task(self, task: TaskRef) -> TaskOutcome:
-        self._ev("task_start", task, seed=task.seed, arm=self.arm)
+        if self.designer_controller:
+            # Refuse BEFORE measurement: a new instance has empty in-memory budgets.
+            # Replaying a partial task would otherwise silently buy another baseline.
+            with self._io_lock:
+                path = self.run_dir / "events.jsonl"
+                previous = read_trace(path) if path.exists() else []
+                if task.task_id in self._v3_started or any(
+                    event.kind == "task_start" and event.payload["task_id"] == task.task_id
+                    for event in previous
+                ):
+                    raise ConfigError("V3 task already started; implicit restart is forbidden")
+                self._v3_started.add(task.task_id)
+                self._ev(
+                    "task_start",
+                    task,
+                    seed=task.seed,
+                    arm=self.arm,
+                    method_config=self.config.model_dump(mode="json"),
+                    control_config=self.designer_controller_config.model_dump(mode="json"),
+                )
+        else:
+            self._ev("task_start", task, seed=task.seed, arm=self.arm)
         try:
             try:
                 outcome = self._run_task(task)
@@ -368,7 +436,7 @@ class Controller:
                     task, "infra_error", "", detail={"error": str(exc), "kind": exc.kind}
                 )
             outcome.n_search = self.budget.account(task.task_id).spent
-            if self.integrated:
+            if self.task_local:
                 measured = self.baseline_budget.account(task.task_id).spent
                 outcome.detail.update(
                     baseline_rollouts=measured, adaptation_rollouts=outcome.n_search
@@ -402,7 +470,7 @@ class Controller:
             probabilities=est.probabilities,
             stop=est.stop_reason,
         )
-        if self.integrated:
+        if self.task_local:
             self._ev(
                 "measurement_evidence",
                 task,
@@ -418,6 +486,18 @@ class Controller:
                 adaptation_cap=self.config.cap,
             )
         if est.regime == "band":
+            if self.designer_controller:
+                evidence_path = (
+                    self.run_dir
+                    / "designer_controller"
+                    / canonical_hash(task.task_id)[:16]
+                    / "search_traces.jsonl"
+                )
+                self._ev(
+                    "v3_mid_freeze",
+                    task,
+                    search_evidence_sha256=hashlib.sha256(evidence_path.read_bytes()).hexdigest(),
+                )
             meta = AeaMeta(
                 kind="kept",
                 task_id=task.task_id,
@@ -429,6 +509,10 @@ class Controller:
             )
             self._write_corpus(task, Candidate(), meta)
             return TaskOutcome(task, "kept", "", "band", est.p_hat)
+        if self.designer_controller:
+            from aea.design_session import run_designer_controller
+
+            return run_designer_controller(self, task, est)
         if est.regime == "saturated":
             return self._harden(task, est)
         return self._stage(task, est)
@@ -440,7 +524,7 @@ class Controller:
 
         def rollout(i: int) -> Trace:
             nonlocal retry
-            if self.integrated and retry:
+            if self.task_local and retry:
                 trace = self._rollouts(task, Candidate(), 1, "estimate")[0]
                 retry = bool(trace.error)
                 return trace

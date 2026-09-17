@@ -63,6 +63,7 @@ class AEAConfig(StrictModel):
         "llm_v2_iterative_low_semantic_gate",
         "llm_v2_iterative_low_llm_judge",
         "llm_v2_integrated",
+        "llm_v3_designer_controller",
     ] = "v0.4"
     """Which method the controller runs. ``v0.4`` (default; a config without the field is v0.4)
     is the box of docs/spec/AEA_v0.4.md unchanged; ``llm_v1`` (docs/spec/AEA_llm_v1.md) replaces

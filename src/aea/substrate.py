@@ -199,7 +199,7 @@ class AeaSubstrate:
             with attributed(request.attribution, request.seed):
                 return client.complete(request)
 
-        if self._method_version == "llm_v2_integrated":
+        if self._method_version in ("llm_v2_integrated", "llm_v3_designer_controller"):
             return WitnessCheckingPrivilegeJudge(complete, config=config, attribution=attribution)
         return LLMPrivilegeJudge(complete, config=config, attribution=attribution)
 
@@ -226,6 +226,7 @@ def reference_provider(
             "llm_v2_iterative_low_semantic_gate",
             "llm_v2_iterative_low_llm_judge",
             "llm_v2_integrated",
+            "llm_v3_designer_controller",
         )
     ):
         return None
