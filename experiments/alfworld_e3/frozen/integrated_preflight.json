@@ -1,0 +1,24 @@
+{
+  "final_focused_tests": 80,
+  "freeze_sha256": "92c08cfcce3d1ab501bec0198e40556683fe192b1cb89a89e6be0380da51cc3b",
+  "historical_driver_change": "Type-only cast in manifest metadata; execution semantics unchanged",
+  "historical_exact_path_anchors": 9,
+  "historical_exact_path_matches": 9,
+  "historical_goal_grammar_matches": 30,
+  "independent_preflight_review_sha256": "aaa733304623985494e2897d79af2f3a7f88308b24a0190685182dfb2a870161",
+  "log_sha256": {
+    "final_targeted_tests.log": "7aab9d03d5aad3ae7953c0ac55e01a47a25a852128e93ee579eb4dadf81d7df0",
+    "mypy.log": "8b88f6d12bd312c1b024b66d07a7f7619a68482ac4d64e475759b1823199faa5",
+    "runtime_test.log": "423b1d0e014eb1eab96f4420f7b344c2615be505dd574b756ac884826ca74f2d",
+    "unit_tests.log": "5758ceb8ab94caa1bb9d8f1f58e73be9bbd5efc779165f0109fff185c933c583"
+  },
+  "method_selector": "llm_v2_integrated",
+  "paid_calls_before_freeze": 0,
+  "privacy_classification_audit_sha256": "3834f078f31728e59cdac0a6c02f55a47380999bd9916c82d651ff8e3bb0b6d4",
+  "real_alfworld_llm_free_tests": 1,
+  "ruff": "PASS",
+  "runtime_games": 3553,
+  "status": "PASS",
+  "strict_typing_changed_modules": 12,
+  "unit_tests": 1070
+}

@@ -62,6 +62,7 @@ class AEAConfig(StrictModel):
         "llm_v2_iterative_low",
         "llm_v2_iterative_low_semantic_gate",
         "llm_v2_iterative_low_llm_judge",
+        "llm_v2_integrated",
     ] = "v0.4"
     """Which method the controller runs. ``v0.4`` (default; a config without the field is v0.4)
     is the box of docs/spec/AEA_v0.4.md unchanged; ``llm_v1`` (docs/spec/AEA_llm_v1.md) replaces
@@ -81,6 +82,8 @@ class AEAConfig(StrictModel):
     before certification, keeping that optimizer unchanged.
     ``llm_v2_iterative_low_llm_judge`` replaces that local screen with an independent
     benchmark-general LLM judge; FAIL and UNCERTAIN permit bounded redesign.
+    ``llm_v2_integrated`` integrates the frozen three-call LOW pilot with HIGH/MID,
+    fresh baseline measurement outside the adaptation cap, and task-local family freeze.
     Same schema: the field has a default."""
     band_t: tuple[float, float] = (0.4, 0.6)
     """Target band B_T: the accept range is B_T expressed at ``probe[1]`` rollouts."""
@@ -93,7 +96,8 @@ class AEAConfig(StrictModel):
     probe: tuple[int, int] = (4, 8)
     """The 4 -> 8 rule: first batch, full batch."""
     cap: int = Field(default=30, ge=1)
-    """Policy rollouts per task, all budgets of the method."""
+    """Policy rollouts per task. Legacy selectors include the estimate; integrated AEA
+    uses this adaptation cap after a separate, fully accounted K-rollout baseline."""
     impl: ImplConfig = ImplConfig()
 
     @model_validator(mode="after")

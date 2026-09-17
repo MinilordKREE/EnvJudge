@@ -32,7 +32,7 @@ import sys
 import threading
 import time
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from envharness.core.types import Candidate
 
@@ -40,7 +40,7 @@ from aea.config import AEAConfig, aea_config_sha256
 from aea.controller import Controller, TaskRef
 from aea.core.config import LLMConfig, RetryConfig, RunConfig
 from aea.core.context import create_run_context
-from aea.core.hashing import sha256_digest
+from aea.core.hashing import JsonValue, sha256_digest
 from aea.core.manifest import load_run_context, write_manifest
 from aea.e0config import derive_arm_config, derive_corpus_config, write_corpus_config
 from aea.errors import ConfigError, InfraError
@@ -600,7 +600,7 @@ def stage_released(arm: str) -> None:
                 "rollouts": int(cfg["orchestrator"].get("rollout_concurrency", 5)),
                 "inflight_episodes": int(cfg["orchestrator"].get("rollout_concurrency", 5)),
             },
-            "resumed_with_tasks": ids if done else None,
+            "resumed_with_tasks": cast(JsonValue, ids) if done else None,
         },
     )
     if not ids:

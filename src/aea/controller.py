@@ -34,6 +34,7 @@ from __future__ import annotations
 
 import concurrent.futures as cf
 import hashlib
+import json
 import threading
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
@@ -64,7 +65,7 @@ from aea.designer import (
     serialize_low,
     task_goal,
 )
-from aea.errors import BudgetExhausted, InfraError
+from aea.errors import BudgetExhausted, ConfigError, InfraError
 from aea.estimate import EstimateResult, estimate
 from aea.evaluate import Eval, evaluate
 from aea.families import LIBRARY, Family, FamilyContext, LeverageTable, propose_families
@@ -80,6 +81,7 @@ from aea.llm.types import Attribution, BudgetName, ChatRequest, ChatResponse
 from aea.llm_privilege_low import JudgedLowOptimizer, LLMLowPrivilegeScreen
 from aea.low_optimizer import Feedback, LowEnvironmentOptimizer, propose_low
 from aea.privilege_judge import PrivilegeJudge
+from aea.privilege_surfaces import ReplayEpisode
 from aea.rules_control import assist_bracket
 from aea.semantic_low import LowPrivilegeScreen, ScreenedLowOptimizer
 from aea.session import SESSION_LOCK, Session
@@ -151,6 +153,14 @@ class TaskOutcome:
     detail: dict[str, Any] = field(default_factory=dict)
 
 
+class _IntegratedPrivilegeScreen(LLMLowPrivilegeScreen):
+    def _capture(self) -> tuple[ReplayEpisode, ...]:
+        # In-process original-state replays share the environment bridge. The lock is
+        # released before the independent model call.
+        with SESSION_LOCK:
+            return super()._capture()
+
+
 class Controller:
     def __init__(
         self,
@@ -167,6 +177,7 @@ class Controller:
         privilege_judge: PrivilegeJudge | None = None,
     ) -> None:
         self.config = config
+        self.integrated = config.method_version == "llm_v2_integrated"
         self._privilege_judge = privilege_judge
         self.reference = reference
         """``llm_v1`` LOW only: the privileged reference provider (None = failure-only mode)."""
@@ -182,6 +193,8 @@ class Controller:
         self.leverage = leverage or LeverageTable()
         run_dir.mkdir(parents=True, exist_ok=True)
         self.budget = Budget(config.cap)
+        self.baseline_budget = Budget(config.k)
+        self._frozen_families: dict[str, str] = {}
         self.events = EventWriter(run_dir / "events.jsonl", run_id)
         self.traces = TraceWriter(run_dir / "traces.jsonl")
         self.corpus_path = run_dir / "corpus.jsonl"
@@ -189,7 +202,8 @@ class Controller:
         self._io_lock = threading.Lock()
         self._order: dict[str, int] = {}
         self._finished: dict[str, threading.Event] = {}
-        self._restore_leverage()
+        if not self.integrated:
+            self._restore_leverage()
 
     # ------------------------------------------------------------------ plumbing
     def _attr(self, task: TaskRef, phase: str, budget: BudgetName = "search") -> Attribution:
@@ -208,13 +222,14 @@ class Controller:
         reset_options: dict[str, Any] | None = None,
     ) -> list[Trace]:
         """Charge ``n`` BEFORE running (the cap is a hard stop), then run and record."""
-        self.budget.charge(task.task_id, n, phase=phase)
+        account = self.baseline_budget if self.integrated and phase == "estimate" else self.budget
+        account.charge(task.task_id, n, phase=phase)
         traces = self.substrate.rollouts(
             task, candidate, n, attribution=self._attr(task, phase), reset_options=reset_options
         )
         errored = sum(1 for t in traces if t.error)
         if errored:  # environment / infrastructure errors are refunded and never counted
-            self.budget.refund(task.task_id, errored, phase=phase)
+            account.refund(task.task_id, errored, phase=phase)
             self._ev("rollout_errors", task, phase=phase, n=errored)
         for t in traces:
             self.traces.add(t)
@@ -225,9 +240,20 @@ class Controller:
             n=len(traces),
             successes=sum(int(bool(t.success)) for t in traces),
         )
+        if self.integrated and (
+            len(traces) != n or (phase != "estimate" and any(trace.error for trace in traces))
+        ):
+            raise InfraError("incomplete integrated AEA policy batch", kind="rollout")
         return traces
 
     def _write_corpus(self, task: TaskRef, candidate: Candidate, meta: AeaMeta) -> None:
+        if self.integrated:
+            meta = meta.model_copy(
+                update={
+                    "n_search": self.baseline_budget.account(task.task_id).spent
+                    + self.budget.account(task.task_id).spent
+                }
+            )
         write_corpus_entry(
             self.corpus_path, entry_from_candidate(self.substrate.game_file(task), candidate, meta)
         )
@@ -245,13 +271,16 @@ class Controller:
         return {t for t, o in done.items() if o != "infra_error"}
 
     def _record_leverage(self, task: TaskRef, family: str, has_leverage: bool) -> None:
-        self.leverage.record_leverage(family, has_leverage)
+        if not self.integrated:
+            self.leverage.record_leverage(family, has_leverage)
         self._ev("leverage", task, family=family, tested=True, has_leverage=has_leverage)
 
     def _record_frontier(
         self, task: TaskRef, family: str, lo: float, hi: float, accepted: float | None
     ) -> None:
         frontier = accepted if accepted is not None else (lo + hi) / 2
+        if self.integrated:
+            return
         self.leverage.record_frontier(family, frontier)
         self._ev("leverage", task, family=family, frontier=frontier, lo=lo, hi=hi)
 
@@ -303,7 +332,10 @@ class Controller:
             with cf.ThreadPoolExecutor(max_workers=concurrency) as pool:
                 outcomes = list(pool.map(self.run_task, todo))
         canonicalize_corpus(self.corpus_path, order)
-        write_accounting(self.run_dir / "accounting.csv", self.budget.accounting_rows(order))
+        rows = self.budget.accounting_rows(order)
+        if self.integrated:
+            rows = self.baseline_budget.accounting_rows(order) + rows
+        write_accounting(self.run_dir / "accounting.csv", rows)
         return outcomes
 
     def _await_predecessors(self, task: TaskRef) -> None:
@@ -336,6 +368,12 @@ class Controller:
                     task, "infra_error", "", detail={"error": str(exc), "kind": exc.kind}
                 )
             outcome.n_search = self.budget.account(task.task_id).spent
+            if self.integrated:
+                measured = self.baseline_budget.account(task.task_id).spent
+                outcome.detail.update(
+                    baseline_rollouts=measured, adaptation_rollouts=outcome.n_search
+                )
+                outcome.n_search += measured
             self.events.write(
                 "task_done",
                 {
@@ -364,6 +402,21 @@ class Controller:
             probabilities=est.probabilities,
             stop=est.stop_reason,
         )
+        if self.integrated:
+            self._ev(
+                "measurement_evidence",
+                task,
+                successes=est.successes,
+                n=est.n,
+                p_hat=est.p_hat,
+                probabilities=est.probabilities,
+                regime=est.regime,
+                stop_reason=est.stop_reason,
+                errors_retried=est.errors_retried,
+                episode_ids=[trace.episode_id for trace in est.traces],
+                baseline_rollouts=self.baseline_budget.account(task.task_id).spent,
+                adaptation_cap=self.config.cap,
+            )
         if est.regime == "band":
             meta = AeaMeta(
                 kind="kept",
@@ -383,12 +436,20 @@ class Controller:
     def _estimate(self, task: TaskRef) -> EstimateResult:
         pending: list[Trace] = []
         impl = self.config.impl
+        retry = False
 
         def rollout(i: int) -> Trace:
+            nonlocal retry
+            if self.integrated and retry:
+                trace = self._rollouts(task, Candidate(), 1, "estimate")[0]
+                retry = bool(trace.error)
+                return trace
             if not pending:
                 n = impl.batch_first if i == 0 else impl.batch_next
                 pending.extend(self._rollouts(task, Candidate(), n, "estimate"))
-            return pending.pop(0)
+            trace = pending.pop(0)
+            retry = bool(trace.error)
+            return trace
 
         return estimate(rollout, self.config)
 
@@ -434,6 +495,7 @@ class Controller:
             "llm_v2_iterative_low",
             "llm_v2_iterative_low_semantic_gate",
             "llm_v2_iterative_low_llm_judge",
+            "llm_v2_integrated",
         )
 
     def _harden(self, task: TaskRef, est: EstimateResult) -> TaskOutcome:
@@ -476,6 +538,8 @@ class Controller:
         cache: dict[float, Candidate] = {}
 
         def make(d: float) -> Candidate | None:
+            if self.integrated:
+                self._assert_frozen_family(task, fam)
             if d not in cache:
                 cand = fam.make(d, ctx)
                 if cand is None:
@@ -515,15 +579,42 @@ class Controller:
             cand = make(d)
             if cand is None:
                 raise _InfeasibleError(f"{fam.name} infeasible at d={d}")
-            return evaluate(
+            evaluation = evaluate(
                 lambda n: self._rollouts(task, cand, n, f"dose:{fam.name}"), self.config
             )
+            if self.integrated:
+                self._assert_frozen_family(task, fam)
+                if d != 1.0:
+                    self._ev(
+                        "dose_evaluation",
+                        task,
+                        family=fam.name,
+                        source_sha256=self._source_hash(fam),
+                        d=d,
+                        s=evaluation.successes,
+                        n=evaluation.n,
+                        verdict=evaluation.verdict,
+                    )
+            return evaluation
 
         try:
             lev = evaluate_at(1.0)
         except _InfeasibleError:
             return None
         has_leverage = lev.verdict != "too_easy"
+        if self.integrated:
+            self._ev(
+                "endpoint",
+                task,
+                family=fam.name,
+                source_sha256=self._source_hash(fam),
+                d=1.0,
+                s=lev.successes,
+                n=lev.n,
+                verdict=lev.verdict,
+            )
+            if has_leverage:
+                self._freeze_family(task, fam, "harder_with_d")
         self._record_leverage(task, fam.name, has_leverage)
         if lev.verdict == "in_band":
             return self._accept_knob(task, fam, cache[1.0], 1.0, lev, est, [DoseEval(1.0, lev)])
@@ -537,6 +628,15 @@ class Controller:
             )
         except _InfeasibleError as why:
             self._ev("family_skipped", task, family=fam.name, reason=str(why))
+            if self.integrated:
+                return TaskOutcome(
+                    task,
+                    "dropped",
+                    "infeasible",
+                    "saturated",
+                    est.p_hat,
+                    detail={"family": fam.name},
+                )
             return None
         # one frontier estimate per finished search: the accepted dose, else the midpoint of the
         # task's final local interval (exhausted or censored searches count too)
@@ -576,6 +676,43 @@ class Controller:
             detail={"family": fam.name, "status": result.status},
         )
 
+    @staticmethod
+    def _source_hash(family: Family) -> str:
+        source = getattr(family, "template", None)
+        if not isinstance(source, str):
+            raise ConfigError("Integrated family has no source template")
+        return hashlib.sha256(source.encode()).hexdigest()
+
+    @classmethod
+    def _family_signature(cls, family: Family) -> str:
+        return json.dumps(
+            [
+                family.name,
+                family.axis,
+                family.source,
+                cls._source_hash(family),
+                getattr(family, "direction", "harder_with_d"),
+            ]
+        )
+
+    def _assert_frozen_family(self, task: TaskRef, family: Family) -> None:
+        previous = self._frozen_families.get(task.task_id)
+        if previous is not None and previous != self._family_signature(family):
+            raise ConfigError("CONTROL attempted to change the frozen semantic family")
+
+    def _freeze_family(self, task: TaskRef, family: Family, direction: str) -> None:
+        self._assert_frozen_family(task, family)
+        if task.task_id in self._frozen_families:
+            raise ConfigError("A task cannot reopen its family freeze")
+        self._frozen_families[task.task_id] = self._family_signature(family)
+        self._ev(
+            "family_frozen",
+            task,
+            family=family.name,
+            source_sha256=self._source_hash(family),
+            direction=direction,
+        )
+
     def _start_dose(self, fam: Family) -> float:
         """The first interior probe of the bracket. v0.4: the family's soft warm start. llm_v1:
         always the midpoint — a generated family's name is a per-task identity, so no
@@ -594,6 +731,8 @@ class Controller:
         est: EstimateResult,
         history: list[DoseEval],
     ) -> TaskOutcome:
+        if self.integrated:
+            self._assert_frozen_family(task, fam)
         meta = AeaMeta(
             kind="knob",
             task_id=task.task_id,
@@ -622,6 +761,7 @@ class Controller:
             "llm_v2_iterative_low",
             "llm_v2_iterative_low_semantic_gate",
             "llm_v2_iterative_low_llm_judge",
+            "llm_v2_integrated",
         ):
             return self._stage_iterative_low(task, est)
         if self.config.method_version == "llm_v1_stage_control":
@@ -783,6 +923,16 @@ class Controller:
             accepted=[f.name for f in design.families],
             mechanisms=design.mechanisms,
             rejected=design.rejected,
+            **(
+                {
+                    "accepted_sources": [
+                        {"name": f.name, "source_sha256": self._source_hash(f)}
+                        for f in design.families
+                    ]
+                }
+                if self.integrated
+                else {}
+            ),
         )
         self._ev(
             "proposer",
@@ -808,7 +958,7 @@ class Controller:
             if result is None:
                 continue
             tried += 1
-            if result.outcome == "accepted":
+            if result.outcome == "accepted" or self.integrated:
                 return result
         reason = "exhausted" if tried else "no_leverage"
         return TaskOutcome(
@@ -991,9 +1141,38 @@ class Controller:
         ctx = FamilyContext(task.task_id, ())
         privilege_screen: LowPrivilegeScreen | LLMLowPrivilegeScreen | None = None
         llm_screen: LLMLowPrivilegeScreen | None = None
+        admissions: dict[str, dict[str, Any]] = {}
+
+        def record_privilege(record: dict[str, Any]) -> None:
+            filename = (
+                "llm_privilege.jsonl"
+                if (
+                    self.config.method_version
+                    in ("llm_v2_iterative_low_llm_judge", "llm_v2_integrated")
+                )
+                else "semantic_privilege.jsonl"
+            )
+            self._append(self.run_dir / filename, record)
+            if self.integrated:
+                decision = record["result"]
+                binding = {
+                    key: decision[key]
+                    for key in (
+                        "source_sha256",
+                        "input_sha256",
+                        "config_sha256",
+                        "prompt_sha256",
+                        "schema_sha256",
+                    )
+                }
+                binding.update(verdict=decision["decision"]["verdict"], doses=record["doses"])
+                admissions[binding["source_sha256"]] = binding
+                self._ev("privilege_decision", task, family=record["family"], **binding)
+
         if self.config.method_version in (
             "llm_v2_iterative_low_semantic_gate",
             "llm_v2_iterative_low_llm_judge",
+            "llm_v2_integrated",
         ):
             screen_kwargs: dict[str, Any] = dict(
                 task_id=task.task_id,
@@ -1007,18 +1186,11 @@ class Controller:
                 audit_dir=self.run_dir
                 / (
                     "llm_privilege_inputs"
-                    if self.config.method_version == "llm_v2_iterative_low_llm_judge"
+                    if self.config.method_version
+                    in ("llm_v2_iterative_low_llm_judge", "llm_v2_integrated")
                     else "semantic_privilege_inputs"
                 ),
-                record=lambda record: self._append(
-                    self.run_dir
-                    / (
-                        "llm_privilege.jsonl"
-                        if self.config.method_version == "llm_v2_iterative_low_llm_judge"
-                        else "semantic_privilege.jsonl"
-                    ),
-                    record,
-                ),
+                record=record_privilege,
                 task_prompt=str(getattr(self.substrate, "task_prompt", "")),
                 action_format=str(
                     getattr(self.substrate, "policy_spec_kwargs", {}).get(
@@ -1027,14 +1199,20 @@ class Controller:
                 ),
             )
 
-            if self.config.method_version == "llm_v2_iterative_low_llm_judge":
+            if self.config.method_version in (
+                "llm_v2_iterative_low_llm_judge",
+                "llm_v2_integrated",
+            ):
                 judge = self._privilege_judge
                 if judge is None:
                     factory = getattr(self.substrate, "privilege_judge", None)
                     if not callable(factory):
                         raise InfraError("independent privilege judge unavailable", kind="config")
                     judge = factory(self._attr(task, "privilege_judge", "none"))
-                llm_screen = LLMLowPrivilegeScreen(judge=judge, **screen_kwargs)
+                screen_type = (
+                    _IntegratedPrivilegeScreen if self.integrated else LLMLowPrivilegeScreen
+                )
+                llm_screen = screen_type(judge=judge, **screen_kwargs)
                 privilege_screen = llm_screen
             else:
                 privilege_screen = LowPrivilegeScreen(**screen_kwargs)
@@ -1063,7 +1241,7 @@ class Controller:
             if llm_screen is not None:
                 llm_screen.require_pass_candidate(candidate, 1.0)
             with SESSION_LOCK:
-                return solvable(
+                guard = solvable(
                     candidate,
                     lambda c: self.substrate.open_session(task, c, None),
                     self.config,
@@ -1071,8 +1249,23 @@ class Controller:
                     oracle=self.substrate.has_oracle(),
                     by_construction=False,
                 )
+            if self.integrated:
+                self._ev(
+                    "solvable",
+                    task,
+                    d=1.0,
+                    ok=guard.ok,
+                    source=guard.source,
+                    detail=guard.detail,
+                    candidate_sha256=hashlib.sha256(
+                        (candidate.rules_code or "").encode()
+                    ).hexdigest(),
+                )
+            return guard
 
         def measure(family: AssistFamily, dose: float) -> Eval:
+            if self.integrated:
+                self._assert_frozen_family(task, family)
             if privilege_screen is not None:
                 privilege_screen.require_pass(family, dose)
             candidate = family.make(dose, ctx)
@@ -1084,7 +1277,20 @@ class Controller:
                     raise InfraError("incomplete iterative LOW policy batch", kind="rollout")
                 return traces
 
-            return evaluate(run, self.config)
+            evaluation = evaluate(run, self.config)
+            if self.integrated:
+                self._assert_frozen_family(task, family)
+                self._ev(
+                    "endpoint" if dose == 1.0 else "dose_evaluation",
+                    task,
+                    family=family.name,
+                    source_sha256=self._source_hash(family),
+                    d=dose,
+                    s=evaluation.successes,
+                    n=evaluation.n,
+                    verdict=evaluation.verdict,
+                )
+            return evaluation
 
         optimizer_kwargs: dict[str, Any] = {
             "task_id": task.task_id,
@@ -1094,6 +1300,8 @@ class Controller:
             "remaining": lambda: self.budget.account(task.task_id).remaining(),
             "endpoint_reserve": 2 * self.config.probe[1],
         }
+        if self.integrated:
+            optimizer_kwargs["max_calls"] = 3
         optimizer: LowEnvironmentOptimizer
         if llm_screen is not None:
             optimizer = JudgedLowOptimizer(
@@ -1129,6 +1337,8 @@ class Controller:
             reason=result.reason,
             candidate_ids=[r.candidate_id for r in optimizer.history],
         )
+        if self.integrated and result.status == "inconclusive":
+            raise InfraError(result.reason, kind="task_infrastructure")
         if result.status != "viable":
             return TaskOutcome(
                 task,
@@ -1140,6 +1350,8 @@ class Controller:
             )
         family, endpoint = result.family, result.endpoint
         assert family is not None and endpoint is not None
+        if self.integrated:
+            self._freeze_family(task, family, family.direction)
         self._ev(
             "low_family_frozen",
             task,
@@ -1176,8 +1388,24 @@ class Controller:
                     est.p_hat,
                     detail={"candidate_id": result.candidate_id, "family": family.name},
                 )
+        if self.integrated:
+            self._assert_frozen_family(task, family)
         candidate = family.make(accepted.d, ctx)
         assert candidate is not None
+        if self.integrated:
+            assert llm_screen is not None
+            llm_screen.require_pass_candidate(candidate, accepted.d)
+            binding = admissions[self._source_hash(family)]
+            if binding["verdict"] != "PASS" or accepted.d not in binding["doses"]:
+                raise ConfigError("Selected LOW environment lacks exact admission")
+            self._ev(
+                "selected_admission",
+                task,
+                family=family.name,
+                d=accepted.d,
+                candidate_sha256=hashlib.sha256((candidate.rules_code or "").encode()).hexdigest(),
+                **binding,
+            )
         outcome = self._accept_assist(
             task, family, candidate, accepted.d, accepted.eval, est, history
         )

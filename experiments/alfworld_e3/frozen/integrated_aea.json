@@ -1,0 +1,469 @@
+{
+  "adaptation_cap": 30,
+  "baseline_cap": 16,
+  "concurrency": {
+    "rollouts": 4,
+    "tasks": 4
+  },
+  "confirmation_k": 16,
+  "designer": {
+    "api_key_env": "DEEPSEEK_API_KEY",
+    "base_url": "https://api.deepseek.com",
+    "cost_tolerance": 1e-06,
+    "max_tokens": 4096,
+    "model": "deepseek-v4-pro",
+    "provider": "deepseek",
+    "provider_pin": null,
+    "reasoning_effort": null,
+    "retry": {
+      "initial_delay_s": 1.0,
+      "jitter_s": 1.0,
+      "max_attempts": 5,
+      "max_delay_s": 30.0,
+      "multiplier": 2.0,
+      "retry_status_codes": [
+        408,
+        409,
+        425,
+        429
+      ],
+      "total_timeout_s": 300.0
+    },
+    "temperature": 0.7,
+    "thinking": false,
+    "timeout_s": 120.0
+  },
+  "judge": {
+    "accepted_response_models": [
+      "deepseek-v4-flash",
+      "deepseek-flash"
+    ],
+    "base_url": "https://api.deepseek.com",
+    "max_input_bytes": 1100000,
+    "max_tokens": 2048,
+    "model": "deepseek-v4-flash",
+    "provider": "deepseek",
+    "seed": 0,
+    "served_model_note": "Documented request alias served by DeepSeek-V4.1-Flash; remote weights not attested.",
+    "temperature": 0.0,
+    "thinking": false
+  },
+  "judge_phase_a_ready": false,
+  "method": {
+    "accept": [
+      3,
+      5
+    ],
+    "band_l": [
+      0.2,
+      0.8
+    ],
+    "band_t": [
+      0.4,
+      0.6
+    ],
+    "cap": 30,
+    "impl": {
+      "batch_first": 4,
+      "batch_next": 2,
+      "confidence": 0.9,
+      "max_bisections": 4,
+      "max_candidates": 6,
+      "n_failed_rollouts": 3,
+      "oracle_attempts": 3,
+      "oracle_max_steps": 50,
+      "order_tolerance": 0.375,
+      "policy_max_steps": 50,
+      "proposer_cap": 2,
+      "stage_budget": 100,
+      "warm_start_min_history": 3
+    },
+    "k": 16,
+    "method_version": "llm_v2_integrated",
+    "probe": [
+      4,
+      8
+    ],
+    "schema_version": 4
+  },
+  "policy": {
+    "api_key_env": "OPENROUTER_API_KEY",
+    "base_url": "https://openrouter.ai/api/v1",
+    "cost_tolerance": 1e-06,
+    "max_tokens": 2048,
+    "model": "qwen/qwen3-8b",
+    "provider": "openrouter",
+    "provider_pin": "alibaba",
+    "reasoning_effort": null,
+    "retry": {
+      "initial_delay_s": 2.0,
+      "jitter_s": 1.0,
+      "max_attempts": 10,
+      "max_delay_s": 90.0,
+      "multiplier": 2.0,
+      "retry_status_codes": [
+        408,
+        409,
+        425,
+        429
+      ],
+      "total_timeout_s": 900.0
+    },
+    "temperature": 0.5,
+    "thinking": false,
+    "timeout_s": 120.0
+  },
+  "protocol": "e3-integrated-aea-v1",
+  "runtime_fingerprint": {
+    "games": 3553,
+    "logic": {
+      "alfred.pddl": "f1473041ed01da514de1f87adfd7ef0804862361f83ccf63c75e43633b0eb280",
+      "alfred.twl2": "c5b22f0f73309a7fd7c8e5b71de42ad4803b60766ab4a51cc2feb34162be036b"
+    },
+    "ordered_game_paths_sha256": "7232e180de24fefa2f8d4d2b47e9895301de802157b7bec7d6c877fe0198e405",
+    "package_versions": {
+      "alfworld": "0.4.2",
+      "envharness": "0.0.1",
+      "numpy": "2.5.3",
+      "openai": "2.54.0",
+      "textworld": "1.7.0"
+    },
+    "selection_runtime": {
+      "alfworld.agents.environment.alfred_tw_env": "4d9166363e32f0fa70c63530a900785ddb45c79387a02ebcb9a21252869a8924",
+      "textworld.gym.envs.textworld_batch": "8dec4478630707e1e4c5e7f0f96a8670bcb2ffb3c5c498cb98760b7102d2e0c3",
+      "textworld.gym.envs.utils": "3536d84a30b82655e1976b8b57eb9206aa1c6c63fadbc236b9be59a15be02da1"
+    },
+    "tasks": [
+      {
+        "file_sha256": "be4a92b34e150bcdbb94ede442db7fb7b9dbc02dc69bfc3b50f2f55b5dd8990b",
+        "path_sha256": "ec8fd2e999dd390b5979b535cbd101533f7ba78d08f126f9cfeac15549eabc88",
+        "task_id": 0
+      },
+      {
+        "file_sha256": "f174e178ca245846979b9ee84f4b882755266a4de26d472eff85f02cdf190aa2",
+        "path_sha256": "f6dda9a0ace2c1d0993816cd8e33ec6231442d22ee0271527b86dc02cb550641",
+        "task_id": 1
+      },
+      {
+        "file_sha256": "1f30976f4bb120c8f2b30d63c895c7d1ad793ed4ab7344c587d23cced14e7d59",
+        "path_sha256": "98036e3014c51fe1ce1eea22419b08db2410169cc34989c0781696dd6229d880",
+        "task_id": 2
+      },
+      {
+        "file_sha256": "9aeab69c1fc7fb20a6c8b0f6b4eda95b191d21eb4da64744dcff72508af7affa",
+        "path_sha256": "ba35a91b88787c9ab54bfe8adc0a27c74d822860c5c95de24e70eed1bf03d76a",
+        "task_id": 3
+      },
+      {
+        "file_sha256": "8b76d9a0a9d2f1bf5a901ce4e4ef5a0858b897d084ffc7eaeb2b68282b0cc1f3",
+        "path_sha256": "7f7f67984780651f51773f0b36439804fe9cac7d4c0568e424a35df8f53f3b3a",
+        "task_id": 4
+      },
+      {
+        "file_sha256": "91da2f147ec94fd9d9a599e5dfb0ba4e06d132d772b6b0df770d96e281ccab0b",
+        "path_sha256": "2085385aff16853d8a275bd904e159bc1b323d25960c9946406f04ead35aa7af",
+        "task_id": 5
+      },
+      {
+        "file_sha256": "cad4d175e6a716f4e82f2e3e7f51415d84fec1b5525836b39c9376f9eb27bdc8",
+        "path_sha256": "03340d4a5e16610da4ed7284adcfd93653a98997315717214ed68f1642f99fe3",
+        "task_id": 6
+      },
+      {
+        "file_sha256": "fb77afd05182c672f8ea6341cf56bc1844af27d8ca1b8c3b02133e61d79fa51e",
+        "path_sha256": "b5c82638689e72a5082583790446562193b4f260dd0ca9d29e872ed1721eef2e",
+        "task_id": 7
+      },
+      {
+        "file_sha256": "fd76a673045c45bca3b8c82e5dca9018ca735bc4de5354fe9aac8c533e217936",
+        "path_sha256": "28192e6d5532445babdb30d425d350880101a5b789f3ec618fb1503271a7326f",
+        "task_id": 8
+      },
+      {
+        "file_sha256": "59122500d0ab7621bfb14fb49514af9ab70823ad8157a8e3b4d6327660c24315",
+        "path_sha256": "7e06cf08c07df08017088986c5ee12b1c00f0eff95c58e8d066d04a656c228d4",
+        "task_id": 9
+      },
+      {
+        "file_sha256": "16fd872bfc7bf4609ebf5cfdb8db28341ee2b38b9d24e0f35016abc4b053cf7a",
+        "path_sha256": "8d98736227c882df5f83e43834077b05f0c55f0226da4d5c4262a1e824773d9e",
+        "task_id": 10
+      },
+      {
+        "file_sha256": "ccf3463b89b213f5f994d0ec50af10a7327c81702bb7c44779aba2b8f0b1aa5d",
+        "path_sha256": "2d8b57fc581ea1054b58e70723584c8340f817eb974a057e30f1b99247931379",
+        "task_id": 11
+      },
+      {
+        "file_sha256": "2648fab024cfc67fca6f9884f0e58e56ad13ff43f04a5db613de7270172f6d21",
+        "path_sha256": "ace6b425d0486b66caca7ff6b869cc9f81aa66ec359261824582ecadc06dd7ee",
+        "task_id": 12
+      },
+      {
+        "file_sha256": "e9cd98b3d888b12183e6a5ff7034cb68fe77ee9d7cf225f051778d242652ffec",
+        "path_sha256": "6c431d0961d83d15a814cac4ab9cd41e58685502793e4c941ce8e44e62d95413",
+        "task_id": 13
+      },
+      {
+        "file_sha256": "4f724ad9e8f80313bc445f2d37f5df9023c3e2e4b07f5450d83e2618e735f8f4",
+        "path_sha256": "5fe7e4f9bb390c592d9b6235ff700a7316b1283fa1c19a680810075433d0172a",
+        "task_id": 14
+      },
+      {
+        "file_sha256": "f449658b4eac5e4523b94ecc06955bfd78dd37640778bc1236f733bd930b4fdc",
+        "path_sha256": "27b88c0c578f58bdced3f9608e2497ea834507ad4f57c3dc84e96d6b18aa9545",
+        "task_id": 15
+      },
+      {
+        "file_sha256": "2b23c85af22fec14ca226b28c9a84585d17b05f54ac1c4aa2607bd5c275eef84",
+        "path_sha256": "1f069a0b55e0f574630d0c5153168d5b793ff162be2d424630ede048debe9158",
+        "task_id": 16
+      },
+      {
+        "file_sha256": "6c0528d47c865d52080f56b27b6dbee63a554f0ab7359ea2cee7bc870b01123f",
+        "path_sha256": "d8140674cd2658216278a5edade2705b2841747200631199ae53107f2b6c7fab",
+        "task_id": 17
+      },
+      {
+        "file_sha256": "8e8229c9dbdda1ea557d42376fb3ea68a3848f7155872b544a030bd32b5032ed",
+        "path_sha256": "c0961f1ff83ce9005acda5098814449d1aac6c4a02681835159b5b48c6afe48b",
+        "task_id": 18
+      },
+      {
+        "file_sha256": "748fee78190698e9bee172a7dd0224d2dd06c923063527986cacbb56577619ad",
+        "path_sha256": "a051936859d26a32b4c1cfe41f7d223a10e01308353da2aa2e896cc8fe600518",
+        "task_id": 19
+      },
+      {
+        "file_sha256": "1eed708d01f33885d92b49efec6d31589692916fab9b16e6578b1ef4d02094a3",
+        "path_sha256": "657a4855e6961f6d1a58b4ceea8ee84fafed79eb9aeaa3b22ca51b211675c883",
+        "task_id": 20
+      },
+      {
+        "file_sha256": "ca7e8126cabe99533bb5cf506fd19c7cdf1e8cd167dadccc96aaf8508a8301c3",
+        "path_sha256": "ba0c66dc12423d29eff94de2b2042cee8a0e53e93c4493ff3c84b6602cc72b73",
+        "task_id": 21
+      },
+      {
+        "file_sha256": "0bd74ddaaea8d49aa08779864fb12a0427ad6f578165c939e73f3b4a252fc1d0",
+        "path_sha256": "3c4d73f3a5884ff608f6f89541eb3fed6525a5a265b4270ff6321d547709c30d",
+        "task_id": 22
+      },
+      {
+        "file_sha256": "43e6a122ec8df41d364f534d0f34bf9ec7314d0c07eb6265911d1090055419c1",
+        "path_sha256": "e427e21242173449ba17e07d2a98c1746f205d859021de65da03f1eefa1918da",
+        "task_id": 23
+      },
+      {
+        "file_sha256": "285b7b441912723be27d3cd6187f459ab5db3db6dfe8ef04283db2582d6cac86",
+        "path_sha256": "bfdce247408da2ea91d6c925a8c7393264a0e0658c66364445ad5ff70809b9b0",
+        "task_id": 24
+      },
+      {
+        "file_sha256": "01b0f232addbad22f83281626b15d3aec06668c419906067844f4ae18e3e0708",
+        "path_sha256": "c8be9b5f0e037a3dd42421ed9d0274f95aa9ba152df8b2c68e5712cecc9e1404",
+        "task_id": 25
+      },
+      {
+        "file_sha256": "c35e396c05654f633e263b38de7ae3469934d961441a3ea6fd0ef9cc9e4ad58a",
+        "path_sha256": "fbf18474c40418658e7daedee3398404b4964332a3847771c79b8838a75fa65c",
+        "task_id": 26
+      },
+      {
+        "file_sha256": "8f5a2568a8f3baef1419b47f99eafff0dff9ea71ac5e5bdfb3334c5da376e119",
+        "path_sha256": "eb93243c58ae23bae89fee11dff9c7f914f57d23bf4110cca372843b42d71d19",
+        "task_id": 27
+      },
+      {
+        "file_sha256": "b3ef1b9bd0cf299f5c814458cd1a4ecdeb81cbd49ab29e564dd46034e7edd3a8",
+        "path_sha256": "2db558c9dbf74c4d613e9435d5b28e2e4e099b15603b58508b6a5da76d15a4ad",
+        "task_id": 28
+      },
+      {
+        "file_sha256": "838a93c41d8da022666c1c7133c2935d469ccf8d7a6dc579b181a0d155244127",
+        "path_sha256": "4767e69435d7e6275d9fca431756bd8de5b7e227559a8113e82f65144fadc6e4",
+        "task_id": 29
+      }
+    ]
+  },
+  "source_hashes": {
+    "configs/alfworld_config_100.yaml": "ef6a64096b198d7105bb3d3083f922ac0c0ee60bd2186c67ab4bd99863089e30",
+    "configs/corpus_aea.yaml": "a5f4b3c7ec0ace3ffebef184481585402dbf9a2d594d4fcde4dfc355a97eab10",
+    "configs/pricing.yaml": "22ec07333b638ad6b5679bc58ce1f7fd0a1c8b526bed5420c378a03147805f7e",
+    "configs/privilege_judge_pricing.yaml": "f54f67cb3a6af8565a801fdc47204d5a605f343bf785203fd25fba4900037c21",
+    "docs/design/AEA_INTEGRATED.md": "91af44173548474b6a6345312f423c086633bf04976aad050b418df0046c0741",
+    "experiments/alfworld_e3/PREREG_INTEGRATED_AEA.md": "5532dd8df413d5805d693c74e9d39e9aed157742865508107f7d82feb3293914",
+    "experiments/alfworld_e3/results/e3_layer1_data.json": "44710bae17a8531b66aeb137d3c9b90776ba4ca2bda71694de5d2e21da8eec09",
+    "pyproject.toml": "e5fc70cf27360d9f52efc3221cab23dac31a873abcd4705aa10e226300581f10",
+    "scripts/e3.py": "24ef30b32f4b5ca23ad55eface1f98c9eba0322450ddc1bf8002ab046e17c12a",
+    "scripts/e3_integrated.py": "6796f34643e416804c413e55501aa90acdd002ffabdfa3aed107f9e4a820b538",
+    "scripts/make_tables_e3_integrated.py": "03f52a9b4df5841cbf054f55d2711bfcd6c938300f7dbdb6d9e3f43be0ef0683",
+    "src/aea/__init__.py": "909295305e1778c08ac74cf76055a1a4fe12880fcccfa01945cb4f7f16a26c94",
+    "src/aea/bracket.py": "8d68009990cec52fd55f11c0d061327ea4bec0d162b461f95c87adee0c0d260d",
+    "src/aea/budget.py": "417b6322572f88386d4b7e7510bc0c7e443967d0c1ea60c36cdc3f6b73f9cd6b",
+    "src/aea/cli.py": "6da7af9595b249cce5027e35703b3248cf916e9eabd85978b5587848cd5d503a",
+    "src/aea/config.py": "e3e9bff017e1df7859cde7a0dacc3aad9dba7b7fc22a4654ce50e8b91e1fd3c5",
+    "src/aea/controller.py": "672909198aebec26efc1ffc9625557f5216b37165a1b77d09977dba121a29acc",
+    "src/aea/core/__init__.py": "cc41f38c38c28ced6baa662559a239c15706a11db9665a77a7aadfb02e3e3641",
+    "src/aea/core/config.py": "b90e967af72d1b536866efa9ee72be85b5cd42b47a9c87f3885507f7d76698b9",
+    "src/aea/core/context.py": "09c41656a64b34abf4938a834310c217cc93c77a39cd6b597664ffc3a49f7ea8",
+    "src/aea/core/hashing.py": "3b7fbd0f8f11782c39fbd8fe2012c036ae8b26180323df4a0a1f6f24d27e022b",
+    "src/aea/core/io.py": "65d5bf94c91e4624358c90b8fcb5069818b1e25d84294db285ce2ce89cf4c6b4",
+    "src/aea/core/manifest.py": "6aab2e4ba9a805d097dd589de620f539cbfe81f3f81157936ec800bd4c067003",
+    "src/aea/core/trace.py": "0a24f28e7dae00c85cfc35d2f2743e10c5661c0a67e0546a97501935f45d00a1",
+    "src/aea/designer.py": "3f0185ac12291a753d0de54b2996baf93e0b8073db8f6ef0e5aaa3be9c2e2b65",
+    "src/aea/e0config.py": "fa4b882748679082dee79e6062db98076532d04a3bf59b6f8da82d329fd6a9ed",
+    "src/aea/errors.py": "6cff3e7b4b06713f46be282a5453aec0b62408aa62d1eb8c50de3f03e074d205",
+    "src/aea/estimate.py": "72bda41313809d3a595adb704c6f43192b7a24b6be251174994e0bfd20cfe14e",
+    "src/aea/evaldriver.py": "9497a1d9d0390c6ea74e8ec467f89bd84e215110a75703ef1b8542f8044a7fd6",
+    "src/aea/evalhook.py": "924bc79de35a7c2c93bae9b612cda168bd52470c6a5e50c1df95e83201e19500",
+    "src/aea/evaluate.py": "c16ed353e610d2e4a730ca4de7d072b79c2d60388f528f3999d7701c074e1a07",
+    "src/aea/exemplars/__init__.py": "9851c1b2d9d11907b0516ff4eec65f5340e835f34d97a4071c86e55030ca94e9",
+    "src/aea/families.py": "9152b1abf373eee7cd6af14a328d1df0bd633d23c293976f8752b53cb4f54abf",
+    "src/aea/integrated_artifacts.py": "7ba70966698290f7e3c660e7081ee79f326e0624ee42a1d63d939ec66507b658",
+    "src/aea/io.py": "146589c77d21b25f056ebda0cb568ec944c8990a21fa6dd2b758ed705659ac72",
+    "src/aea/llm/__init__.py": "fd0676fa5c11fbf5c29e25c236bd6b89ae5cb04522fdb36175fae891a5d43ea2",
+    "src/aea/llm/attribution.py": "cc3da1cd06051802c04a563f10ede6a0f20046aa5931e68e279e8aa2b6f49270",
+    "src/aea/llm/client.py": "fd99cf8f476193dfb48807b6af911eb034f172dfafb90274711c899f197159c3",
+    "src/aea/llm/envharness_client.py": "d9860561638402bb78012676bf122afb63953d6208bc03634d117829a1cdf009",
+    "src/aea/llm/fake.py": "dcce0fe2f2a0bb90542d685b8ed145c6604f62b980ff519c9630329131d2abb3",
+    "src/aea/llm/ledger.py": "79918a1f92cb8c7479f73d81184460807ee7c9701b62174473e1ce1554e859f0",
+    "src/aea/llm/physical_audit.py": "bccb491f6a624b7823bfdb356bf2791654947f27e2ab86495ec78588635e8765",
+    "src/aea/llm/pricing.py": "25e95198564fcd43b94f7428a02072c6eaf39e9c5ae538525d90cd5b3e3d2c8f",
+    "src/aea/llm/provider.py": "314578b54b9ff46a20d1915ba0edff8cbd514cb098a324dfb6106bacdf02c8ac",
+    "src/aea/llm/retry.py": "03008529c31369ebab3f0d8c55a574fdc729e4171b4ae068563615d8c3216b68",
+    "src/aea/llm/types.py": "97ae9ba8d10ad6df24eca9f83c00e191d227410800939c6425d069f253b3e92e",
+    "src/aea/llm_privilege_low.py": "aa2406d3ecc55ee216d94127062e95125d340fdd24084ffe927cf70fddd57913",
+    "src/aea/logs.py": "1820f80675f64006cf957e88b0cf0b36f2fc1a525bdd7b5fd9dcc4be9db26bc7",
+    "src/aea/low_optimizer.py": "254174d6b749ae64a94f7c6cd6d73a6a866ce21f7d9c10e9776b88da1bf64bf5",
+    "src/aea/policy_skills.py": "c3b59690c6de3b35f3de9e1b62ec555020adabbec0f04b756aac91fd8a65258b",
+    "src/aea/privilege_judge.py": "8ce16e125391324f2d50358588fcab595ea35ee2275bf00b2f42d8742838ab1e",
+    "src/aea/privilege_surfaces.py": "c637d9519ed3db273262a123c075f830121a6c75932fbd030ae7e2744dcacee0",
+    "src/aea/privilege_witness.py": "88b2bd166d56ec363e1a5be231234315e7c4fd0cc0d1ef144ac0e6529799075f",
+    "src/aea/rules_control.py": "a325ab786c7a7d94d1035f5c4717ada0fe4ebe32401c84b1d93673962a87b653",
+    "src/aea/runner.py": "bc5560b93b0fd5a0eb6332696495460433616df8d32b7499ef880be368d00095",
+    "src/aea/semantic_low.py": "53c0a9886b3adba1101a9144239bf6dc5a8f68cfaae8907df5151fae90b8b088",
+    "src/aea/semantic_privilege.py": "ab0ba2aceffd53f408191105a4cfedb2dacc6136bd16defd03d553fad5b5dccd",
+    "src/aea/session.py": "d98ff072dd5764db3729eadf22201490aa2354b7044e4664c6fb4b67b765fd02",
+    "src/aea/settings.py": "7ae333f1522da975d748b5651e799b80cf86265a01f8eb886aa1fb54a2a4e687",
+    "src/aea/stage.py": "317b16b7c6de36e41ecc4e07693191b28694ea11e402ff363c340596340b1a28",
+    "src/aea/stage_control.py": "95c9fcae1d3f73a00aaba87787a739f06e92bf1fe36eca0724a9cf02342b4d6d",
+    "src/aea/substrate.py": "e68902b45d78f048a5265095085c327761bbc797a5af66636b72f6e087b32880",
+    "src/aea/witness.py": "f287954433d79a6d6087d31e76473b3a18f6de7f7f4724321d18057bf236b5ae",
+    "tests/unit/test_e3_integrated_driver.py": "a26b0be86e8974a134871680380678c3f98f8d49f9e18183e1989e2b66fe4e8f",
+    "tests/unit/test_integrated_aea.py": "46f413c6a4526e0a022d7f779232bb84032a79c83b7b37fb2c6f1cba21fa6a59",
+    "tests/unit/test_integrated_artifacts.py": "54c1a0a16966ec6d0a82ef9b1f4d93b590e8508b264479298f2bd2f5c5232c7a",
+    "tests/unit/test_physical_audit.py": "49ee40930156d803088aab1bbc4def1bbf6f99f441f746248c0fa0d9d59dbd57",
+    "third_party/envharness/envharness/__init__.py": "7dfa5d6155bc83c514559df2c4065d29cb109dfb15f78add50e0ab27f0ddb71c",
+    "third_party/envharness/envharness/agents/__init__.py": "66e2c8b3833821f35709b2f4173bcbaa338d4702eda0c569e56ca4450eb44ecc",
+    "third_party/envharness/envharness/agents/harness_agent.py": "4a8f5e8f4dd3e0961bda937da47310b085a124e290d20c620a7a6f3c44863517",
+    "third_party/envharness/envharness/agents/policy.py": "8e06bf1d83bb65a235551dc2a982bf150a7d3c3dade33d9fa9d0b104c161c978",
+    "third_party/envharness/envharness/bridges/__init__.py": "4c10edb9523b80fd2b1524c82f25b43f8e1da88003a49aa62fe589d4ee33ec7b",
+    "third_party/envharness/envharness/bridges/alfworld/__init__.py": "46c5327943f29ad6ed6cee14e8c437427000845d20533dbb58627fbff36f6b8b",
+    "third_party/envharness/envharness/bridges/alfworld/bridge.py": "2e66a32d939c0f1ed20ff186dd51deb3496cb2edff4ed56050fc8daa1003d170",
+    "third_party/envharness/envharness/bridges/alfworld/tools.py": "5e920da57f32fbf65885f8d1ec0d1da90d7e00a69a6e66a406c1a2bb1c903e92",
+    "third_party/envharness/envharness/bridges/officeqa/__init__.py": "4c10edb9523b80fd2b1524c82f25b43f8e1da88003a49aa62fe589d4ee33ec7b",
+    "third_party/envharness/envharness/bridges/officeqa/bridge.py": "bda902f3e96a9d01bdf3057661e38d211a32780de9653ba5fb1e2b37d67baa83",
+    "third_party/envharness/envharness/bridges/officeqa/dataset.py": "88cd9a9b657b24e66d89bee845cbffc839df9f525cd491ae0a78a26c02cb0bcd",
+    "third_party/envharness/envharness/bridges/officeqa/tools.py": "c932787b9c998044fc6205634d5c4b9c69d675dc9abf930eda2e1fadc37b443a",
+    "third_party/envharness/envharness/bridges/spreadsheetbench/__init__.py": "af377031ea69fbeeceafb18171303e4928b8b97ace50672fb65f598070c78cdf",
+    "third_party/envharness/envharness/bridges/spreadsheetbench/bridge.py": "af7088ac47208d6b49ec0fab697b406a9f64df92548c0c2eb949dd7152ca55e3",
+    "third_party/envharness/envharness/bridges/spreadsheetbench/dataset.py": "e0e006ca71c02928856021f47302738d8532b8d8372feff939ff1017d5f3916c",
+    "third_party/envharness/envharness/bridges/spreadsheetbench/online_judge_eval.py": "a3c2bf21df44542566bfa85d6627f4ecd051d3d861bd69ee743789a91abf4be2",
+    "third_party/envharness/envharness/bridges/spreadsheetbench/tools.py": "af0602a0d070af94a365e5c0a9ef42080f35201f83178cf32d589d7b16decebd",
+    "third_party/envharness/envharness/bridges/swebench/__init__.py": "ecbf9670a6fbc0756b5378014b6f0546ac59813fa29104a251e63e72339d35e3",
+    "third_party/envharness/envharness/bridges/swebench/bridge.py": "ccc8b9a809c5ab2d619dd3a39d213a4272c564886fce2997b0b8943171d7fe46",
+    "third_party/envharness/envharness/bridges/swebench/tools.py": "949bdf33ff6cd268e1332539e5d9005e795d4d8c3a559966d7e1f2715b98e115",
+    "third_party/envharness/envharness/bridges/toy24/__init__.py": "73f66ea532143445d20c91628bb0fab1792e072117e9ca0cd8ac8717145a6ded",
+    "third_party/envharness/envharness/bridges/toy24/bridge.py": "df10f3d34431b482455c47e0b46e5b448b7b0ff79a9fa0d7ba43fd3378e40ff9",
+    "third_party/envharness/envharness/bridges/toy24/solver.py": "74d324ea6838afab5a129576396c1b779bb60ede1a212a8a7476f756ce7c500e",
+    "third_party/envharness/envharness/bridges/toy24/tools.py": "03d462a0bfc9b12df39cbb681999180b55a465f6b50dd50a312feacf3ca31336",
+    "third_party/envharness/envharness/bridges/webarena/__init__.py": "85ceab2ab43fc57beb2a7c0012d1a7062eafad72545eefbc3a8f39c492b6ee00",
+    "third_party/envharness/envharness/bridges/webarena/bridge.py": "44cd4304cf9e0561d624b53d6748e175da311b082afd506f050b6ac0cd5f4edb",
+    "third_party/envharness/envharness/bridges/webarena/tools.py": "ee98bad6253254fc508aeeeb52425bd5b3d761cb2d20aa1bea2c5253cca5502e",
+    "third_party/envharness/envharness/core/__init__.py": "ae45c894dadfae3ac3ed9d81b37507d4733f5ada17cd61362fa90c267b56118f",
+    "third_party/envharness/envharness/core/actionable_env.py": "23b001e39532ea3f49998fc93d93a32c0ca4c0f0a18d34334dd56ead1c127092",
+    "third_party/envharness/envharness/core/code_loader.py": "182a1807639630ea313d7521a04e1736ce2f03502bec5eafafc79a1d907253e7",
+    "third_party/envharness/envharness/core/envharness.py": "5e02eb02dca10d99233620179e1c3de4daf47bc28520410eed7c6104132d4782",
+    "third_party/envharness/envharness/core/hooks.py": "fd2ba389b2c1172da395c871fe27db7028564d0c8e401e0999b31de486118604",
+    "third_party/envharness/envharness/core/registry.py": "aef543458b0144f6427620f67ba04809f526b12a19211bc39c1bd95ee3ac4fb3",
+    "third_party/envharness/envharness/core/tool.py": "a1f2febdfb4fe04d92bd2ec861523b9129fa89cd672a1a2d070366c102218f50",
+    "third_party/envharness/envharness/core/types.py": "34e5280efb41d951d46515b157887ffb5615d1ecfb5f6ef28f0fd0ea3135a9a9",
+    "third_party/envharness/envharness/harnesses/__init__.py": "e5b5b89e46cb19d7b87600fdadd614937113145002a64ef76948232877b51254",
+    "third_party/envharness/envharness/harnesses/link.py": "c79c840d964ddcaf309f32eedad814b0957e36906791368e16767f8ed3cf0ad8",
+    "third_party/envharness/envharness/harnesses/rules.py": "ee7a7df6659ceb9d648cf933e451ccee4fb3ba172c2dc5d74d234d4a03649f6f",
+    "third_party/envharness/envharness/harnesses/setup.py": "eca9376e475715a22b2d485c812d350058e9ed3a421d577a72dee84794bf1e6e",
+    "third_party/envharness/envharness/infra/__init__.py": "4c10edb9523b80fd2b1524c82f25b43f8e1da88003a49aa62fe589d4ee33ec7b",
+    "third_party/envharness/envharness/infra/endpoint_pool.py": "e5acbb24f8ea1b9f1e83742e62412f8ddf572079e5142d7467c71b25f73dbe5e",
+    "third_party/envharness/envharness/infra/llm.py": "7a422dfc1b664b8373ff4996d5c57025f1771b881a1331ee0e2f332fe04c84be",
+    "third_party/envharness/envharness/infra/model.py": "b278f36c6de1fc33041a6138120b7234748cc2551dd53809875e4db1117b573a",
+    "third_party/envharness/envharness/infra/utils.py": "d7ec8b7b633af518c98de6856deab4c43f2363d869b505c560f0b601e86f4207",
+    "third_party/envharness/envharness/orchestration/__init__.py": "4c10edb9523b80fd2b1524c82f25b43f8e1da88003a49aa62fe589d4ee33ec7b",
+    "third_party/envharness/envharness/orchestration/baseline_cache.py": "b40a20768649c90812f1fcd5d2a717eba15e02d01021be645af02b3df1171859",
+    "third_party/envharness/envharness/orchestration/budget.py": "d34aa837ee52b352c3e57ae9da3a7d0f3cd3173a840d161ca4626598b9a30cd4",
+    "third_party/envharness/envharness/orchestration/episode_worker.py": "3a75e12389d622742b50901264eba091029e56d6988216758edf274e754ccca1",
+    "third_party/envharness/envharness/orchestration/objectives.py": "fd9d20869e17d8ada0903caf52050a438ffaa5df27f4b27fac02c55ba1a75f93",
+    "third_party/envharness/envharness/orchestration/orchestrator.py": "fd1aee308b5988b6bca45d9821911edfafe6fe8b784547b6489e8ea68baa6632",
+    "third_party/envharness/envharness/orchestration/runner.py": "b8742c2721cdc1b01d97724b77399bf0f284943d08de858c0e7fb50804dc02a1",
+    "third_party/envharness/envharness/orchestration/storage.py": "be779db9630ecea3d2b793d7ada831f5dc4e773e3799ee75b3f1f2c4ac2b2be9",
+    "third_party/envharness/envharness/persistence/__init__.py": "aa17274f5af1712210f8cffc7c71d80e623c72286d70fa38a66df8cfe9b7d480",
+    "third_party/envharness/envharness/persistence/checkpoint.py": "f2483748386078981ee027a0af3105a34d4663fc155adba7a96c90cba660f02f",
+    "third_party/envharness/envharness/prompts/__init__.py": "4c10edb9523b80fd2b1524c82f25b43f8e1da88003a49aa62fe589d4ee33ec7b",
+    "third_party/envharness/envharness/prompts/alfworld_skill_prompt.py": "bdedb171294cc2cf5244320ad5eacea35ff8c569bb31f6673a47fea2bda90cee",
+    "third_party/envharness/envharness/prompts/webarena_reasoning_bank_agent.py": "9632e666d0e3074035ea0527a0aeffa6f18b8e67999f2ebe355ac9094469bfec",
+    "third_party/envharness/envharness/reasoning_bank/__init__.py": "ede16f3c2170219d209ddf07db5493de0765d8a5f17c5a0c2e0054c0d9f3ae8b",
+    "third_party/envharness/envharness/reasoning_bank/bank.py": "6ddcbda63deda039a3417385f253966eb29fa0fc36683b491e7667668646764b",
+    "third_party/envharness/envharness/reasoning_bank/embed.py": "65bcec9d608bb1b83dfb4b33ac2c4dd59f7000e65142b9e75d544f7448c7fa8e",
+    "third_party/envharness/envharness/reasoning_bank/induce.py": "e4150876c014f18caef9056b9cbb5798ebb206b936d86426de4e47a0b888a96c",
+    "third_party/envharness/envharness/third_party/__init__.py": "71fb36f4f247b1ffbd6dfa36ca04d247af4d12e050f51dbbb9b415a204bc51fa",
+    "third_party/envharness/envharness/third_party/alfworld/base_config.yaml": "2fb5f24f344eaaf14d517605a27c248b9bb1bce445ca22f5fc4eb8a6d3156863",
+    "third_party/envharness/envharness/third_party/reasoning_bank/__init__.py": "5881f02c1a78a73fdc95cc72fb0847239e5f890bddf0ea6fafe207cdce323771",
+    "third_party/envharness/envharness/third_party/reasoning_bank/prompts.py": "77fa050ff66cb124f42f9c9b8f784a93ef60f83e2120362b944ffbf0996c6eea",
+    "third_party/envharness/envharness/third_party/reasoning_bank/swebench_prompts.py": "676fe2115bbdcc9e38304ffdef258ca1091b1e47cfda455be50ffa54f499d9ed",
+    "third_party/envharness/envharness/third_party/reasoning_bank_agent/__init__.py": "0fcc25aaa1441dff73515d527330122d7a37ad4289997b0d574ef6be494925a3",
+    "third_party/envharness/envharness/third_party/reasoning_bank_agent/agent.py": "0521423ec4c690b55ca1f0f9b8750039a97a93049a53ec2d20acea86fb528848",
+    "third_party/envharness/envharness/third_party/reasoning_bank_agent/dynamic_prompting.py": "5cbfdcb11a58dc52c950f6d377847da8ff8ea6d309f95f304acb24054cfb3753",
+    "third_party/envharness/envharness/third_party/reasoning_bank_agent/utils/__init__.py": "0ac5808faaf18226d9989375c1b2db036701f86b6f6bc70a6c0ba7178f878454",
+    "third_party/envharness/envharness/third_party/reasoning_bank_agent/utils/chat_api.py": "11adbff26efcce5a03e82cfed213e0074bc072f6baf699a5c71901545454c996",
+    "third_party/envharness/envharness/third_party/reasoning_bank_agent/utils/llm_utils.py": "4a476eedd191bfe00115ec85b7f90ebfe9b8a118647f35de08412d0721dfde9a",
+    "third_party/envharness/envharness/third_party/reasoning_bank_agent/utils/prompt_templates.py": "15401696ae3716c4770f12084056917bc313709530ef9db85f20e244a1c042fc",
+    "third_party/envharness/envharness/third_party/skillopt/__init__.py": "1ed7ba80639c2839bd8f657458ee46706a98186aa4a8e0968e58e1cffb732f7c",
+    "third_party/envharness/envharness/third_party/skillopt/officeqa_evaluator.py": "f1618b9b3024d95f89c8255d29f1a4a436f9e636610cd88bae2952300db37c47",
+    "third_party/envharness/envharness/third_party/trace2skill/__init__.py": "55cc97990b4fc59849502e467e1c1d1ac37a76be11da42da5bd130cb41c634b2",
+    "third_party/envharness/envharness/third_party/trace2skill/prompts.py": "c8e75049c8dab2383b1046a3347358e808ac1132c1b61bd4c9a3960303ca85ed",
+    "uv.lock": "084d52b672f73a87d9a90e74a4dc760f273124d35de277320e6e0ea52db8bf02"
+  },
+  "tasks": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29
+  ],
+  "usd_cap": null
+}

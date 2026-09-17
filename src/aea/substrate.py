@@ -32,6 +32,7 @@ from aea.llm.pricing import CostBreakdown, PricingTable, load_pricing
 from aea.llm.types import Attribution, ChatRequest, ChatResponse, Usage
 from aea.policy_skills import inject
 from aea.privilege_judge import JudgeConfig, LLMPrivilegeJudge, PrivilegeJudge
+from aea.privilege_witness import WitnessCheckingPrivilegeJudge
 from aea.runner import AeaSubprocessRunner, dispatch, episode_spec, ledger_path_for_process
 from aea.session import Session, open_session
 from aea.settings import load_settings
@@ -77,6 +78,7 @@ class AeaSubstrate:
         )
         self.run_dir = run_dir
         self.run_id = run_id
+        self._method_version = aea_config.method_version
         self.runner = AeaSubprocessRunner(
             run_id, timeout=subprocess_timeout_s, subprocess_log_dir=run_dir / "subprocess_logs"
         )
@@ -197,6 +199,8 @@ class AeaSubstrate:
             with attributed(request.attribution, request.seed):
                 return client.complete(request)
 
+        if self._method_version == "llm_v2_integrated":
+            return WitnessCheckingPrivilegeJudge(complete, config=config, attribution=attribution)
         return LLMPrivilegeJudge(complete, config=config, attribution=attribution)
 
     def has_oracle(self) -> bool:
@@ -221,6 +225,7 @@ def reference_provider(
             "llm_v2_iterative_low",
             "llm_v2_iterative_low_semantic_gate",
             "llm_v2_iterative_low_llm_judge",
+            "llm_v2_integrated",
         )
     ):
         return None

@@ -193,6 +193,7 @@ class LowEnvironmentOptimizer:
         measure: Callable[[AssistFamily, float], Eval],
         remaining: Callable[[], int],
         endpoint_reserve: int = 16,
+        max_calls: int | None = None,
     ) -> None:
         self.evidence = evidence
         self.failures = tuple(failures)
@@ -204,6 +205,9 @@ class LowEnvironmentOptimizer:
         self.measure = measure
         self.remaining = remaining
         self.endpoint_reserve = endpoint_reserve
+        self._max_calls = max_calls
+        if max_calls is not None and (type(max_calls) is not int or max_calls < 1):
+            raise ConfigError("LOW max_calls must be a positive integer")
         self.history: tuple[CandidateRecord, ...] = ()
         self.rejections: tuple[Feedback, ...] = ()
         self.current: AssistFamily | None = None
@@ -212,8 +216,14 @@ class LowEnvironmentOptimizer:
         self._started = False
 
     @property
+    def max_calls(self) -> int:
+        # Legacy experiment launchers temporarily bind the module constant around run().
+        # New production integration supplies an instance limit and never changes it.
+        return MAX_OPTIMIZER_CALLS if self._max_calls is None else self._max_calls
+
+    @property
     def remaining_calls(self) -> int:
-        return MAX_OPTIMIZER_CALLS - len(self.history)
+        return self.max_calls - len(self.history)
 
     def _validate(self, args: dict[str, Any]) -> tuple[AssistFamily | None, list[str], list[str]]:
         raw = args.get("families")
@@ -251,7 +261,7 @@ class LowEnvironmentOptimizer:
         if not self.reference.ok:
             return DesignResult("inconclusive", "reference_unavailable")
         feedback: Feedback | None = None
-        for call_index in range(1, MAX_OPTIMIZER_CALLS + 1):
+        for call_index in range(1, self.max_calls + 1):
             if self.remaining() < self.endpoint_reserve:
                 return DesignResult("budget_unresolved", "endpoint_and_calibration_reserve")
             args = self.propose(feedback, call_index)
@@ -331,7 +341,7 @@ class LowEnvironmentOptimizer:
                 guard_text,
                 counts,
                 reason or None,
-                MAX_OPTIMIZER_CALLS - call_index,
+                self.max_calls - call_index,
                 self.remaining(),
             )
             self.history += (record,)
